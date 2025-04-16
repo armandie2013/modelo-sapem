@@ -1,11 +1,12 @@
 // controllers/authController.mjs
+
 import Usuario from "../models/usuario.mjs";
 import bcrypt from "bcrypt";
 
 export const registrarUsuarioController = async (req, res) => {
   try {
     console.log("Registrando usuario...", req.body); // 👈 log útil
-    const { nombre, email, password, rol } = req.body;
+    const { nombre, apellido,dni, email, password, rol } = req.body;
 
     // Verificar si ya existe el usuario
     const existeUsuario = await Usuario.findOne({ email });
@@ -22,9 +23,12 @@ export const registrarUsuarioController = async (req, res) => {
 
     const nuevoUsuario = new Usuario({
       nombre,
+      apellido,
+      dni,
       email,
       password: passwordHash,
-      rol: rol || "usuario", // por defecto
+      // rol: rol || "usuario", // por defecto, antes habiliar el campo rol en el formulario de registro
+      rol: "usuario", // por defecto, antes habiliar el campo rol en el formulario de registro
     });
 
     await nuevoUsuario.save();
@@ -40,6 +44,7 @@ export const mostrarFormularioLogin = (req, res) => {
   res.render("login", {
     title: "Iniciar sesión",
     errores: [],
+    error:null,
     datos: {},
   });
 };
@@ -70,8 +75,10 @@ export const procesarLogin = async (req, res) => {
     req.session.usuario = {
       id: usuario._id,
       nombre: usuario.nombre,
+      apellido: usuario.apellido,
       email: usuario.email,
       rol: usuario.rol,
+      dni: String(usuario.dni),
     };
 
     res.redirect("/viaticos/dashboard");

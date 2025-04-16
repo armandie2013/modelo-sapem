@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import methodOverride from "method-override";
 import expressEjsLayouts from "express-ejs-layouts";
-import session from "express-session"; // <-- agregado
+import session from "express-session";
 import { connectDB } from "./config/dbConfig.mjs";
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
 import authRoutes from "./routes/authRoutes.mjs";

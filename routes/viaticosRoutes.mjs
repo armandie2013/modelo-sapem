@@ -5,12 +5,14 @@ import {
   mostrarTodosLosViaticos,
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
+import { accesoPorDni } from "../middlewares/dniAccessMiddleware.mjs";
+import { dniPermitidosModuloViaticos } from "../utils/dniPermitidos.mjs";
 import Viatico from "../models/viatico.mjs";
 
 const router = express.Router();
 
 // Ruta para renderizar el formulario de creación de viáticos
-router.get("/crear", (req, res) => {
+router.get("/crear", verificarSesion, accesoPorDni(dniPermitidosModuloViaticos), (req, res) => {
   console.log("Entró a /viaticos/crear");
   res.render("crearViatico", {
     title: "Nuevo Viático",
@@ -36,7 +38,7 @@ router.get(
 );
 
 // Ruta para procesar la creación del viático
-router.post("/crear", crearViaticoController);
+router.post("/crear", verificarSesion, accesoPorDni(dniPermitidosModuloViaticos), crearViaticoController);
 // router.get("/dashboard", mostrarDashboardViaticos);
 router.get("/dashboard/todos", mostrarTodosLosViaticos);
 
