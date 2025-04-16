@@ -1,5 +1,5 @@
 // controllers/authController.mjs
-import { Usuario } from "/models/Usuario.mjs";
+import Usuario from "../models/usuario.mjs";
 import bcrypt from "bcrypt";
 
 export const registrarUsuarioController = async (req, res) => {
