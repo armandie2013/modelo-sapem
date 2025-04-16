@@ -1,6 +1,10 @@
 import express from "express";
-import { crearViaticoController, mostrarDashboardViaticos, mostrarTodosLosViaticos } from "../controllers/viaticosController.mjs";
-import {verificarSesion} from "../middlewares/authMiddleware.mjs";
+import {
+  crearViaticoController,
+  mostrarDashboardViaticos,
+  mostrarTodosLosViaticos,
+} from "../controllers/viaticosController.mjs";
+import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import Viatico from "../models/viatico.mjs";
 
 const router = express.Router();
@@ -15,14 +19,21 @@ router.get("/crear", (req, res) => {
   });
 });
 
-router.get("/dashboard", verificarSesion, mostrarDashboardViaticos, async (req, res) => {
-  const viaticos = await Viatico.find().sort({ fechaDeCreacion: -1 }).limit(5);
-  res.render("dashboardViaticos", {
-    title: "Dashboard de Viáticos",
-    usuario: req.session.usuario,
-    viaticos,
-  });
-});
+router.get(
+  "/dashboard",
+  verificarSesion,
+  mostrarDashboardViaticos,
+  async (req, res) => {
+    const viaticos = await Viatico.find()
+      .sort({ fechaDeCreacion: -1 })
+      .limit(5);
+    res.render("dashboardViaticos", {
+      title: "Dashboard de Viáticos",
+      usuario: req.session.usuario,
+      viaticos,
+    });
+  }
+);
 
 // Ruta para procesar la creación del viático
 router.post("/crear", crearViaticoController);
