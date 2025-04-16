@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Mostrar formulario
 router.get('/registro', (req, res) => {
-  res.render('registro', {
+  res.render('register', {
     title: "Registro de Usuario",
     errores: [],
     usuario: {},
@@ -13,6 +13,6 @@ router.get('/registro', (req, res) => {
 });
 
 // Procesar formulario
-router.post('/registro', registrarUsuarioController);
+router.post('/register', registrarUsuarioController);
 
 export default router;
