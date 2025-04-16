@@ -6,6 +6,7 @@ import session from 'express-session'; // <-- agregado
 import { connectDB } from './config/dbConfig.mjs';
 import viaticosRoutes from './routes/viaticosRoutes.mjs';
 import authRoutes from './routes/authRoutes.mjs';
+import { setUsuarioEnVista } from './middlewares/authMiddleware.mjs';
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -23,6 +24,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
+app.use(setUsuarioEnVista); // Esto hace que usuario esté disponible en todas las vistas
 
 // Motor de plantillas EJS
 app.set('view engine', 'ejs');
