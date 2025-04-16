@@ -6,14 +6,21 @@ import bcrypt from "bcrypt";
 export const registrarUsuarioController = async (req, res) => {
   try {
     console.log("Registrando usuario...", req.body); // 👈 log útil
-    const { nombre, apellido,dni, email, password, rol } = req.body;
+    const { nombre, apellido, dni, email, password, rol } = req.body;
 
-    // Verificar si ya existe el usuario
-    const existeUsuario = await Usuario.findOne({ email });
-    if (existeUsuario) {
+    // Verificar duplicados por DNI o Email
+    const existeEmail = await Usuario.findOne({ email });
+    const existeDni = await Usuario.findOne({ dni });
+
+    if (existeEmail || existeDni) {
+      const errores = [];
+      if (existeEmail)
+        errores.push({ campo: "email", mensaje: "Correo ya registrado" });
+      if (existeDni)
+        errores.push({ campo: "dni", mensaje: "DNI ya registrado" });
       return res.status(400).render("registro", {
         title: "Registro",
-        errores: [{ campo: "email", mensaje: "El correo ya está registrado" }],
+        errores,
         usuario: req.body,
       });
     }
@@ -44,7 +51,7 @@ export const mostrarFormularioLogin = (req, res) => {
   res.render("login", {
     title: "Iniciar sesión",
     errores: [],
-    error:null,
+    error: null,
     datos: {},
   });
 };

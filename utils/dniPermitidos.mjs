@@ -11,9 +11,9 @@ export const dniPermitidosModuloViaticos = [
     "12345678",
     "87654321",
     "11223344",
-    "31126079",
-    "21588483", // ALE
-    "22843791", // FEDE
+    "31126079", // DIEGO CARDENES
+    "21588483", // ALEJANDRO
+    "22843791", // FEDERICO
   ];
   
   export const dniPermitidosModuloFinanzas = [
