@@ -2,9 +2,10 @@ import express from 'express';
 import path from 'path';
 import methodOverride from 'method-override';
 import expressEjsLayouts from 'express-ejs-layouts';
+import session from 'express-session'; // <-- agregado
 import { connectDB } from './config/dbConfig.mjs';
 import viaticosRoutes from './routes/viaticosRoutes.mjs';
-import authRoutes from './routes/authRoutes.mjs'
+import authRoutes from './routes/authRoutes.mjs';
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -17,18 +18,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+app.use(session({
+  secret: 'clave_super_segura',
+  resave: false,
+  saveUninitialized: false
+}));
+
 // Motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.resolve('./views'));
 app.use(expressEjsLayouts);
-app.set('layout', 'layout'); // Usa views/layout.ejs como layout base
+app.set('layout', 'layout');
 
 // Archivos estáticos
 app.use(express.static(path.resolve('./public')));
 
+// Rutas de autenticación
 app.use(authRoutes);
 
-// Rutas
+// Rutas de viáticos
 app.use('/viaticos', viaticosRoutes);
 
 // Ruta base

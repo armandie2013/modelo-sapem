@@ -13,6 +13,10 @@ router.get('/registro', (req, res) => {
 });
 
 // Procesar formulario
-router.post('/register', registrarUsuarioController);
+router.post('/registro', registrarUsuarioController);
+
+router.get('/login', (req, res) => {
+    res.render('login', { title: 'Iniciar Sesión', error: null, username: '' });
+  });
 
 export default router;
