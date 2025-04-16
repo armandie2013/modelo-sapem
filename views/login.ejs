@@ -1,17 +1,19 @@
-
-  <div class="flex justify-center items-start min-h-screen py-8 px-4">
+<div class="flex justify-center items-start min-h-screen py-8 px-4">
   <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-14">Iniciar Sesión</h1>
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Iniciar Sesión</h1>
 
-    <% if (errores && errores.length > 0) { %>
-      <div class="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded text-sm">
-        <ul>
-          <% errores.forEach(e => { %>
-            <li><strong><%= e.campo %>:</strong> <%= e.mensaje %></li>
-          <% }) %>
-        </ul>
-      </div>
-    <% } %>
+    <!-- Contenedor reservado para el mensaje de error -->
+    <div class="min-h-[48px] mb-6">
+      <% if (errores && errores.length > 0) { %>
+        <div class="bg-red-100 text-red-700 px-4 py-2 rounded text-sm">
+          <ul>
+            <% errores.forEach(e => { %>
+              <li><strong><%= e.campo %>:</strong> <%= e.mensaje %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+    </div>
 
     <form action="/login" method="POST" class="space-y-4">
       <div>
