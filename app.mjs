@@ -4,6 +4,7 @@ import methodOverride from 'method-override';
 import expressEjsLayouts from 'express-ejs-layouts';
 import { connectDB } from './config/dbConfig.mjs';
 import viaticosRoutes from './routes/viaticosRoutes.mjs';
+import authRoutes from './routes/authRoutes.mjs'
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -24,6 +25,8 @@ app.set('layout', 'layout'); // Usa views/layout.ejs como layout base
 
 // Archivos estáticos
 app.use(express.static(path.resolve('./public')));
+
+app.use(authRoutes);
 
 // Rutas
 app.use('/viaticos', viaticosRoutes);
