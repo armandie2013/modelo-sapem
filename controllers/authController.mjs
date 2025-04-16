@@ -1,13 +1,14 @@
 // controllers/authController.mjs
-import usuario from '../models/usuario.mjs';
+import Usuario from '../models/Usuario.mjs';
 import bcrypt from 'bcrypt';
 
 export const registrarUsuarioController = async (req, res) => {
   try {
+    console.log("Registrando usuario...", req.body); // 👈 log útil
     const { nombre, email, password, rol } = req.body;
 
     // Verificar si ya existe el usuario
-    const existeUsuario = await usuario.findOne({ email });
+    const existeUsuario = await Usuario.findOne({ email });
     if (existeUsuario) {
       return res.status(400).render("registro", {
         title: "Registro",
@@ -19,7 +20,7 @@ export const registrarUsuarioController = async (req, res) => {
     // Hashear contraseña
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const nuevoUsuario = new usuario({
+    const nuevoUsuario = new Usuario({
       nombre,
       email,
       password: passwordHash,
