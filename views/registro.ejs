@@ -1,4 +1,63 @@
-<div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow">
+<div class="flex justify-center items-start min-h-screen py-8 px-4">
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Registro de Usuario</h1>
+
+    <% if (errores && errores.length > 0) { %>
+      <div class="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded text-sm">
+        <ul>
+          <% errores.forEach(e => { %>
+            <li><strong><%= e.campo %>:</strong> <%= e.mensaje %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form action="/registro" method="POST" class="space-y-4">
+      <div>
+        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+        <input type="text" name="nombre" id="nombre" required
+               class="w-full border px-3 py-2 rounded-lg"
+               value="<%= usuario?.nombre || '' %>">
+      </div>
+
+      <div>
+        <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+        <input type="text" name="apellido" id="apellido" required
+               class="w-full border px-3 py-2 rounded-lg"
+               value="<%= usuario?.apellido || '' %>">
+      </div>
+
+      <div>
+        <label for="dni" class="block text-sm font-medium text-gray-700 mb-2">DNI</label>
+        <input type="number" name="dni" id="dni" required
+               class="w-full border px-3 py-2 rounded-lg"
+               value="<%= usuario?.dni || '' %>">
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
+        <input type="email" name="email" id="email" required
+               class="w-full border px-3 py-2 rounded-lg"
+               value="<%= usuario?.email || '' %>">
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+        <input type="password" name="password" id="password" required
+               class="w-full border px-3 py-2 rounded-lg">
+      </div>
+
+      <div class="pt-4">
+        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 mt-4 rounded-lg hover:bg-blue-800 transition">
+          Registrar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow">
   <h1 class="text-xl font-semibold mb-4">Registro de Usuario</h1>
   <form action="/registro" method="POST" class="space-y-4">
     <input type="text" name="nombre" placeholder="Nombre" required class="w-full p-2 border rounded"
@@ -13,11 +72,11 @@
 
     <input type="password" name="password" placeholder="Contraseña" required class="w-full p-2 border rounded">
 
-    <!-- <select name="rol" class="w-full p-2 border rounded">
-      <option value="usuario" <%=usuario?.rol==='usuario' ? 'selected' : '' %>>Usuario</option>
-      <option value="admin" <%=usuario?.rol==='admin' ? 'selected' : '' %>>Administrador</option>
-    </select> -->
+    
 
+    
+    
+    
     <% if (errores && errores.length> 0) { %>
       <div class="text-red-600 text-sm">
         <ul>
@@ -36,4 +95,10 @@
           Registrar
         </button>
   </form>
-</div>
+</div> -->
+
+
+<!-- <select name="rol" class="w-full p-2 border rounded">
+      <option value="usuario" <%=usuario?.rol==='usuario' ? 'selected' : '' %>>Usuario</option>
+      <option value="admin" <%=usuario?.rol==='admin' ? 'selected' : '' %>>Administrador</option>
+    </select> -->
