@@ -5,10 +5,10 @@
     <!-- Contenedor reservado para el mensaje de error -->
     <div class="min-h-[48px] mb-6">
       <% if (errores && errores.length > 0) { %>
-        <div class="bg-red-100 text-red-700 px-4 py-2 rounded text-sm">
+        <div class="">
           <ul>
             <% errores.forEach(e => { %>
-              <li><strong><%= e.campo %>:</strong> <%= e.mensaje %></li>
+              <li class="text-red-700 text-center"><%= e.mensaje %></li>
             <% }) %>
           </ul>
         </div>

@@ -1,4 +1,6 @@
 import Viatico from "../models/viatico.mjs";
+import PersonaDisponible from "../models/personaDisponible.mjs";
+import Contador from "../models/contador.mjs";
 
 export async function crearViaticoController(req, res) {
   try {
@@ -8,7 +10,6 @@ export async function crearViaticoController(req, res) {
       fechaDeCreacion,
       areaSolicitante,
       cantidadDeViajantes,
-      nombreSolicitante,
       cargo,
       importeViatico,
       numeroDeViaje,
@@ -24,14 +25,19 @@ export async function crearViaticoController(req, res) {
       cantidadVale,
       totalVale,
       vehiculoUtilizado,
-      creadoPor,
     } = req.body;
+
+    // Asegurarnos de que siempre sea un array
+    let viajantes = req.body.nombreSolicitante;
+    if (!Array.isArray(viajantes)) {
+      viajantes = [viajantes];
+    }
 
     const nuevoViatico = new Viatico({
       fechaDeCreacion,
       areaSolicitante,
       cantidadDeViajantes,
-      nombreSolicitante,
+      viajantes,
       cargo,
       importeViatico,
       numeroDeViaje,
@@ -47,9 +53,8 @@ export async function crearViaticoController(req, res) {
       cantidadVale,
       totalVale,
       vehiculoUtilizado,
-      creadoPor,
+      creadoPor: req.session.usuario?.nombre || "Desconocido",
     });
-
     await nuevoViatico.save();
 
     console.log("Viático creado correctamente");
@@ -61,12 +66,14 @@ export async function crearViaticoController(req, res) {
       error: error.message,
     });
   }
-};
+}
 
 // Mostrar los 5 últimos viajes
 export const mostrarDashboardViaticos = async (req, res) => {
   try {
-    const viaticosRecientes = await Viatico.find().sort({ fechaDeCreacion: -1 }).limit(5);
+    const viaticosRecientes = await Viatico.find()
+      .sort({ fechaDeCreacion: -1 })
+      .limit(5);
     res.render("dashboardViaticos", {
       title: "Últimos Viáticos",
       viaticos: viaticosRecientes,
@@ -90,5 +97,32 @@ export const mostrarTodosLosViaticos = async (req, res) => {
   } catch (error) {
     console.error("Error al cargar todos los viáticos:", error);
     res.status(500).send("Error al cargar todos los viáticos");
+  }
+};
+
+export const mostrarFormularioViatico = async (req, res) => {
+  try {
+    // Obtener el próximo número de viaje
+    const contador = await Contador.findOneAndUpdate(
+      { nombre: "numeroDeViaje" },
+      { $inc: { valor: 1 } },
+      { new: true, upsert: true }
+    );
+
+    const numeroDeViaje = contador.valor;
+
+    // Obtener listado de personas disponibles
+    const listaDePersonasDisponibles = await PersonaDisponible.find().sort({
+      nombreApellido: 1,
+    });
+
+    // Renderizar formulario con datos
+    res.render("crearViatico", {
+      numeroDeViaje,
+      listaDePersonasDisponibles,
+    });
+  } catch (error) {
+    console.error("Error al mostrar formulario de viático:", error);
+    res.status(500).send("Error al mostrar formulario de viático");
   }
 };

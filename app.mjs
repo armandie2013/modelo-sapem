@@ -5,6 +5,7 @@ import expressEjsLayouts from "express-ejs-layouts";
 import session from "express-session";
 import { connectDB } from "./config/dbConfig.mjs";
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
+import personasRoutes from "./routes/personasRoutes.mjs"
 import authRoutes from "./routes/authRoutes.mjs";
 import { setUsuarioEnVista } from "./middlewares/authMiddleware.mjs";
 
@@ -43,6 +44,7 @@ app.use(authRoutes);
 
 // Rutas de viáticos
 app.use("/viaticos", viaticosRoutes);
+app.use("/personas", personasRoutes);
 
 // Ruta base
 app.get("/", (req, res) => {

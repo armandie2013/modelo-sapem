@@ -34,7 +34,15 @@
               <% viaticos.forEach(v => { %>
                 <tr class="border-b hover:bg-gray-50 transition">
                   <td class="px-4 py-2"><%= new Date(v.fechaDeCreacion).toLocaleDateString() %></td>
-                  <td class="px-4 py-2"><%= v.nombreSolicitante %></td>
+                  <td class="px-4 py-2 whitespace-pre-line">
+                    <% if (Array.isArray(v.nombreSolicitante)) { %>
+                      <% v.nombreSolicitante.forEach(nombre => { %>
+                        <div class="text-sm text-gray-800"><%= nombre %></div>
+                      <% }) %>
+                    <% } else { %>
+                      <div class="text-sm text-gray-800"><%= v.nombreSolicitante %></div>
+                    <% } %>
+                  </td>
                   <td class="px-4 py-2"><%= v.destino %></td>
                   <td class="px-4 py-2"><%= v.motivoDelViaje %></td>
                   <td class="px-4 py-2">$<%= v.montoTotalViatico.toFixed(2) %></td>

@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
-import { type } from "os";
-import { boolean } from "webidl-conversions";
 
 const viaticoSchema = new mongoose.Schema({
   fechaDeCreacion: { type: Date, required: true },
   areaSolicitante: { type: String, required: true },
   cantidadDeViajantes: { type: Number, required: true },
-  nombreSolicitante: { type: String, required: true },
-  cargo: { type: String, required: true },
+  viajantes: { type: [String], required: true }, // ✅ array de nombres
+  cargo: { type: String, required: true }, // ✅ de vuelta en el modelo
   importeViatico: { type: Number, required: true },
   numeroDeViaje: { type: Number, required: true },
   motivoDelViaje: { type: String, required: true },
