@@ -9,6 +9,7 @@ import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { accesoPorDni } from "../middlewares/dniAccessMiddleware.mjs";
 import { dniPermitidosModuloViaticos } from "../utils/dniPermitidos.mjs";
 import Viatico from "../models/viatico.mjs";
+import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
 
 const router = express.Router();
 
@@ -31,6 +32,7 @@ router.get(
 router.get(
   "/dashboard",
   verificarSesion,
+  accesoPorModulo("viaticos"),
   mostrarDashboardViaticos,
   async (req, res) => {
     const viaticos = await Viatico.find()

@@ -1,17 +1,21 @@
 <nav class="bg-blue-800 text-white py-4 px-6">
-    <div class="container mx-auto flex justify-between items-center">
-      <!-- Logo o título -->
-      <a href="/" class="text-xl font-bold tracking-wide">Sistema de Viáticos</a>
-  
-      <!-- Navegación -->
+  <div class="container mx-auto flex justify-between items-center">
+    <!-- Logo -->
+    <a href="/" class="text-xl font-bold">Sistema</a>
+
+    <% if (usuario) { %>
+      <!-- Mostrar links solo si está autenticado -->
+      
+    <% } else { %>
       <ul class="flex space-x-6">
-        <li>
-          <a href="/viaticos" class="hover:underline">Inicio</a>
-        </li>
-        <li>
-          <a href="/viaticos/crear" class="hover:underline">Crear Viático</a>
-        </li>
-        <!-- Agregá más ítems según módulos -->
+        <% if (rutaActual === "/registro") { %>
+          <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
+        <% } else if (rutaActual === "/login") { %>
+          <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+        <% } else { %>
+          <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
+          <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+        <% } %>
       </ul>
-    </div>
-  </nav>
+    <% } %>
+</nav>

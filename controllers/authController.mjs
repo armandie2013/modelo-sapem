@@ -1,14 +1,13 @@
-// controllers/authController.mjs
-
 import Usuario from "../models/usuario.mjs";
 import bcrypt from "bcrypt";
 
+// Controlador para registrar un nuevo usuario
 export const registrarUsuarioController = async (req, res) => {
   try {
-    console.log("Registrando usuario...", req.body); // 👈 log útil
-    const { nombre, apellido, dni, email, password, rol } = req.body;
+    console.log("Registrando usuario...", req.body);
+    const { nombre, apellido, dni, email, password } = req.body;
 
-    // Verificar duplicados por DNI o Email
+    // Validar duplicados
     const existeEmail = await Usuario.findOne({ email });
     const existeDni = await Usuario.findOne({ dni });
 
@@ -18,10 +17,12 @@ export const registrarUsuarioController = async (req, res) => {
         errores.push({ campo: "email", mensaje: "Correo ya registrado" });
       if (existeDni)
         errores.push({ campo: "dni", mensaje: "DNI ya registrado" });
+
       return res.status(400).render("registro", {
         title: "Registro",
         errores,
         usuario: req.body,
+        path: req.path,
       });
     }
 
@@ -34,8 +35,7 @@ export const registrarUsuarioController = async (req, res) => {
       dni,
       email,
       password: passwordHash,
-      // rol: rol || "usuario", // por defecto, antes habiliar el campo rol en el formulario de registro
-      rol: "usuario", // por defecto, antes habiliar el campo rol en el formulario de registro
+      rol: "usuario",
     });
 
     await nuevoUsuario.save();
@@ -43,19 +43,27 @@ export const registrarUsuarioController = async (req, res) => {
     res.redirect("/login");
   } catch (error) {
     console.error("Error al registrar usuario:", error);
-    res.status(500).send("Error al registrar usuario");
+    res.status(500).render("registro", {
+      title: "Registro",
+      errores: [{ mensaje: "Error al registrar usuario" }],
+      usuario: req.body,
+      path: req.path,
+    });
   }
 };
 
+// Mostrar formulario de login
 export const mostrarFormularioLogin = (req, res) => {
   res.render("login", {
     title: "Iniciar sesión",
     errores: [],
     error: null,
     datos: {},
+    path: req.path,
   });
 };
 
+// Procesar inicio de sesión
 export const procesarLogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -66,6 +74,7 @@ export const procesarLogin = async (req, res) => {
         title: "Iniciar sesión",
         errores: [{ campo: "email", mensaje: "Correo no registrado" }],
         datos: req.body,
+        path: req.path,
       });
     }
 
@@ -75,10 +84,13 @@ export const procesarLogin = async (req, res) => {
         title: "Iniciar sesión",
         errores: [{ campo: "password", mensaje: "Contraseña incorrecta" }],
         datos: req.body,
+        path: req.path,
       });
     }
 
-    // Guardamos el usuario en sesión
+    console.log("🧑 Usuario autenticado:", usuario);
+
+    // Guardar en sesión
     req.session.usuario = {
       id: usuario._id,
       nombre: usuario.nombre,
@@ -91,10 +103,16 @@ export const procesarLogin = async (req, res) => {
     res.redirect("/viaticos/dashboard");
   } catch (error) {
     console.error("Error en login:", error);
-    res.status(500).send("Error del servidor");
+    res.status(500).render("login", {
+      title: "Iniciar sesión",
+      errores: [{ mensaje: "Error del servidor" }],
+      datos: req.body,
+      path: req.path,
+    });
   }
 };
 
+// Cerrar sesión
 export const cerrarSesion = (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login");
