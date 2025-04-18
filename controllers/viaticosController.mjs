@@ -10,6 +10,7 @@ export async function crearViaticoController(req, res) {
       fechaDeCreacion,
       areaSolicitante,
       cantidadDeViajantes,
+      nombreSolicitante,
       cargo,
       importeViatico,
       numeroDeViaje,
@@ -27,40 +28,46 @@ export async function crearViaticoController(req, res) {
       vehiculoUtilizado,
     } = req.body;
 
-    // Asegurarnos de que siempre sea un array
-    let viajantes = req.body.nombreSolicitante;
-    if (!Array.isArray(viajantes)) {
-      viajantes = [viajantes];
+    // Generar array de viajantes
+    const viajantes = [];
+    for (let i = 0; i < nombreSolicitante.length; i++) {
+      if (nombreSolicitante[i]) {
+        viajantes.push({
+          nombre: nombreSolicitante[i],
+          cargo: cargo[i],
+          importe: parseFloat(importeViatico[i]) || 0,
+        });
+      }
     }
 
+    // Crear nuevo documento Viatico
     const nuevoViatico = new Viatico({
       fechaDeCreacion,
       areaSolicitante,
-      cantidadDeViajantes,
-      viajantes,
-      cargo,
-      importeViatico,
-      numeroDeViaje,
+      cantidadDeViajantes: parseInt(cantidadDeViajantes),
+      numeroDeViaje: parseInt(numeroDeViaje),
       motivoDelViaje,
       origen,
       destino,
-      montoTotalViatico,
-      adicionalEnEfectivo,
-      devolucionEnEfectivo,
-      pendienteDeRendicion,
-      valesCombustible: valesCombustible === "on" || valesCombustible === true,
-      valorVale,
-      cantidadVale,
-      totalVale,
+      montoTotalViatico: parseFloat(montoTotalViatico) || 0,
+      adicionalEnEfectivo: parseFloat(adicionalEnEfectivo) || 0,
+      devolucionEnEfectivo: parseFloat(devolucionEnEfectivo) || 0,
+      pendienteDeRendicion: parseFloat(pendienteDeRendicion) || 0,
+      valesCombustible: valesCombustible === "on",
+      valorVale: parseFloat(valorVale) || 0,
+      cantidadVale: parseInt(cantidadVale) || 0,
+      totalVale: parseFloat(totalVale) || 0,
       vehiculoUtilizado,
       creadoPor: req.session.usuario?.nombre || "Desconocido",
+      viajantes,
     });
+
     await nuevoViatico.save();
 
-    console.log("Viático creado correctamente");
-    res.redirect("/viaticos/dashboard"); // o a dashboard si tenés
+    console.log("✅ Viático creado correctamente");
+    res.redirect("/viaticos/dashboard");
   } catch (error) {
-    console.error("Error al crear el viático:", error);
+    console.error("❌ Error al crear el viático:", error);
     res.status(500).send({
       mensaje: "Error al crear el viático",
       error: error.message,

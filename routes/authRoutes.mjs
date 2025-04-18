@@ -26,6 +26,6 @@ router.post('/login', procesarLogin);
 
 
 // Logout
-router.get("/logout", cerrarSesion);
+router.post("/logout", cerrarSesion);
 
 export default router;

@@ -9,19 +9,20 @@ import { connectDB } from "./config/dbConfig.mjs";
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
 import personasRoutes from "./routes/personasRoutes.mjs";
 import authRoutes from "./routes/authRoutes.mjs";
+import usuariosRoutes from "./routes/usuariosRoutes.mjs";
 
 const app = express();
 const PORT = process.env.PORT || 3500;
 
-// Conexión a la base de datos
+// 1. Conexión a la base de datos
 connectDB();
 
-// Middlewares generales
+// 2. Configuración de middlewares generales
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-// Manejo de sesiones
+// 3. Manejo de sesiones
 app.use(
   session({
     secret: "clave_super_segura",
@@ -30,43 +31,44 @@ app.use(
   })
 );
 
-// Motor de plantillas EJS
+// 4. Motor de plantillas EJS y layout
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
 app.use(expressEjsLayouts);
 app.set("layout", "layout");
 
-// Archivos estáticos
+// 5. Archivos estáticos
 app.use(express.static(path.resolve("./public")));
 
-// Este middleware pone el usuario y la ruta actual en todas las vistas
+// 6. Middleware para datos globales en vistas
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.rutaActual = req.path;
   next();
 });
 
-// Rutas principales
+// 7. Rutas principales
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);
 app.use("/personas", personasRoutes);
+app.use("/usuarios", usuariosRoutes);
 
-// Landing page como página principal
+// 8. Landing page como ruta principal
 app.get("/", (req, res) => {
   res.render("landing", { title: "Inicio" });
 });
 
-// Middleware de ruta no encontrada
+// 9. Middleware de ruta no encontrada
 app.use((req, res) => {
   res.status(404).send({ mensaje: "Ruta no encontrada" });
 });
 
-// Mostrar rutas registradas
+// 10. Mostrar rutas registradas en consola
 const listarRutas = (app) => {
-  console.log("📋 Rutas registradas:");
+  console.log("\uD83D\uDCCB Rutas registradas:");
 
   if (!app._router || !app._router.stack) {
-    console.warn("⚠️ No hay rutas registradas aún o _router no está disponible.");
+    console.warn("\u26A0\uFE0F No hay rutas registradas aún o _router no está disponible.");
     return;
   }
 
@@ -85,7 +87,7 @@ const listarRutas = (app) => {
 
 listarRutas(app);
 
-// Iniciar servidor
+// 11. Iniciar servidor
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

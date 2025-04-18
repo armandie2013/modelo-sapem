@@ -47,7 +47,8 @@ router.get(
 );
 
 // Ruta para procesar la creación del viático
-router.post("/crear", verificarSesion, accesoPorDni(dniPermitidosModuloViaticos), crearViaticoController);
+// router.post("/crear", verificarSesion, accesoPorDni(dniPermitidosModuloViaticos), crearViaticoController);
+router.post("/crear", verificarSesion, accesoPorModulo("viaticos"), crearViaticoController);
 // router.get("/dashboard", mostrarDashboardViaticos);
 router.get("/dashboard/todos", mostrarTodosLosViaticos);
 

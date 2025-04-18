@@ -3,10 +3,30 @@
     <!-- Logo -->
     <a href="/" class="text-xl font-bold">Sistema</a>
 
-    <% if (usuario) { %>
-      <!-- Mostrar links solo si está autenticado -->
-      
+    <% if (usuario && usuario.rol) { %>
+      <!-- Navbar para usuarios autenticados -->
+      <ul class="flex space-x-6 items-center">
+        <li><a href="/viaticos/dashboard" class="hover:underline">Dashboard Viáticos</a></li>
+        <li><a href="/viaticos/crear" class="hover:underline">Crear Viático</a></li>
+        <li><a href="/stock" class="hover:underline">Control de Stock</a></li>
+
+        <% if (usuario.rol === 'admin') { %>
+          <li class="relative group">
+            <span class="hover:underline cursor-pointer">Acceso</span>
+            <ul class="absolute hidden group-hover:block bg-white text-black mt-1 rounded shadow-lg p-2 space-y-2">
+              <li><a href="/personas/dashboard" class="hover:underline block px-2">Personal SAPEM</a></li>
+              <li><a href="/usuarios/dashboard" class="hover:underline block px-2">Usuarios Registrados</a></li>
+            </ul>
+          </li>
+        <% } %>
+      </ul>
+
+      <!-- Botón cerrar sesión -->
+      <form action="/logout" method="POST" class="ml-4">
+        <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800">Cerrar sesión</button>
+      </form>
     <% } else { %>
+      <!-- Navbar para visitantes -->
       <ul class="flex space-x-6">
         <% if (rutaActual === "/registro") { %>
           <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
@@ -18,4 +38,5 @@
         <% } %>
       </ul>
     <% } %>
+  </div>
 </nav>
