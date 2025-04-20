@@ -13,19 +13,11 @@ import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
 
 const router = express.Router();
 
-// Ruta para renderizar el formulario de creación de viáticos
-// router.get("/crear", verificarSesion, accesoPorDni(dniPermitidosModuloViaticos),mostrarFormularioViatico, (req, res) => {
-//   console.log("Entró a /viaticos/crear");
-//   res.render("crearViatico", {
-//     title: "Nuevo Viático",
-//     errores: [],
-//     viatico: {},
-//   });
-// });
+
 router.get(
   "/crear",
   verificarSesion,
-  accesoPorDni(dniPermitidosModuloViaticos),
+  // accesoPorDni(dniPermitidosModuloViaticos),
   mostrarFormularioViatico
 );
 

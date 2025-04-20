@@ -1,147 +1,147 @@
-<div class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-8">Formulario de Viáticos</h1>
-
-    <form action="/viaticos/crear" method="POST" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <!-- Fecha y Área -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Fecha de Creación</label>
-          <input type="date" name="fechaDeCreacion" required class="w-full border px-3 py-2 rounded-lg">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Área Solicitante</label>
-          <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg">
-        </div>
-
-        <!-- Cantidad de Viajantes -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Cantidad de Viajantes</label>
-          <select id="cantidadDeViajantes" name="cantidadDeViajantes" required
-            class="w-full border px-3 py-2 rounded-lg">
-            <% for (let i=1; i <=5; i++) { %>
-              <option value="<%= i %>">
-                <%= i %>
-              </option>
-              <% } %>
-          </select>
-        </div>
-
-        <!-- Selects para Viajantes -->
-        <% for (let i=0; i < 5; i++) { %>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Viajante <%= i + 1 %></label>
-            <select name="nombreSolicitante[<%= i %>]" id="viajante-<%= i %>" disabled
-              class="w-full border px-3 py-2 rounded-lg bg-gray-100">
-              <option value="">Seleccionar persona</option>
-              <% listaDePersonasDisponibles.forEach(p=> { %>
-                <option value="<%= p.nombreApellido %>">
-                  <%= p.nombreApellido %>
-                </option>
-                <% }) %>
-            </select>
-          </div>
-          <% } %>
-
-            <!-- Número de Viaje -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Número de Viaje</label>
-              <input type="text" class="w-full border px-3 py-2 rounded-lg bg-gray-100" value="<%= numeroDeViaje %>"
-                readonly>
-              <input type="hidden" name="numeroDeViaje" value="<%= numeroDeViaje %>">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
-              <input type="text" name="motivoDelViaje" required class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Origen</label>
-              <input type="text" name="origen" required class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Destino</label>
-              <input type="text" name="destino" required class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Cargo</label>
-              <input type="text" name="cargo" required class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Importe de Viático</label>
-              <input type="number" step="0.01" name="importeViatico" required class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Monto Total Viático</label>
-              <input type="number" step="0.01" name="montoTotalViatico" required
-                class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
-              <input type="number" step="0.01" name="adicionalEnEfectivo" required
-                class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Devolución en Efectivo</label>
-              <input type="number" step="0.01" name="devolucionEnEfectivo" required
-                class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Pendiente de Rendición</label>
-              <input type="number" step="0.01" name="pendienteDeRendicion" required
-                class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div class="flex items-center mt-4">
-              <input type="checkbox" name="valesCombustible" id="valesCombustible" class="mr-2">
-              <label for="valesCombustible" class="text-sm text-gray-700">Incluye Vales de Combustible</label>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Valor de Vale</label>
-              <input type="number" step="0.01" name="valorVale" class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
-              <input type="number" name="cantidadVale" class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Total Vales</label>
-              <input type="number" step="0.01" name="totalVale" class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
-              <input type="text" name="vehiculoUtilizado" class="w-full border px-3 py-2 rounded-lg">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Creado por</label>
-              <input type="text" name="creadoPor" class="w-full border px-3 py-2 rounded-lg">
-            </div>
-      </div>
-
-      <div class="text-center pt-4">
-        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Guardar
-          Viático</button>
-      </div>
-    </form>
-  </div>
-</div>
+<!-- Scripts existentes de cálculo -->
 <script>
-  const selectCantidad = document.getElementById("cantidadDeViajantes");
+  function convertirAFloat(valor) {
+    return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
+  }
 
-  selectCantidad.addEventListener("change", function () {
+  function formatArg(num) {
+    return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function calcularTotalViatico() {
+    let total = 0;
+    for (let i = 0; i < 5; i++) {
+      const input = document.getElementById(`importeViatico-${i}`);
+      if (input && !input.disabled) {
+        total +=convertirAFloat(input.value);
+      }
+    }
+    document.getElementById('totalViatico').innerText = formatArg(total);
+    calcularTotalARecibir();
+  }
+
+  function calcularTotalARecibir() {
+    const viatico = convertirAFloat(document.getElementById("totalViatico")?.innerText || "0");
+    const adicional = convertirAFloat(document.getElementById("adicionalEnEfectivo")?.value || "0");
+    document.getElementById("totalARecibir").innerText = formatArg(viatico + adicional);
+  }
+
+  function calcularPendiente() {
+    const adicional = convertirAFloat(document.getElementById('adicionalEnEfectivo')?.value || "0");
+    const rendido = convertirAFloat(document.getElementById('rendido')?.value || "0");
+    const pendiente = adicional - rendido;
+    document.getElementById('pendienteDeRendicion').value = formatArg(pendiente < 0 ? 0 : pendiente);
+  }
+
+  function calcularTotalVales() {
+    const cantidad = parseInt(document.getElementById("cantidadVale")?.value || 0);
+    const valor = convertirAFloat(document.getElementById("valorVale")?.value || "0");
+    const total = cantidad * valor;
+    document.getElementById("totalVale").value = formatArg(total);
+  }
+
+  document.querySelectorAll('.importe').forEach(input => {
+    input.addEventListener('input', calcularTotalViatico);
+  });
+
+  document.getElementById("adicionalEnEfectivo")?.addEventListener("input", () => {
+    calcularPendiente();
+    calcularTotalARecibir();
+  });
+
+  document.getElementById("rendido")?.addEventListener("input", calcularPendiente);
+
+  document.getElementById("valesCombustible")?.addEventListener("change", function () {
+    const campos = document.getElementById("camposVales");
+    campos.style.display = this.checked ? "grid" : "none";
+  });
+
+  document.getElementById("valorVale")?.addEventListener("input", calcularTotalVales);
+  document.getElementById("cantidadVale")?.addEventListener("input", calcularTotalVales);
+
+  document.getElementById("cantidadDeViajantes").addEventListener("change", function () {
     const cantidad = parseInt(this.value);
     for (let i = 0; i < 5; i++) {
       const select = document.getElementById(`viajante-${i}`);
-      if (i < cantidad) {
-        select.disabled = false;
-        select.classList.remove("bg-gray-100");
-      } else {
-        select.disabled = true;
-        select.classList.add("bg-gray-100");
-        select.selectedIndex = 0;
-      }
+      select.disabled = i >= cantidad;
+      select.classList.toggle("bg-gray-100", i >= cantidad);
+      if (i >= cantidad) select.selectedIndex = 0;
     }
   });
+// Ingresa el automaticamente el cargo segun se selecione las personas
+  document.querySelectorAll('.viajante-select').forEach(select => {
+    select.addEventListener('change', function () {
+      const index = this.dataset.index;
+      const selected = this.options[this.selectedIndex];
+      const cargo = selected.getAttribute('data-cargo') || '';
+      document.getElementById(`cargo-${index}`).value = cargo;
+    });
+  });
 
-  // Ejecutar al cargar por si ya hay una cantidad seleccionada
-  selectCantidad.dispatchEvent(new Event("change"));
+  document.getElementById("cantidadDeViajantes").dispatchEvent(new Event("change"));
+
+</script>
+
+<!-- Script para enviar totales ocultos -->
+<script>
+  function convertirAFloat(valor) {
+    return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
+  }
+
+  document.querySelector("form").addEventListener("submit", function () {
+    document.getElementById("montoTotalViaticoHidden").value = convertirAFloat(document.getElementById("totalViatico").innerText);
+    document.getElementById("pendienteDeRendicionHidden").value = convertirAFloat(document.getElementById("pendienteDeRendicion").value);
+  });
+
+  /// Habilitar campos según cantidad de viajantes
+  function actualizarCamposViajantes() {
+    const cantidad = parseInt(document.getElementById("cantidadDeViajantes").value);
+    const selects = document.querySelectorAll(".viajante-select");
+    const importes = document.querySelectorAll(".importe");
+
+    selects.forEach((select, i) => {
+      select.disabled = i >= cantidad;
+      select.classList.toggle("bg-gray-100", i >= cantidad);
+      if (i >= cantidad) select.value = "";
+    });
+
+    importes.forEach((input, i) => {
+      input.disabled = i >= cantidad;
+      input.classList.toggle("bg-gray-100", i >= cantidad);
+      if (i >= cantidad) input.value = "";
+    });
+  }
+
+  document.getElementById("cantidadDeViajantes").addEventListener("change", actualizarCamposViajantes);
+
+  // Ejecutar una vez al inicio para asegurar el estado correcto
+  window.addEventListener("DOMContentLoaded", actualizarCamposViajantes);
+
+  // Validar que solo se ingresen números en los campos de importe
+  document.querySelectorAll(".importe").forEach(input => {
+    input.addEventListener("input", function (e) {
+      this.value = this.value.replace(/[^0-9.,]/g, "");
+    });
+  });
+
+  // Evitar selección duplicada de viajantes
+  document.querySelectorAll('.viajante-select').forEach(select => {
+    select.addEventListener('change', function () {
+      const selectedValues = Array.from(document.querySelectorAll('.viajante-select'))
+        .map(s => s.value)
+        .filter(v => v);
+
+      const duplicates = selectedValues.filter((v, i, a) => a.indexOf(v) !== i);
+
+      if (duplicates.length > 0) {
+        alert('No se pueden seleccionar viajantes duplicados.');
+        this.value = "";
+      }
+    });
+  });
+  
+  
+
+
+  
 </script>

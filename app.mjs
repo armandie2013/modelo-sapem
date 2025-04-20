@@ -23,13 +23,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
 // 3. Manejo de sesiones
-app.use(
-  session({
-    secret: "clave_super_segura",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+app.use(session({
+  secret: 'clave-super-secreta',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60, // 1 hora
+    httpOnly: true,
+    // secure: true, // SOLO si usás HTTPS
+  }
+}));
 
 // 4. Motor de plantillas EJS y layout
 app.set("view engine", "ejs");
