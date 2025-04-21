@@ -2,11 +2,10 @@
   <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
     <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Registro de Usuario</h1>
 
-    <!-- Reservamos espacio suficiente para 2-3 errores (por ejemplo, hasta 96px) -->
+    <!-- Mensajes de error -->
     <div class="min-h-[48px] mb-6">
       <% if (errores && errores.length > 0) { %>
-        <!-- <div class="bg-red-100 text-red-700 px-4 py-2 rounded text-sm"> -->
-          <div class="">
+        <div>
           <ul>
             <% errores.forEach(e => { %>
               <li class="text-red-700 text-center"><%= e.mensaje %></li>
@@ -15,13 +14,6 @@
         </div>
       <% } %>
     </div>
-
-    <!-- <pre class="text-xs bg-gray-200 text-black p-2 rounded">
-      usuario: <%= JSON.stringify(usuario) %>
-      rutaActual: <%= rutaActual %>
-    </pre> -->
-
-
 
     <form action="/registro" method="POST" class="space-y-4">
       <div>
@@ -58,6 +50,12 @@
                class="w-full border px-3 py-2 rounded-lg">
       </div>
 
+      <div>
+        <label for="confirmarPassword" class="block text-sm font-medium text-gray-700 mb-2">Repetir Contraseña</label>
+        <input type="password" name="confirmarPassword" id="confirmarPassword" required
+               class="w-full border px-3 py-2 rounded-lg">
+      </div>
+
       <div class="pt-4">
         <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 mt-4 rounded-lg hover:bg-blue-800 transition">
           Registrar
@@ -66,4 +64,5 @@
     </form>
   </div>
 </div>
+
 

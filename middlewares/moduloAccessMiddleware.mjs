@@ -4,7 +4,9 @@ export function accesoPorModulo(...modulosRequeridos) {
   return async (req, res, next) => {
     if (!req.session.usuario || !req.session.usuario.dni) {
       console.log("🔒 Usuario no autenticado o sin DNI");
-      return res.status(403).send("Acceso denegado: Usuario no autenticado o sin DNI.");
+      return res
+        .status(403)
+        .send("Acceso denegado: Usuario no autenticado o sin DNI.");
     }
 
     const dniUsuario = req.session.usuario.dni;
@@ -16,7 +18,10 @@ export function accesoPorModulo(...modulosRequeridos) {
 
     if (!datosPersona || !datosPersona.modulosPermitidos) {
       console.log("🚫 Persona no encontrada o sin modulosPermitidos");
-      return res.status(403).send("Acceso denegado: No se encontró la persona o no tiene permisos.");
+      // return res.status(403).send("Acceso denegado: No se encontró la persona o no tiene permisos.");
+      return res.status(403).render("sinPermisoModulo", {
+        title: "Sin Permiso",
+      });
     }
 
     const tieneAcceso = modulosRequeridos.some((modulo) =>
@@ -28,7 +33,9 @@ export function accesoPorModulo(...modulosRequeridos) {
     console.log("🟢 ¿Tiene acceso?:", tieneAcceso);
 
     if (!tieneAcceso) {
-      return res.status(403).send("Acceso denegado: No tenés permiso para este módulo.");
+      return res
+        .status(403)
+        .send("Acceso denegado: No tenés permiso para este módulo.");
     }
 
     next();

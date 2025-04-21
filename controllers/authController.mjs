@@ -5,19 +5,26 @@ import bcrypt from "bcrypt";
 export const registrarUsuarioController = async (req, res) => {
   try {
     console.log("Registrando usuario...", req.body);
-    const { nombre, apellido, dni, email, password } = req.body;
+    const { nombre, apellido, dni, email, password, confirmarPassword } = req.body;
 
-    // Validar duplicados
+    const errores = [];
+
+    // Validación de campos duplicados
     const existeEmail = await Usuario.findOne({ email });
     const existeDni = await Usuario.findOne({ dni });
 
-    if (existeEmail || existeDni) {
-      const errores = [];
-      if (existeEmail)
-        errores.push({ campo: "email", mensaje: "Correo ya registrado" });
-      if (existeDni)
-        errores.push({ campo: "dni", mensaje: "DNI ya registrado" });
+    if (existeEmail)
+      errores.push({ campo: "email", mensaje: "Correo ya registrado" });
+    if (existeDni)
+      errores.push({ campo: "dni", mensaje: "DNI ya registrado" });
 
+    // Validar coincidencia de contraseñas
+    if (password !== confirmarPassword) {
+      errores.push({ campo: "password", mensaje: "Las contraseñas no coinciden" });
+    }
+
+    // Si hay errores, mostrar el formulario de nuevo
+    if (errores.length > 0) {
       return res.status(400).render("registro", {
         title: "Registro",
         errores,
@@ -88,6 +95,9 @@ export const procesarLogin = async (req, res) => {
       });
     }
 
+    console.log("✅ Sesión iniciada para:", usuario.email);
+    console.log("📦 Datos de sesión guardados:", req.session.usuario);
+
     console.log("🧑 Usuario autenticado:", usuario);
 
     // Guardar en sesión
@@ -100,7 +110,9 @@ export const procesarLogin = async (req, res) => {
       dni: String(usuario.dni),
     };
 
-    res.redirect("/viaticos/dashboard");
+    const redirigirA = req.session.redirigirA || "/viaticos/dashboard";
+    delete req.session.redirigirA;
+    res.redirect(redirigirA);
   } catch (error) {
     console.error("Error en login:", error);
     res.status(500).render("login", {
@@ -114,7 +126,10 @@ export const procesarLogin = async (req, res) => {
 
 // Cerrar sesión
 export const cerrarSesion = (req, res) => {
+  const email = req.session?.usuario?.email || "desconocido";
+
   req.session.destroy(() => {
+    console.log("🚪 Cerrando sesión para:", email);
     res.redirect("/login");
   });
 };

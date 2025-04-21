@@ -34,6 +34,19 @@ app.use(session({
   }
 }));
 
+
+// Middleware para registrar actividad de sesión LUEGO BORRAR
+app.use((req, res, next) => {
+  console.log("🔑 Sesión ID:", req.sessionID);
+  if (req.session.usuario) {
+    console.log("👤 Usuario en sesión:", req.session.usuario.email);
+  } else {
+    console.log("⚠️ No hay usuario en sesión");
+  }
+  next();
+});
+
+
 // 4. Motor de plantillas EJS y layout
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));

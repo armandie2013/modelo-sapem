@@ -7,17 +7,20 @@ import {
   actualizarPersona,
   eliminarPersona,
 } from "../controllers/personasController.mjs";
+import { verificarSesion } from "../middlewares/authMiddleware.mjs";
+import { verificarAdmin } from "../middlewares/verificarAdmin.mjs";
 
 const router = express.Router();
 
-router.get("/agregar", mostrarFormularioAgregar);
-router.post("/agregar", agregarPersona);
+router.get("/dashboard", verificarSesion, verificarAdmin, listarPersonas);
 
-router.get("/dashboard", listarPersonas);
+router.get("/agregar", verificarSesion, verificarAdmin, mostrarFormularioAgregar);
+router.post("/agregar", verificarSesion, verificarAdmin, agregarPersona);
 
-router.get("/editar/:id", mostrarFormularioEditar);
-router.put("/editar/:id", actualizarPersona);
 
-router.delete("/eliminar/:id", eliminarPersona);
+router.get("/editar/:id", verificarSesion, verificarAdmin, mostrarFormularioEditar);
+router.put("/editar/:id", verificarSesion, actualizarPersona);
+
+router.delete("/eliminar/:id", verificarSesion, verificarAdmin, eliminarPersona);
 
 export default router;

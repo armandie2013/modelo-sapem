@@ -6,20 +6,13 @@ import {
   mostrarFormularioViatico,
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
-import { accesoPorDni } from "../middlewares/dniAccessMiddleware.mjs";
-import { dniPermitidosModuloViaticos } from "../utils/dniPermitidos.mjs";
 import Viatico from "../models/viatico.mjs";
 import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
 
 const router = express.Router();
 
 
-router.get(
-  "/crear",
-  verificarSesion,
-  // accesoPorDni(dniPermitidosModuloViaticos),
-  mostrarFormularioViatico
-);
+
 
 router.get(
   "/dashboard",
@@ -38,13 +31,18 @@ router.get(
   }
 );
 
-// Ruta para procesar la creación del viático
-// router.post("/crear", verificarSesion, accesoPorDni(dniPermitidosModuloViaticos), crearViaticoController);
+router.get(
+  "/crear",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  mostrarFormularioViatico
+);
+
 router.post("/crear", verificarSesion, accesoPorModulo("viaticos"), crearViaticoController);
-// router.get("/dashboard", mostrarDashboardViaticos);
+
+
 router.get("/dashboard/todos", mostrarTodosLosViaticos);
 
-// router.get("/crear", mostrarFormularioViatico);
-// // router.post("/crear", crearViaticoController);
+
 
 export default router;
