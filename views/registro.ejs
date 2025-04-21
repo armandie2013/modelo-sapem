@@ -66,3 +66,26 @@
 </div>
 
 
+<!-- Pone las mayusculas al principio en los campos nombre y apellido -->
+<script>
+  function capitalizarPrimeraLetra(texto) {
+    return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
+  }
+
+  function aplicarCapitalizacion(input) {
+    input.addEventListener("input", function () {
+      const palabras = this.value.split(" ").map(capitalizarPrimeraLetra);
+      this.value = palabras.join(" ");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const campoNombre = document.getElementById("nombre");
+    const campoApellido = document.getElementById("apellido");
+
+    if (campoNombre) aplicarCapitalizacion(campoNombre);
+    if (campoApellido) aplicarCapitalizacion(campoApellido);
+  });
+</script>
+
+

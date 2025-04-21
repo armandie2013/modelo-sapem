@@ -87,18 +87,13 @@
             </tr>
             <% } %>
               <tr class="bg-gray-100 font-semibold">
-                <td colspan="3" class="px-4 py-2 text-right" name="montoTotalViatico" id="montoTotalViatico">Total
-                  Viático</td>
+                <td colspan="3" class="px-4 py-2 text-right" name="montoTotalViatico" id="montoTotalViatico">Total de
+                  Viáticos</td>
                 <td class="px-4 py-2 text-left">
                   <span>$</span><span id="totalViatico">0,00</span>
                 </td>
               </tr>
-              <tr class="bg-gray-100 font-semibold">
-                <td colspan="3" class="px-4 py-2 text-right">Total a Recibir</td>
-                <td class="px-4 py-2 text-left">
-                  <span>$</span><span id="totalARecibir">0,00</span>
-                </td>
-              </tr>
+
         </tbody>
       </table>
 
@@ -106,6 +101,14 @@
 
       <!-- Origen, Destino, Motivo -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
+          <input type="date" name="fechaDeSalida" required class="w-full border px-2 py-1 rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
+          <input type="date" name="fechaDellegada" required class="w-full border px-2 py-1 rounded-lg text-sm">
+        </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Origen</label>
           <input type="text" name="origen" required class="w-full border px-3 py-2 rounded-lg">
@@ -118,6 +121,10 @@
       <div class="mt-4">
         <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
         <input type="text" name="motivoDelViaje" required class="w-full border px-3 py-2 rounded-lg">
+      </div>
+      <div class="mt-4">
+        <label class="block text-sm font-medium text-gray-700">Vehiculo Utilizado</label>
+        <input type="text" name="vehiculoUtilizado" required class="w-full border px-3 py-2 rounded-lg">
       </div>
 
       <!-- Adicional, Pendiente y Rendido -->
@@ -149,7 +156,18 @@
               class="w-full border pl-6 pr-2 py-2 rounded text-sm" placeholder="0,00">
           </div>
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="totalARecibir" name="totalARecibir" readonly
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm bg-gray-100 font-semibold text-blue-800"
+              placeholder="0,00">
+          </div>
+        </div>
       </div>
+
+
 
       <!-- Checkbox y Campos para Vales de Combustible -->
       <div class="mt-6">
@@ -164,13 +182,20 @@
           <input type="number" name="cantidadVale" id="cantidadVale" min="0" class="w-full border px-3 py-2 rounded">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Importe por Vale</label>
-          <input type="text" name="valorVale" id="valorVale" class="w-full border px-3 py-2 rounded" placeholder="0,00">
+          <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="valorVale" name="valorVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
+              placeholder="0,00">
+          </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Total Vales</label>
-          <input type="text" name="totalVale" id="totalVale" class="w-full border px-3 py-2 rounded bg-gray-100"
-            readonly>
+          <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="totalVale" name="totalVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
+              placeholder="0,00">
+          </div>
         </div>
       </div>
 
@@ -188,6 +213,40 @@
 
     // Ejecutar una vez al inicio para asegurar el estado correcto
     window.addEventListener("DOMContentLoaded", actualizarCamposViajantes);
+
+
+    // Prueba de fomateo en tiempo real 
+
+//     const adicionalInput = document.getElementById("adicionalEnEfectivo");
+
+// adicionalInput.addEventListener("input", function (e) {
+//   // Remover puntos y reemplazar coma por punto para convertir a float
+//   const valor = e.target.value.replace(/\./g, '').replace(',', '.');
+
+//   const numero = parseFloat(valor);
+
+//   if (!isNaN(numero)) {
+//     e.target.value = numero.toLocaleString("es-AR", {
+     
+//     });
+//   }
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // Habilitar campos según cantidad de viajantes
@@ -247,7 +306,7 @@
       });
     });
 
-    // Convertir .importe con punto separador de miles
+    // // Convertir .importe con punto separador de miles
     function convertirAFloat(valor) {
       return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
     }
@@ -289,6 +348,38 @@
       document.querySelectorAll('.importe').forEach(input => {
         prepararCampoImporte(input);
       });
+    });
+
+    // Habilitar check incluir vales de combustibles
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkboxVales = document.getElementById("valesCombustible");
+      const camposVales = document.getElementById("camposVales");
+      const cantidadVale = document.getElementById("cantidadVale");
+      const valorVale = document.getElementById("valorVale");
+      const totalVale = document.getElementById("totalVale");
+
+      // Función para habilitar/deshabilitar campos de vales
+      function toggleCamposVales() {
+        const habilitar = checkboxVales.checked;
+        camposVales.style.display = habilitar ? "grid" : "none";
+
+        cantidadVale.disabled = !habilitar;
+        valorVale.disabled = !habilitar;
+        totalVale.disabled = !habilitar;
+        totalVale.classList.toggle("bg-gray-100", !habilitar);
+
+        if (!habilitar) {
+          cantidadVale.value = "";
+          valorVale.value = "";
+          totalVale.value = "";
+        }
+      }
+
+      // Ejecutar una vez por si ya está tildado al cargar
+      toggleCamposVales();
+
+      // Evento al cambiar el estado del checkbox
+      checkboxVales.addEventListener("change", toggleCamposVales);
     });
 
 

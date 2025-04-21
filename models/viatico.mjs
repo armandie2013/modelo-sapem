@@ -16,6 +16,8 @@ const viaticoSchema = new mongoose.Schema({
   motivoDelViaje: { type: String, required: true },
   origen: { type: String, required: true },
   destino: { type: String, required: true },
+  fechaDeSalida: { type: Date, required: true },
+  fechaDeLlegada: { type: Date, required: true },
   montoTotalViatico: { type: Number, required: true },
   adicionalEnEfectivo: { type: Number, required: true },
   devolucionEnEfectivo: { type: Number, required: true },

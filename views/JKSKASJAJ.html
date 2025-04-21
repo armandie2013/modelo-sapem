@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formato de Número en Tiempo Real</title>
+</head>
+
+<body>
+    <input type="text" id="numberInput" placeholder="Escribe un número">
+    <p>Formato en tiempo real: <span id="formattedNumber"></span></p>
+
+    <script>
+        // Agregar un event listener al documento
+        document.addEventListener('keydown', function (event) {
+            // Verificar si la tecla presionada es el punto (.)
+            if (event.key === '.') {
+                // Mostrar la letra A
+                alert('A');
+            }
+        });
+    </script>
+</body>
+
+</html>

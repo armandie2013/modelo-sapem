@@ -96,7 +96,7 @@ export const procesarLogin = async (req, res) => {
     }
 
     console.log("✅ Sesión iniciada para:", usuario.email);
-    console.log("📦 Datos de sesión guardados:", req.session.usuario);
+    
 
     console.log("🧑 Usuario autenticado:", usuario);
 
@@ -109,7 +109,9 @@ export const procesarLogin = async (req, res) => {
       rol: usuario.rol,
       dni: String(usuario.dni),
     };
-
+    
+    console.log("📦 Datos de sesión guardados:", req.session.usuario);
+    
     const redirigirA = req.session.redirigirA || "/viaticos/dashboard";
     delete req.session.redirigirA;
     res.redirect(redirigirA);

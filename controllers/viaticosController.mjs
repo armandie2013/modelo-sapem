@@ -17,6 +17,8 @@ export async function crearViaticoController(req, res) {
       motivoDelViaje,
       origen,
       destino,
+      fechaDeSalida,
+      fechaDeLlegada,
       montoTotalViatico,
       adicionalEnEfectivo,
       devolucionEnEfectivo,
@@ -49,6 +51,8 @@ export async function crearViaticoController(req, res) {
       motivoDelViaje,
       origen,
       destino,
+      fechaDeSalida,
+      fechaDeLlegada,
       montoTotalViatico: parseFloat(montoTotalViatico) || 0,
       adicionalEnEfectivo: parseFloat(adicionalEnEfectivo) || 0,
       devolucionEnEfectivo: parseFloat(devolucionEnEfectivo) || 0,
@@ -125,6 +129,7 @@ export const mostrarFormularioViatico = async (req, res) => {
 
     // Renderizar formulario con datos
     res.render("crearViatico", {
+      title: "Crear Viatico",
       numeroDeViaje,
       listaDePersonasDisponibles,
     });
