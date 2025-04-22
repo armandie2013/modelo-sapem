@@ -1,8 +1,12 @@
-import Usuario from "../models/usuario.mjs";
+// controllers/usuariosController.mjs
 
+import { obtenerUsuariosOrdenados, eliminarUsuarioPorId } from "../services/usuariosService.mjs";
+
+
+// Listar usuarios
 export const listarUsuarios = async (req, res) => {
   try {
-    const usuarios = await Usuario.find().sort({ nombre: 1 });
+    const usuarios = await obtenerUsuariosOrdenados();
     res.render("dashboardUsuarios", { title: "Usuarios Registrados", usuarios });
   } catch (error) {
     console.error("Error al listar usuarios:", error);
@@ -10,9 +14,11 @@ export const listarUsuarios = async (req, res) => {
   }
 };
 
+
+// Eliminar usuario
 export const eliminarUsuario = async (req, res) => {
   try {
-    await Usuario.findByIdAndDelete(req.params.id);
+    await eliminarUsuarioPorId(req.params.id);
     res.redirect("/usuarios/dashboard");
   } catch (error) {
     console.error("Error al eliminar usuario:", error);

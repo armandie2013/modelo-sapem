@@ -4,7 +4,11 @@ import {
   obtenerDatosFormularioViatico,
   obtenerUltimosViaticos,
   obtenerTodosLosViaticos,
-  crearViatico, eliminarViaticoPorId
+  crearViatico,
+  eliminarViaticoPorId,
+  obtenerViaticoPorId,
+  obtenerPersonasDisponiblesOrdenadas,
+  actualizarViatico
 } from "../services/viaticosService.mjs";
 
 // Mostrar el formulario de creación de viáticos
@@ -78,4 +82,61 @@ export const eliminarViaticoController = async (req, res) => {
     console.error("❌ Error al eliminar viático:", error);
     res.status(500).send("Error al eliminar viático");
   }
+};
+
+
+// Ver Viatico
+export const verViaticoController = async (req, res) => {
+  try {
+    const viatico = await obtenerViaticoPorId(req.params.id);
+    const listaDePersonasDisponibles = await obtenerPersonasDisponiblesOrdenadas();
+    if (!viatico) return res.status(404).send("Viático no encontrado");
+
+    res.render("verViatico", {
+      title: "Detalle del Viático",
+      viatico,
+      listaDePersonasDisponibles,
+      soloLectura: true,
+    });
+  } catch (error) {
+    console.error("Error al mostrar viático:", error);
+    res.status(500).send("Error al mostrar viático");
+  }
+};
+
+
+// Controlador para mostrar un viático en modo edición
+export async function mostrarFormularioEditarViatico(req, res) {
+  try {
+    const viatico = await obtenerViaticoPorId(req.params.id);
+    res.render("editarViatico", { viatico });
+  } catch (error) {
+    console.error("Error al mostrar formulario de edición:", error);
+    res.status(500).send("Error al mostrar formulario de edición");
+  }
+}
+
+
+// Controlador para actualizar un viático existente
+export async function actualizarViaticoController(req, res) {
+  try {
+    await actualizarViaticoPorId(req.params.id, req.body);
+    res.redirect("/viaticos/dashboard");
+  } catch (error) {
+    console.error("Error al actualizar viático:", error);
+    res.status(500).send("Error al actualizar viático");
+  }
+}
+
+
+// Editar viatico
+export async function editarViaticoController(req, res) {
+  try {
+    const { id } = req.params;
+    await actualizarViatico(id, req.body);
+    res.redirect("/viaticos/dashboard");
+  } catch (error) {
+    console.error("Error al editar viático:", error);
+    res.status(500).send("Error al editar viático");
+  };
 };

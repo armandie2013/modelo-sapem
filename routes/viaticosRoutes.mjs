@@ -6,7 +6,10 @@ import {
   mostrarDashboardViaticos,
   mostrarTodosLosViaticos,
   mostrarFormularioViatico,
-  eliminarViaticoController
+  eliminarViaticoController,
+  verViaticoController,
+  editarViaticoController,
+  mostrarFormularioEditarViatico
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
@@ -43,6 +46,30 @@ router.get(
   verificarSesion,
   accesoPorModulo("viaticos"),
   mostrarTodosLosViaticos
+);
+
+// Ver un viático (modo lectura)
+router.get(
+  "/:id",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  verViaticoController
+);
+
+// Editar un viático existente
+router.put(
+  "/:id",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  editarViaticoController
+);
+
+// Mostrar formulario para editar un viático
+router.get(
+  "/:id/editar",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  mostrarFormularioEditarViatico
 );
 
 // Elininar viatico por id

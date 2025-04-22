@@ -1,29 +1,43 @@
-import Usuario from "../models/usuario.mjs";
-import bcrypt from "bcrypt";
+// controllers/authController.mjs
+
+import {
+  verificarEmailExistente,
+  verificarDniExistente,
+  crearUsuarioConHash,
+  buscarUsuarioPorEmail,
+  validarPassword
+} from "../services/authService.mjs";
+
+// Mostrar formulario de registro
+export const mostrarFormularioRegistro = (req, res) => {
+  res.render("registro", {
+    title: "Registro",
+    errores: [],
+    usuario: {},
+    path: req.path,
+  });
+};
 
 // Controlador para registrar un nuevo usuario
 export const registrarUsuarioController = async (req, res) => {
   try {
-    console.log("Registrando usuario...", req.body);
     const { nombre, apellido, dni, email, password, confirmarPassword } = req.body;
-
     const errores = [];
 
     // Validación de campos duplicados
-    const existeEmail = await Usuario.findOne({ email });
-    const existeDni = await Usuario.findOne({ dni });
-
-    if (existeEmail)
+    if (await verificarEmailExistente(email)) {
       errores.push({ campo: "email", mensaje: "Correo ya registrado" });
-    if (existeDni)
+    }
+
+    if (await verificarDniExistente(dni)) {
       errores.push({ campo: "dni", mensaje: "DNI ya registrado" });
+    }
 
     // Validar coincidencia de contraseñas
     if (password !== confirmarPassword) {
       errores.push({ campo: "password", mensaje: "Las contraseñas no coinciden" });
     }
 
-    // Si hay errores, mostrar el formulario de nuevo
     if (errores.length > 0) {
       return res.status(400).render("registro", {
         title: "Registro",
@@ -33,19 +47,7 @@ export const registrarUsuarioController = async (req, res) => {
       });
     }
 
-    // Hashear contraseña
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const nuevoUsuario = new Usuario({
-      nombre,
-      apellido,
-      dni,
-      email,
-      password: passwordHash,
-      rol: "usuario",
-    });
-
-    await nuevoUsuario.save();
+    await crearUsuarioConHash({ nombre, apellido, dni, email, password });
 
     res.redirect("/login");
   } catch (error) {
@@ -75,7 +77,7 @@ export const procesarLogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const usuario = await Usuario.findOne({ email });
+    const usuario = await buscarUsuarioPorEmail(email);
     if (!usuario) {
       return res.status(401).render("login", {
         title: "Iniciar sesión",
@@ -85,7 +87,7 @@ export const procesarLogin = async (req, res) => {
       });
     }
 
-    const passwordValido = await bcrypt.compare(password, usuario.password);
+    const passwordValido = await validarPassword(password, usuario.password);
     if (!passwordValido) {
       return res.status(401).render("login", {
         title: "Iniciar sesión",
@@ -96,11 +98,7 @@ export const procesarLogin = async (req, res) => {
     }
 
     console.log("✅ Sesión iniciada para:", usuario.email);
-    
 
-    console.log("🧑 Usuario autenticado:", usuario);
-
-    // Guardar en sesión
     req.session.usuario = {
       id: usuario._id,
       nombre: usuario.nombre,
@@ -109,9 +107,9 @@ export const procesarLogin = async (req, res) => {
       rol: usuario.rol,
       dni: String(usuario.dni),
     };
-    
+
     console.log("📦 Datos de sesión guardados:", req.session.usuario);
-    
+
     const redirigirA = req.session.redirigirA || "/viaticos/dashboard";
     delete req.session.redirigirA;
     res.redirect(redirigirA);

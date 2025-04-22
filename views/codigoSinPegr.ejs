@@ -1,147 +1,438 @@
+<!-- Formulario de Solicitud de Viático -->
 <div class="bg-gray-100 min-h-screen py-10 px-4">
-    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto">
-      <h1 class="text-2xl font-bold text-center text-gray-800 mb-8">Formulario de Viáticos</h1>
-  
-      <form action="/viaticos/crear" method="POST" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  
-          <!-- Fecha y Área -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Fecha de Creación</label>
-            <input type="date" name="fechaDeCreacion" required class="w-full border px-3 py-2 rounded-lg">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Área Solicitante</label>
-            <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg">
-          </div>
-  
-          <!-- Cantidad de Viajantes -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Cantidad de Viajantes</label>
-            <select id="cantidadDeViajantes" name="cantidadDeViajantes" required
-              class="w-full border px-3 py-2 rounded-lg">
-              <% for (let i=1; i <=5; i++) { %>
-                <option value="<%= i %>">
-                  <%= i %>
-                </option>
-                <% } %>
-            </select>
-          </div>
-  
-          <!-- Selects para Viajantes -->
-          <% for (let i=0; i < 5; i++) { %>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Viajante <%= i + 1 %></label>
-              <select name="nombreSolicitante[<%= i %>]" id="viajante-<%= i %>" disabled
-                class="w-full border px-3 py-2 rounded-lg bg-gray-100">
-                <option value="">Seleccionar persona</option>
-                <% listaDePersonasDisponibles.forEach(p=> { %>
-                  <option value="<%= p.nombreApellido %>">
-                    <%= p.nombreApellido %>
-                  </option>
-                  <% }) %>
-              </select>
-            </div>
+  <div class="bg-white p-8 rounded-2xl shadow-xl max-w-6xl mx-auto">
+    <form action="/viaticos/crear" method="POST">
+      <!-- Logo y título -->
+      <div class="text-center mb-6">
+        <img src="/ruta-a-tu-logo.png" alt="Logo" class="mx-auto h-16 mb-2">
+        <h1 class="text-3xl font-bold text-gray-800">Solicitud de Viático</h1>
+      </div>
+
+      <!-- Fecha, Número de viaje y Área Solicitante -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Fecha</label>
+          <input type="date" name="fechaDeCreacion" required class="w-full border px-2 py-1 rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Área Solicitante</label>
+          <input type="text" name="areaSolicitante" required class="w-full border px-2 py-1 rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">N° de Viaje</label>
+          <input type="text" name="numeroDeViaje" value="<%= numeroDeViaje %>" readonly
+            class="w-full border px-2 py-1 rounded-lg bg-gray-100 text-sm">
+        </div>
+      </div>
+
+      <!-- Campo oculto para numeroDeViaje -->
+      <input type="hidden" name="numeroDeViaje" value="<%= numeroDeViaje %>">
+      <!-- Campo oculto para montoTotalViatico -->
+      <input type="hidden" name="montoTotalViatico" id="montoTotalViaticoHidden">
+      <!-- Campo oculto para pendienteDeRendicion -->
+      <input type="hidden" name="pendienteDeRendicion" id="pendienteDeRendicionHidden">
+      <!-- Campo oculto para devolucionEnEfectivo -->
+      <input type="hidden" name="devolucionEnEfectivo" value="0">
+
+      <div class="mb-6 w-1/4">
+        <label class="block text-xs font-medium text-gray-600">Cantidad de Viajantes</label>
+        <select id="cantidadDeViajantes" name="cantidadDeViajantes" required
+          class="w-full border px-2 py-1 rounded text-sm">
+          <% for (let i=1; i <=5; i++) { %>
+            <option value="<%= i %>">
+              <%= i %>
+            </option>
             <% } %>
-  
-              <!-- Número de Viaje -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Número de Viaje</label>
-                <input type="text" class="w-full border px-3 py-2 rounded-lg bg-gray-100" value="<%= numeroDeViaje %>"
-                  readonly>
-                <input type="hidden" name="numeroDeViaje" value="<%= numeroDeViaje %>">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
-                <input type="text" name="motivoDelViaje" required class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Origen</label>
-                <input type="text" name="origen" required class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Destino</label>
-                <input type="text" name="destino" required class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Cargo</label>
-                <input type="text" name="cargo" required class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Importe de Viático</label>
-                <input type="number" step="0.01" name="importeViatico" required class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Monto Total Viático</label>
-                <input type="number" step="0.01" name="montoTotalViatico" required
-                  class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
-                <input type="number" step="0.01" name="adicionalEnEfectivo" required
-                  class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Devolución en Efectivo</label>
-                <input type="number" step="0.01" name="devolucionEnEfectivo" required
-                  class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Pendiente de Rendición</label>
-                <input type="number" step="0.01" name="pendienteDeRendicion" required
-                  class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div class="flex items-center mt-4">
-                <input type="checkbox" name="valesCombustible" id="valesCombustible" class="mr-2">
-                <label for="valesCombustible" class="text-sm text-gray-700">Incluye Vales de Combustible</label>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Valor de Vale</label>
-                <input type="number" step="0.01" name="valorVale" class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
-                <input type="number" name="cantidadVale" class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Total Vales</label>
-                <input type="number" step="0.01" name="totalVale" class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
-                <input type="text" name="vehiculoUtilizado" class="w-full border px-3 py-2 rounded-lg">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Creado por</label>
-                <input type="text" name="creadoPor" class="w-full border px-3 py-2 rounded-lg">
-              </div>
+        </select>
+      </div>
+
+      <!-- Tabla de viajantes -->
+      <table class="w-full text-sm table-auto border-collapse">
+        <thead class="bg-gray-100 text-left">
+          <tr>
+            <th class="border px-4 py-2">#</th>
+            <th class="border px-4 py-2">Viajante</th>
+            <th class="border px-4 py-2">Cargo</th>
+            <th class="border px-4 py-2">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let i=0; i < 5; i++) { %>
+            <tr>
+              <td class="border px-4 py-2">
+                <%= i + 1 %>
+              </td>
+              <td class="border px-4 py-2">
+                <select name="nombreSolicitante[<%= i %>]" id="viajante-<%= i %>"
+                  class="w-full border px-2 py-1 rounded bg-gray-100 text-sm viajante-select" data-index="<%= i %>">
+                  <option value="">Seleccionar persona</option>
+                  <% listaDePersonasDisponibles.forEach(p=> { %>
+                    <option value="<%= p.nombreApellido %>" data-cargo="<%= p.cargo %>">
+                      <%= p.nombreApellido %>
+                    </option>
+                    <% }) %>
+                </select>
+              </td>
+              <td class="border px-4 py-2">
+                <input type="text" name="cargo[<%= i %>]" id="cargo-<%= i %>"
+                  class="w-full border px-2 py-1 rounded text-sm" readonly>
+              </td>
+              <td class="border px-4 py-2">
+                <div class="relative">
+                  <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+                  <input type="text" name="importeViatico[<%= i %>]" id="importeViatico-<%= i %>"
+                    class="w-full border pl-6 pr-2 py-1 rounded importe text-sm" inputmode="decimal" placeholder="0,00">
+                </div>
+              </td>
+            </tr>
+            <% } %>
+              <tr class="bg-gray-100 font-semibold">
+                <td colspan="3" class="px-4 py-2 text-right" name="montoTotalViatico" id="montoTotalViatico">Total de
+                  Viáticos</td>
+                <td class="px-4 py-2 text-left">
+                  <span>$</span><span id="totalViatico">0,00</span>
+                </td>
+              </tr>
+
+        </tbody>
+      </table>
+
+
+
+      <!-- Origen, Destino, Motivo -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
+          <input type="date" name="fechaDeSalida" required class="w-full border px-2 py-1 rounded-lg text-sm">
         </div>
-  
-        <div class="text-center pt-4">
-          <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Guardar
-            Viático</button>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
+          <input type="date" name="fechaDellegada" required class="w-full border px-2 py-1 rounded-lg text-sm">
         </div>
-      </form>
-    </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Origen</label>
+          <input type="text" name="origen" required class="w-full border px-3 py-2 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Destino</label>
+          <input type="text" name="destino" required class="w-full border px-3 py-2 rounded-lg">
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
+        <input type="text" name="motivoDelViaje" required class="w-full border px-3 py-2 rounded-lg">
+      </div>
+      <div class="mt-4">
+        <label class="block text-sm font-medium text-gray-700">Vehiculo Utilizado</label>
+        <input type="text" name="vehiculoUtilizado" required class="w-full border px-3 py-2 rounded-lg">
+      </div>
+
+      <!-- Adicional, Pendiente y Rendido -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="adicionalEnEfectivo" name="adicionalEnEfectivo"
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm" placeholder="0,00">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">Pendiente de
+            Rendición</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="pendienteDeRendicion" name="pendienteDeRendicion" readonly
+              class="w-full border pl-6 pr-2 py-2 rounded bg-gray-100 text-sm font-semibold text-red-600">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Rendido</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="devolucionEnEfectivo" name="devolucionEnEfectivo"
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm" placeholder="0,00">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="totalARecibir" name="totalARecibir" readonly
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm bg-gray-100 font-semibold text-blue-800"
+              placeholder="0,00">
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Checkbox y Campos para Vales de Combustible -->
+      <div class="mt-6">
+        <label class="inline-flex items-center">
+          <input type="checkbox" id="valesCombustible" name="valesCombustible" class="form-checkbox text-blue-600">
+          <span class="ml-2 text-sm text-gray-700">Incluir Vales de Combustible</span>
+        </label>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4" id="camposVales" style="display: none;">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
+          <input type="number" name="cantidadVale" id="cantidadVale" min="0" class="w-full border px-3 py-2 rounded">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="valorVale" name="valorVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
+              placeholder="0,00">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
+          <div class="relative">
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
+            <input type="text" id="totalVale" name="totalVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
+              placeholder="0,00">
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón para generar viático -->
+      <div class="text-center pt-8">
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg shadow-lg transition">
+          Generar Viático
+        </button>
+      </div>
+    </form>
   </div>
+
   <script>
-    const selectCantidad = document.getElementById("cantidadDeViajantes");
-  
-    selectCantidad.addEventListener("change", function () {
-      const cantidad = parseInt(this.value);
-      for (let i = 0; i < 5; i++) {
-        const select = document.getElementById(`viajante-${i}`);
-        if (i < cantidad) {
-          select.disabled = false;
-          select.classList.remove("bg-gray-100");
-        } else {
-          select.disabled = true;
-          select.classList.add("bg-gray-100");
-          select.selectedIndex = 0;
+
+    // Ejecutar una vez al inicio para asegurar el estado correcto
+    window.addEventListener("DOMContentLoaded", actualizarCamposViajantes);
+
+
+    // Prueba de fomateo en tiempo real 
+
+//     const adicionalInput = document.getElementById("adicionalEnEfectivo");
+
+// adicionalInput.addEventListener("input", function (e) {
+//   // Remover puntos y reemplazar coma por punto para convertir a float
+//   const valor = e.target.value.replace(/\./g, '').replace(',', '.');
+
+//   const numero = parseFloat(valor);
+
+//   if (!isNaN(numero)) {
+//     e.target.value = numero.toLocaleString("es-AR", {
+     
+//     });
+//   }
+// });
+
+
+
+
+// const adicionalInput = document.getElementById("adicionalEnEfectivo");
+
+// // Reemplazar punto por coma al presionar
+// adicionalInput.addEventListener("keydown", function (e) {
+//   if (e.key === ".") {
+//     e.preventDefault();
+//     const cursor = this.selectionStart;
+//     const antes = this.value.slice(0, cursor);
+//     const despues = this.value.slice(cursor);
+//     this.value = antes + "," + despues;
+//     this.setSelectionRange(cursor + 1, cursor + 1);
+//   }
+// });
+
+// // Formatear en tiempo real al escribir
+// adicionalInput.addEventListener("input", function (e) {
+//   const soloNumeros = e.target.value.replace(/[^0-9,]/g, '');
+//   const valor = soloNumeros.replace(/\./g, '').replace(',', '.');
+//   const numero = parseFloat(valor);
+
+//   if (!isNaN(numero)) {
+//     e.target.value = numero.toLocaleString("es-AR", {
+//       minimumFractionDigits: 2,
+//       maximumFractionDigits: 2,
+//     });
+//   }
+// });
+
+
+
+const adicionalInput = document.getElementById("adicionalEnEfectivo");
+
+// Reemplazar punto por coma al presionar tecla
+adicionalInput.addEventListener("keydown", function (e) {
+  if (e.key === ".") {
+    e.preventDefault();
+    const cursor = this.selectionStart;
+    const before = this.value.slice(0, cursor);
+    const after = this.value.slice(cursor);
+    this.value = before + "," + after;
+    this.setSelectionRange(cursor + 1, cursor + 1);
+  }
+});
+
+// Formatear en tiempo real permitiendo dos decimales
+adicionalInput.addEventListener("input", function (e) {
+  // Remover caracteres no válidos
+  let valor = e.target.value.replace(/\./g, '').replace(',', '.').replace(/[^0-9.]/g, '');
+
+  const numero = parseFloat(valor);
+  if (!isNaN(numero)) {
+    // Mostrar con separador de miles y dos decimales
+    e.target.value = numero.toLocaleString("es-AR", {
+      // minimumFractionDigits: 2,
+      // maximumFractionDigits: 2,
+    });
+  } else {
+    e.target.value = "";
+  }
+});
+
+    // Habilitar campos según cantidad de viajantes
+    function actualizarCamposViajantes() {
+      const cantidad = parseInt(document.getElementById("cantidadDeViajantes").value);
+      const selects = document.querySelectorAll(".viajante-select");
+      const importes = document.querySelectorAll(".importe");
+      selects.forEach((select, i) => {
+        select.disabled = i >= cantidad;
+        select.classList.toggle("bg-gray-100", i >= cantidad);
+        if (i >= cantidad) select.value = "";
+      });
+
+      importes.forEach((input, i) => {
+        input.disabled = i >= cantidad;
+        input.classList.toggle("bg-gray-100", i >= cantidad);
+        if (i >= cantidad) input.value = "";
+      });
+    }
+
+    document.getElementById("cantidadDeViajantes").addEventListener("change", actualizarCamposViajantes);
+
+
+    // Ingresa el automaticamente el cargo segun se selecione las personas
+    document.querySelectorAll('.viajante-select').forEach(select => {
+      select.addEventListener('change', function () {
+        const index = this.dataset.index;
+        const selected = this.options[this.selectedIndex];
+        const cargo = selected.getAttribute('data-cargo') || '';
+        document.getElementById(cargo-${index}).value = cargo;
+      });
+    });
+
+    // Evitar selección duplicada de viajantes
+    document.querySelectorAll('.viajante-select').forEach(select => {
+      select.addEventListener('change', function (e) {
+        const index = this.dataset.index;
+        const selected = this.options[this.selectedIndex];
+        const cargoInput = document.getElementById(cargo-${index});
+
+        const selectedValues = Array.from(document.querySelectorAll('.viajante-select'))
+          .map(s => s.value)
+          .filter(v => v);
+
+        const duplicates = selectedValues.filter((v, i, a) => a.indexOf(v) !== i);
+
+        if (duplicates.length > 0) {
+          alert('No se pueden seleccionar viajantes duplicados.');
+          this.value = "";
+          cargoInput.value = ""; // ❗ Borra el cargo si había quedado
+          return; // ✅ Sale del evento antes de continuar
+        }
+
+        // ✅ Solo se ejecuta si NO hay duplicados
+        const cargo = selected.getAttribute('data-cargo') || '';
+        cargoInput.value = cargo;
+      });
+    });
+
+    // // Convertir .importe con punto separador de miles
+    // function convertirAFloat(valor) {
+    //   return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
+    // }
+
+    function formatArg(num) {
+      return num.toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function prepararCampoImporte(input) {
+      // Reemplazar "." por "," al presionar
+      input.addEventListener('keydown', function (e) {
+        if (e.key === '.') {
+          e.preventDefault();
+          const cursor = this.selectionStart;
+          const before = this.value.slice(0, cursor);
+          const after = this.value.slice(cursor);
+          this.value = before + ',' + after;
+          this.setSelectionRange(cursor + 1, cursor + 1);
+        }
+      });
+
+      // Formatear al salir del campo
+      input.addEventListener('blur', function () {
+        const valor = convertirAFloat(this.value);
+        this.value = formatArg(valor);
+      });
+
+      // Permitir borrar y escribir números naturalmente
+      input.addEventListener('input', function () {
+        // No formatear en tiempo real, solo validar caracteres permitidos
+        this.value = this.value.replace(/[^0-9.,]/g, '');
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.importe').forEach(input => {
+        prepararCampoImporte(input);
+      });
+    });
+
+    // Habilitar check incluir vales de combustibles
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkboxVales = document.getElementById("valesCombustible");
+      const camposVales = document.getElementById("camposVales");
+      const cantidadVale = document.getElementById("cantidadVale");
+      const valorVale = document.getElementById("valorVale");
+      const totalVale = document.getElementById("totalVale");
+
+      // Función para habilitar/deshabilitar campos de vales
+      function toggleCamposVales() {
+        const habilitar = checkboxVales.checked;
+        camposVales.style.display = habilitar ? "grid" : "none";
+
+        cantidadVale.disabled = !habilitar;
+        valorVale.disabled = !habilitar;
+        totalVale.disabled = !habilitar;
+        totalVale.classList.toggle("bg-gray-100", !habilitar);
+
+        if (!habilitar) {
+          cantidadVale.value = "";
+          valorVale.value = "";
+          totalVale.value = "";
         }
       }
+
+      // Ejecutar una vez por si ya está tildado al cargar
+      toggleCamposVales();
+
+      // Evento al cambiar el estado del checkbox
+      checkboxVales.addEventListener("change", toggleCamposVales);
     });
-  
-    // Ejecutar al cargar por si ya hay una cantidad seleccionada
-    selectCantidad.dispatchEvent(new Event("change"));
+
+
+
   </script>
+
+
+
+</div>

@@ -1,31 +1,28 @@
+// routes/authRoutes.mjs
 import express from "express";
-import { registrarUsuarioController, mostrarFormularioLogin, procesarLogin, cerrarSesion } from "../controllers/authController.mjs";
+import {
+  mostrarFormularioRegistro,
+  registrarUsuarioController,
+  mostrarFormularioLogin,
+  procesarLogin,
+  cerrarSesion,
+} from "../controllers/authController.mjs";
 
 const router = express.Router();
 
-// Mostrar formulario
-router.get("/registro", (req, res) => {
-  res.render("registro", {
-    title: "Registro de Usuario",
-    errores: [],
-    usuario: {},
-  });
-});
-
 // Mostrar formulario de registro
-router.get('/registro', (req, res) => {
-  res.render('registro', { title: 'Registro', errores: [], usuario: {} });
-});
+router.get("/registro", mostrarFormularioRegistro);
 
 // Procesar formulario de registro
-router.post('/registro', registrarUsuarioController);
+router.post("/registro", registrarUsuarioController);
 
-// Login
-router.get('/login', mostrarFormularioLogin);
-router.post('/login', procesarLogin);
+// Mostrar login
+router.get("/login", mostrarFormularioLogin);
 
+// Procesar login
+router.post("/login", procesarLogin);
 
-// Logout
+// Cerrar sesión
 router.post("/logout", cerrarSesion);
 
 export default router;

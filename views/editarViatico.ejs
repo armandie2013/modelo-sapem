@@ -1,0 +1,102 @@
+<!-- Formulario para Editar Viático -->
+<div class="bg-gray-100 min-h-screen py-10 px-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-6xl mx-auto">
+      <form action="/viaticos/<%= viatico._id %>?_method=PUT" method="POST">
+        <div class="text-center mb-6">
+          <img src="/ruta-a-tu-logo.png" alt="Logo" class="mx-auto h-16 mb-2">
+          <h1 class="text-3xl font-bold text-gray-800">Editar Viático</h1>
+        </div>
+  
+        <!-- Fecha y datos generales -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Fecha</label>
+            <input type="date" name="fechaDeCreacion" value="<%= viatico.fechaDeCreacion.toISOString().substring(0, 10) %>" required class="w-full border px-2 py-1 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Área Solicitante</label>
+            <input type="text" name="areaSolicitante" value="<%= viatico.areaSolicitante %>" required class="w-full border px-2 py-1 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">N° de Viaje</label>
+            <input type="text" name="numeroDeViaje" value="<%= viatico.numeroDeViaje %>" readonly class="w-full border px-2 py-1 rounded-lg bg-gray-100 text-sm">
+          </div>
+        </div>
+  
+        <!-- Tabla de Viajantes -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Viajantes</label>
+          <table class="w-full text-sm table-auto border-collapse">
+            <thead class="bg-gray-100 text-left">
+              <tr>
+                <th class="border px-4 py-2">#</th>
+                <th class="border px-4 py-2">Viajante</th>
+                <th class="border px-4 py-2">Cargo</th>
+                <th class="border px-4 py-2">Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for (let i = 0; i < 5; i++) { %>
+                <tr>
+                  <td class="border px-4 py-2"><%= i + 1 %></td>
+                  <td class="border px-4 py-2">
+                    <input type="text" name="nombreSolicitante[<%= i %>]" value="<%= viatico.viajantes[i]?.nombre || '' %>" class="w-full border px-2 py-1 rounded text-sm">
+                  </td>
+                  <td class="border px-4 py-2">
+                    <input type="text" name="cargo[<%= i %>]" value="<%= viatico.viajantes[i]?.cargo || '' %>" class="w-full border px-2 py-1 rounded text-sm">
+                  </td>
+                  <td class="border px-4 py-2">
+                    <input type="text" name="importeViatico[<%= i %>]" value="<%= viatico.viajantes[i]?.importe || '' %>" class="w-full border px-2 py-1 rounded text-sm importe">
+                  </td>
+                </tr>
+              <% } %>
+              <tr class="bg-gray-100 font-semibold">
+                <td colspan="3" class="px-4 py-2 text-right">Total de Viáticos</td>
+                <td class="px-4 py-2 text-left">
+                  <span>$</span><span id="totalViatico">0,00</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Campos adicionales -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Origen</label>
+            <input type="text" name="origen" value="<%= viatico.origen %>" class="w-full border px-2 py-1 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Destino</label>
+            <input type="text" name="destino" value="<%= viatico.destino %>" class="w-full border px-2 py-1 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Motivo</label>
+            <input type="text" name="motivoDelViaje" value="<%= viatico.motivoDelViaje %>" class="w-full border px-2 py-1 rounded">
+          </div>
+        </div>
+  
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
+            <input type="text" name="adicionalEnEfectivo" value="<%= viatico.adicionalEnEfectivo %>" class="w-full border px-2 py-1 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Rendido</label>
+            <input type="text" name="devolucionEnEfectivo" value="<%= viatico.devolucionEnEfectivo %>" class="w-full border px-2 py-1 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
+            <input type="text" name="vehiculoUtilizado" value="<%= viatico.vehiculoUtilizado %>" class="w-full border px-2 py-1 rounded">
+          </div>
+        </div>
+  
+        <div class="text-center mt-6">
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
