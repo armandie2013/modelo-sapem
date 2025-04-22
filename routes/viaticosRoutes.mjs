@@ -1,36 +1,27 @@
+// routes/viaticosRoutes.mjs
+
 import express from "express";
 import {
   crearViaticoController,
   mostrarDashboardViaticos,
   mostrarTodosLosViaticos,
   mostrarFormularioViatico,
+  eliminarViaticoController
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
-import Viatico from "../models/viatico.mjs";
 import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
 
 const router = express.Router();
 
-
-
-
+// Dashboard principal de viáticos (últimos 5)
 router.get(
   "/dashboard",
   verificarSesion,
   accesoPorModulo("viaticos"),
-  mostrarDashboardViaticos,
-  async (req, res) => {
-    const viaticos = await Viatico.find()
-      .sort({ fechaDeCreacion: -1 })
-      .limit(5);
-    res.render("dashboardViaticos", {
-      title: "Dashboard de Viáticos",
-      usuario: req.session.usuario,
-      viaticos,
-    });
-  }
+  mostrarDashboardViaticos
 );
 
+// Formulario para crear viático
 router.get(
   "/crear",
   verificarSesion,
@@ -38,11 +29,28 @@ router.get(
   mostrarFormularioViatico
 );
 
-router.post("/crear", verificarSesion, accesoPorModulo("viaticos"), crearViaticoController);
+// Acción para crear viático (POST)
+router.post(
+  "/crear",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  crearViaticoController
+);
 
+// Ver todos los viáticos
+router.get(
+  "/dashboard/todos",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  mostrarTodosLosViaticos
+);
 
-router.get("/dashboard/todos", mostrarTodosLosViaticos);
-
-
+// Elininar viatico por id
+router.delete(
+  "/eliminar/:id",
+  verificarSesion,
+  accesoPorModulo("viaticos"),
+  eliminarViaticoController
+);
 
 export default router;

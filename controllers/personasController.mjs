@@ -1,4 +1,12 @@
-import PersonaDisponible from "../models/personaDisponible.mjs";
+// controllers/personasController.mjs
+
+import {
+  obtenerPersonasOrdenadas,
+  obtenerPersonaPorId,
+  agregarPersonaService,
+  actualizarPersonaService,
+  eliminarPersonaPorId
+} from "../services/personasService.mjs";
 
 // Mostrar el formulario para agregar una persona
 export const mostrarFormularioAgregar = (req, res) => {
@@ -8,32 +16,7 @@ export const mostrarFormularioAgregar = (req, res) => {
 // Agregar persona a la base de datos
 export const agregarPersona = async (req, res) => {
   try {
-    const {
-      numeroOrden,
-      legajo,
-      nombreApellido,
-      dni,
-      cargo,
-      modulosPermitidos,
-    } = req.body;
-
-    // Asegurar que modulosPermitidos sea siempre un array
-    const modulos = Array.isArray(modulosPermitidos)
-      ? modulosPermitidos
-      : modulosPermitidos
-      ? [modulosPermitidos]
-      : [];
-
-    const nuevaPersona = new PersonaDisponible({
-      numeroOrden,
-      legajo,
-      nombreApellido,
-      dni,
-      cargo,
-      modulosPermitidos: modulos,
-    });
-
-    await nuevaPersona.save();
+    await agregarPersonaService(req.body);
     res.redirect("/personas/dashboard");
   } catch (error) {
     console.error("Error al agregar persona:", error);
@@ -44,7 +27,7 @@ export const agregarPersona = async (req, res) => {
 // Listar todas las personas disponibles
 export const listarPersonas = async (req, res) => {
   try {
-    const personas = await PersonaDisponible.find().sort({ numeroOrden: 1 });
+    const personas = await obtenerPersonasOrdenadas();
     res.render("dashboardPersonas", {
       title: "Personas Disponibles",
       personas,
@@ -58,7 +41,7 @@ export const listarPersonas = async (req, res) => {
 // Mostrar formulario de edición
 export const mostrarFormularioEditar = async (req, res) => {
   try {
-    const persona = await PersonaDisponible.findById(req.params.id);
+    const persona = await obtenerPersonaPorId(req.params.id);
     if (!persona) return res.status(404).send("Persona no encontrada");
     res.render("editarPersona", { title: "Editar Persona", persona });
   } catch (error) {
@@ -70,31 +53,7 @@ export const mostrarFormularioEditar = async (req, res) => {
 // Actualizar persona
 export const actualizarPersona = async (req, res) => {
   try {
-    const {
-      numeroOrden,
-      legajo,
-      nombreApellido,
-      dni,
-      cargo,
-      modulosPermitidos,
-    } = req.body;
-
-    // Aseguramos que modulosPermitidos siempre sea un array
-    const modulos = Array.isArray(modulosPermitidos)
-      ? modulosPermitidos
-      : modulosPermitidos
-      ? [modulosPermitidos]
-      : [];
-
-    await PersonaDisponible.findByIdAndUpdate(req.params.id, {
-      numeroOrden,
-      legajo,
-      nombreApellido,
-      dni,
-      cargo,
-      modulosPermitidos: modulos,
-    });
-
+    await actualizarPersonaService(req.params.id, req.body);
     res.redirect("/personas/dashboard");
   } catch (error) {
     console.error("Error al actualizar persona:", error);
@@ -105,7 +64,7 @@ export const actualizarPersona = async (req, res) => {
 // Eliminar persona
 export const eliminarPersona = async (req, res) => {
   try {
-    await PersonaDisponible.findByIdAndDelete(req.params.id);
+    await eliminarPersonaPorId(req.params.id);
     res.redirect("/personas/dashboard");
   } catch (error) {
     console.error("Error al eliminar persona:", error);
