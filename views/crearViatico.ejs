@@ -152,7 +152,7 @@
           <label class="block text-sm font-medium text-gray-700">Rendido</label>
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-            <input type="text" id="devolucionEnEfectivo" name="devolucionEnEfectivo"
+            <input type="text" id="devolucionEnEfectivo" name="devolucionEnEfectivo" 
               class="w-full border pl-6 pr-2 py-2 rounded text-sm" placeholder="0,00">
           </div>
         </div>
@@ -182,7 +182,7 @@
           <input type="number" name="cantidadVale" id="cantidadVale" min="0" class="w-full border px-3 py-2 rounded">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
+          <label class="block text-sm font-medium text-gray-700">Valor de Vales</label>
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
             <input type="text" id="valorVale" name="valorVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
@@ -193,7 +193,7 @@
           <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-            <input type="text" id="totalVale" name="totalVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
+            <input type="text" id="totalVale" name="totalVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm" readonly
               placeholder="0,00">
           </div>
         </div>
@@ -209,241 +209,4 @@
     </form>
   </div>
 
-  <script>
-
-    // // Ejecutar una vez al inicio para asegurar el estado correcto
-    // window.addEventListener("DOMContentLoaded", actualizarCamposViajantes);
-
-
-    // Prueba de fomateo en tiempo real 
-
-    //     const adicionalInput = document.getElementById("adicionalEnEfectivo");
-
-    // adicionalInput.addEventListener("input", function (e) {
-    //   // Remover puntos y reemplazar coma por punto para convertir a float
-    //   const valor = e.target.value.replace(/\./g, '').replace(',', '.');
-
-    //   const numero = parseFloat(valor);
-
-    //   if (!isNaN(numero)) {
-    //     e.target.value = numero.toLocaleString("es-AR", {
-
-    //     });
-    //   }
-    // });
-    // function convertirAFloat(valor) {
-    //   return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
-    // }
-
-    // function formatArg(num) {
-    //   return num.toLocaleString('es-AR', {
-    //     minimumFractionDigits: 2,
-    //     maximumFractionDigits: 2
-    //   });
-    // }
-
-
-
-    
-
-    function calcularTotales() {
-    const importes = document.querySelectorAll('.importe');
-    let totalViatico = 0;
-
-    importes.forEach(input => {
-      totalViatico += convertirAFloat(input.value);
-    });
-
-    const adicional = convertirAFloat(document.getElementById('adicionalEnEfectivo').value);
-    const rendido = convertirAFloat(document.getElementById('devolucionEnEfectivo').value);
-
-    // Calculos
-    const pendiente = adicional;
-    const pendienteFinal = pendiente - rendido;
-    const totalARecibir = totalViatico + adicional;
-
-    // Mostrar valores
-    document.getElementById('totalViatico').textContent = formatArg(totalViatico);
-    document.getElementById('pendienteDeRendicion').value = formatArg(pendienteFinal);
-    document.getElementById('totalARecibir').value = formatArg(totalARecibir);
-
-    // Campos ocultos para enviar
-    document.getElementById('montoTotalViaticoHidden').value = totalViatico.toFixed(2);
-    document.getElementById('pendienteDeRendicionHidden').value = pendienteFinal.toFixed(2);
-  }
-
-  // Activar cálculo en tiempo real
-  document.addEventListener('input', (e) => {
-    if (
-      e.target.classList.contains('importe') ||
-      ['adicionalEnEfectivo', 'devolucionEnEfectivo'].includes(e.target.id)
-    ) {
-      calcularTotales();
-    }
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('.importe').forEach(input => {
-      input.addEventListener('blur', calcularTotales);
-    });
-    calcularTotales();
-  });
-
-
-
-
-
-
-
-
-    // --------------------------------------------------------INICIO---------------------------------------------------------------- //
-    // Convertir .importe con punto separador de miles
-    function convertirAFloat(valor) {
-      return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
-    }
-
-    function formatArg(num) {
-      return num.toLocaleString('es-AR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    function prepararCampoImporte(input) {
-      // Reemplazar "." por "," al presionar
-      input.addEventListener('keydown', function (e) {
-        if (e.key === '.') {
-          e.preventDefault();
-          const cursor = this.selectionStart;
-          const before = this.value.slice(0, cursor);
-          const after = this.value.slice(cursor);
-          this.value = before + ',' + after;
-          this.setSelectionRange(cursor + 1, cursor + 1);
-        }
-      });
-
-      // Formatear al salir del campo
-      input.addEventListener('blur', function () {
-        const valor = convertirAFloat(this.value);
-        this.value = formatArg(valor);
-      });
-
-      // Permitir borrar y escribir números naturalmente
-      input.addEventListener('input', function () {
-        // No formatear en tiempo real, solo validar caracteres permitidos
-        this.value = this.value.replace(/[^0-9.,]/g, '');
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.importe').forEach(input => {
-        prepararCampoImporte(input);
-      });
-    });
-    // --------------------------------------------------------FIN------------------------------------------------------------------ //
-
-
-
-
-    // --------------------------------------------------------INICIO---------------------------------------------------------------- //
-    // Habilitar campos según cantidad de viajantes
-    function actualizarCamposViajantes() {
-      const cantidad = parseInt(document.getElementById("cantidadDeViajantes").value);
-      const selects = document.querySelectorAll(".viajante-select");
-      const importes = document.querySelectorAll(".importe");
-
-      selects.forEach((select, i) => {
-        select.disabled = i >= cantidad;
-        select.classList.toggle("bg-gray-100", i >= cantidad);
-        if (i >= cantidad) select.value = "";
-      });
-
-      importes.forEach((input, i) => {
-        input.disabled = i >= cantidad;
-        input.classList.toggle("bg-gray-100", i >= cantidad);
-        if (i >= cantidad) input.value = "";
-      });
-    }
-
-    document.getElementById("cantidadDeViajantes").addEventListener("change", actualizarCamposViajantes);
-    // --------------------------------------------------------FIN------------------------------------------------------------------ //
-
-
-
-
-    // --------------------------------------------------------INICIO---------------------------------------------------------------- //
-    // Ejecutar una vez al inicio para asegurar el estado correcto
-    window.addEventListener("DOMContentLoaded", actualizarCamposViajantes);
-
-    // Evitar selección duplicada de viajantes
-    document.querySelectorAll('.viajante-select').forEach(select => {
-      select.addEventListener('change', function () {
-        const selectedValues = Array.from(document.querySelectorAll('.viajante-select'))
-          .map(s => s.value)
-          .filter(v => v);
-
-        const duplicates = selectedValues.filter((v, i, a) => a.indexOf(v) !== i);
-
-        if (duplicates.length > 0) {
-          alert('No se pueden seleccionar viajantes duplicados.');
-          this.value = "";
-        }
-      });
-    });
-    // --------------------------------------------------------FIN------------------------------------------------------------------ //
-
-
-
-
-    // --------------------------------------------------------INICIO---------------------------------------------------------------- //
-    // Ingresa el automaticamente el cargo segun se selecione las personas
-    document.querySelectorAll('.viajante-select').forEach(select => {
-      select.addEventListener('change', function () {
-        const index = this.dataset.index;
-        const selected = this.options[this.selectedIndex];
-        const cargo = selected.getAttribute('data-cargo') || '';
-        document.getElementById(`cargo-${index}`).value = cargo;
-      });
-    });
-
-    document.getElementById("cantidadDeViajantes").dispatchEvent(new Event("change"));
-    // --------------------------------------------------------FIN------------------------------------------------------------------ //
-
-
-
-
-    // --------------------------------------------------------INICIO---------------------------------------------------------------- //
-    // Habilitar check incluir vales de combustibles
-    document.addEventListener("DOMContentLoaded", () => {
-      const checkboxVales = document.getElementById("valesCombustible");
-      const camposVales = document.getElementById("camposVales");
-      const cantidadVale = document.getElementById("cantidadVale");
-      const valorVale = document.getElementById("valorVale");
-      const totalVale = document.getElementById("totalVale");
-
-      // Función para habilitar/deshabilitar campos de vales
-      function toggleCamposVales() {
-        const habilitar = checkboxVales.checked;
-        camposVales.style.display = habilitar ? "grid" : "none";
-
-        cantidadVale.disabled = !habilitar;
-        valorVale.disabled = !habilitar;
-        totalVale.disabled = !habilitar;
-        totalVale.classList.toggle("bg-gray-100", !habilitar);
-
-        if (!habilitar) {
-          cantidadVale.value = "";
-          valorVale.value = "";
-          totalVale.value = "";
-        }
-      }
-
-      // Ejecutar una vez por si ya está tildado al cargar
-      toggleCamposVales();
-
-      // Evento al cambiar el estado del checkbox
-      checkboxVales.addEventListener("change", toggleCamposVales);
-    });
-    // --------------------------------------------------------INICIO---------------------------------------------------------------- //
-
-  </script>
+  <script src="/scripts/scriptViaticos.js"></script>

@@ -74,7 +74,7 @@ router.get(
 
 // Elininar viatico por id
 router.delete(
-  "/eliminar/:id",
+  "/:id",
   verificarSesion,
   accesoPorModulo("viaticos"),
   eliminarViaticoController

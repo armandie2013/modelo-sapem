@@ -132,6 +132,7 @@
       <table class="w-full table-auto text-sm border-collapse">
         <thead class="bg-gray-200 text-gray-700 font-semibold">
           <tr>
+            <th class="px-4 py-2 text-left">N° Viaje</th>
             <th class="px-4 py-2 text-left">Fecha</th>
             <th class="px-4 py-2 text-left">Viajantes</th>
             <th class="px-4 py-2 text-left">Origen</th>
@@ -146,6 +147,7 @@
         <tbody>
           <% viaticos.forEach(v => { %>
             <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-4 py-2 font-bold text-blue-800"><%= v.numeroDeViaje %></td>
               <td class="px-4 py-2"><%= new Date(v.fechaDeCreacion).toLocaleDateString('es-AR') %></td>
               <td class="px-4 py-2">
                 <ul class="list-disc ml-4">
@@ -163,7 +165,7 @@
               <td class="px-4 py-2 space-x-2">
                 <a href="/viaticos/<%= v._id %>" class="text-blue-600 hover:underline">Ver</a>
                 <a href="/viaticos/<%= v._id %>/editar" class="text-yellow-600 hover:underline">Editar</a>
-                <form action="/viaticos/<%= v._id %>?_method=DELETE" method="POST" class="inline">
+                <form action="/viaticos/<%= v._id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('¿Eliminar este viatico?')">
                   <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
                 </form>
               </td>

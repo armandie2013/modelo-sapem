@@ -105,16 +105,20 @@ export const verViaticoController = async (req, res) => {
 };
 
 
-// Controlador para mostrar un viático en modo edición
 export async function mostrarFormularioEditarViatico(req, res) {
   try {
     const viatico = await obtenerViaticoPorId(req.params.id);
-    res.render("editarViatico", { viatico });
+    const listaDePersonasDisponibles = await obtenerPersonasDisponiblesOrdenadas();
+
+    res.render("editarViatico", {
+      viatico,
+      listaDePersonasDisponibles
+    });
   } catch (error) {
     console.error("Error al mostrar formulario de edición:", error);
     res.status(500).send("Error al mostrar formulario de edición");
-  }
-}
+  };
+};
 
 
 // Controlador para actualizar un viático existente

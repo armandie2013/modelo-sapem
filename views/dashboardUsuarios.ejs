@@ -21,7 +21,7 @@
           <td class="border px-4 py-2"><%= u.dni %></td>
           <td class="border px-4 py-2"><%= u.rol %></td>
           <td class="border px-4 py-2 text-center">
-            <form action="/usuarios/eliminar/<%= u._id %>?_method=POST" method="POST" onsubmit="return confirm('¿Eliminar este usuario?')">
+            <form action="/usuarios/eliminar/<%= u._id %>?_method=DELETE" method="POST" onsubmit="return confirm('¿Eliminar este usuario?')">
               <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
             </form>
           </td>
