@@ -18,10 +18,10 @@ export function accesoPorModulo(...modulosRequeridos) {
 
     if (!datosPersona || !datosPersona.modulosPermitidos) {
       console.log("🚫 Persona no encontrada o sin modulosPermitidos");
-      // return res.status(403).send("Acceso denegado: No se encontró la persona o no tiene permisos.");
-      return res.status(403).render("sinPermisoModulo", {
-        title: "Sin Permiso",
-      });
+      return res.status(403).send("Acceso denegado: No se encontró la persona o no tiene permisos.");
+      // return res.status(403).render("sinPermisoModulo", {
+      //   title: "Sin Permiso",
+      // });
     }
 
     const tieneAcceso = modulosRequeridos.some((modulo) =>
@@ -35,6 +35,7 @@ export function accesoPorModulo(...modulosRequeridos) {
     if (!tieneAcceso) {
       // return res.status(403).send("Acceso denegado: No tenés permiso para este módulo.");
       return res.status(403).render("sinPermisoModulo")
+      
     }
 
     next();

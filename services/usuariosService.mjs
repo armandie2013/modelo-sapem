@@ -5,7 +5,7 @@ import Usuario from "../models/usuario.mjs";
 
 // Obtener usuarios
 export async function obtenerUsuariosOrdenados() {
-  return await Usuario.find().sort({ nombre: 1 });
+  return await Usuario.find().sort({ apellido: 1 });
 };
 
 
