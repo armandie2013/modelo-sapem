@@ -7,6 +7,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
     "method-override": "^3.0.0",
-    "mongoose": "^8.13.2"
+    "mongoose": "^8.13.2",
+    "puppeteer": "^24.7.1"
   }
 }

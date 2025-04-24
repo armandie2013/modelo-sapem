@@ -1,26 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formato de Número en Tiempo Real</title>
+  <meta charset="UTF-8">
+  <title>Solicitud de Viático</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2cm;
+      font-size: 12px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #1F2937;
+      margin-bottom: 1em;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+    }
+    .logo {
+      height: 60px;
+    }
+    .section {
+      margin-bottom: 1em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .totales {
+      font-weight: bold;
+    }
+  </style>
 </head>
-
 <body>
-    <input type="text" id="numberInput" placeholder="Escribe un número">
-    <p>Formato en tiempo real: <span id="formattedNumber"></span></p>
+  <div class="header">
+    <img src="/ruta-a-tu-logo.png" class="logo" alt="Logo">
+    <h1>Solicitud de Viático</h1>
+  </div>
 
-    <script>
-        // Agregar un event listener al documento
-        document.addEventListener('keydown', function (event) {
-            // Verificar si la tecla presionada es el punto (.)
-            if (event.key === '.') {
-                // Mostrar la letra A
-                alert('A');
-            }
-        });
-    </script>
+  <div class="section">
+    <p><strong>Fecha:</strong> <%= new Date(viatico.fechaDeCreacion).toLocaleDateString('es-AR') %></p>
+    <p><strong>Área Solicitante:</strong> <%= viatico.areaSolicitante %></p>
+    <p><strong>N° de Viaje:</strong> <%= viatico.numeroDeViaje %></p>
+  </div>
+
+  <div class="section">
+    <h3>Datos del viaje</h3>
+    <p><strong>Origen:</strong> <%= viatico.origen %></p>
+    <p><strong>Destino:</strong> <%= viatico.destino %></p>
+    <p><strong>Motivo:</strong> <%= viatico.motivoDelViaje %></p>
+    <p><strong>Fecha de salida:</strong> <%= new Date(viatico.fechaDeSalida).toLocaleDateString('es-AR') %></p>
+    <p><strong>Fecha de llegada:</strong> <%= new Date(viatico.fechaDeLlegada).toLocaleDateString('es-AR') %></p>
+    <p><strong>Vehículo utilizado:</strong> <%= viatico.vehiculoUtilizado %></p>
+  </div>
+
+  <div class="section">
+    <h3>Viajantes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Cargo</th>
+          <th>Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% viatico.viajantes.forEach((vj, i) => { %>
+          <tr>
+            <td><%= i + 1 %></td>
+            <td><%= vj.nombre %></td>
+            <td><%= vj.cargo %></td>
+            <td>$ <%= vj.importe.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>Totales</h3>
+    <p><strong>Total Viático:</strong> $ <%= viatico.montoTotalViatico.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+    <p><strong>Adicional en efectivo:</strong> $ <%= viatico.adicionalEnEfectivo.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+    <p><strong>Total a recibir:</strong> $ <%= (viatico.montoTotalViatico + viatico.adicionalEnEfectivo).toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+    <p><strong>Rendido:</strong> $ <%= viatico.devolucionEnEfectivo.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+    <p><strong>Pendiente de Rendición:</strong> $ <%= viatico.pendienteDeRendicion.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+  </div>
+
+  <% if (viatico.valesCombustible) { %>
+    <div class="section">
+      <h3>Vales de combustible</h3>
+      <p><strong>Cantidad:</strong> <%= viatico.cantidadVale %></p>
+      <p><strong>Valor por vale:</strong> $ <%= viatico.valorVale.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+      <p><strong>Total vales:</strong> $ <%= viatico.totalVale.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %></p>
+    </div>
+  <% } %>
+
+  <div class="section">
+    <p><strong>Creado por:</strong> <%= viatico.creadoPor %></p>
+  </div>
+
 </body>
-
 </html>

@@ -33,9 +33,8 @@ export function accesoPorModulo(...modulosRequeridos) {
     console.log("🟢 ¿Tiene acceso?:", tieneAcceso);
 
     if (!tieneAcceso) {
-      return res
-        .status(403)
-        .send("Acceso denegado: No tenés permiso para este módulo.");
+      // return res.status(403).send("Acceso denegado: No tenés permiso para este módulo.");
+      return res.status(403).render("sinPermisoModulo")
     }
 
     next();
