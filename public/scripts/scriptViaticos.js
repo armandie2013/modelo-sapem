@@ -1,6 +1,6 @@
 
-    // 🔠 Capitalización de campos
-    function capitalizarCadaPalabra(texto) {
+     // 🔠 Capitalización de campos
+     function capitalizarCadaPalabra(texto) {
       return texto.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
     }
   
@@ -130,6 +130,14 @@
       ];
   
       camposFormatear.forEach(input => {
+
+      // Formatear los campos de importe al cargar la página
+      camposFormatear.forEach(input => {
+        if (input && input.value) {
+          const valor = convertirAFloat(input.value);
+          input.value = formatArg(valor);
+        }
+      });
         if (input) prepararCampoImporte(input);
       });
   
@@ -263,4 +271,3 @@
   
   // Llamar a la función principal
   iniciarFormularioViaticos();
-  
