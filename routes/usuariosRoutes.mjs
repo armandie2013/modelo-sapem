@@ -14,7 +14,7 @@ router.get(
   listarUsuarios
 );
 
-router.post(
+router.delete(
   "/eliminar/:id",
   verificarSesion,
   accesoPorModulo("viaticos"),
