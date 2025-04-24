@@ -5,7 +5,7 @@ import {
   verificarDniExistente,
   crearUsuarioConHash,
   buscarUsuarioPorEmail,
-  validarPassword
+  validarPassword,
 } from "../services/authService.mjs";
 
 // Mostrar formulario de registro
@@ -21,7 +21,8 @@ export const mostrarFormularioRegistro = (req, res) => {
 // Controlador para registrar un nuevo usuario
 export const registrarUsuarioController = async (req, res) => {
   try {
-    const { nombre, apellido, dni, email, password, confirmarPassword } = req.body;
+    const { nombre, apellido, dni, email, password, confirmarPassword } =
+      req.body;
     const errores = [];
 
     // Validación de campos duplicados
@@ -35,7 +36,10 @@ export const registrarUsuarioController = async (req, res) => {
 
     // Validar coincidencia de contraseñas
     if (password !== confirmarPassword) {
-      errores.push({ campo: "password", mensaje: "Las contraseñas no coinciden" });
+      errores.push({
+        campo: "password",
+        mensaje: "Las contraseñas no coinciden",
+      });
     }
 
     if (errores.length > 0) {
@@ -110,9 +114,11 @@ export const procesarLogin = async (req, res) => {
 
     console.log("📦 Datos de sesión guardados:", req.session.usuario);
 
-    const redirigirA = req.session.redirigirA || "/viaticos/dashboard";
-    delete req.session.redirigirA;
-    res.redirect(redirigirA);
+    req.session.save(() => {
+      const redirigirA = req.session.redirigirA || "/viaticos/dashboard";
+      delete req.session.redirigirA;
+      res.redirect(redirigirA);
+    });
   } catch (error) {
     console.error("Error en login:", error);
     res.status(500).render("login", {

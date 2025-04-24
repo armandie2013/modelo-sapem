@@ -4,6 +4,7 @@ import methodOverride from "method-override";
 import expressEjsLayouts from "express-ejs-layouts";
 import session from "express-session";
 import { connectDB } from "./config/dbConfig.mjs";
+import MongoStore from "connect-mongo";
 
 // Rutas
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
@@ -25,12 +26,18 @@ app.use(methodOverride("_method"));
 // 3. Manejo de sesiones
 app.use(session({
   secret: 'clave-super-secreta',
-  resave: false,
+  resave: true, // Fuerza a guardar la sesión en cada request (aunque no haya cambios)
   saveUninitialized: false,
+  rolling:true, // Resetea el tiempo de expiración de la cookie en cada request, extendiendo la sesión
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI, // Asegurate de tener esta variable en el .env
+    ttl: 60 * 60, // 1 hora en segundos
+  }),
   cookie: {
-    maxAge: 1000 * 60 * 60, // 1 hora
+    maxAge: 1000 * 60 * 60, // 1 hora en milisegundos
     httpOnly: true,
-    // secure: true, // SOLO si usás HTTPS
+    sameSite: 'lax'
+    // secure: true  // Activar solo si estás usando HTTPS
   }
 }));
 

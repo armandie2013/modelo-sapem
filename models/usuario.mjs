@@ -16,8 +16,8 @@ const usuarioSchema = new mongoose.Schema({
   creadoEn: { type: Date, default: Date.now },
 });
 
-// crea índices únicos en MongoDB si aún no existen
-usuarioSchema.index({ dni: 1 }, { unique: true });
+// // crea índices únicos en MongoDB si aún no existen
+// usuarioSchema.index({ dni: 1 }, { unique: true });
 
 const Usuario = mongoose.model("Usuario", usuarioSchema);
 export default Usuario;
