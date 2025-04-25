@@ -11,6 +11,7 @@ import {
   actualizarViatico
 } from "../services/viaticosService.mjs";
 
+
 // Mostrar el formulario de creación de viáticos
 export const mostrarFormularioViatico = async (req, res) => {
   try {
@@ -145,3 +146,6 @@ export async function editarViaticoController(req, res) {
     res.status(500).send("Error al editar viático");
   };
 };
+
+
+

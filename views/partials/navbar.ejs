@@ -1,4 +1,4 @@
-<nav class="bg-blue-800 text-white py-4 px-6">
+<nav class="bg-blue-800 text-white py-4 px-6 relative z-50">
   <div class="container mx-auto flex justify-between items-center">
     <!-- Logo -->
     <a href="/" class="text-xl text-base">Catamarca Telecomunicaciones SAPEM</a>
@@ -11,11 +11,12 @@
         <li><a href="/stock" class="hover:underline">Control de Stock</a></li>
 
         <% if (usuario.rol==='admin' ) { %>
-          <li class="relative group">
-            <span class="hover:underline cursor-pointer">Acceso</span>
-            <ul class="absolute hidden group-hover:block bg-white text-black mt-1 rounded shadow-lg p-2 space-y-2">
-              <li><a href="/personas/dashboard" class="hover:underline block px-2">Personal SAPEM</a></li>
-              <li><a href="/usuarios/dashboard" class="hover:underline block px-2">Usuarios Registrados</a></li>
+          <li class="relative">
+            <button id="toggleDropdown" class="hover:underline focus:outline-none">Acceso ▾</button>
+            <ul id="dropdownMenu"
+              class="absolute right-0 top-full mt-2 w-56 bg-white text-black rounded-lg shadow-lg hidden z-50">
+              <li><a href="/personas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Personal SAPEM</a></li>
+              <li><a href="/usuarios/dashboard" class="block px-4 py-2 hover:bg-gray-200">Usuarios Registrados</a></li>
             </ul>
           </li>
           <% } %>
@@ -25,6 +26,7 @@
       <form action="/logout" method="POST" class="ml-4">
         <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800">Cerrar sesión</button>
       </form>
+
       <% } else { %>
         <!-- Navbar para visitantes -->
         <ul class="flex space-x-6">
@@ -40,3 +42,24 @@
         <% } %>
   </div>
 </nav>
+
+<!-- Script para abrir/cerrar el dropdown al hacer clic -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("toggleDropdown");
+    const dropdown = document.getElementById("dropdownMenu");
+
+    if (toggleBtn && dropdown) {
+      toggleBtn.addEventListener("click", () => {
+        dropdown.classList.toggle("hidden");
+      });
+
+      // Cerrar dropdown si se hace clic fuera
+      document.addEventListener("click", function (e) {
+        if (!toggleBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add("hidden");
+        }
+      });
+    }
+  });
+</script>
