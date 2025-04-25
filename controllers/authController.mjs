@@ -136,6 +136,6 @@ export const cerrarSesion = (req, res) => {
 
   req.session.destroy(() => {
     console.log("🚪 Cerrando sesión para:", email);
-    res.redirect("/login");
+    res.redirect("/");
   });
 };

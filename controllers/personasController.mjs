@@ -24,12 +24,12 @@ export const agregarPersona = async (req, res) => {
   }
 };
 
-// Listar todas las personas disponibles
+// Listar todas las personal disponibles
 export const listarPersonas = async (req, res) => {
   try {
     const personas = await obtenerPersonasOrdenadas();
     res.render("dashboardPersonas", {
-      title: "Personas Disponibles",
+      title: "Personal SAPEM",
       personas,
     });
   } catch (error) {
@@ -43,7 +43,7 @@ export const mostrarFormularioEditar = async (req, res) => {
   try {
     const persona = await obtenerPersonaPorId(req.params.id);
     if (!persona) return res.status(404).send("Persona no encontrada");
-    res.render("editarPersona", { title: "Editar Persona", persona });
+    res.render("editarPersona", { title: "Editar Personal", persona });
   } catch (error) {
     console.error("Error al buscar persona:", error);
     res.status(500).send("Error al buscar persona");
