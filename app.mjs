@@ -99,7 +99,7 @@ const listarRutas = (app) => {
   if (!app._router || !app._router.stack) {
     console.warn("\u26A0\uFE0F No hay rutas registradas aún o _router no está disponible.");
     return;
-  }
+  };
 
   app._router.stack.forEach((middleware) => {
     if (middleware.route) {
