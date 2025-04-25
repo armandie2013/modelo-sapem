@@ -6,7 +6,15 @@ const personaSchema = new mongoose.Schema({
   nombreApellido: { type: String, required: true },
   dni: { type: String, required: true, unique: true },
   cargo: { type: String, required: true },
-  modulosPermitidos: { type: [String], default: [] }, // ← Nuevo campo
+  modulosPermitidos: {
+    viaticos: {
+      ver: { type: Boolean, default: false },
+      crear: { type: Boolean, default: false },
+      editar: { type: Boolean, default: false },
+      eliminar: { type: Boolean, default: false }
+    },
+    // otros módulos...
+  }, // ← Nuevo campo
 });
 
 const PersonaDisponible = mongoose.model("PersonaDisponible", personaSchema);

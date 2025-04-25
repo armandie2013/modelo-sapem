@@ -70,6 +70,12 @@ app.use((req, res, next) => {
   next();
 });
 
+
+app.use((req, res, next) => {
+  console.log("🔍 Método:", req.method, "➡️ Ruta:", req.originalUrl);
+  next();
+});
+
 // 7. Rutas principales
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);

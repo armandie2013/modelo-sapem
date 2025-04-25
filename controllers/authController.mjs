@@ -7,6 +7,8 @@ import {
   buscarUsuarioPorEmail,
   validarPassword,
 } from "../services/authService.mjs";
+import { buscarPersonaPorDni } from "../services/personasService.mjs";
+
 
 // Mostrar formulario de registro
 export const mostrarFormularioRegistro = (req, res) => {
@@ -103,6 +105,10 @@ export const procesarLogin = async (req, res) => {
 
     console.log("✅ Sesión iniciada para:", usuario.email);
 
+    // ✅ Buscar permisos en PersonaDisponible por dni
+    const persona = await buscarPersonaPorDni(usuario.dni);
+    const modulosPermitidos = persona?.modulosPermitidos || {};
+
     req.session.usuario = {
       id: usuario._id,
       nombre: usuario.nombre,
@@ -110,6 +116,7 @@ export const procesarLogin = async (req, res) => {
       email: usuario.email,
       rol: usuario.rol,
       dni: String(usuario.dni),
+      modulosPermitidos: modulosPermitidos
     };
 
     console.log("📦 Datos de sesión guardados:", req.session.usuario);

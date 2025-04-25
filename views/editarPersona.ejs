@@ -1,55 +1,118 @@
-<div class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md mx-auto">
-    <h1 class="text-2xl text-center text-gray-800 mb-6">Editar Personal</h1>
+<% const tienePermisos = (persona.modulosPermitidos && (persona.modulosPermitidos.viaticos || persona.modulosPermitidos.stock || persona.modulosPermitidos.reclamos)) ? true : false; %>
+
+<div id="datosPermisos" data-tiene-permisos="<%= tienePermisos ? 'true' : 'false' %>"></div>
+
+<div class="bg-gray-100 min-h-screen py-8 flex justify-center items-start">
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-2xl">
+    <h1 class="text-2xl text-center text-gray-800 mb-6">Editar Persona</h1>
 
     <form action="/personas/editar/<%= persona._id %>?_method=PUT" method="POST" class="space-y-4">
+      <!-- Datos Básicos -->
       <div>
         <label class="block text-sm font-medium text-gray-700">Número de Orden</label>
-        <input type="number" name="numeroOrden" required class="w-full border px-3 py-2 rounded-lg"
-               value="<%= persona.numeroOrden %>">
+        <input type="number" name="numeroOrden" value="<%= persona.numeroOrden %>" required class="w-full border px-3 py-2 rounded-lg">
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Legajo</label>
-        <input type="text" name="legajo" required class="w-full border px-3 py-2 rounded-lg"
-               value="<%= persona.legajo %>">
+        <input type="text" name="legajo" value="<%= persona.legajo %>" required class="w-full border px-3 py-2 rounded-lg">
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Nombre y Apellido</label>
-        <input type="text" name="nombreApellido" required class="w-full border px-3 py-2 rounded-lg"
-               value="<%= persona.nombreApellido %>">
+        <input type="text" name="nombreApellido" value="<%= persona.nombreApellido %>" required class="w-full border px-3 py-2 rounded-lg">
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">DNI</label>
-        <input type="text" name="dni" required class="w-full border px-3 py-2 rounded-lg"
-               value="<%= persona.dni %>">
+        <input type="text" name="dni" value="<%= persona.dni %>" required class="w-full border px-3 py-2 rounded-lg">
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Cargo</label>
-        <input type="text" name="cargo" required class="w-full border px-3 py-2 rounded-lg"
-               value="<%= persona.cargo %>">
+        <input type="text" name="cargo" value="<%= persona.cargo %>" required class="w-full border px-3 py-2 rounded-lg">
       </div>
 
+      <!-- Permisos -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Módulos Permitidos</label>
-        <div class="flex flex-col gap-2">
-          <label><input type="checkbox" name="modulosPermitidos" value="viaticos"
-            <%= persona.modulosPermitidos.includes('viaticos') ? 'checked' : '' %>> Viáticos</label>
-          <label><input type="checkbox" name="modulosPermitidos" value="materiales"
-            <%= persona.modulosPermitidos.includes('materiales') ? 'checked' : '' %>> Pedido de Materiales</label>
-          <label><input type="checkbox" name="modulosPermitidos" value="stock"
-            <%= persona.modulosPermitidos.includes('stock') ? 'checked' : '' %>> Control de Stock</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Permisos por Módulo</label>
+
+        <div class="mb-3">
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="checkTecnica" class="mr-2">
+            <span class="text-base font-semibold">Técnica</span>
+          </label>
+        </div>
+
+        <div id="subModulosTecnica" class="space-y-4 ml-4 hidden">
+
+          <% const permisos = persona.modulosPermitidos || {}; %>
+
+          <div class="border border-gray-300 p-3 rounded">
+            <p class="font-semibold mb-1">Viáticos</p>
+            <div class="flex gap-4 flex-wrap">
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true" <%= (permisos.viaticos && permisos.viaticos.ver) ? 'checked' : '' %>> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true" <%= (permisos.viaticos && permisos.viaticos.crear) ? 'checked' : '' %>> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true" <%= (permisos.viaticos && permisos.viaticos.editar) ? 'checked' : '' %>> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true" <%= (permisos.viaticos && permisos.viaticos.eliminar) ? 'checked' : '' %>> Eliminar</label>
+            </div>
+          </div>
+
+          <div class="border border-gray-300 p-3 rounded">
+            <p class="font-semibold mb-1">Control de Stock</p>
+            <div class="flex gap-4 flex-wrap">
+              <label><input type="checkbox" name="modulosPermitidos[stock][ver]" value="true" <%= (permisos.stock && permisos.stock.ver) ? 'checked' : '' %>> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][crear]" value="true" <%= (permisos.stock && permisos.stock.crear) ? 'checked' : '' %>> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][editar]" value="true" <%= (permisos.stock && permisos.stock.editar) ? 'checked' : '' %>> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][eliminar]" value="true" <%= (permisos.stock && permisos.stock.eliminar) ? 'checked' : '' %>> Eliminar</label>
+            </div>
+          </div>
+
+          <div class="border border-gray-300 p-3 rounded">
+            <p class="font-semibold mb-1">Reclamos Técnicos</p>
+            <div class="flex gap-4 flex-wrap">
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][ver]" value="true" <%= (permisos.reclamos && permisos.reclamos.ver) ? 'checked' : '' %>> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][crear]" value="true" <%= (permisos.reclamos && permisos.reclamos.crear) ? 'checked' : '' %>> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][editar]" value="true" <%= (permisos.reclamos && permisos.reclamos.editar) ? 'checked' : '' %>> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][eliminar]" value="true" <%= (permisos.reclamos && permisos.reclamos.eliminar) ? 'checked' : '' %>> Eliminar</label>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="text-center pt-4">
-        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+      <!-- Botón -->
+      <div class="pt-4">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
           Guardar Cambios
         </button>
       </div>
+
     </form>
   </div>
 </div>
+
+<!-- Script limpio sin EJS adentro -->
+<script>
+  const tecnica = document.getElementById('checkTecnica');
+  const subModulos = document.getElementById('subModulosTecnica');
+  const datosPermisos = document.getElementById('datosPermisos');
+  const tienePermisos = datosPermisos.dataset.tienePermisos === 'true';
+
+  if (tienePermisos) {
+    window.addEventListener('DOMContentLoaded', () => {
+      tecnica.checked = true;
+      subModulos.classList.remove('hidden');
+    });
+  }
+
+  tecnica.addEventListener('change', function () {
+    if (this.checked) {
+      subModulos.classList.remove('hidden');
+    } else {
+      subModulos.classList.add('hidden');
+      const inputs = subModulos.querySelectorAll('input[type="checkbox"]');
+      inputs.forEach(input => input.checked = false);
+    }
+  });
+</script>

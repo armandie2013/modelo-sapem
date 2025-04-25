@@ -1,5 +1,3 @@
-// routes/personasRoutes.mjs
-
 import express from "express";
 import {
   mostrarFormularioAgregar,
@@ -7,59 +5,29 @@ import {
   listarPersonas,
   mostrarFormularioEditar,
   actualizarPersona,
-  eliminarPersona,
+  eliminarPersona
 } from "../controllers/personasController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarAdmin } from "../middlewares/verificarAdmin.mjs";
 
 const router = express.Router();
 
-// Listar personas
-router.get(
-  "/dashboard",
-  verificarSesion,
-  verificarAdmin,
-  listarPersonas
-);
+// Listar todas las personas
+router.get("/dashboard", verificarSesion, verificarAdmin, listarPersonas);
 
-// Mostrar formulario para agregar persona
-router.get(
-  "/agregar",
-  verificarSesion,
-  verificarAdmin,
-  mostrarFormularioAgregar
-);
+// Formulario para agregar persona
+router.get("/agregar", verificarSesion, verificarAdmin, mostrarFormularioAgregar);
 
-// Agregar persona
-router.post(
-  "/agregar",
-  verificarSesion,
-  verificarAdmin,
-  agregarPersona
-);
+// Acción para agregar persona
+router.post("/agregar", verificarSesion, verificarAdmin, agregarPersona);
 
-// Mostrar formulario para editar persona
-router.get(
-  "/editar/:id",
-  verificarSesion,
-  verificarAdmin,
-  mostrarFormularioEditar
-);
+// Formulario para editar persona
+router.get("/editar/:id", verificarSesion, verificarAdmin, mostrarFormularioEditar);
 
-// Actualizar persona
-router.put(
-  "/editar/:id",
-  verificarSesion,
-  verificarAdmin,
-  actualizarPersona
-);
+// Acción para actualizar persona
+router.put("/editar/:id", verificarSesion, verificarAdmin, actualizarPersona);
 
-// Eliminar persona
-router.delete(
-  "/eliminar/:id",
-  verificarSesion,
-  verificarAdmin,
-  eliminarPersona
-);
+// Acción para eliminar persona
+router.delete("/eliminar/:id", verificarSesion, verificarAdmin, eliminarPersona);
 
 export default router;

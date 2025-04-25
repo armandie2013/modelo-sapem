@@ -1,5 +1,3 @@
-// routes/viaticosRoutes.mjs
-
 import express from "express";
 import {
   crearViaticoController,
@@ -12,7 +10,7 @@ import {
   mostrarFormularioEditarViatico
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
-import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
+import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
 
 const router = express.Router();
 
@@ -20,63 +18,63 @@ const router = express.Router();
 router.get(
   "/dashboard",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarPermiso("viaticos", "ver"),
   mostrarDashboardViaticos
-);
-
-// Formulario para crear viático
-router.get(
-  "/crear",
-  verificarSesion,
-  accesoPorModulo("viaticos"),
-  mostrarFormularioViatico
-);
-
-// Acción para crear viático (POST)
-router.post(
-  "/crear",
-  verificarSesion,
-  accesoPorModulo("viaticos"),
-  crearViaticoController
 );
 
 // Ver todos los viáticos
 router.get(
   "/dashboard/todos",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarPermiso("viaticos", "ver"),
   mostrarTodosLosViaticos
 );
 
-// Ver un viático (modo lectura)
+// Formulario para crear viático
+router.get(
+  "/crear",
+  verificarSesion,
+  verificarPermiso("viaticos", "crear"),
+  mostrarFormularioViatico
+);
+
+// Crear viático
+router.post(
+  "/crear",
+  verificarSesion,
+  verificarPermiso("viaticos", "crear"),
+  crearViaticoController
+);
+
+// Ver viático
 router.get(
   "/:id",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarPermiso("viaticos", "ver"),
   verViaticoController
 );
 
-// Editar un viático existente
-router.put(
-  "/:id",
-  verificarSesion,
-  accesoPorModulo("viaticos"),
-  editarViaticoController
-);
-
-// Mostrar formulario para editar un viático
+// Formulario para editar
 router.get(
   "/:id/editar",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarPermiso("viaticos", "editar"),
   mostrarFormularioEditarViatico
 );
 
-// Elininar viatico por id
+// Actualizar viático
+router.put(
+  "/:id",
+  verificarSesion,
+  verificarPermiso("viaticos", "editar"),
+  editarViaticoController
+);
+
+// Eliminar viático
 router.delete(
   "/:id",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarPermiso("viaticos", "eliminar"),
   eliminarViaticoController
 );
 

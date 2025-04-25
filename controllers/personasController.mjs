@@ -1,5 +1,3 @@
-// controllers/personasController.mjs
-
 import {
   obtenerPersonasOrdenadas,
   obtenerPersonaPorId,
@@ -8,33 +6,30 @@ import {
   eliminarPersonaPorId
 } from "../services/personasService.mjs";
 
-// Mostrar el formulario para agregar una persona
+// Mostrar formulario para agregar
 export const mostrarFormularioAgregar = (req, res) => {
   res.render("agregarPersona", { title: "Agregar Persona" });
 };
 
-// Agregar persona a la base de datos
+// Agregar persona
 export const agregarPersona = async (req, res) => {
   try {
     await agregarPersonaService(req.body);
     res.redirect("/personas/dashboard");
   } catch (error) {
     console.error("Error al agregar persona:", error);
-    res.status(500).send("Error al agregar persona");
+    res.status(500).send({ mensaje: "Error al agregar persona", error: error.message });
   }
 };
 
-// Listar todas las personal disponibles
+// Listar personas
 export const listarPersonas = async (req, res) => {
   try {
     const personas = await obtenerPersonasOrdenadas();
-    res.render("dashboardPersonas", {
-      title: "Personal SAPEM",
-      personas,
-    });
+    res.render("dashboardPersonas", { title: "Personal SAPEM", personas });
   } catch (error) {
     console.error("Error al listar personas:", error);
-    res.status(500).send("Error al obtener personas");
+    res.status(500).send({ mensaje: "Error al listar personas", error: error.message });
   }
 };
 
@@ -43,10 +38,10 @@ export const mostrarFormularioEditar = async (req, res) => {
   try {
     const persona = await obtenerPersonaPorId(req.params.id);
     if (!persona) return res.status(404).send("Persona no encontrada");
-    res.render("editarPersona", { title: "Editar Personal", persona });
+    res.render("editarPersona", { title: "Editar Persona", persona });
   } catch (error) {
     console.error("Error al buscar persona:", error);
-    res.status(500).send("Error al buscar persona");
+    res.status(500).send({ mensaje: "Error al buscar persona", error: error.message });
   }
 };
 
@@ -57,7 +52,7 @@ export const actualizarPersona = async (req, res) => {
     res.redirect("/personas/dashboard");
   } catch (error) {
     console.error("Error al actualizar persona:", error);
-    res.status(500).send("Error al actualizar persona");
+    res.status(500).send({ mensaje: "Error al actualizar persona", error: error.message });
   }
 };
 
@@ -68,6 +63,6 @@ export const eliminarPersona = async (req, res) => {
     res.redirect("/personas/dashboard");
   } catch (error) {
     console.error("Error al eliminar persona:", error);
-    res.status(500).send("Error al eliminar persona");
+    res.status(500).send({ mensaje: "Error al eliminar persona", error: error.message });
   }
 };

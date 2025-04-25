@@ -1,43 +1,25 @@
 import PersonaDisponible from "../models/personaDisponible.mjs";
+import { buscarPersonaPorDni } from "../services/personasService.mjs";
 
-export function accesoPorModulo(...modulosRequeridos) {
+export function accesoPorModulo(modulo) {
   return async (req, res, next) => {
-    if (!req.session.usuario || !req.session.usuario.dni) {
-      console.log("🔒 Usuario no autenticado o sin DNI");
-      return res
-        .status(403)
-        .send("Acceso denegado: Usuario no autenticado o sin DNI.");
+    try {
+      const datosPersona = await buscarPersonaPorDni(req.session.usuario.dni);
+
+      if (!datosPersona || !datosPersona.modulosPermitidos) {
+        return res.status(403).send("Acceso denegado: no autorizado.");
+      }
+
+      const modulos = Object.keys(datosPersona.modulosPermitidos);
+
+      if (modulos.includes(modulo)) {
+        return next();
+      } else {
+        return res.status(403).send("Acceso denegado: no autorizado.");
+      }
+    } catch (error) {
+      console.error("Error en accesoPorModulo:", error);
+      return res.status(500).send("Error en servidor.");
     }
-
-    const dniUsuario = req.session.usuario.dni;
-    console.log("🔍 Buscando acceso para DNI:", dniUsuario);
-
-    const datosPersona = await PersonaDisponible.findOne({ dni: dniUsuario });
-
-    console.log("👤 Persona encontrada:", datosPersona);
-
-    if (!datosPersona || !datosPersona.modulosPermitidos) {
-      console.log("🚫 Persona no encontrada o sin modulosPermitidos");
-      return res.status(403).send("Acceso denegado: No se encontró la persona o no tiene permisos.");
-      // return res.status(403).render("sinPermisoModulo", {
-      //   title: "Sin Permiso",
-      // });
-    }
-
-    const tieneAcceso = modulosRequeridos.some((modulo) =>
-      datosPersona.modulosPermitidos.includes(modulo)
-    );
-
-    console.log("✅ Modulos requeridos:", modulosRequeridos);
-    console.log("🧾 Modulos de la persona:", datosPersona.modulosPermitidos);
-    console.log("🟢 ¿Tiene acceso?:", tieneAcceso);
-
-    if (!tieneAcceso) {
-      // return res.status(403).send("Acceso denegado: No tenés permiso para este módulo.");
-      return res.status(403).render("sinPermisoModulo")
-      
-    }
-
-    next();
   };
 }
