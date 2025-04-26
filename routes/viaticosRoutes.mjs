@@ -11,6 +11,7 @@ import {
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
+import { obtenerUltimosViaticos } from "../services/viaticosService.mjs";
 
 const router = express.Router();
 
@@ -76,6 +77,22 @@ router.delete(
   verificarSesion,
   verificarPermiso("viaticos", "eliminar"),
   eliminarViaticoController
+);
+
+// 🆕 Endpoint para listar viáticos en formato JSON
+router.get(
+  "/api/listar",
+  verificarSesion,
+  verificarPermiso("viaticos", "ver"),
+  async (req, res) => {
+    try {
+      const viaticos = await obtenerUltimosViaticos(); // o todos, depende de lo que quieras mostrar
+      res.json(viaticos);
+    } catch (error) {
+      console.error("Error al obtener viáticos para API:", error);
+      res.status(500).json({ mensaje: "Error interno" });
+    }
+  }
 );
 
 export default router;
