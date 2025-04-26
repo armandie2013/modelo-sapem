@@ -7,7 +7,7 @@ import { obtenerUsuariosOrdenados, eliminarUsuarioPorId } from "../services/usua
 export const listarUsuarios = async (req, res) => {
   try {
     const usuarios = await obtenerUsuariosOrdenados();
-    res.render("dashboardUsuarios", { title: "Usuarios Registrados", usuarios });
+    res.render("usuariosViews/dashboardUsuarios", { title: "Usuarios Registrados", usuarios });
   } catch (error) {
     console.error("Error al listar usuarios:", error);
     res.status(500).send("Error al listar usuarios");

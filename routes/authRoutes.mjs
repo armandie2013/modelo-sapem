@@ -7,6 +7,7 @@ import {
   procesarLogin,
   cerrarSesion,
 } from "../controllers/authController.mjs";
+import { verificarSesionParaLogout } from "../middlewares/verificarSesionParaLogout.mjs";
 
 const router = express.Router();
 
@@ -23,6 +24,9 @@ router.get("/login", mostrarFormularioLogin);
 router.post("/login", procesarLogin);
 
 // Cerrar sesión
-router.post("/logout", cerrarSesion);
+router.post("/logout", verificarSesionParaLogout, cerrarSesion);
+
+// Cerrar sesión MANUAL
+router.get("/logout", verificarSesionParaLogout, cerrarSesion);
 
 export default router;

@@ -16,7 +16,7 @@ import {
 export const mostrarFormularioViatico = async (req, res) => {
   try {
     const { numeroDeViaje, listaDePersonasDisponibles } = await obtenerDatosFormularioViatico();
-    res.render("crearViatico", {
+    res.render("viaticosViews/crearViatico", {
       title: "Crear Viatico",
       numeroDeViaje,
       listaDePersonasDisponibles,
@@ -44,7 +44,7 @@ export const crearViaticoController = async (req, res) => {
 export const mostrarDashboardViaticos = async (req, res) => {
   try {
     const viaticos = await obtenerUltimosViaticos();
-    res.render("dashboardViaticos", {
+    res.render("viaticosViews/dashboardViaticos", {
       title: "Últimos Viáticos",
       viaticos,
       mostrarTodos: false,
@@ -60,7 +60,7 @@ export const mostrarDashboardViaticos = async (req, res) => {
 export const mostrarTodosLosViaticos = async (req, res) => {
   try {
     const viaticos = await obtenerTodosLosViaticos();
-    res.render("dashboardViaticos", {
+    res.render("viaticosViews/dashboardViaticos", {
       title: "Todos los Viáticos",
       viaticos,
       mostrarTodos: true,
@@ -93,7 +93,7 @@ export const verViaticoController = async (req, res) => {
     const listaDePersonasDisponibles = await obtenerPersonasDisponiblesOrdenadas();
     if (!viatico) return res.status(404).send("Viático no encontrado");
 
-    res.render("verViatico", {
+    res.render("viaticosViews/verViatico", {
       title: "Detalle del Viático",
       viatico,
       listaDePersonasDisponibles,
@@ -112,7 +112,7 @@ export async function mostrarFormularioEditarViatico(req, res) {
     const viatico = await obtenerViaticoPorId(req.params.id);
     const listaDePersonasDisponibles = await obtenerPersonasDisponiblesOrdenadas();
 
-    res.render("editarViatico", {
+    res.render("viaticosViews/editarViatico", {
       viatico,
       listaDePersonasDisponibles
     });
