@@ -7,7 +7,7 @@ export function verificarPermiso(modulo, accion) {
 
     if (!usuario || !usuario.modulosPermitidos) {
       return res.status(403).send("Permiso denegado");
-    }
+    };
 
     const tienePermiso = usuario.modulosPermitidos?.[modulo]?.[accion] === true;
 
@@ -22,4 +22,4 @@ export function verificarPermiso(modulo, accion) {
       return res.status(403).send("Permiso insuficiente para esta acción");
     }
   };
-}
+};

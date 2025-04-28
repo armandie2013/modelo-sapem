@@ -12,16 +12,18 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div>
           <label class="block text-sm font-medium text-gray-700">Fecha</label>
-          <input type="date" name="fechaDeCreacion" required class="w-full border px-2 py-1 rounded-lg text-sm">
+          <input type="date" name="fechaDeCreacion" required
+            class="w-full border px-2 py-1 rounded-lg text-sm  border border-gray-300">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Área Solicitante</label>
-          <input type="text" name="areaSolicitante" required class="w-full border px-2 py-1 rounded-lg text-sm">
+          <input type="text" name="areaSolicitante" required
+            class="w-full border px-2 py-1 rounded-lg text-sm  border border-gray-300">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">N° de Viático</label>
           <input type="text" name="" value="" readonly placeholder="Automático"
-            class="w-full border px-2 py-1 rounded-lg bg-gray-100 text-sm">
+            class="w-full border px-2 py-1 rounded-lg bg-gray-100 text-sm border border-gray-300">
         </div>
       </div>
 
@@ -35,9 +37,9 @@
       <input type="hidden" name="devolucionEnEfectivo" value="0">
 
       <div class="mb-6 w-1/4">
-        <label class="block text-xs font-medium text-gray-600">Cantidad de Viajantes</label>
+        <label class="block text-xs font-medium text-gray-600 ">Cantidad de Viajantes</label>
         <select id="cantidadDeViajantes" name="cantidadDeViajantes" required
-          class="w-full border px-2 py-1 rounded text-sm">
+          class="w-full border px-2 py-1 rounded text-sm  border border-gray-300">
           <% for (let i=1; i <=5; i++) { %>
             <option value="<%= i %>">
               <%= i %>
@@ -103,28 +105,32 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
         <div>
           <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
-          <input type="date" name="fechaDeSalida" required class="w-full border px-2 py-1 rounded-lg text-sm">
+          <input type="date" name="fechaDeSalida" required
+            class="w-full border px-2 py-1 rounded-lg text-sm border border-gray-300">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
-          <input type="date" name="fechaDellegada" required class="w-full border px-2 py-1 rounded-lg text-sm">
+          <input type="date" name="fechaDellegada" required
+            class="w-full border px-2 py-1 rounded-lg text-sm border border-gray-300">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Origen</label>
-          <input type="text" name="origen" required class="w-full border px-3 py-2 rounded-lg">
+          <input type="text" name="origen" required class="w-full border px-3 py-2 rounded-lg border border-gray-300">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Destino</label>
-          <input type="text" name="destino" required class="w-full border px-3 py-2 rounded-lg">
+          <input type="text" name="destino" required class="w-full border px-3 py-2 rounded-lg border border-gray-300">
         </div>
       </div>
       <div class="mt-4">
         <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
-        <input type="text" name="motivoDelViaje" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="text" name="motivoDelViaje" required
+          class="w-full border px-3 py-2 rounded-lg border border-gray-300">
       </div>
       <div class="mt-4">
         <label class="block text-sm font-medium text-gray-700">Vehiculo Utilizado</label>
-        <input type="text" name="vehiculoUtilizado" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="text" name="vehiculoUtilizado" required
+          class="w-full border px-3 py-2 rounded-lg border border-gray-300">
       </div>
 
       <!-- Adicional, Pendiente y Rendido -->
@@ -134,7 +140,7 @@
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
             <input type="text" id="adicionalEnEfectivo" name="adicionalEnEfectivo"
-              class="w-full border pl-6 pr-2 py-2 rounded text-sm" placeholder="0,00">
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300" placeholder="0,00">
           </div>
         </div>
 
@@ -144,7 +150,7 @@
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
             <input type="text" id="pendienteDeRendicion" name="pendienteDeRendicion" readonly
-              class="w-full border pl-6 pr-2 py-2 rounded bg-gray-100 text-sm font-semibold text-red-600">
+              class="w-full border pl-6 pr-2 py-2 rounded bg-gray-100 text-sm font-semibold text-red-600 border border-gray-300">
           </div>
         </div>
 
@@ -152,8 +158,8 @@
           <label class="block text-sm font-medium text-gray-700">Rendido</label>
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-            <input type="text" id="devolucionEnEfectivo" name="devolucionEnEfectivo" 
-              class="w-full border pl-6 pr-2 py-2 rounded text-sm" placeholder="0,00">
+            <input type="text" id="devolucionEnEfectivo" name="devolucionEnEfectivo"
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300" placeholder="0,00">
           </div>
         </div>
         <div>
@@ -161,8 +167,8 @@
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
             <input type="text" id="totalARecibir" name="totalARecibir" readonly
-              class="w-full border pl-6 pr-2 py-2 rounded text-sm bg-gray-100 font-semibold text-blue-800"
-              placeholder="0,00">
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm bg-gray-100 font-semibold text-blue-800 border border-gray-300"
+              placeholder="0,00 border border-gray-300">
           </div>
         </div>
       </div>
@@ -173,28 +179,29 @@
       <div class="mt-6">
         <label class="inline-flex items-center">
           <input type="checkbox" id="valesCombustible" name="valesCombustible" class="form-checkbox text-blue-600">
-          <span class="ml-2 text-sm text-gray-700">Incluir Vales de Combustible</span>
+          <span class="ml-2 text-sm text-gray-700 border border-gray-300">Incluir Vales de Combustible</span>
         </label>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4" id="camposVales" style="display: none;">
         <div>
           <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
-          <input type="number" name="cantidadVale" id="cantidadVale" min="0" class="w-full border px-3 py-2 rounded">
+          <input type="number" name="cantidadVale" id="cantidadVale" min="0"
+            class="w-full border px-3 py-2 rounded border border-gray-300">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Valor de Vales</label>
+          <label class="block text-sm font-medium text-gray-700">Importe Vales</label>
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-            <input type="text" id="valorVale" name="valorVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm"
-              placeholder="0,00">
+            <input type="text" id="valorVale" name="valorVale"
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300" placeholder="0,00">
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
+          <label class="block text-sm font-medium text-gray-700">Total Vales</label>
           <div class="relative">
             <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600">$</span>
-            <input type="text" id="totalVale" name="totalVale" class="w-full border pl-6 pr-2 py-2 rounded text-sm" readonly
-              placeholder="0,00">
+            <input type="text" id="totalVale" name="totalVale"
+              class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300" readonly placeholder="0,00">
           </div>
         </div>
       </div>
@@ -218,4 +225,3 @@
       }
     });
   </script>
-  
