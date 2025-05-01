@@ -8,7 +8,8 @@ import {
   eliminarViaticoPorId,
   obtenerViaticoPorId,
   obtenerPersonasDisponiblesOrdenadas,
-  actualizarViatico
+  actualizarViatico,
+  generarPDFViatico
 } from "../services/viaticosService.mjs";
 
 
@@ -132,7 +133,7 @@ export async function actualizarViaticoController(req, res) {
     console.error("Error al actualizar viático:", error);
     res.status(500).send("Error al actualizar viático");
   }
-}
+};
 
 
 // Editar viatico
@@ -148,4 +149,33 @@ export async function editarViaticoController(req, res) {
 };
 
 
+// Generar PDF desde verviatico
+export const generarPDFViaticoController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pdfBuffer = await generarPDFViatico(id, req);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename=viatico-${id}.pdf`,
+    });
+
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error al generar PDF del viático:", error);
+    res.status(500).send("Error al generar PDF");
+  }
+};
+
+
+// Renderisar y mostrar verViaticoPdf
+export async function mostrarVistaPDF(req, res) {
+  const { id } = req.params;
+  try {
+    const viatico = await obtenerViaticoPorId(id);
+    res.render("viaticosViews/verViaticoPdf", { viatico, layout: false });
+  } catch (error) {
+    res.status(500).send("Error al cargar PDF");
+  };
+};
 

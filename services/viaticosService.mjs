@@ -3,8 +3,29 @@ import PersonaDisponible from "../models/personaDisponible.mjs";
 import Contador from "../models/contador.mjs";
 import { convertirAFloat } from "../utils/convertirAFloat.mjs";
 import { obtenerSiguienteNumeroDeViaje } from "./contadorService.mjs";
+import puppeteer from "puppeteer";
 
-// Obtener datos necesarios para renderizar el formulario
+// Obtener personas disponibles
+export async function obtenerPersonasDisponiblesOrdenadas() {
+  return await PersonaDisponible.find().sort({ nombreApellido: 1 });
+};
+
+// Obtener viático por ID
+export async function obtenerViaticoPorId(id) {
+  return await Viatico.findById(id);
+};
+
+// Obtener los últimos viáticos
+export async function obtenerUltimosViaticos(limit = 10) {
+  return await Viatico.find().sort({ numeroDeViaje: -1 }).limit(limit);
+};
+
+// Obtener todos los viáticos
+export async function obtenerTodosLosViaticos() {
+  return await Viatico.find().sort({ numeroDeViaje: -1 });
+};
+
+// Obtener datos para el formulario de creación
 export async function obtenerDatosFormularioViatico() {
   const contador = await Contador.findOneAndUpdate(
     { nombre: "numeroDeViaje" },
@@ -17,21 +38,7 @@ export async function obtenerDatosFormularioViatico() {
   return { numeroDeViaje, listaDePersonasDisponibles };
 };
 
-
-
-// Obtener los 5 viáticos más recientes
-export async function obtenerUltimosViaticos(limit = 10) {
-  return await Viatico.find().sort({ numeroDeViaje: -1 }).limit(limit);
-};
-
-
-// Obtener todos los viáticos
-export async function obtenerTodosLosViaticos() {
-  return await Viatico.find().sort({ numeroDeViaje: -1 });
-};
-
-
-// Crear viatico
+// Crear viático
 export async function crearViatico(req, res) {
   const {
     fechaDeCreacion,
@@ -54,47 +61,34 @@ export async function crearViatico(req, res) {
     vehiculoUtilizado,
   } = req.body;
 
-  const viajantes = [];
-  for (let i = 0; i < nombreSolicitante.length; i++) {
-    if (nombreSolicitante[i]) {
-      viajantes.push({
-        nombre: nombreSolicitante[i],
-        cargo: cargo[i],
-        importe: convertirAFloat(importeViatico[i]) || 0,
-      });
-    }
-  }
+  const viajantes = nombreSolicitante.map((nombre, i) => ({
+    nombre,
+    cargo: cargo[i],
+    importe: convertirAFloat(importeViatico[i]) || 0
+  }));
 
   const adicional = convertirAFloat(adicionalEnEfectivo) || 0;
   const rendido = convertirAFloat(devolucionEnEfectivo) || 0;
-  const totalValeConvertido = convertirAFloat(totalVale) || 0;
-  const valorValeConvertido = convertirAFloat(valorVale) || 0;
-  const montoTotalConvertido = viajantes.reduce((acc, v) => acc + v.importe, 0);
-  const pendiente = adicional - rendido;
-
-  // ✅ Generar número de viaje desde contador
-  const numeroDeViaje = await obtenerSiguienteNumeroDeViaje();
-
-  console.log("🟢 Número generado correctamente:", numeroDeViaje);
+  const montoTotal = viajantes.reduce((acc, v) => acc + v.importe, 0);
 
   const nuevoViatico = new Viatico({
     fechaDeCreacion,
     areaSolicitante,
     cantidadDeViajantes: parseInt(cantidadDeViajantes),
-    numeroDeViaje, // ✅ generado correctamente
+    numeroDeViaje: await obtenerSiguienteNumeroDeViaje(),
     motivoDelViaje,
     origen,
     destino,
     fechaDeSalida,
     fechaDeLlegada: fechaDellegada,
-    montoTotalViatico: montoTotalConvertido,
+    montoTotalViatico: montoTotal,
     adicionalEnEfectivo: adicional,
     devolucionEnEfectivo: rendido,
-    pendienteDeRendicion: pendiente,
+    pendienteDeRendicion: adicional - rendido,
     valesCombustible: valesCombustible === "on",
-    valorVale: valorValeConvertido,
+    valorVale: convertirAFloat(valorVale) || 0,
     cantidadVale: parseInt(cantidadVale) || 0,
-    totalVale: totalValeConvertido,
+    totalVale: convertirAFloat(totalVale) || 0,
     vehiculoUtilizado,
     creadoPor: `${req.session.usuario.nombre} ${req.session.usuario.apellido}`,
     viajantes,
@@ -102,28 +96,9 @@ export async function crearViatico(req, res) {
 
   await nuevoViatico.save();
   return nuevoViatico;
-}
-
-
-// Eliminar viatico por id
-export async function eliminarViaticoPorId(id) {
-  return await Viatico.findByIdAndDelete(id);
 };
 
-
-// Obtener viatico por id
-export async function obtenerViaticoPorId(id) {
-  return await Viatico.findById(id);
-}
-
-
-// Obtener personas ordenadas
-export async function obtenerPersonasDisponiblesOrdenadas() {
-  return await PersonaDisponible.find().sort({ nombreApellido: 1 });
-}
-
-
-// Editar viático existente
+// Actualizar viático
 export async function actualizarViatico(id, datos) {
   const {
     fechaDeCreacion,
@@ -145,24 +120,11 @@ export async function actualizarViatico(id, datos) {
     valesCombustible,
   } = datos;
 
-  const viajantes = [];
-  for (let i = 0; i < nombreSolicitante.length; i++) {
-    if (nombreSolicitante[i]) {
-      viajantes.push({
-        nombre: nombreSolicitante[i],
-        cargo: cargo[i],
-        importe: convertirAFloat(importeViatico[i]) || 0,
-      });
-    }
-  }
-
-  const montoTotalViatico = viajantes.reduce((acc, v) => acc + v.importe, 0);
-  const adicional = convertirAFloat(adicionalEnEfectivo) || 0;
-  const rendido = convertirAFloat(devolucionEnEfectivo) || 0;
-  const pendiente = adicional - rendido;
-  const valorValeConvertido = convertirAFloat(valorVale) || 0;
-  const totalValeConvertido = convertirAFloat(totalVale) || 0;
-  const cantidadValeConvertido = parseInt(cantidadVale) || 0;
+  const viajantes = nombreSolicitante.map((nombre, i) => ({
+    nombre,
+    cargo: cargo[i],
+    importe: convertirAFloat(importeViatico[i]) || 0
+  }));
 
   await Viatico.findByIdAndUpdate(id, {
     fechaDeCreacion,
@@ -172,16 +134,43 @@ export async function actualizarViatico(id, datos) {
     motivoDelViaje,
     origen,
     destino,
-    montoTotalViatico,
-    adicionalEnEfectivo: adicional,
-    devolucionEnEfectivo: rendido,
-    pendienteDeRendicion: pendiente,
+    montoTotalViatico: viajantes.reduce((acc, v) => acc + v.importe, 0),
+    adicionalEnEfectivo: convertirAFloat(adicionalEnEfectivo) || 0,
+    devolucionEnEfectivo: convertirAFloat(devolucionEnEfectivo) || 0,
+    pendienteDeRendicion: (convertirAFloat(adicionalEnEfectivo) || 0) - (convertirAFloat(devolucionEnEfectivo) || 0),
     vehiculoUtilizado,
-    viajantes,    
     valesCombustible: valesCombustible === "on",
-    valorVale: valorValeConvertido,
-    cantidadVale: cantidadValeConvertido,
-    totalVale: totalValeConvertido,
+    valorVale: convertirAFloat(valorVale) || 0,
+    cantidadVale: parseInt(cantidadVale) || 0,
+    totalVale: convertirAFloat(totalVale) || 0,
+    viajantes,
   });
-}
-  
+};
+
+// Eliminar viático
+export async function eliminarViaticoPorId(id) {
+  return await Viatico.findByIdAndDelete(id);
+};
+
+// Generar PDF
+export async function generarPDFViatico(id, req) {
+  const host = req.protocol + "://" + req.get("host");
+  const url = `${host}/viaticos/${id}/pdfview-nologin`;
+
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  });
+
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "networkidle0" });
+
+  const pdf = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" }
+  });
+
+  await browser.close();
+  return pdf;
+};

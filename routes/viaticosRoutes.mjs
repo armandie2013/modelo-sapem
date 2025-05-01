@@ -7,7 +7,9 @@ import {
   eliminarViaticoController,
   verViaticoController,
   editarViaticoController,
-  mostrarFormularioEditarViatico
+  mostrarFormularioEditarViatico,
+  generarPDFViaticoController,
+  mostrarVistaPDF
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
@@ -79,20 +81,37 @@ router.delete(
   eliminarViaticoController
 );
 
-// 🆕 Endpoint para listar viáticos en formato JSON
+// // 🆕 Endpoint para listar viáticos en formato JSON
+// router.get(
+//   "/api/listar",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "ver"),
+//   async (req, res) => {
+//     try {
+//       const viaticos = await obtenerUltimosViaticos(); // o todos, depende de lo que quieras mostrar
+//       res.json(viaticos);
+//     } catch (error) {
+//       console.error("Error al obtener viáticos para API:", error);
+//       res.status(500).json({ mensaje: "Error interno" });
+//     }
+//   }
+// );
+
 router.get(
-  "/api/listar",
+  "/:id/pdf",
   verificarSesion,
   verificarPermiso("viaticos", "ver"),
-  async (req, res) => {
-    try {
-      const viaticos = await obtenerUltimosViaticos(); // o todos, depende de lo que quieras mostrar
-      res.json(viaticos);
-    } catch (error) {
-      console.error("Error al obtener viáticos para API:", error);
-      res.status(500).json({ mensaje: "Error interno" });
-    }
-  }
+  generarPDFViaticoController
 );
+
+router.get(
+  "/:id/pdfview",
+  verificarSesion,
+  verificarPermiso("viaticos", "ver"),
+  mostrarVistaPDF // Este renderiza `verViaticoPdf.ejs`
+);
+
+// Vista del viático para PDF (sin sesión, solo uso interno)
+router.get("/:id/pdfview-nologin", mostrarVistaPDF);
 
 export default router;
