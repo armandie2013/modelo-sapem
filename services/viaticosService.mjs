@@ -139,6 +139,10 @@ export async function actualizarViatico(id, datos) {
     adicionalEnEfectivo,
     devolucionEnEfectivo,
     vehiculoUtilizado,
+    valorVale,
+    cantidadVale,
+    totalVale,
+    valesCombustible,
   } = datos;
 
   const viajantes = [];
@@ -156,6 +160,9 @@ export async function actualizarViatico(id, datos) {
   const adicional = convertirAFloat(adicionalEnEfectivo) || 0;
   const rendido = convertirAFloat(devolucionEnEfectivo) || 0;
   const pendiente = adicional - rendido;
+  const valorValeConvertido = convertirAFloat(valorVale) || 0;
+  const totalValeConvertido = convertirAFloat(totalVale) || 0;
+  const cantidadValeConvertido = parseInt(cantidadVale) || 0;
 
   await Viatico.findByIdAndUpdate(id, {
     fechaDeCreacion,
@@ -170,7 +177,11 @@ export async function actualizarViatico(id, datos) {
     devolucionEnEfectivo: rendido,
     pendienteDeRendicion: pendiente,
     vehiculoUtilizado,
-    viajantes,
+    viajantes,    
+    valesCombustible: valesCombustible === "on",
+    valorVale: valorValeConvertido,
+    cantidadVale: cantidadValeConvertido,
+    totalVale: totalValeConvertido,
   });
 }
   
