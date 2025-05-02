@@ -10,15 +10,15 @@ const viaticoSchema = new mongoose.Schema({
       cargo: { type: String, required: true },
       importe: { type: Number, required: true },
     },
-  ],
-
+  ],  
+  montoTotalViatico: { type: Number, required: true },
+  totalARecibir:{type: Number, required: true},
   numeroDeViaje: { type: Number, required: true },
   motivoDelViaje: { type: String, required: true },
   origen: { type: String, required: true },
   destino: { type: String, required: true },
   fechaDeSalida: { type: Date, required: true },
-  fechaDeLlegada: { type: Date, required: true },
-  montoTotalViatico: { type: Number, required: true },
+  fechaDeLlegada: { type: Date, required: true },  
   adicionalEnEfectivo: { type: Number, required: true },
   devolucionEnEfectivo: { type: Number, required: true },
   pendienteDeRendicion: { type: Number, required: true },
@@ -27,7 +27,7 @@ const viaticoSchema = new mongoose.Schema({
   cantidadVale: { type: Number },
   totalVale: { type: Number },
   vehiculoUtilizado: { type: String },
-  creadoPor: { type: String },
+  creadoPor: { type: String },  
 });
 
 const Viatico = mongoose.model("Viatico", viaticoSchema, "viaticos");

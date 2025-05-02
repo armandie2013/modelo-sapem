@@ -70,6 +70,7 @@ export async function crearViatico(req, res) {
   const adicional = convertirAFloat(adicionalEnEfectivo) || 0;
   const rendido = convertirAFloat(devolucionEnEfectivo) || 0;
   const montoTotal = viajantes.reduce((acc, v) => acc + v.importe, 0);
+  const totalARecibir = montoTotal + adicional;
 
   const nuevoViatico = new Viatico({
     fechaDeCreacion,
@@ -92,6 +93,7 @@ export async function crearViatico(req, res) {
     vehiculoUtilizado,
     creadoPor: `${req.session.usuario.nombre} ${req.session.usuario.apellido}`,
     viajantes,
+    totalARecibir: totalARecibir,
   });
 
   await nuevoViatico.save();
@@ -126,6 +128,11 @@ export async function actualizarViatico(id, datos) {
     importe: convertirAFloat(importeViatico[i]) || 0
   }));
 
+  const montoTotalViatico = viajantes.reduce((acc, v) => acc + v.importe, 0);
+  const adicional = convertirAFloat(adicionalEnEfectivo) || 0;
+  const devolucion = convertirAFloat(devolucionEnEfectivo) || 0;
+  const totalARecibir = montoTotalViatico + adicional;
+
   await Viatico.findByIdAndUpdate(id, {
     fechaDeCreacion,
     areaSolicitante,
@@ -134,18 +141,19 @@ export async function actualizarViatico(id, datos) {
     motivoDelViaje,
     origen,
     destino,
-    montoTotalViatico: viajantes.reduce((acc, v) => acc + v.importe, 0),
-    adicionalEnEfectivo: convertirAFloat(adicionalEnEfectivo) || 0,
-    devolucionEnEfectivo: convertirAFloat(devolucionEnEfectivo) || 0,
-    pendienteDeRendicion: (convertirAFloat(adicionalEnEfectivo) || 0) - (convertirAFloat(devolucionEnEfectivo) || 0),
+    montoTotalViatico,
+    adicionalEnEfectivo: adicional,
+    devolucionEnEfectivo: devolucion,
+    pendienteDeRendicion: adicional - devolucion,
     vehiculoUtilizado,
     valesCombustible: valesCombustible === "on",
     valorVale: convertirAFloat(valorVale) || 0,
     cantidadVale: parseInt(cantidadVale) || 0,
     totalVale: convertirAFloat(totalVale) || 0,
     viajantes,
+    totalARecibir
   });
-};
+}
 
 // Eliminar viático
 export async function eliminarViaticoPorId(id) {
@@ -163,7 +171,8 @@ export async function generarPDFViatico(id, req) {
   });
 
   const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "networkidle0" });
+  await page.goto(url, { waitUntil: "load" }); // procesa pdf en 2.18 segundo
+  // await page.goto(url, { waitUntil: "networkidle0" }); // procesa pdf en 2.75 segundos
 
   const pdf = await page.pdf({
     format: "A4",

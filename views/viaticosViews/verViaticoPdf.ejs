@@ -1,123 +1,115 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Viático N° <%= viatico.numeroDeViaje %>
-    </title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 9pt;
-            margin: 2cm;
-            color: #000000;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 18pt;
-        }
-
-        .section-title {
-            margin-top: 24px;
-            font-weight: bold;
-            font-size: 10pt;
-            border-bottom: 1px solid #000;
-            padding-bottom: 4px;
-            margin-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th,
-        td {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            text-align: left;
-        }
-
-        p {
-            margin: 6px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Viático N° <%= viatico.numeroDeViaje %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 10pt;
+      margin: 2cm;
+      color: #000;
+    }
+    h1 {
+      text-align: center;
+      font-size: 16pt;
+      font-weight: bold;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 6px;
+    }
+    .section {
+      margin-top: 20px;
+    }
+    .section-title {
+      font-weight: bold;
+      font-size: 12pt;
+      margin-bottom: 8px;
+      border-left: 4px solid #007bff;
+      padding-left: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    th {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      font-weight: bold;
+    }
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    p {
+      margin: 4px 0;
+    }
+    .summary {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px dashed #aaa;
+    }
+  </style>
 </head>
-
 <body>
 
-    <h1>Solicitud de Viático Nº <%= viatico.numeroDeViaje %>
-    </h1>
+  <h1>Solicitud de Viático Nº <%= viatico.numeroDeViaje %></h1>
 
-    <p><strong>Fecha:</strong>
-        <%= new Date(viatico.fechaDeCreacion).toLocaleDateString("es-AR") %>
-    </p>
-    <p><strong>Área Solicitante:</strong>
-        <%= viatico.areaSolicitante %>
-    </p>
-    <p><strong>Motivo del Viaje:</strong>
-        <%= viatico.motivoDelViaje %>
-    </p>
-    <p><strong>Origen:</strong>
-        <%= viatico.origen %> — <strong>Destino:</strong>
-            <%= viatico.destino %>
-    </p>
+  <div>
+    <p><strong>Fecha:</strong> <%= new Date(viatico.fechaDeCreacion).toLocaleDateString("es-AR") %></p>
+    <p><strong>Área Solicitante:</strong> <%= viatico.areaSolicitante %></p>
+    <p><strong>Motivo del Viaje:</strong> <%= viatico.motivoDelViaje %></p>
+    <p><strong>Origen:</strong> <%= viatico.origen %> &nbsp; <strong>Destino:</strong> <%= viatico.destino %></p>
+  </div>
 
+  <div class="section">
     <div class="section-title">Viajantes</div>
     <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Cargo</th>
-                <th>Importe</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% viatico.viajantes.forEach(v=> { %>
-                <tr>
-                    <td>
-                        <%= v.nombre %>
-                    </td>
-                    <td>
-                        <%= v.cargo %>
-                    </td>
-                    <td>$ <%= v.importe.toLocaleString("es-AR", {minimumFractionDigits: 2}) %>
-                    </td>
-                </tr>
-                <% }) %>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Cargo</th>
+          <th>Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% viatico.viajantes.forEach(v => { %>
+          <tr>
+            <td><%= v.nombre %></td>
+            <td><%= v.cargo %></td>
+            <td>$ <%= v.importe.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
     </table>
+  </div>
 
-    <p><strong>Adicional en efectivo:</strong> $ <%= viatico.adicionalEnEfectivo.toLocaleString("es-AR") %>
-    </p>
-    <p><strong>Devolución:</strong> $ <%= viatico.devolucionEnEfectivo.toLocaleString("es-AR") %>
-    </p>
-    <p><strong>Pendiente de rendición:</strong> $ <%= viatico.pendienteDeRendicion.toLocaleString("es-AR") %>
-    </p>
+  <div class="section">
+    <div class="section-title">Resumen Económico</div>
+    <div class="summary">
+      <p><strong>Adicional en efectivo:</strong> $ <%= viatico.adicionalEnEfectivo.toLocaleString("es-AR") %></p>
+      <p><strong>Devolución:</strong> $ <%= viatico.devolucionEnEfectivo.toLocaleString("es-AR") %></p>
+      <p><strong>Pendiente de rendición:</strong> $ <%= viatico.pendienteDeRendicion.toLocaleString("es-AR") %></p>
+    </div>
+  </div>
 
-    <% if (viatico.valesCombustible) { %>
-        <div class="section-title">Vales de Combustible</div>
-        <p><strong>Cantidad:</strong>
-            <%= viatico.cantidadVale %>
-        </p>
-        <p><strong>Valor por Vale:</strong> $ <%= viatico.valorVale.toLocaleString("es-AR") %>
-        </p>
-        <p><strong>Total Vales:</strong> $ <%= viatico.totalVale.toLocaleString("es-AR") %>
-        </p>
-        <% } %>
+  <% if (viatico.valesCombustible) { %>
+    <div class="section">
+      <div class="section-title">Vales de Combustible</div>
+      <p><strong>Cantidad:</strong> <%= viatico.cantidadVale %></p>
+      <p><strong>Valor por Vale:</strong> $ <%= viatico.valorVale.toLocaleString("es-AR") %></p>
+      <p><strong>Total Vales:</strong> $ <%= viatico.totalVale.toLocaleString("es-AR") %></p>
+    </div>
+  <% } %>
 
-            <p><strong>Vehículo Utilizado:</strong>
-                <%= viatico.vehiculoUtilizado %>
-            </p>
-            <p><strong>Creado por:</strong>
-                <%= viatico.creadoPor %>
-            </p>
-
-            
+  <div class="section">
+    <p><strong>Vehículo Utilizado:</strong> <%= viatico.vehiculoUtilizado %></p>
+    <p><strong>Creado por:</strong> <%= viatico.creadoPor %></p>
+  </div>
 
 </body>
-
 </html>
