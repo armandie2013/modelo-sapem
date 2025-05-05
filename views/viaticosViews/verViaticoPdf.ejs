@@ -35,24 +35,25 @@
       margin-bottom: 20px;
     }
     th {
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
+      background-color: #ebe8e8;
+      border: 1px solid #000000;
       padding: 8px;
       text-align: left;
       font-weight: bold;
     }
     td {
-      border: 1px solid #ccc;
+      border: 1px solid #000000;
       padding: 8px;
     }
     p {
-      margin: 4px 0;
+      margin: 10px 0;
     }
     .summary {
       margin-top: 10px;
       padding: 10px;
-      border: 1px dashed #aaa;
+      border: 1px dashed #000000;
     }
+    
   </style>
 </head>
 <body>
@@ -63,7 +64,8 @@
     <p><strong>Fecha:</strong> <%= new Date(viatico.fechaDeCreacion).toLocaleDateString("es-AR") %></p>
     <p><strong>Área Solicitante:</strong> <%= viatico.areaSolicitante %></p>
     <p><strong>Motivo del Viaje:</strong> <%= viatico.motivoDelViaje %></p>
-    <p><strong>Origen:</strong> <%= viatico.origen %> &nbsp; <strong>Destino:</strong> <%= viatico.destino %></p>
+    <p><strong>Origen:</strong> <%= viatico.origen %>
+    <p><strong>Destino:</strong> <%= viatico.destino %></p>
   </div>
 
   <div class="section">
