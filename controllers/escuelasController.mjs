@@ -5,7 +5,9 @@ import {
   crearEscuelaService,
   actualizarEscuelaService,
   eliminarEscuelaService,
-  obtenerUltimaEscuelaService
+  obtenerUltimaEscuelaService,
+  obtenerEscuelaPorId,
+  generarPDFEscuelaService 
 } from "../services/escuelasService.mjs";
 
 export async function listarEscuelasController(req, res) {
@@ -87,5 +89,24 @@ export async function verEscuelaController(req, res) {
   } catch (error) {
     console.error("Error al obtener escuela:", error);
     res.status(500).send("Error al obtener detalles");
+  }
+}
+
+export async function generarPDFEscuelaController(req, res) {
+  try {
+    const escuela = await obtenerEscuelaPorId(req.params.id);
+    if (!escuela) {
+      return res.status(404).send("Escuela no encontrada");
+    }
+
+    const pdfBuffer = await generarPDFEscuelaService(escuela);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename=escuela-${escuela.numeroTicket}.pdf`,
+    });
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error al generar PDF de escuela:", error);
+    res.status(500).send("Error al generar PDF");
   }
 }

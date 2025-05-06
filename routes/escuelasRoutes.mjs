@@ -7,7 +7,8 @@ import {
   mostrarFormularioEditarEscuelaController,
   actualizarEscuelaController,
   eliminarEscuelaController,
-  mostrarFormularioCrearEscuelaController
+  mostrarFormularioCrearEscuelaController,
+  generarPDFEscuelaController
 } from "../controllers/escuelasController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
@@ -34,5 +35,8 @@ router.post("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"
 
 // Eliminar escuela
 router.delete("/:id", verificarSesion, verificarPermiso("escuelas", "eliminar"), eliminarEscuelaController);
+
+// Generar PDF 
+router.get("/:id/pdf", verificarSesion, verificarPermiso("escuelas", "ver"), generarPDFEscuelaController);
 
 export default router;

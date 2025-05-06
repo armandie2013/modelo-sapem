@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Escuela - Ticket <%= escuela.numeroTicket %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin: 40px;
+      color: #000;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section h2 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #333;
+    }
+    .field {
+      margin-bottom: 8px;
+    }
+    .label {
+      font-weight: bold;
+      display: inline-block;
+      width: 160px;
+    }
+    .value {
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Detalle del Caso - Escuela</h1>
+    <p>Ticket N° <%= escuela.numeroTicket %></p>
+  </div>
+
+  <div class="section">
+    <h2>Información General</h2>
+    <div class="field"><span class="label">Fecha de creación:</span> <span class="value"><%= new Date(escuela.fechaDeCreacion).toLocaleDateString('es-AR') %></span></div>
+    <div class="field"><span class="label">Creado por:</span> <span class="value"><%= escuela.creadoPor %></span></div>
+  </div>
+
+  <div class="section">
+    <h2>Datos de la Escuela</h2>
+    <div class="field"><span class="label">Nombre:</span> <span class="value"><%= escuela.nombre %></span></div>
+    <div class="field"><span class="label">CUE:</span> <span class="value"><%= escuela.cue %></span></div>
+    <div class="field"><span class="label">Provincia:</span> <span class="value"><%= escuela.provincia %></span></div>
+    <div class="field"><span class="label">Departamento:</span> <span class="value"><%= escuela.departamento %></span></div>
+    <div class="field"><span class="label">Ciudad:</span> <span class="value"><%= escuela.ciudad %></span></div>
+    <div class="field"><span class="label">Dirección:</span> <span class="value"><%= escuela.direccion %></span></div>
+    <div class="field"><span class="label">Proveedor:</span> <span class="value"><%= escuela.proveedor %></span></div>
+  </div>
+
+  <div class="section">
+    <h2>Detalle del Caso</h2>
+    <p><%= escuela.detalleDelCaso %></p>
+  </div>
+</body>
+</html>
