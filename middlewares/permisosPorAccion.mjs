@@ -19,7 +19,7 @@ export function verificarPermiso(modulo, accion) {
         accion,
         permisos: req.session.usuario.modulosPermitidos
       });
-      return res.status(403).send("Permiso insuficiente para esta acción");
+      return res.status(403).render("noAutorizado",{title: "Permiso Denegado"});
     }
   };
 };
