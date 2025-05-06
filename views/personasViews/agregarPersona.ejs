@@ -2,6 +2,10 @@
   <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-2xl border border-gray-300">
     <h1 class="text-2xl text-center text-gray-800 mb-6">Agregar Nueva Persona</h1>
 
+    <script>
+      const modulosActivos = []; // Como es agregar, no hay permisos cargados aún
+    </script>
+
     <form action="/personas/agregar" method="POST" class="space-y-4">
       <!-- Datos básicos -->
       <div>
@@ -30,77 +34,114 @@
       </div>
 
       <!-- Módulos permitidos dinámicos -->
+      <!-- Permisos por Módulo -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Permisos por Módulo</label>
 
-        <!-- Checkbox principal -->
+        <!-- Checkbox Técnica -->
         <div class="mb-3">
           <label class="inline-flex items-center">
-            <input type="checkbox" id="checkTecnica" class="mr-2">
+            <input type="checkbox" class="modulo-checkbox mr-2" data-modulo="tecnica">
             <span class="text-base font-semibold">Técnica</span>
           </label>
         </div>
 
-        <!-- Submódulos -->
-        <div id="subModulosTecnica" class="space-y-4 ml-4 hidden">
-
+        <div id="sub-tecnica" class="space-y-4 ml-4 hidden">
           <!-- Viáticos -->
           <div class="border border-gray-300 p-3 rounded">
             <p class="font-semibold mb-1">Viáticos</p>
             <div class="flex gap-4 flex-wrap">
-              <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true" class="mr-1"> Ver</label>
-              <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true" class="mr-1"> Crear</label>
-              <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true" class="mr-1"> Editar</label>
-              <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true" class="mr-1"> Eliminar</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true"> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true"> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true"> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true"> Eliminar</label>
             </div>
           </div>
 
-          <!-- Control de Stock -->
+          <!-- Stock -->
           <div class="border border-gray-300 p-3 rounded">
             <p class="font-semibold mb-1">Control de Stock</p>
             <div class="flex gap-4 flex-wrap">
-              <label><input type="checkbox" name="modulosPermitidos[stock][ver]" value="true" class="mr-1"> Ver</label>
-              <label><input type="checkbox" name="modulosPermitidos[stock][crear]" value="true" class="mr-1"> Crear</label>
-              <label><input type="checkbox" name="modulosPermitidos[stock][editar]" value="true" class="mr-1"> Editar</label>
-              <label><input type="checkbox" name="modulosPermitidos[stock][eliminar]" value="true" class="mr-1"> Eliminar</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][ver]" value="true"> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][crear]" value="true"> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][editar]" value="true"> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[stock][eliminar]" value="true"> Eliminar</label>
             </div>
           </div>
 
-          <!-- Reclamos Técnicos -->
+          <!-- Reclamos -->
           <div class="border border-gray-300 p-3 rounded">
             <p class="font-semibold mb-1">Reclamos Técnicos</p>
             <div class="flex gap-4 flex-wrap">
-              <label><input type="checkbox" name="modulosPermitidos[reclamos][ver]" value="true" class="mr-1"> Ver</label>
-              <label><input type="checkbox" name="modulosPermitidos[reclamos][crear]" value="true" class="mr-1"> Crear</label>
-              <label><input type="checkbox" name="modulosPermitidos[reclamos][editar]" value="true" class="mr-1"> Editar</label>
-              <label><input type="checkbox" name="modulosPermitidos[reclamos][eliminar]" value="true" class="mr-1"> Eliminar</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][ver]" value="true"> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][crear]" value="true"> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][editar]" value="true"> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[reclamos][eliminar]" value="true"> Eliminar</label>
             </div>
           </div>
-
         </div>
-      </div>
 
-      <!-- Botón -->
-      <div class="pt-4">
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
-          Agregar Persona
-        </button>
-      </div>
+        <!-- Checkbox Proyectos -->
+        <div class="mb-3">
+          <label class="inline-flex items-center">
+            <input type="checkbox" class="modulo-checkbox mr-2" data-modulo="proyectos">
+            <span class="text-base font-semibold">Proyectos</span>
+          </label>
+        </div>
+
+        <div id="sub-proyectos" class="space-y-4 ml-4 hidden">
+          <div class="border border-gray-300 p-3 rounded">
+            <p class="font-semibold mb-1">Escuelas</p>
+            <div class="flex gap-4 flex-wrap">
+              <label><input type="checkbox" name="modulosPermitidos[escuelas][ver]" value="true"> Ver</label>
+              <label><input type="checkbox" name="modulosPermitidos[escuelas][crear]" value="true"> Crear</label>
+              <label><input type="checkbox" name="modulosPermitidos[escuelas][editar]" value="true"> Editar</label>
+              <label><input type="checkbox" name="modulosPermitidos[escuelas][eliminar]" value="true"> Eliminar</label>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <!-- Botón -->
+        <div class="pt-4">
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+            Agregar Persona
+          </button>
+        </div>
     </form>
   </div>
 </div>
 
+
+
 <script>
-// Mostrar u ocultar submódulos al clickear Técnica
-document.getElementById('checkTecnica').addEventListener('change', function () {
-  const subModulos = document.getElementById('subModulosTecnica');
-  if (this.checked) {
-    subModulos.classList.remove('hidden');
-  } else {
-    subModulos.classList.add('hidden');
-    // Si se desactiva Técnica, también desmarcamos todos los sub-checkboxes
-    const inputs = subModulos.querySelectorAll('input[type="checkbox"]');
-    inputs.forEach(input => input.checked = false);
-  }
-});
+  document.addEventListener("DOMContentLoaded", () => {
+    const modulos = document.querySelectorAll('.modulo-checkbox');
+
+    modulos.forEach((checkbox) => {
+      const modulo = checkbox.dataset.modulo;
+      const submodulo = document.getElementById(`sub-${modulo}`);
+
+      // Mostrar si algún checkbox interno ya está tildado
+      const algunCheckInternoMarcado = submodulo.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+      if (algunCheckInternoMarcado) {
+        checkbox.checked = true;
+        submodulo.classList.remove('hidden');
+      }
+
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          submodulo.classList.remove('hidden');
+        } else {
+          // Solo ocultar si no hay ninguno marcado
+          const algunoMarcado = [...submodulo.querySelectorAll('input[type="checkbox"]')].some(i => i.checked);
+          if (!algunoMarcado) {
+            submodulo.classList.add('hidden');
+          }
+        }
+      });
+    });
+  });
 </script>

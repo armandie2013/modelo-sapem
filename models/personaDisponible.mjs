@@ -13,6 +13,12 @@ const personaSchema = new mongoose.Schema({
       editar: { type: Boolean, default: false },
       eliminar: { type: Boolean, default: false }
     },
+    escuelas: {
+      ver: { type: Boolean, default: false },
+      crear: { type: Boolean, default: false },
+      editar: { type: Boolean, default: false },
+      eliminar: { type: Boolean, default: false }
+    },
     // otros módulos...
   }, // ← Nuevo campo
 });
