@@ -20,7 +20,7 @@
                         <div>
                             <label for="numeroTicket" class="block text-sm font-medium text-gray-700">Número de
                                 Ticket</label>
-                            <input type="text" id="numeroTicket" value="<%= numeroTicket %> (automático)" readonly
+                            <input type="text" id="numeroTicket" value="<%= numeroTicket %> (automático)" readonly placeholder="Automático"
                                 class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600">
                             <input type="hidden" name="numeroTicket" value="<%= numeroTicket %>">
                         </div>
@@ -29,56 +29,56 @@
                         <div>
                             <label for="fechaDeCreacion" class="block text-sm font-medium text-gray-700">Fecha de
                                 creación</label>
-                            <input type="date" id="fechaDeCreacion" name="fechaDeCreacion"
+                            <input type="date" id="fechaDeCreacion" name="fechaDeCreacion" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
                         <div>
                             <label for="nombreEscuela" class="block text-sm font-medium text-gray-700">Nombre de la
                                 escuela</label>
-                            <input type="text" id="nombre" name="nombre"
+                            <input type="text" id="nombre" name="nombre" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div>
                             <label for="cue" class="block text-sm font-medium text-gray-700">CUE</label>
-                            <input type="text" id="cue" name="cue" class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="cue" name="cue" required class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div>
                             <label for="provincia" class="block text-sm font-medium text-gray-700">Provincia</label>
-                            <input type="text" id="provincia" name="provincia"
+                            <input type="text" id="provincia" name="provincia" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div>
                             <label for="departamento"
                                 class="block text-sm font-medium text-gray-700">Departamento</label>
-                            <input type="text" id="departamento" name="departamento"
+                            <input type="text" id="departamento" name="departamento" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div>
                             <label for="ciudad" class="block text-sm font-medium text-gray-700">Ciudad</label>
-                            <input type="text" id="ciudad" name="ciudad"
+                            <input type="text" id="ciudad" name="ciudad" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
-                            <input type="text" id="direccion" name="direccion"
+                            <input type="text" id="direccion" name="direccion" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="proveedor" class="block text-sm font-medium text-gray-700">Proveedor</label>
-                            <input type="text" id="proveedor" name="proveedor"
+                            <input type="text" id="proveedor" name="proveedor" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="detalleCaso" class="block text-sm font-medium text-gray-700">Detalle del
                                 caso</label>
-                            <textarea id="detalleDelCaso" name="detalleDelCaso" rows="4"
+                            <textarea id="detalleDelCaso" name="detalleDelCaso" rows="4" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm"></textarea>
                         </div>
                     </div>
