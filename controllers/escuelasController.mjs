@@ -10,6 +10,8 @@ import {
   generarPDFEscuelaService 
 } from "../services/escuelasService.mjs";
 
+import { obtenerSiguienteNumeroDeTicket } from "../utils/obtenerSiguienteNumeroDeTicket.mjs";
+
 export async function listarEscuelasController(req, res) {
   try {
     const escuelas = await obtenerEscuelasService();
@@ -22,10 +24,7 @@ export async function listarEscuelasController(req, res) {
 
 export async function mostrarFormularioCrearEscuelaController(req, res) {
   try {
-    const ultimaEscuela = await obtenerUltimaEscuelaService();
-    const numeroTicket = ultimaEscuela ? ultimaEscuela.numeroTicket + 1 : 1;
-
-    res.render("escuelasViews/crearEscuela", { numeroTicket });
+    res.render("escuelasViews/crearEscuela");
   } catch (error) {
     console.error("Error al mostrar formulario de creación:", error);
     res.status(500).send("Error al cargar el formulario");
@@ -34,8 +33,8 @@ export async function mostrarFormularioCrearEscuelaController(req, res) {
 
 export async function crearEscuelaController(req, res) {
   try {
-    const ultimaEscuela = await obtenerUltimaEscuelaService();
-    const nuevoNumeroTicket = ultimaEscuela ? ultimaEscuela.numeroTicket + 1 : 1;
+    // Obtener número de ticket único usando contador general
+    const nuevoNumeroTicket = await obtenerSiguienteNumeroDeTicket("escuelas");
 
     const datosEscuela = {
       ...req.body,

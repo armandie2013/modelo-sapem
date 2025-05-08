@@ -1,136 +1,215 @@
-<main class="bg-gray-100 min-h-screen py-10 px-4">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Editar Datos de la Escuela</h1>
+<% const soloLectura=escuela.estado==='Cerrado' && usuario?.rol !=='admin' ; %>
 
-        <% if (typeof errores !=='undefined' && errores.length> 0) { %>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <ul class="list-disc pl-5 text-sm">
-                    <% errores.forEach(error=> { %>
-                        <li>
-                            <%= error.msg %>
-                        </li>
-                    <% }) %>
-                </ul>
-            </div>
-        <% } %>
+    <main class="bg-gray-100 min-h-screen py-10 px-4">
+        <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Editar Datos de la Escuela</h1>
 
-        <form action="/escuelas/<%= escuela._id %>/editar" method="POST" enctype="multipart/form-data" class="space-y-6">
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Fecha de creación</label>
-                    <input type="date" name="fechaDeCreacion"
-                        value="<%= escuela.fechaDeCreacion.toISOString().split('T')[0] %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
+            <% if (soloLectura) { %>
+                <div
+                    class="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded mb-6 text-center font-normal">
+                    Este caso se encuentra cerrado. Si es necesario, cree uno nuevo.
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Número de ticket</label>
-                    <input type="text" name="numeroTicket" value="<%= escuela.numeroTicket %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600" readonly>
-                </div>
+                <% } %>
 
-                <div>
-                    <label for="estado" class="block text-sm font-medium text-gray-700">Estado del caso</label>
-                    <% if (usuario?.rol === 'admin' || escuela.estado === 'Abierto') { %>
-                        <select id="estado" name="estado" class="w-full border px-3 py-2 rounded-lg text-sm">
-                            <option value="Abierto" <%= escuela.estado === "Abierto" ? "selected" : "" %>>Abierto</option>
-                            <option value="Cerrado" <%= escuela.estado === "Cerrado" ? "selected" : "" %>>Cerrado</option>
-                        </select>
-                    <% } else { %>
-                        <input type="text" value="<%= escuela.estado %>" disabled class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
-                        <input type="hidden" name="estado" value="<%= escuela.estado %>">
-                    <% } %>
-                </div>
+                    <% if (typeof errores !=='undefined' && errores.length> 0) { %>
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                            <ul class="list-disc pl-5 text-sm">
+                                <% errores.forEach(error=> { %>
+                                    <li>
+                                        <%= error.msg %>
+                                    </li>
+                                    <% }) %>
+                            </ul>
+                        </div>
+                        <% } %>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Predio</label>
-                    <input type="text" name="predio" value="<%= escuela.predio %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
+                            <form action="/escuelas/<%= escuela._id %>/editar" method="POST"
+                                enctype="multipart/form-data" class="space-y-6">
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">CUE</label>
-                    <input type="text" name="cue" value="<%= escuela.cue %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Fecha de creación</label>
+                                        <input type="date" name="fechaDeCreacion"
+                                            value="<%= escuela.fechaDeCreacion.toISOString().split('T')[0] %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Nombre de la escuela</label>
-                    <input type="text" name="nombre" value="<%= escuela.nombre %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Número de ticket</label>
+                                        <input type="text" name="numeroTicket" value="<%= escuela.numeroTicket %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600"
+                                            readonly>
+                                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Provincia</label>
-                    <input type="text" name="provincia" value="<%= escuela.provincia %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Departamento</label>
-                    <input type="text" name="departamento" value="<%= escuela.departamento %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Ciudad</label>
-                    <input type="text" name="ciudad" value="<%= escuela.ciudad %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                    <input type="text" name="direccion" value="<%= escuela.direccion %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm" required>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">Proveedor</label>
-                    <input type="text" name="proveedor" value="<%= escuela.proveedor %>"
-                        class="w-full border px-3 py-2 rounded-lg text-sm">
-                </div>
-            </div>
+                                    <div>
+                                        <label for="estado" class="block text-sm font-medium text-gray-700">Estado del
+                                            caso</label>
+                                        <% if (usuario?.rol==='admin' || escuela.estado==='Abierto' ) { %>
+                                            <select id="estado" name="estado"
+                                                class="w-full border px-3 py-2 rounded-lg text-sm" <%=soloLectura
+                                                ? "disabled" : "" %>>
+                                                <option value="Abierto" <%=escuela.estado==="Abierto" ? "selected" : ""
+                                                    %>>Abierto</option>
+                                                <option value="Cerrado" <%=escuela.estado==="Cerrado" ? "selected" : ""
+                                                    %>>Cerrado</option>
+                                            </select>
+                                            <% } else { %>
+                                                <input type="text" value="<%= escuela.estado %>" disabled
+                                                    class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+                                                <input type="hidden" name="estado" value="<%= escuela.estado %>">
+                                                <% } %>
+                                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Detalle del caso</label>
-                <textarea name="detalleDelCaso" rows="4"
-                    class="w-full border px-3 py-2 rounded-lg text-sm resize-none"><%= escuela.detalleDelCaso %></textarea>
-            </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Predio</label>
+                                        <input type="text" name="predio" value="<%= escuela.predio %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Observaciones técnicas</label>
-                <textarea name="observacionesTecnica" rows="3" class="w-full border px-3 py-2 rounded-lg text-sm resize-none"><%= escuela.observacionesTecnica || '' %></textarea>
-            </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">CUE</label>
+                                        <input type="text" name="cue" value="<%= escuela.cue %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Imágenes del caso (máx. 3)</label>
-                <input type="file" name="imagenes" id="imagenes" accept="image/*" multiple class="w-full border px-3 py-2 rounded-lg text-sm">
-                <div id="preview" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4"></div>
-              </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Nombre de la
+                                            escuela</label>
+                                        <input type="text" name="nombre" value="<%= escuela.nombre %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
 
-            <div class="text-center">
-                <button type="submit"
-                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
-                    Guardar Cambios
-                </button>
-            </div>
-        </form>
-    </div>
-</main>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Provincia</label>
+                                        <input type="text" name="provincia" value="<%= escuela.provincia %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
 
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Departamento</label>
+                                        <input type="text" name="departamento" value="<%= escuela.departamento %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
 
-<script>
-    document.getElementById("imagenes")?.addEventListener("change", function(event) {
-      const preview = document.getElementById("preview");
-      preview.innerHTML = "";
-      const archivos = Array.from(event.target.files).slice(0, 3); // max 3
-      archivos.forEach(file => {
-        if (file.type.startsWith("image/")) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            img.className = "w-full h-auto rounded-lg border";
-            preview.appendChild(img);
-          };
-          reader.readAsDataURL(file);
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Ciudad</label>
+                                        <input type="text" name="ciudad" value="<%= escuela.ciudad %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Dirección</label>
+                                        <input type="text" name="direccion" value="<%= escuela.direccion %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
+
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700">Proveedor</label>
+                                        <input type="text" name="proveedor" value="<%= escuela.proveedor %>"
+                                            class="w-full border px-3 py-2 rounded-lg text-sm" <%=soloLectura
+                                            ? "readonly" : "" %>>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Detalle del caso</label>
+                                    <textarea name="detalleDelCaso" rows="4"
+                                        class="w-full border px-3 py-2 rounded-lg text-sm resize-none" <%=soloLectura
+                                        ? "readonly" : "" %>><%= escuela.detalleDelCaso %></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Observaciones
+                                        técnicas</label>
+                                    <textarea name="observacionesTecnica" rows="3"
+                                        class="w-full border px-3 py-2 rounded-lg text-sm resize-none" <%=soloLectura
+                                        ? "readonly" : "" %>><%= escuela.observacionesTecnica || '' %></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Imágenes del caso (máx.
+                                        3)</label>
+                                    <input type="file" name="imagenes" id="imagenes" accept="image/*" multiple
+                                        class="w-full border px-3 py-2 rounded-lg text-sm" <%=soloLectura ? "disabled"
+                                        : "" %>>
+                                    <div id="preview" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                                    </div>
+                                </div>
+
+                                <% if (!soloLectura) { %>
+                                    <div class="text-center">
+                                        <button type="submit"
+                                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+                                            Guardar Cambios
+                                        </button>
+                                    </div>
+                                    <% } %>
+                            </form>
+        </div>
+    </main>
+
+    <!-- Cargar imagenes -->
+    <script>
+        document.getElementById("imagenes")?.addEventListener("change", function (event) {
+            const preview = document.getElementById("preview");
+            preview.innerHTML = "";
+            const archivos = Array.from(event.target.files).slice(0, 3); // max 3
+            archivos.forEach(file => {
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.className = "w-full h-auto rounded-lg border";
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // Capitaliza cada palabra (título)
+        function capitalizarCadaPalabra(texto) {
+            return texto
+                .toLowerCase()
+                .replace(/\b\w/g, letra => letra.toUpperCase());
         }
-      });
-    });
-  </script>
+
+        // Capitaliza solo la primera letra
+        function capitalizarPrimeraLetra(texto) {
+            const limpio = texto.trim();
+            return limpio.charAt(0).toUpperCase() + limpio.slice(1).toLowerCase();
+        }
+
+        // Aplicar a campos tipo título
+        const camposTitulo = ["nombre", "provincia", "departamento", "ciudad", "direccion", "proveedor"];
+        camposTitulo.forEach(name => {
+            const input = document.querySelector(`input[name="${name}"]`);
+            if (input) {
+                input.addEventListener("blur", () => {
+                    input.value = capitalizarCadaPalabra(input.value);
+                });
+            }
+        });
+
+        // Aplicar a campos tipo párrafo
+        const camposParrafo = ["detalleDelCaso", "observacionesTecnica"];
+        camposParrafo.forEach(name => {
+            const textarea = document.querySelector(`textarea[name="${name}"]`);
+            if (textarea) {
+                textarea.addEventListener("blur", () => {
+                    textarea.value = capitalizarPrimeraLetra(textarea.value);
+                });
+            }
+        });
+    </script>

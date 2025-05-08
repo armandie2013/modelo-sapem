@@ -19,12 +19,11 @@
 
                         <!-- Número de Ticket automático -->
                         <div>
-                            <label for="numeroTicket" class="block text-sm font-medium text-gray-700">Número de
+                            <label class="block text-sm font-medium text-gray-700">Número de
                                 Ticket</label>
-                            <input type="text" id="numeroTicket" value="<%= numeroTicket %> (automático)" readonly
-                                placeholder="Automático"
+                            <input type="text" id="" value="" readonly placeholder="Automático"
                                 class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600">
-                            <input type="hidden" name="numeroTicket" value="<%= numeroTicket %>">
+                            
                         </div>
 
                         <!-- Fecha de creación -->
@@ -104,3 +103,38 @@
                 </form>
     </div>
 </main>
+
+<script>
+    // Capitaliza cada palabra (tipo título)
+    function capitalizarCadaPalabra(texto) {
+        return texto
+            .toLowerCase()
+            .replace(/\b\w/g, letra => letra.toUpperCase());
+    }
+
+    // Capitaliza solo la primera letra
+    function capitalizarPrimeraLetra(texto) {
+        const limpio = texto.trim();
+        return limpio.charAt(0).toUpperCase() + limpio.slice(1).toLowerCase();
+    }
+
+    // Campos a capitalizar por palabra
+    const camposTitulo = ["nombre", "provincia", "departamento", "ciudad", "direccion", "proveedor"];
+
+    camposTitulo.forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo) {
+            campo.addEventListener("blur", () => {
+                campo.value = capitalizarCadaPalabra(campo.value);
+            });
+        }
+    });
+
+    // Campo "detalle del caso": solo primera letra
+    const detalle = document.getElementById("detalleDelCaso");
+    if (detalle) {
+        detalle.addEventListener("blur", () => {
+            detalle.value = capitalizarPrimeraLetra(detalle.value);
+        });
+    }
+</script>
