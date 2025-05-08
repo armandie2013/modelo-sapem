@@ -8,7 +8,8 @@ import {
   actualizarEscuelaController,
   eliminarEscuelaController,
   mostrarFormularioCrearEscuelaController,
-  generarPDFEscuelaController
+  generarPDFEscuelaController,
+  eliminarImagenEscuelaController
 } from "../controllers/escuelasController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
@@ -40,5 +41,8 @@ router.delete("/:id", verificarSesion, verificarPermiso("escuelas", "eliminar"),
 
 // Generar PDF 
 router.get("/:id/pdf", verificarSesion, verificarPermiso("escuelas", "ver"), generarPDFEscuelaController);
+
+// Eliminar imagen cargada en editarEscuela.ejs
+router.post("/:id/imagenes/:nombre/eliminar", verificarSesion, eliminarImagenEscuelaController);
 
 export default router;

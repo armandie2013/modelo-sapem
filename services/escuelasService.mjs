@@ -22,7 +22,10 @@ export async function crearEscuelaService(datos) {
 }
 
 export async function actualizarEscuelaService(id, nuevosDatos) {
-  return await Escuela.findByIdAndUpdate(id, nuevosDatos);
+  return await Escuela.findByIdAndUpdate(id, nuevosDatos, {
+    new: true,
+    runValidators: true,
+  });
 }
 
 export async function eliminarEscuelaService(id) {

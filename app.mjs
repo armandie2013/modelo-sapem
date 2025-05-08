@@ -63,6 +63,7 @@ app.set("layout", "layout");
 
 // 5. Archivos estáticos
 app.use(express.static(path.resolve("./public")));
+app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
 
 // 6. Middleware para datos globales en vistas
 app.use((req, res, next) => {
