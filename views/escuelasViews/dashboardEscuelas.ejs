@@ -1,62 +1,94 @@
 <main class="bg-gray-100 py-6 px-2 sm:px-4 md:px-2 lg:px-0">
     <div class="w-full max-w-[95vw] mx-auto bg-white p-4 sm:p-6 md:p-6 rounded-2xl shadow-xl border border-gray-300">
-      <!-- Encabezado -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <h1 class="text-xl sm:text-2xl text-gray-800">Listado de Casos</h1>
-        <% if (usuario?.modulosPermitidos?.escuelas?.crear) { %>
-          <a href="/escuelas/crear" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
-            Cargar Reclamo
-          </a>
-        <% } %>
-      </div>
-  
-      <% if (escuelas.length === 0) { %>
-        <p class="text-gray-600 text-center">No hay escuelas registradas.</p>
-      <% } else { %>
-        <!-- Tabla con scroll horizontal en pantallas chicas -->
-        <div class="overflow-x-auto">
-          <table class="w-full table-auto text-xs sm:text-sm border-collapse min-w-[1000px]">
-            <thead class="bg-gray-200 text-gray-700 font-semibold">
-              <tr>
-                <th class="px-3 py-2 text-left">N° Ticket</th>
-                <th class="px-3 py-2 text-left">Nombre</th>
-                <th class="px-3 py-2 text-left">CUE</th>
-                <th class="px-3 py-2 text-left">Provincia</th>
-                <th class="px-3 py-2 text-left">Ciudad</th>
-                <th class="px-3 py-2 text-left">Creación</th>
-                <th class="px-3 py-2 text-left">Creado por</th>
-                <th class="px-3 py-2 text-left">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% escuelas.forEach(escuela => { %>
-                <tr class="border-b hover:bg-gray-50 transition">
-                  <td class="px-3 py-2 font-bold text-blue-800"><%= escuela.numeroTicket %></td>
-                  <td class="px-3 py-2"><%= escuela.nombre %></td>
-                  <td class="px-3 py-2"><%= escuela.cue %></td>
-                  <td class="px-3 py-2"><%= escuela.provincia %></td>
-                  <td class="px-3 py-2"><%= escuela.ciudad %></td>
-                  <td class="px-3 py-2"><%= new Date(escuela.fechaDeCreacion).toLocaleDateString('es-AR') %></td>
-                  <td class="px-3 py-2"><%= escuela.creadoPor %></td>
-                  <td class="px-3 py-2 space-x-2 whitespace-nowrap">
-                    <% if (usuario?.modulosPermitidos?.escuelas?.ver) { %>
-                      <a href="/escuelas/<%= escuela._id %>" class="text-blue-600 hover:underline">Ver</a>
-                      <a href="/escuelas/<%= escuela._id %>/pdf" target="_blank" class="text-green-600 hover:underline">PDF</a>
-                    <% } %>
-                    <% if (usuario?.modulosPermitidos?.escuelas?.editar) { %>
-                      <a href="/escuelas/<%= escuela._id %>/editar" class="text-yellow-600 hover:underline">Editar</a>
-                    <% } %>
-                    <% if (usuario?.modulosPermitidos?.escuelas?.eliminar) { %>
-                      <form action="/escuelas/<%= escuela._id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro que deseas eliminar esta escuela?');">
-                        <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
-                      </form>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
+        <!-- Encabezado -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+            <h1 class="text-xl sm:text-2xl text-gray-800">Listado de Casos</h1>
+            <% if (usuario?.modulosPermitidos?.escuelas?.crear) { %>
+                <a href="/escuelas/crear"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+                    Cargar Reclamo
+                </a>
+                <% } %>
         </div>
-      <% } %>
+
+        <% if (escuelas.length===0) { %>
+            <p class="text-gray-600 text-center">No hay escuelas registradas.</p>
+            <% } else { %>
+                <!-- Tabla con scroll horizontal en pantallas chicas -->
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto text-xs sm:text-sm border-collapse min-w-[1000px]">
+                        <thead class="bg-gray-200 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-3 py-2 text-left">N° Ticket</th>
+                                <th class="px-3 py-2 text-left">Predio</th>
+                                <th class="px-3 py-2 text-left">CUE</th>
+                                <th class="px-3 py-2 text-left">Nombre Escuela</th>
+                                <th class="px-3 py-2 text-left">Provincia</th>
+                                <th class="px-3 py-2 text-left">Ciudad</th>
+                                <th class="px-3 py-2 text-left">Creación</th>
+                                <th class="px-3 py-2 text-left">Creado por</th>
+                                <th class="px-3 py-2 text-left">Estado</th>
+                                <th class="px-3 py-2 text-left">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% escuelas.forEach(escuela=> { %>
+                                <tr class="border-b hover:bg-gray-50 transition">
+                                    <td class="px-3 py-2 font-bold text-blue-800">
+                                        <%= escuela.numeroTicket %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= escuela.predio %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= escuela.cue %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= escuela.nombre %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= escuela.provincia %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= escuela.ciudad %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= new Date(escuela.fechaDeCreacion).toLocaleDateString('es-AR') %>
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <%= escuela.creadoPor %>
+                                    </td>
+                                    <td class="px-3 py-2 text-center">
+                                        <span
+                                            class="<%= escuela.estado === 'Abierto' ? 'text-green-600' : 'text-red-600' %>">
+                                            <%= escuela.estado %>
+                                        </span>
+                                    </td>
+                                    <td class="px-3 py-2 space-x-2 whitespace-nowrap">
+                                        <% if (usuario?.modulosPermitidos?.escuelas?.ver) { %>
+                                            <a href="/escuelas/<%= escuela._id %>"
+                                                class="text-blue-600 hover:underline">Ver</a>
+                                            <a href="/escuelas/<%= escuela._id %>/pdf" target="_blank"
+                                                class="text-green-600 hover:underline">PDF</a>
+                                            <% } %>
+                                                <% if (usuario?.modulosPermitidos?.escuelas?.editar) { %>
+                                                    <a href="/escuelas/<%= escuela._id %>/editar"
+                                                        class="text-yellow-600 hover:underline">Editar</a>
+                                                    <% } %>
+                                                        <% if (usuario?.modulosPermitidos?.escuelas?.eliminar) { %>
+                                                            <form action="/escuelas/<%= escuela._id %>?_method=DELETE"
+                                                                method="POST" class="inline"
+                                                                onsubmit="return confirm('¿Estás seguro que deseas eliminar esta escuela?');">
+                                                                <button type="submit"
+                                                                    class="text-red-600 hover:underline">Eliminar</button>
+                                                            </form>
+                                                            <% } %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } %>
     </div>
-  </main>
+</main>

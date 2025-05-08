@@ -10,6 +10,11 @@ const escuelaSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  predio: {
+    type: String,
+    required: true,
+    trim: true
+  },
   cue: {
     type: String,
     required: true,
@@ -61,11 +66,15 @@ const escuelaSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  numeroTicket: {
-    type: Number,
-    required: true,
-    unique: true // Evita duplicados
+  imagenes: {
+    type: [String],
+    default: []
   },
+  estado: {
+    type: String,
+    enum: ['Abierto', 'Cerrado'],
+    default: 'Abierto'
+  }
 });
 
 const Escuela = mongoose.model("Escuela", escuelaSchema);

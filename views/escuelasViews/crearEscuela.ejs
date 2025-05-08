@@ -1,6 +1,6 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
     <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
-        <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Registrar Nueva Escuela</h1>
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Registrar Nuevo Caso</h1>
 
         <% if (typeof errores !=='undefined' && errores.length> 0) { %>
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -16,11 +16,13 @@
 
                 <form action="/escuelas/crear" method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                         <!-- Número de Ticket automático -->
                         <div>
                             <label for="numeroTicket" class="block text-sm font-medium text-gray-700">Número de
                                 Ticket</label>
-                            <input type="text" id="numeroTicket" value="<%= numeroTicket %> (automático)" readonly placeholder="Automático"
+                            <input type="text" id="numeroTicket" value="<%= numeroTicket %> (automático)" readonly
+                                placeholder="Automático"
                                 class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600">
                             <input type="hidden" name="numeroTicket" value="<%= numeroTicket %>">
                         </div>
@@ -32,16 +34,25 @@
                             <input type="date" id="fechaDeCreacion" name="fechaDeCreacion" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
+
                         <div>
-                            <label for="nombreEscuela" class="block text-sm font-medium text-gray-700">Nombre de la
-                                escuela</label>
-                            <input type="text" id="nombre" name="nombre" required
+                            <label for="predio" class="block text-sm font-medium text-gray-700">
+                                Predio</label>
+                            <input type="text" id="predio" name="predio" required
                                 class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div>
                             <label for="cue" class="block text-sm font-medium text-gray-700">CUE</label>
-                            <input type="text" id="cue" name="cue" required class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="cue" name="cue" required
+                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                        </div>
+
+                        <div>
+                            <label for="nombreEscuela" class="block text-sm font-medium text-gray-700">Nombre de la
+                                escuela</label>
+                            <input type="text" id="nombre" name="nombre" required
+                                class="w-full border px-3 py-2 rounded-lg text-sm">
                         </div>
 
                         <div>
@@ -82,7 +93,7 @@
                                 class="w-full border px-3 py-2 rounded-lg text-sm"></textarea>
                         </div>
                     </div>
-                    
+
 
                     <div class="flex justify-end mt-6">
                         <button type="submit"

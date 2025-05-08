@@ -42,6 +42,7 @@ export async function crearEscuelaController(req, res) {
       numeroTicket: nuevoNumeroTicket,
       fechaCreacion: new Date(),
       creadoPor: `${req.session.usuario.nombre} ${req.session.usuario.apellido}`,
+      estado: "Abierto"
     };
 
     await crearEscuelaService(datosEscuela);
@@ -55,7 +56,7 @@ export async function crearEscuelaController(req, res) {
 export async function mostrarFormularioEditarEscuelaController(req, res) {
   try {
     const escuela = await obtenerEscuelaPorIdService(req.params.id);
-    res.render("escuelasViews/editarEscuela", { escuela });
+    res.render("escuelasViews/editarEscuela", { escuela, usuario: req.session.usuario });
   } catch (error) {
     console.error("Error al cargar escuela:", error);
     res.status(500).send("Error al editar escuela");
@@ -64,11 +65,39 @@ export async function mostrarFormularioEditarEscuelaController(req, res) {
 
 export async function actualizarEscuelaController(req, res) {
   try {
-    await actualizarEscuelaService(req.params.id, req.body);
+    const { id } = req.params;
+    const datosActualizados = { ...req.body };
+
+    const escuela = await obtenerEscuelaPorId(id);
+    if (!escuela) return res.status(404).send("Escuela no encontrada");
+
+    // 🛡️ Reglas del estado
+    const esAdmin = req.session.usuario?.rol === "admin";
+    const estadoOriginal = escuela.estado;
+    const estadoNuevo = datosActualizados.estado;
+
+    if (!esAdmin && estadoOriginal === "Cerrado" && estadoNuevo === "Abierto") {
+      datosActualizados.estado = "Cerrado";
+    }
+
+    // 📌 Agregar observaciones técnicas
+    datosActualizados.observacionesTecnica = req.body.observacionesTecnica || "";
+
+    // 📎 Guardar imágenes nuevas si se cargaron
+    if (req.files && req.files.length > 0) {
+      const nuevasImagenes = req.files.map(file => file.filename);
+
+      if (!escuela.imagenes) escuela.imagenes = [];
+      escuela.imagenes.push(...nuevasImagenes);
+
+      datosActualizados.imagenes = escuela.imagenes;
+    }
+
+    await actualizarEscuelaService(id, datosActualizados);
     res.redirect("/escuelas/dashboard");
   } catch (error) {
     console.error("Error al actualizar escuela:", error);
-    res.status(500).send("Error al actualizar escuela");
+    res.status(500).send("Error al actualizar la escuela");
   }
 }
 

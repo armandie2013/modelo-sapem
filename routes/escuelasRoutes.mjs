@@ -13,6 +13,8 @@ import {
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
 
+import { uploadEscuela } from "../middlewares/uploadEscuela.mjs";
+
 const router = express.Router();
 
 // Mostrar formulario de creación
@@ -31,7 +33,7 @@ router.get("/:id", verificarSesion, verificarPermiso("escuelas","ver"), verEscue
 router.get("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"), mostrarFormularioEditarEscuelaController);
 
 // Procesar edición
-router.post("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"), actualizarEscuelaController);
+router.post("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"), uploadEscuela, actualizarEscuelaController);
 
 // Eliminar escuela
 router.delete("/:id", verificarSesion, verificarPermiso("escuelas", "eliminar"), eliminarEscuelaController);
