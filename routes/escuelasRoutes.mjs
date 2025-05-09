@@ -16,13 +16,16 @@ import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
 
 import { uploadEscuela } from "../middlewares/uploadEscuela.mjs";
 
+import { validacionDatosEscuela } from "../middlewares/validationEscuela.mjs";
+import { manejarErroresValidacion } from "../middlewares/errorMiddleware.mjs";
+
 const router = express.Router();
 
 // Mostrar formulario de creación
 router.get("/crear", verificarSesion, verificarPermiso("escuelas", "crear"), mostrarFormularioCrearEscuelaController);
 
 // Crear nueva escuela
-router.post("/crear", verificarSesion, verificarPermiso("escuelas","crear"), crearEscuelaController);
+router.post("/crear", verificarSesion, verificarPermiso("escuelas","crear"), validacionDatosEscuela, manejarErroresValidacion, crearEscuelaController);
 
 // Listado general
 router.get("/dashboard", verificarSesion, verificarPermiso("escuelas","ver"), listarEscuelasController);
@@ -34,7 +37,7 @@ router.get("/:id", verificarSesion, verificarPermiso("escuelas","ver"), verEscue
 router.get("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"), mostrarFormularioEditarEscuelaController);
 
 // Procesar edición
-router.post("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"), uploadEscuela, actualizarEscuelaController);
+router.post("/:id/editar", verificarSesion, verificarPermiso("escuelas","editar"), uploadEscuela, validacionDatosEscuela, manejarErroresValidacion, actualizarEscuelaController);
 
 // Eliminar escuela
 router.delete("/:id", verificarSesion, verificarPermiso("escuelas", "eliminar"), eliminarEscuelaController);

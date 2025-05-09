@@ -30,7 +30,9 @@ export async function listarEscuelasController(req, res) {
 
 export async function mostrarFormularioCrearEscuelaController(req, res) {
   try {
-    res.render("escuelasViews/crearEscuela");
+    res.render("escuelasViews/crearEscuela", {
+      datos: {} // para evitar errores si no hay datos en el primer render
+    });
   } catch (error) {
     console.error("Error al mostrar formulario de creación:", error);
     res.status(500).send("Error al cargar el formulario");
@@ -39,7 +41,15 @@ export async function mostrarFormularioCrearEscuelaController(req, res) {
 
 export async function crearEscuelaController(req, res) {
   try {
-    // Obtener número de ticket único usando contador general
+    // ⛔ Si hay errores de validación, renderiza el formulario con los errores y los datos ingresados
+    if (req.erroresValidacion) {
+      return res.status(400).render("escuelasViews/crearEscuela", {
+        errores: req.erroresValidacion,
+        datos: req.body,
+      });
+    }
+
+    // ✅ Si no hay errores, sigue con la creación
     const nuevoNumeroTicket = await obtenerSiguienteNumeroDeTicket("escuelas");
 
     const datosEscuela = {
@@ -51,6 +61,7 @@ export async function crearEscuelaController(req, res) {
     };
 
     await crearEscuelaService(datosEscuela);
+    req.session.mensaje = `Caso ${nuevoNumeroTicket} creado correctamente`;
     res.redirect("/escuelas/dashboard");
   } catch (error) {
     console.error("Error al crear escuela:", error);
@@ -73,6 +84,17 @@ export async function mostrarFormularioEditarEscuelaController(req, res) {
 
 export async function actualizarEscuelaController(req, res) {
   try {
+    // ⛔ Validación: si hay errores, renderiza el formulario de edición con los datos actuales
+    if (req.erroresValidacion) {
+      const escuela = await obtenerEscuelaPorId(req.params.id);
+      return res.status(400).render("escuelasViews/editarEscuela", {
+        escuela,
+        usuario: req.session.usuario,
+        errores: req.erroresValidacion,
+        datos:req.body
+      });
+    }
+
     console.log("📩 Edición recibida");
     const { id } = req.params;
     const datosActualizados = { ...req.body };

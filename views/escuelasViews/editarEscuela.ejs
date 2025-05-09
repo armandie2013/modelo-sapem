@@ -12,8 +12,9 @@
                 <% } %>
 
                     <% if (typeof errores !=='undefined' && errores.length> 0) { %>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                            <ul class="list-disc pl-5 text-sm">
+                        <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-6 shadow-sm">
+                            <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
+                            <ul class="list-disc pl-6 text-sm space-y-1">
                                 <% errores.forEach(error=> { %>
                                     <li>
                                         <%= error.msg %>
@@ -28,12 +29,11 @@
 
                             <form action="/escuelas/<%= escuela._id %>/editar" method="POST"
                                 enctype="multipart/form-data" class="space-y-6">
-
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Fecha de creación</label>
                                         <input type="date" name="fechaDeCreacion"
-                                            value="<%= escuela.fechaDeCreacion.toISOString().split('T')[0] %>"
+                                            value="<%= typeof datos !== 'undefined' ? datos.fechaDeCreacion : escuela.fechaDeCreacion.toISOString().split('T')[0] %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
@@ -52,10 +52,10 @@
                                             <select id="estado" name="estado"
                                                 class="w-full border px-3 py-2 rounded-lg text-sm" <%=soloLectura
                                                 ? "disabled" : "" %>>
-                                                <option value="Abierto" <%=escuela.estado==="Abierto" ? "selected" : ""
-                                                    %>>Abierto</option>
-                                                <option value="Cerrado" <%=escuela.estado==="Cerrado" ? "selected" : ""
-                                                    %>>Cerrado</option>
+                                                <option value="Abierto" <%=(typeof datos !=='undefined' ? datos.estado :
+                                                    escuela.estado)==="Abierto" ? "selected" : "" %>>Abierto</option>
+                                                <option value="Cerrado" <%=(typeof datos !=='undefined' ? datos.estado :
+                                                    escuela.estado)==="Cerrado" ? "selected" : "" %>>Cerrado</option>
                                             </select>
                                             <% } else { %>
                                                 <input type="text" value="<%= escuela.estado %>" disabled
@@ -66,14 +66,16 @@
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Predio</label>
-                                        <input type="text" name="predio" value="<%= escuela.predio %>"
+                                        <input type="text" name="predio"
+                                            value="<%= typeof datos !== 'undefined' ? datos.predio : escuela.predio %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">CUE</label>
-                                        <input type="text" name="cue" value="<%= escuela.cue %>"
+                                        <input type="text" name="cue"
+                                            value="<%= typeof datos !== 'undefined' ? datos.cue : escuela.cue %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
@@ -81,42 +83,48 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Nombre de la
                                             escuela</label>
-                                        <input type="text" name="nombre" value="<%= escuela.nombre %>"
+                                        <input type="text" name="nombre"
+                                            value="<%= typeof datos !== 'undefined' ? datos.nombre : escuela.nombre %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Provincia</label>
-                                        <input type="text" name="provincia" value="<%= escuela.provincia %>"
+                                        <input type="text" name="provincia"
+                                            value="<%= typeof datos !== 'undefined' ? datos.provincia : escuela.provincia %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Departamento</label>
-                                        <input type="text" name="departamento" value="<%= escuela.departamento %>"
+                                        <input type="text" name="departamento"
+                                            value="<%= typeof datos !== 'undefined' ? datos.departamento : escuela.departamento %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Ciudad</label>
-                                        <input type="text" name="ciudad" value="<%= escuela.ciudad %>"
+                                        <input type="text" name="ciudad"
+                                            value="<%= typeof datos !== 'undefined' ? datos.ciudad : escuela.ciudad %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                                        <input type="text" name="direccion" value="<%= escuela.direccion %>"
+                                        <input type="text" name="direccion"
+                                            value="<%= typeof datos !== 'undefined' ? datos.direccion : escuela.direccion %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
 
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-medium text-gray-700">Proveedor</label>
-                                        <input type="text" name="proveedor" value="<%= escuela.proveedor %>"
+                                        <input type="text" name="proveedor"
+                                            value="<%= typeof datos !== 'undefined' ? datos.proveedor : escuela.proveedor %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" <%=soloLectura
                                             ? "readonly" : "" %>>
                                     </div>
@@ -126,7 +134,8 @@
                                     <label class="block text-sm font-medium text-gray-700">Detalle del caso</label>
                                     <textarea name="detalleDelCaso" rows="4"
                                         class="w-full border px-3 py-2 rounded-lg text-sm resize-none" <%=soloLectura
-                                        ? "readonly" : "" %>><%= escuela.detalleDelCaso %></textarea>
+                                        ? "readonly" : ""
+                                        %>><%= typeof datos !== 'undefined' ? datos.detalleDelCaso : escuela.detalleDelCaso %></textarea>
                                 </div>
 
                                 <div>
@@ -134,7 +143,8 @@
                                         técnicas</label>
                                     <textarea name="observacionesTecnica" rows="3"
                                         class="w-full border px-3 py-2 rounded-lg text-sm resize-none" <%=soloLectura
-                                        ? "readonly" : "" %>><%= escuela.observacionesTecnica || '' %></textarea>
+                                        ? "readonly" : ""
+                                        %>><%= typeof datos !== 'undefined' ? datos.observacionesTecnica : escuela.observacionesTecnica || '' %></textarea>
                                 </div>
 
                                 <!-- Campo para cargar nuevas imágenes -->
@@ -190,6 +200,18 @@
                             </form>
         </div>
     </main>
+
+    <script>
+        // Restringe solo números para cue y predio
+        ["cue", "predio"].forEach(name => {
+            const input = document.querySelector(`input[name="${name}"]`);
+            if (input && !input.readOnly && !input.disabled) {
+                input.addEventListener("input", () => {
+                    input.value = input.value.replace(/\D/g, "");
+                });
+            }
+        });
+    </script>
 
     <script>
         const inputImagenes = document.getElementById("imagenes");

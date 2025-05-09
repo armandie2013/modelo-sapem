@@ -3,8 +3,9 @@
         <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Registrar Nuevo Caso</h1>
 
         <% if (typeof errores !=='undefined' && errores.length> 0) { %>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <ul class="list-disc pl-5">
+            <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-6 shadow-sm">
+                <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
+                <ul class="list-disc pl-6 text-sm space-y-1">
                     <% errores.forEach(error=> { %>
                         <li>
                             <%= error.msg %>
@@ -17,82 +18,79 @@
                 <form action="/escuelas/crear" method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- Número de Ticket automático -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Número de
-                                Ticket</label>
-                            <input type="text" id="" value="" readonly placeholder="Automático"
-                                class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600">
-                            
+                            <label class="block text-sm font-medium text-gray-700">Número de Ticket</label>
+                            <input type="text" value="" readonly placeholder="Automático"
+                                class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600" />
                         </div>
 
-                        <!-- Fecha de creación -->
                         <div>
                             <label for="fechaDeCreacion" class="block text-sm font-medium text-gray-700">Fecha de
                                 creación</label>
-                            <input type="date" id="fechaDeCreacion" name="fechaDeCreacion" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="date" id="fechaDeCreacion" name="fechaDeCreacion"
+                                value="<%= datos?.fechaDeCreacion || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div>
-                            <label for="predio" class="block text-sm font-medium text-gray-700">
-                                Predio</label>
-                            <input type="text" id="predio" name="predio" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <label for="predio" class="block text-sm font-medium text-gray-700">Predio</label>
+                            <input type="text" id="predio" name="predio" value="<%= datos?.predio || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div>
                             <label for="cue" class="block text-sm font-medium text-gray-700">CUE</label>
-                            <input type="text" id="cue" name="cue" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="cue" name="cue" value="<%= datos?.cue || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div>
-                            <label for="nombreEscuela" class="block text-sm font-medium text-gray-700">Nombre de la
+                            <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre de la
                                 escuela</label>
-                            <input type="text" id="nombre" name="nombre" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="nombre" name="nombre" value="<%= datos?.nombre || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div>
                             <label for="provincia" class="block text-sm font-medium text-gray-700">Provincia</label>
-                            <input type="text" id="provincia" name="provincia" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="provincia" name="provincia" value="<%= datos?.provincia || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div>
                             <label for="departamento"
                                 class="block text-sm font-medium text-gray-700">Departamento</label>
-                            <input type="text" id="departamento" name="departamento" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="departamento" name="departamento"
+                                value="<%= datos?.departamento || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div>
                             <label for="ciudad" class="block text-sm font-medium text-gray-700">Ciudad</label>
-                            <input type="text" id="ciudad" name="ciudad" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="ciudad" name="ciudad" value="<%= datos?.ciudad || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
-                            <input type="text" id="direccion" name="direccion" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="direccion" name="direccion" value="<%= datos?.direccion || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="proveedor" class="block text-sm font-medium text-gray-700">Proveedor</label>
-                            <input type="text" id="proveedor" name="proveedor" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <input type="text" id="proveedor" name="proveedor" value="<%= datos?.proveedor || '' %>"
+                                class="w-full border px-3 py-2 rounded-lg text-sm" required />
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="detalleCaso" class="block text-sm font-medium text-gray-700">Detalle del
+                            <label for="detalleDelCaso" class="block text-sm font-medium text-gray-700">Detalle del
                                 caso</label>
-                            <textarea id="detalleDelCaso" name="detalleDelCaso" rows="4" required
-                                class="w-full border px-3 py-2 rounded-lg text-sm"></textarea>
+                            <textarea id="detalleDelCaso" name="detalleDelCaso" rows="4"
+                                class="w-full border px-3 py-2 rounded-lg text-sm"
+                                required><%= datos?.detalleDelCaso || '' %></textarea>
                         </div>
                     </div>
-
 
                     <div class="flex justify-end mt-6">
                         <button type="submit"
@@ -103,6 +101,18 @@
                 </form>
     </div>
 </main>
+
+<script>
+    // Solo permitir ingreso de números en los campos CUE y predio
+    ["cue", "predio"].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener("input", () => {
+                input.value = input.value.replace(/\D/g, "");
+            });
+        }
+    });
+</script>
 
 <script>
     // Capitaliza cada palabra (tipo título)
