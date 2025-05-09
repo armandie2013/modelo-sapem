@@ -14,6 +14,7 @@ import { obtenerSiguienteNumeroDeTicket } from "../utils/obtenerSiguienteNumeroD
 
 import Escuela from "../models/escuela.mjs";
 
+
 import fs from "fs/promises";
 import path from "path";
 

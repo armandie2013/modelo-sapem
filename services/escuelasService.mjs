@@ -1,5 +1,5 @@
 // services/escuelasService.mjs
-import Escuela from "../models/Escuela.mjs";
+import Escuela from "../models/escuela.mjs";
 import puppeteer from "puppeteer";
 import ejs from "ejs";
 import path from "path";
