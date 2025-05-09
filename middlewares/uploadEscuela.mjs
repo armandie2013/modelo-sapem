@@ -3,26 +3,39 @@ import fs from "fs";
 import path from "path";
 import Escuela from "../models/escuela.mjs";
 
-// Función para obtener el número de ticket de la escuela
+// Función para obtener el número de ticket con validaciones claras
 async function obtenerNumeroTicket(req) {
-  if (req.body.numeroTicket) return req.body.numeroTicket;
-  if (req.params.id) {
-    const escuela = await Escuela.findById(req.params.id);
-    if (escuela) return escuela.numeroTicket;
+  try {
+    if (req.body.numeroTicket) return req.body.numeroTicket;
+
+    if (req.params.id) {
+      const escuela = await Escuela.findById(req.params.id);
+      if (escuela && escuela.numeroTicket) return escuela.numeroTicket;
+    }
+
+    throw new Error("No se pudo obtener el número de ticket");
+  } catch (error) {
+    console.error("❌ Error en obtenerNumeroTicket:", error);
+    return null;
   }
-  return "desconocido"; // fallback si no se encuentra
 }
 
-// Multer storage configurado como función async
+// Multer storage
 const storage = multer.diskStorage({
   destination: async function (req, file, cb) {
     try {
       const numeroTicket = await obtenerNumeroTicket(req);
+
+      if (!numeroTicket) {
+        return cb(new Error("Número de ticket inválido"), null);
+      }
+
       const destino = path.resolve("public", "uploads", "escuelas", String(numeroTicket));
       fs.mkdirSync(destino, { recursive: true });
+
       cb(null, destino);
     } catch (error) {
-      console.error("❌ Error obteniendo número de ticket:", error);
+      console.error("❌ Error al preparar destino de imágenes:", error);
       cb(error, null);
     }
   },
@@ -32,13 +45,14 @@ const storage = multer.diskStorage({
   }
 });
 
-// Conversión a función express middleware para permitir async en destination
+// Exportar como middleware Express
 export const uploadEscuela = (req, res, next) => {
   const handler = multer({ storage }).array("imagenes", 3);
+  
   handler(req, res, function (err) {
     if (err) {
-      console.error("❌ Error al subir archivos:", err);
-      return res.status(500).send("Error al subir archivos");
+      console.error("❌ Error al procesar archivos con multer:", err.message || err);
+      return res.status(500).send("Error al subir archivos. Verifique el número de ticket.");
     }
     next();
   });

@@ -1,0 +1,85 @@
+<script>
+    const inputImagenes = document.getElementById("imagenes");
+    const preview = document.getElementById("preview");
+    const formulario = document.querySelector("form");
+    const btnGuardar = formulario.querySelector('button[type="submit"]');
+    const imagenesAEliminar = document.getElementById("imagenesAEliminar");
+    const contenedorGuardadas = document.getElementById("imagenes-guardadas");
+  
+    let imagenesActuales = [];
+    let cantidadYaCargadas = parseInt(inputImagenes?.dataset.yaCargadas || "0");
+  
+    function actualizarEstadoBoton() {
+      btnGuardar.disabled = false;
+    }
+  
+    inputImagenes?.addEventListener("change", function (event) {
+      const nuevasImagenes = Array.from(event.target.files);
+      const total = cantidadYaCargadas + nuevasImagenes.length;
+  
+      if (total > 3) {
+        alert(`Solo se permiten 3 imágenes. Ya hay ${cantidadYaCargadas} guardadas.`);
+        inputImagenes.value = "";
+        return;
+      }
+  
+      preview.innerHTML = "";
+      imagenesActuales = [];
+  
+      nuevasImagenes.forEach((file) => {
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const contenedor = document.createElement("div");
+            contenedor.className = "relative";
+  
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.className = "w-full h-auto rounded-lg border";
+  
+            const botonQuitar = document.createElement("button");
+            botonQuitar.type = "button";
+            botonQuitar.className = "absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full";
+            botonQuitar.innerText = "Quitar";
+            botonQuitar.addEventListener("click", () => {
+              preview.removeChild(contenedor);
+              imagenesActuales = imagenesActuales.filter(i => i !== file);
+              inputImagenes.value = "";
+              actualizarEstadoBoton();
+            });
+  
+            contenedor.appendChild(img);
+            contenedor.appendChild(botonQuitar);
+            preview.appendChild(contenedor);
+  
+            imagenesActuales.push(file);
+            actualizarEstadoBoton();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+  
+      actualizarEstadoBoton();
+    });
+  
+    // Eliminar imágenes ya guardadas (sin enviarlo al backend aún)
+    contenedorGuardadas?.addEventListener("click", function (e) {
+      if (e.target.classList.contains("quitar-imagen")) {
+        const contenedor = e.target.closest(".imagen-guardada");
+        const nombreImagen = contenedor.getAttribute("data-nombre");
+  
+        contenedor.remove(); // Remueve visualmente
+  
+        const actuales = imagenesAEliminar.value ? imagenesAEliminar.value.split(",") : [];
+        if (!actuales.includes(nombreImagen)) {
+          actuales.push(nombreImagen);
+          imagenesAEliminar.value = actuales.join(",");
+          cantidadYaCargadas--;
+  
+          // Actualizar límite para nuevas imágenes
+          inputImagenes.disabled = false;
+          actualizarEstadoBoton();
+        }
+      }
+    });
+  </script>

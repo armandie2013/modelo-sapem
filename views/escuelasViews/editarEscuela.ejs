@@ -23,7 +23,8 @@
                         </div>
                         <% } %>
 
-                        <input type="hidden" name="editadoPor" value="<%= usuario?.nombre + ' ' + usuario?.apellido %>">
+                            <input type="hidden" name="editadoPor"
+                                value="<%= usuario?.nombre + ' ' + usuario?.apellido %>">
 
                             <form action="/escuelas/<%= escuela._id %>/editar" method="POST"
                                 enctype="multipart/form-data" class="space-y-6">
@@ -150,27 +151,33 @@
                                 </div>
 
                                 <!-- Mostrar imágenes actuales -->
-                                <% if (escuela.imagenes && escuela.imagenes.length > 0) { %>
+                                <% if (escuela.imagenes && escuela.imagenes.length> 0) { %>
                                     <div class="mt-6">
-                                      <h2 class="text-sm font-semibold text-gray-700 mb-2">Imágenes cargadas:</h2>
-                                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                        <% escuela.imagenes.forEach((img) => { %>
-                                          <div class="relative">
-                                            <img src="/uploads/escuelas/<%= escuela.numeroTicket %>/<%= img %>" alt="Imagen cargada" class="w-full h-auto rounded-lg border" />
-                                            <% if (!soloLectura) { %>
-                                              <form action="/escuelas/<%= escuela._id %>/imagenes/<%= img %>/eliminar" method="POST" class="absolute top-2 right-2 form-eliminar-imagen">
-                                                <button type="submit" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow hover:bg-red-600">
-                                                  Quitar
-                                                </button>
-                                              </form>
-                                            <% } %>
-                                          </div>
-                                        <% }) %>
-                                      </div>
+                                        <h2 class="text-sm font-semibold text-gray-700 mb-2">Imágenes cargadas:</h2>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                                            id="imagenes-guardadas">
+                                            <% escuela.imagenes.forEach((img)=> { %>
+                                                <div class="relative imagen-guardada" data-nombre="<%= img %>">
+                                                    <img src="/uploads/escuelas/<%= escuela.numeroTicket %>/<%= img %>"
+                                                        alt="Imagen cargada" class="w-full h-auto rounded-lg border" />
+                                                    <% if (!soloLectura) { %>
+                                                        <button type="button"
+                                                            class="quitar-imagen bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow hover:bg-red-600 absolute top-2 right-2">
+                                                            Quitar
+                                                        </button>
+                                                        <% } %>
+                                                </div>
+                                                <% }) %>
+                                        </div>
                                     </div>
-                                  <% } else { %>
-                                    <p class="text-sm text-gray-500 mt-2 italic">No hay imágenes cargadas para este caso.</p>
-                                  <% } %>
+                                    <% } else { %>
+                                        <p class="text-sm text-gray-500 mt-2 italic">No hay imágenes cargadas para este
+                                            caso.</p>
+                                        <% } %>
+
+                                            <!-- Campo oculto para enviar las imágenes a eliminar -->
+                                            <input type="hidden" name="imagenesAEliminar" id="imagenesAEliminar"
+                                                value="">
 
                                             <% if (!soloLectura) { %>
                                                 <div class="text-center">
@@ -189,70 +196,84 @@
         const preview = document.getElementById("preview");
         const formulario = document.querySelector("form");
         const btnGuardar = formulario.querySelector('button[type="submit"]');
-      
-        let imagenesActuales = [];
+        const imagenesAEliminar = document.getElementById("imagenesAEliminar");
+        const contenedorGuardadas = document.getElementById("imagenes-guardadas");
+
         let cantidadYaCargadas = parseInt(inputImagenes?.dataset.yaCargadas || "0");
-      
+        let nuevasImagenes = []; // nuevas imágenes en memoria
+
         function actualizarEstadoBoton() {
-          btnGuardar.disabled = false;
+            btnGuardar.disabled = false;
         }
-      
+
         inputImagenes?.addEventListener("change", function (event) {
-          const nuevasImagenes = Array.from(event.target.files);
-          const total = cantidadYaCargadas + nuevasImagenes.length;
-      
-          if (total > 3) {
-            alert(`Solo se permiten 3 imágenes. Ya hay ${cantidadYaCargadas} guardadas.`);
-            inputImagenes.value = "";
-            return;
-          }
-      
-          preview.innerHTML = "";
-          imagenesActuales = [];
-      
-          nuevasImagenes.forEach((file) => {
-            if (file.type.startsWith("image/")) {
-              const reader = new FileReader();
-              reader.onload = function (e) {
-                const contenedor = document.createElement("div");
-                contenedor.className = "relative";
-      
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                img.className = "w-full h-auto rounded-lg border";
-      
-                const botonQuitar = document.createElement("button");
-                botonQuitar.type = "button";
-                botonQuitar.className = "absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full";
-                botonQuitar.innerText = "Quitar";
-                botonQuitar.addEventListener("click", () => {
-                  preview.removeChild(contenedor);
-                  imagenesActuales = imagenesActuales.filter(i => i !== file);
-                  inputImagenes.value = "";
-                  actualizarEstadoBoton();
-                });
-      
-                contenedor.appendChild(img);
-                contenedor.appendChild(botonQuitar);
-                preview.appendChild(contenedor);
-      
-                imagenesActuales.push(file);
-                actualizarEstadoBoton();
-              };
-              reader.readAsDataURL(file);
+            const seleccionadas = Array.from(event.target.files);
+
+            if (cantidadYaCargadas + seleccionadas.length > 3) {
+                alert(`Solo se permiten 3 imágenes. Ya hay ${cantidadYaCargadas} guardadas.`);
+                inputImagenes.value = "";
+                return;
             }
-          });
+
+            preview.innerHTML = "";
+            nuevasImagenes = seleccionadas;
+
+            nuevasImagenes.forEach((file) => {
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const contenedor = document.createElement("div");
+                        contenedor.className = "relative";
+
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.className = "w-full h-auto rounded-lg border";
+
+                        const botonQuitar = document.createElement("button");
+                        botonQuitar.type = "button";
+                        botonQuitar.className = "absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full";
+                        botonQuitar.innerText = "Quitar";
+                        botonQuitar.addEventListener("click", () => {
+                            preview.removeChild(contenedor);
+                            nuevasImagenes = nuevasImagenes.filter(i => i !== file);
+                            if (nuevasImagenes.length === 0) inputImagenes.value = "";
+                            actualizarEstadoBoton();
+                        });
+
+                        contenedor.appendChild(img);
+                        contenedor.appendChild(botonQuitar);
+                        preview.appendChild(contenedor);
+
+                        actualizarEstadoBoton();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         });
-      
-        // Cuando se borra una imagen ya guardada
-        document.querySelectorAll(".form-eliminar-imagen").forEach(form => {
-          form.addEventListener("submit", () => {
-            cantidadYaCargadas--;
-            actualizarEstadoBoton();
-            inputImagenes.disabled = false;
-          });
+
+        // Marcar imágenes para eliminación sin redirigir
+        contenedorGuardadas?.addEventListener("click", function (e) {
+            if (e.target.classList.contains("quitar-imagen")) {
+                const contenedor = e.target.closest(".imagen-guardada");
+                const nombreImagen = contenedor.getAttribute("data-nombre");
+                contenedor.remove();
+
+                const actuales = imagenesAEliminar.value ? imagenesAEliminar.value.split(",") : [];
+                if (!actuales.includes(nombreImagen)) {
+                    actuales.push(nombreImagen);
+                    imagenesAEliminar.value = actuales.join(",");
+                    cantidadYaCargadas--;
+                    inputImagenes.disabled = false;
+                    actualizarEstadoBoton();
+                }
+            }
         });
-      </script>
+    </script>
+
+
+
+
+
 
     <script>
         // Capitaliza cada palabra (título)
