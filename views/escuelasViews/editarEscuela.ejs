@@ -65,7 +65,7 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700">Predio</label>
+                                        <label class="block text-sm font-medium text-gray-700">Predio (6 dígitos)</label>
                                         <input type="text" name="predio"
                                             value="<%= typeof datos !== 'undefined' ? datos.predio : escuela.predio %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
@@ -73,7 +73,7 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700">CUE</label>
+                                        <label class="block text-sm font-medium text-gray-700">CUE (9 dígitos)</label>
                                         <input type="text" name="cue"
                                             value="<%= typeof datos !== 'undefined' ? datos.cue : escuela.cue %>"
                                             class="w-full border px-3 py-2 rounded-lg text-sm" required <%=soloLectura
