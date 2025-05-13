@@ -14,7 +14,6 @@ import { obtenerSiguienteNumeroDeTicket } from "../utils/obtenerSiguienteNumeroD
 
 import Escuela from "../models/escuela.mjs";
 
-
 import fs from "fs/promises";
 import path from "path";
 
@@ -31,7 +30,7 @@ export async function listarEscuelasController(req, res) {
 export async function mostrarFormularioCrearEscuelaController(req, res) {
   try {
     res.render("escuelasViews/crearEscuela", {
-      datos: {} // para evitar errores si no hay datos en el primer render
+      datos: {}, // para evitar errores si no hay datos en el primer render
     });
   } catch (error) {
     console.error("Error al mostrar formulario de creación:", error);
@@ -41,7 +40,6 @@ export async function mostrarFormularioCrearEscuelaController(req, res) {
 
 export async function crearEscuelaController(req, res) {
   try {
-    // ⛔ Si hay errores de validación, renderiza el formulario con los errores y los datos ingresados
     if (req.erroresValidacion) {
       return res.status(400).render("escuelasViews/crearEscuela", {
         errores: req.erroresValidacion,
@@ -49,7 +47,6 @@ export async function crearEscuelaController(req, res) {
       });
     }
 
-    // ✅ Si no hay errores, sigue con la creación
     const nuevoNumeroTicket = await obtenerSiguienteNumeroDeTicket("escuelas");
 
     const datosEscuela = {
@@ -59,6 +56,10 @@ export async function crearEscuelaController(req, res) {
       creadoPor: `${req.session.usuario.nombre} ${req.session.usuario.apellido}`,
       estado: "Abierto",
     };
+
+    if (req.files && req.files.length > 0) {
+      datosEscuela.imagenes = req.files.map((file) => file.filename);
+    }
 
     await crearEscuelaService(datosEscuela);
     req.session.mensaje = `Caso ${nuevoNumeroTicket} creado correctamente`;
@@ -91,7 +92,7 @@ export async function actualizarEscuelaController(req, res) {
         escuela,
         usuario: req.session.usuario,
         errores: req.erroresValidacion,
-        datos:req.body
+        datos: req.body,
       });
     }
 
@@ -103,12 +104,17 @@ export async function actualizarEscuelaController(req, res) {
 
     // Reglas de estado
     const esAdmin = req.session.usuario?.rol === "admin";
-    if (!esAdmin && escuela.estado === "Cerrado" && datosActualizados.estado === "Abierto") {
+    if (
+      !esAdmin &&
+      escuela.estado === "Cerrado" &&
+      datosActualizados.estado === "Abierto"
+    ) {
       datosActualizados.estado = "Cerrado";
     }
 
     datosActualizados.detalleDelCaso = req.body.detalleDelCaso || "";
-    datosActualizados.observacionesTecnica = req.body.observacionesTecnica || "";
+    datosActualizados.observacionesTecnica =
+      req.body.observacionesTecnica || "";
     datosActualizados.editadoPor = `${req.session.usuario.nombre} ${req.session.usuario.apellido}`;
 
     let imagenesFinales = [...(escuela.imagenes || [])];
@@ -116,10 +122,17 @@ export async function actualizarEscuelaController(req, res) {
     // 🧹 Quitar imágenes marcadas para eliminar
     if (req.body.imagenesAEliminar) {
       const aEliminar = req.body.imagenesAEliminar.split(",");
-      imagenesFinales = imagenesFinales.filter(img => !aEliminar.includes(img));
+      imagenesFinales = imagenesFinales.filter(
+        (img) => !aEliminar.includes(img)
+      );
       for (const nombre of aEliminar) {
-        const ruta = path.resolve("public", "uploads", "escuelas", String(escuela.numeroTicket), nombre);
-        fs.unlink(ruta, err => {
+        const ruta = path.join(
+          "C:/upload",
+          "escuelas",
+          String(escuela.numeroTicket),
+          nombre
+        );
+        fs.unlink(ruta, (err) => {
           if (err) console.warn("⚠️ No se pudo eliminar:", nombre);
         });
       }
@@ -127,10 +140,14 @@ export async function actualizarEscuelaController(req, res) {
 
     // 🆕 Agregar nuevas imágenes
     if (req.files && req.files.length > 0) {
-      const nuevas = req.files.map(file => file.filename);
+      const nuevas = req.files.map((file) => file.filename);
       const total = imagenesFinales.length + nuevas.length;
       if (total > 3) {
-        return res.status(400).send(`Solo se permiten 3 imágenes. Ya hay ${imagenesFinales.length}.`);
+        return res
+          .status(400)
+          .send(
+            `Solo se permiten 3 imágenes. Ya hay ${imagenesFinales.length}.`
+          );
       }
       imagenesFinales.push(...nuevas);
     }
@@ -146,67 +163,7 @@ export async function actualizarEscuelaController(req, res) {
   }
 }
 
-// export async function actualizarEscuelaController(req, res) {
-//   try {
-//     console.log("📩 Edición recibida");
-//     console.log("Archivos nuevos:", req.files);
-//     console.log("Imágenes a eliminar:", req.body.imagenesAEliminar);
-    
-//     const { id } = req.params;
-//     const datosActualizados = { ...req.body };
 
-//     const escuela = await obtenerEscuelaPorId(id);
-//     if (!escuela) return res.status(404).send("Escuela no encontrada");
-
-//     // Validaciones de estado
-//     const esAdmin = req.session.usuario?.rol === "admin";
-//     if (!esAdmin && escuela.estado === "Cerrado" && datosActualizados.estado === "Abierto") {
-//       datosActualizados.estado = "Cerrado";
-//     }
-
-//     // Campos manuales
-//     datosActualizados.detalleDelCaso = req.body.detalleDelCaso || "";
-//     datosActualizados.observacionesTecnica = req.body.observacionesTecnica || "";
-//     datosActualizados.editadoPor = `${req.session.usuario.nombre} ${req.session.usuario.apellido}`;
-
-//     // Imágenes actuales
-//     let imagenesFinales = [...escuela.imagenes];
-
-//     // Eliminar imágenes marcadas
-//     if (req.body.imagenesAEliminar) {
-//       const aEliminar = req.body.imagenesAEliminar.split(",");
-//       imagenesFinales = imagenesFinales.filter(img => !aEliminar.includes(img));
-
-//       // Eliminar físicamente
-//       for (const nombre of aEliminar) {
-//         const ruta = path.resolve("public", "uploads", "escuelas", String(escuela.numeroTicket), nombre);
-//         fs.unlink(ruta, err => {
-//           if (err) console.warn("⚠️ No se pudo eliminar:", nombre);
-//         });
-//       }
-//     }
-
-//     // Agregar nuevas imágenes
-//     if (req.files && req.files.length > 0) {
-//       const nuevas = req.files.map(file => file.filename);
-//       const total = imagenesFinales.length + nuevas.length;
-
-//       if (total > 3) {
-//         return res.status(400).send(`Solo se permiten 3 imágenes. Ya hay ${imagenesFinales.length}.`);
-//       }
-
-//       imagenesFinales.push(...nuevas);
-//     }
-
-//     datosActualizados.imagenes = imagenesFinales;
-
-//     await actualizarEscuelaService(id, datosActualizados);
-//     res.redirect(`/escuelas/${id}/editar`);
-//   } catch (error) {
-//     console.error("❌ Error al actualizar escuela:", error);
-//     res.status(500).send("Error al actualizar la escuela");
-//   }
-// }
 
 export async function eliminarEscuelaController(req, res) {
   try {
@@ -254,7 +211,9 @@ export async function eliminarImagenEscuelaController(req, res) {
     if (!escuela) return res.status(404).send("Escuela no encontrada");
 
     if (escuela.estado === "Cerrado") {
-      return res.status(403).send("No se pueden eliminar imágenes de un caso cerrado");
+      return res
+        .status(403)
+        .send("No se pueden eliminar imágenes de un caso cerrado");
     }
 
     // Verificamos que el array exista
@@ -265,9 +224,8 @@ export async function eliminarImagenEscuelaController(req, res) {
     await escuela.save();
 
     // Eliminar físicamente la imagen
-    const rutaImagen = path.resolve(
-      "public",
-      "uploads",
+    const rutaImagen = path.join(
+      "C:/upload",
       "escuelas",
       String(escuela.numeroTicket),
       nombre

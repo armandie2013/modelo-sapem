@@ -57,19 +57,19 @@
     </div>
 
     <!-- Imágenes -->
-    <% if (escuela.imagenes && escuela.imagenes.length> 0) { %>
-      <div class="mt-6">
-        <h2 class="text-sm font-semibold text-gray-700 mb-2">Imágenes cargadas:</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <% escuela.imagenes.forEach((img)=> { %>
-            <div class="relative">
-              <img src="/uploads/escuelas/<%= escuela.numeroTicket %>/<%= img %>" alt="Imagen cargada"
-                class="w-full h-auto rounded-lg border" />
-            </div>
-            <% }) %>
+<% if (escuela.imagenes && escuela.imagenes.length > 0) { %>
+  <div class="mt-6">
+    <h2 class="text-sm font-semibold text-gray-700 mb-2">Imágenes cargadas:</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <% escuela.imagenes.forEach((img) => { %>
+        <div class="relative">
+          <img src="/archivos/escuelas/<%= escuela.numeroTicket %>/<%= img %>" alt="Imagen cargada"
+            class="w-full h-auto rounded-lg border" />
         </div>
-      </div>
-      <% } %>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
 
         <div class="text-center mt-8">
           <a href="/escuelas/dashboard"

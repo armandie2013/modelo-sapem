@@ -63,7 +63,7 @@ app.set("layout", "layout");
 
 // 5. Archivos estáticos
 app.use(express.static(path.resolve("./public")));
-app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
+app.use("/archivos", express.static("C:/upload"));
 
 // 6. Middleware para datos globales en vistas
 app.use((req, res, next) => {
@@ -94,6 +94,7 @@ app.get("/", (req, res) => {
 app.use((req, res) => {
   res.status(404).send({ mensaje: "Ruta no encontrada" });
 });
+
 
 // 10. Mostrar rutas registradas en consola
 const listarRutas = (app) => {

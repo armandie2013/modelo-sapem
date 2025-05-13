@@ -34,8 +34,8 @@
                                         <label class="block text-sm font-medium text-gray-700">Fecha de creación</label>
                                         <input type="date" name="fechaDeCreacion"
                                             value="<%= typeof datos !== 'undefined' ? datos.fechaDeCreacion : escuela.fechaDeCreacion.toISOString().split('T')[0] %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
@@ -50,8 +50,8 @@
                                             caso</label>
                                         <% if (usuario?.rol==='admin' || escuela.estado==='Abierto' ) { %>
                                             <select id="estado" name="estado"
-                                                class="w-full border px-3 py-2 rounded-lg text-sm border-red-300" <%=soloLectura
-                                                ? "disabled" : "" %>>
+                                                class="w-full border px-3 py-2 rounded-lg text-sm border-red-300"
+                                                <%=soloLectura ? "disabled" : "" %>>
                                                 <option value="Abierto" <%=(typeof datos !=='undefined' ? datos.estado :
                                                     escuela.estado)==="Abierto" ? "selected" : "" %>>Abierto</option>
                                                 <option value="Cerrado" <%=(typeof datos !=='undefined' ? datos.estado :
@@ -65,19 +65,20 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700">Predio (6 dígitos)</label>
+                                        <label class="block text-sm font-medium text-gray-700">Predio (6
+                                            dígitos)</label>
                                         <input type="text" name="predio"
                                             value="<%= typeof datos !== 'undefined' ? datos.predio : escuela.predio %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">CUE (9 dígitos)</label>
                                         <input type="text" name="cue"
                                             value="<%= typeof datos !== 'undefined' ? datos.cue : escuela.cue %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
@@ -85,56 +86,56 @@
                                             escuela</label>
                                         <input type="text" name="nombre"
                                             value="<%= typeof datos !== 'undefined' ? datos.nombre : escuela.nombre %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Provincia</label>
                                         <input type="text" name="provincia"
                                             value="<%= typeof datos !== 'undefined' ? datos.provincia : escuela.provincia %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Departamento</label>
                                         <input type="text" name="departamento"
                                             value="<%= typeof datos !== 'undefined' ? datos.departamento : escuela.departamento %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Ciudad</label>
                                         <input type="text" name="ciudad"
                                             value="<%= typeof datos !== 'undefined' ? datos.ciudad : escuela.ciudad %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Dirección</label>
                                         <input type="text" name="direccion"
                                             value="<%= typeof datos !== 'undefined' ? datos.direccion : escuela.direccion %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
 
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-medium text-gray-700">Proveedor</label>
                                         <input type="text" name="proveedor"
                                             value="<%= typeof datos !== 'undefined' ? datos.proveedor : escuela.proveedor %>"
-                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" <%=soloLectura
-                                            ? "readonly" : "" %>>
+                                            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300"
+                                            <%=soloLectura ? "readonly" : "" %>>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Detalle del caso</label>
                                     <textarea name="detalleDelCaso" rows="4"
-                                        class="w-full border px-3 py-2 rounded-lg text-sm resize-none border-gray-300" <%=soloLectura
-                                        ? "readonly" : ""
+                                        class="w-full border px-3 py-2 rounded-lg text-sm resize-none border-gray-300"
+                                        <%=soloLectura ? "readonly" : ""
                                         %>><%= typeof datos !== 'undefined' ? datos.detalleDelCaso : escuela.detalleDelCaso %></textarea>
                                 </div>
 
@@ -142,8 +143,8 @@
                                     <label class="block text-sm font-medium text-gray-700">Observaciones
                                         técnicas</label>
                                     <textarea name="observacionesTecnica" rows="3"
-                                        class="w-full border px-3 py-2 rounded-lg text-sm resize-none border-gray-300" <%=soloLectura
-                                        ? "readonly" : ""
+                                        class="w-full border px-3 py-2 rounded-lg text-sm resize-none border-gray-300"
+                                        <%=soloLectura ? "readonly" : ""
                                         %>><%= typeof datos !== 'undefined' ? datos.observacionesTecnica : escuela.observacionesTecnica || '' %></textarea>
                                 </div>
 
@@ -152,8 +153,8 @@
                                     <label class="block text-sm font-medium text-gray-700">Imágenes del caso (máx.
                                         3)</label>
                                     <input type="file" name="imagenes" id="imagenes" accept="image/*" multiple
-                                        class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" <%=soloLectura ? "disabled"
-                                        : "" %>
+                                        class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300"
+                                        <%=soloLectura ? "disabled" : "" %>
                                     data-ya-cargadas="<%= escuela.imagenes?.length || 0 %>"
                                         >
                                         <div id="preview"
@@ -168,7 +169,7 @@
                                             id="imagenes-guardadas">
                                             <% escuela.imagenes.forEach((img)=> { %>
                                                 <div class="relative imagen-guardada" data-nombre="<%= img %>">
-                                                    <img src="/uploads/escuelas/<%= escuela.numeroTicket %>/<%= img %>"
+                                                    <img src="/archivos/escuelas/<%= escuela.numeroTicket %>/<%= img %>"
                                                         alt="Imagen cargada" class="w-full h-auto rounded-lg border" />
                                                     <% if (!soloLectura) { %>
                                                         <button type="button"
