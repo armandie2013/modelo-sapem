@@ -1,0 +1,117 @@
+<main class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Registrar Proveedor</h1>
+
+    <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
+      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-6 shadow-sm">
+        <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
+        <ul class="list-disc pl-6 text-sm space-y-1">
+          <% errores.forEach(error => { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form action="/proveedores/registrar" method="POST" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Número de proveedor -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Número de proveedor</label>
+          <input type="text" value="(se asignará automáticamente)" disabled
+            class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600" />
+        </div>
+
+        <!-- Nombre de fantasía -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nombre de fantasía</label>
+          <input type="text" name="nombreFantasia" value="<%= datos?.nombreFantasia || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
+        </div>
+
+        <!-- Nombre real -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nombre real</label>
+          <input type="text" name="nombreReal" value="<%= datos?.nombreReal || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
+        </div>
+
+        <!-- CUIT -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">CUIT</label>
+          <input type="text" name="cuit" value="<%= datos?.cuit || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
+        </div>
+
+        <!-- Domicilio -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Domicilio</label>
+          <input type="text" name="domicilio" value="<%= datos?.domicilio || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
+        </div>
+
+        <!-- Domicilio Fiscal (Nuevo) -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Domicilio Fiscal</label>
+          <input type="text" name="domicilioFiscal" value="<%= datos?.domicilioFiscal || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
+        </div>
+
+        <!-- Teléfono celular -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Teléfono celular</label>
+          <input type="text" name="telefonoCelular" value="<%= datos?.telefonoCelular || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
+        </div>
+
+        <!-- Teléfono fijo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Teléfono fijo</label>
+          <input type="text" name="telefonoFijo" value="<%= datos?.telefonoFijo || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
+        </div>
+
+        <!-- E-mail -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">E-mail</label>
+          <input type="email" name="email" value="<%= datos?.email || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
+        </div>
+
+        <!-- CBU -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">CBU</label>
+          <input type="text" name="cbu" value="<%= datos?.cbu || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
+        </div>
+
+        <!-- Categoría -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Categoría</label>
+          <input type="text" name="categoria" value="<%= datos?.categoria || '' %>"
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
+        </div>
+
+        <!-- Condición IVA (Nuevo) -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Condición IVA</label>
+          <select name="condicionIva" required class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300">
+            <option value="">Seleccione una opción</option>
+            <option value="Responsable Inscripto" <%= datos?.condicionIva === "Responsable Inscripto" ? "selected" : "" %>>Responsable Inscripto</option>
+            <option value="Monotributo" <%= datos?.condicionIva === "Monotributo" ? "selected" : "" %>>Monotributo</option>
+            <option value="Exento" <%= datos?.condicionIva === "Exento" ? "selected" : "" %>>Exento</option>
+            <option value="Consumidor Final" <%= datos?.condicionIva === "Consumidor Final" ? "selected" : "" %>>Consumidor Final</option>
+            <option value="Otro" <%= datos?.condicionIva === "Otro" ? "selected" : "" %>>Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit"
+          class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+          Guardar proveedor
+        </button>
+      </div>
+    </form>
+  </div>
+</main>

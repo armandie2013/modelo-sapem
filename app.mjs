@@ -12,6 +12,7 @@ import personasRoutes from "./routes/personasRoutes.mjs";
 import authRoutes from "./routes/authRoutes.mjs";
 import usuariosRoutes from "./routes/usuariosRoutes.mjs";
 import escuelasRoutes from "./routes/escuelasRoutes.mjs";
+import proveedorRoutes from "./routes/proveedorRoutes.mjs";
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -84,6 +85,7 @@ app.use("/viaticos", viaticosRoutes);
 app.use("/personas", personasRoutes);
 app.use("/usuarios", usuariosRoutes);
 app.use("/escuelas", escuelasRoutes);
+app.use("/proveedores", proveedorRoutes);
 
 // 8. Landing page como ruta principal
 app.get("/", (req, res) => {
