@@ -13,6 +13,14 @@ export async function mostrarFormularioProveedor(req, res) {
 
 export async function crearProveedorController(req, res) {
   try {
+    // ⚠️ Si hay errores de validación, renderiza la vista con los errores
+    if (req.erroresValidacion) {
+      return res.status(400).render("proveedoresViews/registroProveedor", {
+        errores: req.erroresValidacion,
+        datos: req.body,
+      });
+    }
+
     const nuevoNumero = await obtenerSiguienteNumeroDeProveedor();
 
     const nuevoProveedor = {
@@ -67,6 +75,17 @@ export async function mostrarFormularioEditarProveedor(req, res) {
 
 export async function actualizarProveedorController(req, res) {
   try {
+    // 🛑 Si hay errores de validación, mostrar nuevamente el formulario con errores
+    if (req.erroresValidacion) {
+      const proveedor = await Proveedor.findById(req.params.id);
+      return res.status(400).render("proveedoresViews/editarProveedor", {
+        proveedor,
+        errores: req.erroresValidacion,
+        datos: req.body,
+      });
+    }
+
+    // ✅ Si no hay errores, actualizar normalmente
     const proveedor = await Proveedor.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

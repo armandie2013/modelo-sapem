@@ -11,6 +11,9 @@ import {
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
 
+import { validacionProveedor } from "../middlewares/validacionProveedor.mjs";
+import { manejarErroresValidacion } from "../middlewares/errorMiddleware.mjs";
+
 const router = Router();
 
 router.get(
@@ -29,6 +32,8 @@ router.post(
   "/registrar",
   verificarSesion,
   verificarPermiso("proveedores", "crear"),
+  validacionProveedor,
+  manejarErroresValidacion,
   crearProveedorController
 );
 router.get(
@@ -47,6 +52,8 @@ router.post(
   "/:id/editar",
   verificarSesion,
   verificarPermiso("proveedores", "editar"),
+  validacionProveedor,
+  manejarErroresValidacion,
   actualizarProveedorController
 );
 router.delete(
