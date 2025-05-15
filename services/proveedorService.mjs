@@ -5,9 +5,9 @@ export async function crearProveedorService(datos) {
 }
 
 export async function obtenerProveedoresService() {
-  return await Proveedor.find().sort({ createdAt: -1 });
+  return await Proveedor.find().sort({ createdAt: 1 });
 }
 
 export async function obtenerUltimoProveedorService() {
-  return await Proveedor.findOne().sort({ numeroProveedor: -1 });
+  return await Proveedor.findOne().sort({ numeroProveedor: 1 });
 }
