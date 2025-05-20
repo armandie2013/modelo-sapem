@@ -6,7 +6,7 @@
     <!-- Botón hamburguesa -->
     <button id="menu-toggle" class="md:hidden">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
@@ -17,7 +17,8 @@
       <% if (usuario && usuario.rol) { %>
         <!-- Administración -->
         <div class="relative">
-          <button onclick="toggleDropdown('adminDropdown')" class="hover:underline focus:outline-none">Administración ▾</button>
+          <button onclick="toggleDropdown('adminDropdown')" class="hover:underline focus:outline-none">Administración
+            ▾</button>
           <ul id="adminDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
             <li><a href="/proveedores" class="block px-4 py-2 hover:bg-gray-200">Listado de Proveedores</a></li>
             <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Módulo 2</a></li>
@@ -26,7 +27,8 @@
 
         <!-- Gerencia -->
         <div class="relative">
-          <button onclick="toggleDropdown('gerenciaDropdown')" class="hover:underline focus:outline-none">Gerencia ▾</button>
+          <button onclick="toggleDropdown('gerenciaDropdown')" class="hover:underline focus:outline-none">Gerencia
+            ▾</button>
           <ul id="gerenciaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
             <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Indicadores</a></li>
           </ul>
@@ -34,7 +36,8 @@
 
         <!-- Proyectos -->
         <div class="relative">
-          <button onclick="toggleDropdown('proyectosDropdown')" class="hover:underline focus:outline-none">Proyectos ▾</button>
+          <button onclick="toggleDropdown('proyectosDropdown')" class="hover:underline focus:outline-none">Proyectos
+            ▾</button>
           <ul id="proyectosDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
             <li><a href="/escuelas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Escuelas</a></li>
             <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Nuevo Proyecto</a></li>
@@ -43,41 +46,44 @@
 
         <!-- Técnica -->
         <div class="relative">
-          <button onclick="toggleDropdown('tecnicaDropdown')" class="hover:underline focus:outline-none">Técnica ▾</button>
+          <button onclick="toggleDropdown('tecnicaDropdown')" class="hover:underline focus:outline-none">Técnica
+            ▾</button>
           <ul id="tecnicaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
             <li><a href="/viaticos/dashboard" class="block px-4 py-2 hover:bg-gray-200">Viáticos</a></li>
             <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Control de Stock</a></li>
           </ul>
         </div>
 
-        <% if (usuario.rol === 'admin') { %>
-        <!-- Accesos admin -->
-        <div class="relative">
-          <button onclick="toggleDropdown('adminAccessDropdown')" class="hover:underline focus:outline-none">Acceso Admin ▾</button>
-          <ul id="adminAccessDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
-            <li><a href="/personas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Personal SAPEM</a></li>
-            <li><a href="/usuarios/dashboard" class="block px-4 py-2 hover:bg-gray-200">Usuarios Registrados</a></li>
-          </ul>
-        </div>
-        <% } %>
-
-        <!-- Logout -->
-        <form action="/logout" method="POST" class="mt-4 md:mt-0 md:ml-4">
-          <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800">Cerrar sesión</button>
-        </form>
-      <% } else { %>
-        <!-- Visitantes -->
-        <ul class="flex flex-col md:flex-row md:space-x-6">
-          <% if (rutaActual === "/registro") { %>
-            <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
-          <% } else if (rutaActual === "/login") { %>
-            <li><a href="/registro" class="hover:underline">Registrarse</a></li>
-          <% } else { %>
-            <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
-            <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+        <% if (usuario.rol==='admin' ) { %>
+          <!-- Accesos admin -->
+          <div class="relative">
+            <button onclick="toggleDropdown('adminAccessDropdown')" class="hover:underline focus:outline-none">Acceso
+              Admin ▾</button>
+            <ul id="adminAccessDropdown"
+              class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
+              <li><a href="/personas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Personal SAPEM</a></li>
+              <li><a href="/usuarios/dashboard" class="block px-4 py-2 hover:bg-gray-200">Usuarios Registrados</a></li>
+            </ul>
+          </div>
           <% } %>
-        </ul>
-      <% } %>
+
+            <!-- Logout -->
+            <form action="/logout" method="POST" class="mt-4 md:mt-0 md:ml-4">
+              <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800">Cerrar sesión</button>
+            </form>
+            <% } else { %>
+              <!-- Visitantes -->
+              <ul class="flex flex-col md:flex-row md:space-x-6">
+                <% if (rutaActual==="/registro" ) { %>
+                  <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
+                  <% } else if (rutaActual==="/login" ) { %>
+                    <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+                    <% } else { %>
+                      <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
+                      <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+                      <% } %>
+              </ul>
+              <% } %>
     </div>
   </div>
 </nav>
