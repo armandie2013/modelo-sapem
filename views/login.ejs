@@ -1,34 +1,44 @@
-<div class="flex justify-center items-start w-full">
-  <div class="bg-white p-10 rounded-2xl shadow-lg w-full max-w-sm border border-gray-300">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6 mt-2">Iniciar Sesión</h1>
+<div class="flex justify-center items-center min-h-[calc(100vh-220px)] bg-gray-100 px-4">
+  <div class="bg-white w-full max-w-sm p-8 rounded-2xl shadow-2xl border border-gray-200">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-1">Iniciar Sesión</h1>
+    <p class="text-sm text-gray-500 text-center mb-6">Accedé a tu cuenta</p>
 
-    <!-- Mensajes de error -->
-    <div class="min-h-[48px] mb-6">
-      <% if (errores && errores.length > 0) { %>
-        <ul>
-          <% errores.forEach(e => { %>
-            <li class="text-red-700 text-center"><%= e.mensaje %></li>
-          <% }) %>
-        </ul>
-      <% } %>
+    <!-- Errores -->
+    <div class="min-h-[48px] mb-1">
+      <% if (errores && errores.length> 0) { %>
+        <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded text-sm">
+          <ul class="list-disc list-inside">
+            <% errores.forEach(e=> { %>
+              <li>
+                <%= e.mensaje %>
+              </li>
+              <% }) %>
+          </ul>
+        </div>
+        <% } %>
     </div>
 
     <form action="/login" method="POST" class="space-y-4">
+      <!-- Email -->
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
+        <label for="email" class="block text-sm text-gray-700 mb-1">Correo electrónico</label>
         <input type="email" name="email" id="email" required
-               class="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-blue-0 transition"
-               value="<%= datos?.email || '' %>">
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="correo@ejemplo.com" value="<%= datos?.email || '' %>">
       </div>
 
+      <!-- Contraseña -->
       <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+        <label for="password" class="block text-sm text-gray-700 mb-1">Contraseña</label>
         <input type="password" name="password" id="password" required
-               class="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-blue-0 transition">
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="********">
       </div>
 
-      <div class="pt-4">
-        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 mt-4 rounded-lg hover:bg-blue-800 transition">
+      <!-- Botón -->
+      <div class="pt-2">
+        <button type="submit"
+          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
           Iniciar Sesión
         </button>
       </div>
