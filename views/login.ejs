@@ -1,47 +1,78 @@
-<div class="flex justify-center items-center min-h-[calc(100vh-220px)] bg-gray-100 px-4">
-  <div class="bg-white w-full max-w-sm p-8 rounded-2xl shadow-2xl border border-gray-200">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-1">Iniciar Sesión</h1>
-    <p class="text-sm text-gray-500 text-center mb-6">Accedé a tu cuenta</p>
+<!-- Toast flotante (colocar antes del contenedor principal o justo después del <body>) -->
+<% if (errores && errores.length> 0) { %>
+  <div id="toastErrores" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-red-600/80 text-white px-6 py-4 rounded-xl shadow-xl z-50
+              animate-fade-in text-sm max-w-sm w-full text-center transition-opacity duration-500 backdrop-blur-sm">
+    <ul class="space-y-1">
+      <% errores.forEach(e=> { %>
+        <li> <%= e.mensaje %>
+        </li>
+        <% }) %>
+    </ul>
+  </div>
+  <% } %>
 
-    <!-- Errores -->
-    <div class="min-h-[40px] mb-1">
-      <% if (errores && errores.length> 0) { %>
-        <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded text-sm">
-          <ul class="list-disc list-inside">
-            <% errores.forEach(e=> { %>
-              <li>
-                <%= e.mensaje %>
-              </li>
-              <% }) %>
-          </ul>
-        </div>
-        <% } %>
+    <!-- Formulario -->
+    <div class="flex justify-center items-center min-h-[calc(100vh-220px)] bg-gray-100 px-4">
+      <div class="bg-white w-full max-w-sm p-8 rounded-2xl shadow-2xl border border-gray-200">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-1">Iniciar Sesión</h1>
+        <p class="text-sm text-gray-500 text-center mb-6">Accedé a tu cuenta</p>
+
+        <form action="/login" method="POST" class="space-y-4">
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm text-gray-700 mb-1">Correo electrónico</label>
+            <input type="email" name="email" id="email" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="correo@ejemplo.com" value="<%= datos?.email || '' %>">
+          </div>
+
+          <!-- Contraseña -->
+          <div>
+            <label for="password" class="block text-sm text-gray-700 mb-1">Contraseña</label>
+            <input type="password" name="password" id="password" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="********">
+          </div>
+
+          <!-- Botón -->
+          <div class="pt-2">
+            <button type="submit"
+              class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+              Iniciar Sesión
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <form action="/login" method="POST" class="space-y-4">
-      <!-- Email -->
-      <div>
-        <label for="email" class="block text-sm text-gray-700 mb-1">Correo electrónico</label>
-        <input type="email" name="email" id="email" required
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="correo@ejemplo.com" value="<%= datos?.email || '' %>">
-      </div>
+    <!-- Script para ocultar el toast automáticamente -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toast = document.getElementById("toastErrores");
+        if (toast) {
+          setTimeout(() => {
+            toast.classList.add("opacity-0", "-translate-y-2");
+            setTimeout(() => toast.remove(), 600); // eliminar del DOM
+          }, 4000);
+        }
+      });
+    </script>
 
-      <!-- Contraseña -->
-      <div>
-        <label for="password" class="block text-sm text-gray-700 mb-1">Contraseña</label>
-        <input type="password" name="password" id="password" required
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="********">
-      </div>
+    <!-- Animación personalizada -->
+    <style>
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) translateX(-50%);
+        }
 
-      <!-- Botón -->
-      <div class="pt-2">
-        <button type="submit"
-          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
-          Iniciar Sesión
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+        to {
+          opacity: 1;
+          transform: translateY(0) translateX(-50%);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fade-in 0.4s ease-out forwards;
+      }
+    </style>
