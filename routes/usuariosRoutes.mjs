@@ -4,20 +4,23 @@ import express from "express";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { accesoPorModulo } from "../middlewares/moduloAccessMiddleware.mjs";
 import { listarUsuarios, eliminarUsuario } from "../controllers/usuariosController.mjs";
+import { verificarAdmin } from "../middlewares/verificarAdmin.mjs";
 
 const router = express.Router();
 
 router.get(
   "/dashboard",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarAdmin,
+  // accesoPorModulo("viaticos"),
   listarUsuarios
 );
 
 router.delete(
   "/eliminar/:id",
   verificarSesion,
-  accesoPorModulo("viaticos"),
+  verificarAdmin,
+  // accesoPorModulo("viaticos"),
   eliminarUsuario
 );
 
