@@ -1,45 +1,44 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-    <div class="bg-white max-w-4xl mx-auto p-8 rounded-2xl shadow-xl border border-gray-300">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Editar Pedido de Materiales</h1>
+    <div class="bg-white max-w-6xl mx-auto p-6 md:p-8 rounded-2xl shadow-xl border border-gray-300">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center sm:text-left">Editar Pedido de Materiales</h1>
 
         <form id="formularioEditar" action="/pedidos-materiales/<%= pedido._id %>/editar" method="POST"
             onsubmit="return prepararItems()">
-            <div class="grid md:grid-cols-12 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
                 <div class="md:col-span-2">
-                    <label class="block text-gray-700 font-medium mb-2">Fecha</label>
+                    <label class="block text-gray-700 font-medium mb-1">Fecha</label>
                     <input type="text" readonly value="<%= new Date(pedido.fecha).toLocaleDateString('es-AR') %>"
-                        class="w-full border px-2 py-2 rounded-lg bg-gray-100 text-sm">
+                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm">
                 </div>
 
                 <div class="md:col-span-8">
-                    <label class="block text-gray-700 font-medium mb-2">Área solicitante</label>
+                    <label class="block text-gray-700 font-medium mb-1">Área solicitante</label>
                     <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg"
                         value="<%= pedido.areaSolicitante %>" oninput="capitalizarPrimeraLetra(this)">
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-gray-700 font-medium mb-2">N° Pedido</label>
+                    <label class="block text-gray-700 font-medium mb-1">N° Pedido</label>
                     <input type="text" readonly value="<%= pedido.numeroPedido %>"
-                        class="w-full border px-2 py-2 rounded-lg bg-gray-100 text-sm text-right">
+                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm text-center">
                 </div>
             </div>
 
             <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">Proyecto</label>
+                <label class="block text-gray-700 font-medium mb-1">Proyecto</label>
                 <input type="text" name="proyecto" required class="w-full border px-3 py-2 rounded-lg"
                     value="<%= pedido.proyecto %>" oninput="capitalizarPrimeraLetra(this)">
             </div>
 
-            <!-- Tabla editable -->
-            <div class="mb-6">
-                <table class="w-full border text-sm" id="tablaItems">
-                    <thead class="bg-gray-200 text-gray-700 text-center">
-                        <tr>
-                            <th class="border px-2 py-1 w-16">Ítem</th>
-                            <th class="border px-2 py-1">Detalle</th>
-                            <th class="border px-2 py-1">Dato Técnico</th>
-                            <th class="border px-2 py-1 w-24">Cant.</th>
-                            <th class="border px-2 py-1 w-24">Acción</th>
+            <div class="mb-6 overflow-x-auto">
+                <table class="min-w-full border text-sm" id="tablaItems">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 text-center whitespace-nowrap">
+                            <th class="border px-2 py-1 w-12">Ítem</th>
+                            <th class="border px-2 py-1 w-[55%]">Detalle</th>
+                            <th class="border px-2 py-1 w-[25%]">Dato Técnico</th>
+                            <th class="border px-2 py-1 w-[10%]">Cant.</th>
+                            <th class="border px-2 py-1 w-[10%]">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTabla">
@@ -65,7 +64,8 @@
 
                 <div class="mt-4">
                     <button type="button" onclick="agregarFila()"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg">Agregar Fila</button>
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Agregar
+                        Fila</button>
                 </div>
             </div>
 
@@ -73,9 +73,8 @@
 
             <div class="text-center">
                 <button type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
-                    Guardar Cambios
-                </button>
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">Guardar
+                    Cambios</button>
             </div>
         </form>
     </div>
@@ -96,9 +95,7 @@
             + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
             + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
             + '<td><input type="number" class="w-full border px-2 py-1" required></td>'
-            + '<td class="text-center">'
-            + '  <button type="button" onclick="eliminarFila(this)" class="text-red-600">Eliminar</button>'
-            + '</td>';
+            + '<td class="text-center"><button type="button" onclick="eliminarFila(this)" class="text-red-600">Eliminar</button></td>';
         document.getElementById("cuerpoTabla").appendChild(fila);
         actualizarNumerosItem();
     }

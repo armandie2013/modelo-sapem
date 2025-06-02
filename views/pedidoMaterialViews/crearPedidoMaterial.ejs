@@ -1,44 +1,44 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-    <div class="bg-white max-w-4xl mx-auto p-8 rounded-2xl shadow-xl border border-gray-300">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Nuevo Pedido de Materiales</h1>
+    <div class="bg-white max-w-6xl mx-auto p-6 md:p-8 rounded-2xl shadow-xl border border-gray-300">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center sm:text-left">Nuevo Pedido de Materiales</h1>
 
         <form id="formularioPedido" action="/pedidos-materiales/crear" method="POST" onsubmit="return prepararItems()">
-            <div class="grid md:grid-cols-12 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
                 <div class="md:col-span-2">
-                    <label class="block text-gray-700 font-medium mb-2">Fecha</label>
+                    <label class="block text-gray-700 font-medium mb-1">Fecha</label>
                     <input type="text" readonly value="<%= new Date().toLocaleDateString('es-AR') %>"
-                        class="w-full border px-2 py-2 rounded-lg bg-gray-100 text-sm">
+                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm">
                 </div>
 
                 <div class="md:col-span-8">
-                    <label class="block text-gray-700 font-medium mb-2">Área solicitante</label>
+                    <label class="block text-gray-700 font-medium mb-1">Área solicitante</label>
                     <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg"
                         value="<%= datos?.areaSolicitante || '' %>" oninput="capitalizarPrimeraLetra(this)">
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-gray-700 font-medium mb-2">N° Pedido</label>
-                    <input type="text" name="numeroPedido" value="<%= numeroPedido %>" readonly
-                        class="w-full border px-2 py-2 rounded-lg bg-gray-100 text-sm text-right">
+                    <label class="block text-gray-700 font-medium mb-1">N° Pedido</label>
+                    <input type="text" value="Automáticamente" readonly
+                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm text-center text-gray-500 italic">
                 </div>
             </div>
 
             <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">Proyecto</label>
+                <label class="block text-gray-700 font-medium mb-1">Proyecto</label>
                 <input type="text" name="proyecto" required class="w-full border px-3 py-2 rounded-lg"
                     value="<%= datos?.proyecto || '' %>" oninput="capitalizarPrimeraLetra(this)">
             </div>
 
-            <!-- Tabla dinámica de items -->
-            <div class="mb-6">
-                <table class="w-full border text-sm" id="tablaItems">
+            <!-- Tabla dinámica -->
+            <div class="mb-6 overflow-x-auto">
+                <table class="min-w-full border text-sm" id="tablaItems">
                     <thead>
-                        <tr class="bg-gray-200 text-gray-700 text-center">
-                            <th class="border px-2 py-1 w-16">Ítem</th>
-                            <th class="border px-2 py-1">Detalle</th>
-                            <th class="border px-2 py-1">Dato Técnico</th>
-                            <th class="border px-2 py-1 w-24">Cant.</th>
-                            <th class="border px-2 py-1 w-24">Acción</th>
+                        <tr class="bg-gray-200 text-gray-700 text-center whitespace-nowrap">
+                            <th class="border px-2 py-1 w-12">Ítem</th>
+                            <th class="border px-2 py-1 w-[55%]">Detalle</th>
+                            <th class="border px-2 py-1 w-[25%]">Dato Técnico</th>
+                            <th class="border px-2 py-1 w-[10%]">Cant.</th>
+                            <th class="border px-2 py-1 w-[10%]">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTabla">
@@ -56,13 +56,15 @@
                         </tr>
                     </tbody>
                 </table>
+
                 <div class="mt-4">
                     <button type="button" onclick="agregarFila()"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg">Agregar Fila</button>
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Agregar Fila
+                    </button>
                 </div>
             </div>
 
-            <!-- Campo oculto para items -->
             <input type="hidden" name="items" id="inputItems">
 
             <div class="text-center">
@@ -74,7 +76,6 @@
         </form>
     </div>
 </main>
-
 
 <script>
     function actualizarNumerosItem() {
@@ -123,7 +124,6 @@
         return true;
     }
 
-    // Inicializa los números al cargar
     document.addEventListener("DOMContentLoaded", actualizarNumerosItem);
 
     function capitalizarPrimeraLetra(input) {

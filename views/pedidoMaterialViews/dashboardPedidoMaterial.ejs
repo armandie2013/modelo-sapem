@@ -1,53 +1,71 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-xl border border-gray-300">
-    <div class="flex justify-between items-center mb-6">
+  <div class="bg-white max-w-7xl mx-auto p-6 md:p-8 rounded-2xl shadow-xl border border-gray-300">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <h1 class="text-2xl font-bold text-gray-800">Pedidos de Materiales</h1>
       <a href="/pedidos-materiales/crear"
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition whitespace-nowrap">
         Nuevo pedido
       </a>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="min-w-full border text-sm">
-        <thead class="bg-gray-200 text-gray-700">
-          <tr>
-            <th class="border px-3 py-2">N° Pedido</th>
-            <th class="border px-3 py-2">Fecha</th>
-            <th class="border px-3 py-2">Área</th>
-            <th class="border px-3 py-2">Proyecto</th>
-            <th class="border px-3 py-2">Creado por</th>
-            <th class="border px-3 py-2">Editado por</th>
-            <th class="border px-3 py-2">Acciones</th>
+      <table class="min-w-full border text-sm block md:table">
+        <!-- Encabezado -->
+        <thead class="bg-gray-200 text-gray-700 hidden md:table-header-group">
+          <tr class="text-center">
+            <th class="border px-2 py-2 w-24">N° Pedido</th>
+            <th class="border px-2 py-2 w-28">Fecha</th>
+            <th class="border px-2 py-2 w-64">Área</th>
+            <th class="border px-2 py-2 w-64">Proyecto</th>
+            <th class="border px-2 py-2 w-40">Creado por</th>
+            <th class="border px-2 py-2 w-40">Editado por</th>
+            <th class="border px-2 py-2 w-56">Acciones</th>
           </tr>
         </thead>
-        <tbody>
-          <% if (pedidos.length===0) { %>
-            <tr>
-              <td colspan="7" class="text-center py-4 text-gray-500">No hay pedidos cargados</td>
+
+        <tbody class="block md:table-row-group">
+          <% if (pedidos.length === 0) { %>
+            <tr class="block md:table-row border md:border-0">
+              <td colspan="7" class="text-center py-4 text-gray-500 block md:table-cell">
+                No hay pedidos cargados
+              </td>
             </tr>
-            <% } else { %>
-              <% pedidos.forEach(p=> { %>
-                <tr>
-                  <td class="border px-3 py-2 text-center">
-                    <%= p.numeroPedido %>
-                  </td>
-                  <td class="border px-3 py-2 text-center">
-                    <%= new Date(p.fecha).toLocaleDateString("es-AR") %>
-                  </td>
-                  <td class="border px-3 py-2">
-                    <%= p.areaSolicitante %>
-                  </td>
-                  <td class="border px-3 py-2">
-                    <%= p.proyecto %>
-                  </td>
-                  <td class="border px-3 py-2">
-                    <%= p.creadoPor || "-" %>
-                  </td>
-                  <td class="border px-3 py-2">
-                    <%= p.editadoPor || "-" %>
-                  </td>
-                  <td class="border px-3 py-2 text-center space-x-2">
+          <% } else { %>
+            <% pedidos.forEach(p => { %>
+              <tr class="block md:table-row border md:border-0 mb-4 md:mb-0 hover:bg-gray-50 rounded-lg md:rounded-none">
+                <!-- N° Pedido -->
+                <td class="border px-2 py-2 text-center md:table-cell block">
+                  <span class="font-semibold md:hidden">N° Pedido: </span><%= p.numeroPedido %>
+                </td>
+
+                <!-- Fecha -->
+                <td class="border px-2 py-2 text-center md:table-cell block">
+                  <span class="font-semibold md:hidden">Fecha: </span><%= new Date(p.fecha).toLocaleDateString("es-AR") %>
+                </td>
+
+                <!-- Área -->
+                <td class="border px-2 py-2 text-left md:table-cell block">
+                  <span class="font-semibold md:hidden">Área: </span><%= p.areaSolicitante %>
+                </td>
+
+                <!-- Proyecto -->
+                <td class="border px-2 py-2 text-left md:table-cell block">
+                  <span class="font-semibold md:hidden">Proyecto: </span><%= p.proyecto %>
+                </td>
+
+                <!-- Creado por -->
+                <td class="border px-2 py-2 md:table-cell block">
+                  <span class="font-semibold md:hidden">Creado por: </span><%= p.creadoPor || "-" %>
+                </td>
+
+                <!-- Editado por -->
+                <td class="border px-2 py-2 md:table-cell block">
+                  <span class="font-semibold md:hidden">Editado por: </span><%= p.editadoPor || "-" %>
+                </td>
+
+                <!-- Acciones -->
+                <td class="border px-2 py-2 text-center md:table-cell block">
+                  <div class="inline-flex flex-wrap gap-2 justify-center">
                     <a href="/pedidos-materiales/<%= p._id %>/ver" class="text-blue-600 hover:underline">Ver</a>
                     <a href="/pedidos-materiales/<%= p._id %>/editar" class="text-yellow-600 hover:underline">Editar</a>
                     <a href="/pedidos-materiales/pdf/<%= p._id %>" target="_blank"
@@ -58,10 +76,11 @@
                         Eliminar
                       </button>
                     </form>
-                  </td>
-                </tr>
-                <% }) %>
-                  <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
         </tbody>
       </table>
     </div>
