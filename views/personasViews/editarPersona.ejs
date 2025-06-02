@@ -40,10 +40,14 @@
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Administración</h2>
         <p class="text-gray-600 font-semibold text-xs mb-1">Proveedores</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][ver]" value="true" <%= persona.modulosPermitidos.proveedores?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][crear]" value="true" <%= persona.modulosPermitidos.proveedores?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][editar]" value="true" <%= persona.modulosPermitidos.proveedores?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][eliminar]" value="true" <%= persona.modulosPermitidos.proveedores?.eliminar ? "checked" : "" %>> Eliminar</label>
+          <label><input type="checkbox" name="modulosPermitidos[proveedores][ver]" value="true"
+              <%=persona.modulosPermitidos.proveedores?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[proveedores][crear]" value="true"
+              <%=persona.modulosPermitidos.proveedores?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[proveedores][editar]" value="true"
+              <%=persona.modulosPermitidos.proveedores?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[proveedores][eliminar]" value="true"
+              <%=persona.modulosPermitidos.proveedores?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
       </div>
 
@@ -58,22 +62,45 @@
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Proyectos</h2>
         <p class="text-gray-600 font-semibold text-xs mb-1">Escuelas</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][ver]" value="true" <%= persona.modulosPermitidos.escuelas?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][crear]" value="true" <%= persona.modulosPermitidos.escuelas?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][editar]" value="true" <%= persona.modulosPermitidos.escuelas?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][eliminar]" value="true" <%= persona.modulosPermitidos.escuelas?.eliminar ? "checked" : "" %>> Eliminar</label>
+          <label><input type="checkbox" name="modulosPermitidos[escuelas][ver]" value="true"
+              <%=persona.modulosPermitidos.escuelas?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[escuelas][crear]" value="true"
+              <%=persona.modulosPermitidos.escuelas?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[escuelas][editar]" value="true"
+              <%=persona.modulosPermitidos.escuelas?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[escuelas][eliminar]" value="true"
+              <%=persona.modulosPermitidos.escuelas?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
       </div>
 
       <!-- Columna 5: Técnica -->
       <div>
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Técnica</h2>
+
+         <!-- Viaticos -->
         <p class="text-gray-600 font-semibold text-xs mb-1">Viáticos</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true" <%= persona.modulosPermitidos.viaticos?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true" <%= persona.modulosPermitidos.viaticos?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true" <%= persona.modulosPermitidos.viaticos?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true" <%= persona.modulosPermitidos.viaticos?.eliminar ? "checked" : "" %>> Eliminar</label>
+          <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true"
+              <%=persona.modulosPermitidos.viaticos?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true"
+              <%=persona.modulosPermitidos.viaticos?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true"
+              <%=persona.modulosPermitidos.viaticos?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true"
+              <%=persona.modulosPermitidos.viaticos?.eliminar ? "checked" : "" %>> Eliminar</label>
+        </div>
+
+         <!-- Pedido de materiales -->
+        <p class="text-gray-600 font-semibold text-xs mb-1">Pedido de Materiales</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[materiales][ver]" value="true"
+              <%=persona.modulosPermitidos.materiales?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[materiales][crear]" value="true"
+              <%=persona.modulosPermitidos.materiales?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[materiales][editar]" value="true"
+              <%=persona.modulosPermitidos.materiales?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[materiales][eliminar]" value="true"
+              <%=persona.modulosPermitidos.materiales?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
       </div>
 

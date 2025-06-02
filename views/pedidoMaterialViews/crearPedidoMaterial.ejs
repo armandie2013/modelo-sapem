@@ -1,0 +1,134 @@
+<main class="bg-gray-100 min-h-screen py-10 px-4">
+    <div class="bg-white max-w-4xl mx-auto p-8 rounded-2xl shadow-xl border border-gray-300">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Nuevo Pedido de Materiales</h1>
+
+        <form id="formularioPedido" action="/pedidos-materiales/crear" method="POST" onsubmit="return prepararItems()">
+            <div class="grid md:grid-cols-12 gap-4 mb-4">
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 font-medium mb-2">Fecha</label>
+                    <input type="text" readonly value="<%= new Date().toLocaleDateString('es-AR') %>"
+                        class="w-full border px-2 py-2 rounded-lg bg-gray-100 text-sm">
+                </div>
+
+                <div class="md:col-span-8">
+                    <label class="block text-gray-700 font-medium mb-2">Área solicitante</label>
+                    <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg"
+                        value="<%= datos?.areaSolicitante || '' %>" oninput="capitalizarPrimeraLetra(this)">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 font-medium mb-2">N° Pedido</label>
+                    <input type="text" name="numeroPedido" value="<%= numeroPedido %>" readonly
+                        class="w-full border px-2 py-2 rounded-lg bg-gray-100 text-sm text-right">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">Proyecto</label>
+                <input type="text" name="proyecto" required class="w-full border px-3 py-2 rounded-lg"
+                    value="<%= datos?.proyecto || '' %>" oninput="capitalizarPrimeraLetra(this)">
+            </div>
+
+            <!-- Tabla dinámica de items -->
+            <div class="mb-6">
+                <table class="w-full border text-sm" id="tablaItems">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 text-center">
+                            <th class="border px-2 py-1 w-16">Ítem</th>
+                            <th class="border px-2 py-1">Detalle</th>
+                            <th class="border px-2 py-1">Dato Técnico</th>
+                            <th class="border px-2 py-1 w-24">Cant.</th>
+                            <th class="border px-2 py-1 w-24">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla">
+                        <tr>
+                            <td class="text-center font-medium">1</td>
+                            <td><input type="text" class="w-full border px-2 py-1" required
+                                    oninput="capitalizarPrimeraLetra(this)"></td>
+                            <td><input type="text" class="w-full border px-2 py-1" required
+                                    oninput="capitalizarPrimeraLetra(this)"></td>
+                            <td><input type="number" class="w-full border px-2 py-1" required></td>
+                            <td class="text-center">
+                                <button type="button" onclick="eliminarFila(this)"
+                                    class="text-red-600">Eliminar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="mt-4">
+                    <button type="button" onclick="agregarFila()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg">Agregar Fila</button>
+                </div>
+            </div>
+
+            <!-- Campo oculto para items -->
+            <input type="hidden" name="items" id="inputItems">
+
+            <div class="text-center">
+                <button type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    Guardar Pedido
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+
+<script>
+    function actualizarNumerosItem() {
+        const filas = document.querySelectorAll("#cuerpoTabla tr");
+        filas.forEach((fila, index) => {
+            fila.querySelector("td").innerText = index + 1;
+        });
+    }
+
+    function agregarFila() {
+        const fila = document.createElement("tr");
+        fila.innerHTML = ''
+            + '<td class="text-center font-medium"></td>'
+            + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
+            + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
+            + '<td><input type="number" class="w-full border px-2 py-1" required></td>'
+            + '<td class="text-center">'
+            + '  <button type="button" onclick="eliminarFila(this)" class="text-red-600">Eliminar</button>'
+            + '</td>';
+        document.getElementById("cuerpoTabla").appendChild(fila);
+        actualizarNumerosItem();
+    }
+
+    function eliminarFila(boton) {
+        const fila = boton.closest("tr");
+        fila.remove();
+        actualizarNumerosItem();
+    }
+
+    function prepararItems() {
+        const filas = document.querySelectorAll("#cuerpoTabla tr");
+        const items = [];
+
+        filas.forEach(fila => {
+            const inputs = fila.querySelectorAll("input");
+            const detalle = inputs[0].value.trim();
+            const datoTecnico = inputs[1].value.trim();
+            const cantidad = parseFloat(inputs[2].value);
+
+            if (detalle && datoTecnico && cantidad > 0) {
+                items.push({ detalle, datoTecnico, cantidad });
+            }
+        });
+
+        document.getElementById("inputItems").value = JSON.stringify(items);
+        return true;
+    }
+
+    // Inicializa los números al cargar
+    document.addEventListener("DOMContentLoaded", actualizarNumerosItem);
+
+    function capitalizarPrimeraLetra(input) {
+        if (input.value.length > 0) {
+            input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+        }
+    }
+</script>

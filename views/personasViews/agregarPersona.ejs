@@ -10,7 +10,8 @@
       <div class="space-y-3 col-span-1">
         <div>
           <label class="block font-medium text-gray-700">Nº de Orden</label>
-          <input type="number" name="numeroOrden" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
+          <input type="number" name="numeroOrden" required
+            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
         </div>
         <div>
           <label class="block font-medium text-gray-700">Legajo</label>
@@ -18,7 +19,8 @@
         </div>
         <div>
           <label class="block font-medium text-gray-700">Nombre y Apellido</label>
-          <input type="text" name="nombreApellido" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
+          <input type="text" name="nombreApellido" required
+            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
         </div>
         <div>
           <label class="block font-medium text-gray-700">DNI</label>
@@ -63,12 +65,23 @@
       <!-- Columna 5: Técnica -->
       <div>
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Técnica</h2>
+
+         <!-- Viaticos -->
         <p class="text-gray-600 font-semibold text-xs mb-1">Viáticos</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true"> Ver</label>
           <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true"> Crear</label>
           <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true"> Editar</label>
           <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true"> Eliminar</label>
+        </div>
+
+         <!-- Pedido de materiales -->
+        <p class="text-gray-600 font-semibold text-xs mb-1">Pedido de Materiales</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[materiales][ver]" value="true"> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[materiales][crear]" value="true"> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[materiales][editar]" value="true"> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[materiales][eliminar]" value="true"> Eliminar</label>
         </div>
       </div>
 

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pedido de Materiales Nº <%= pedido.numeroPedido %>
+  </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin: 40px;
+      color: #333;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    /* header h1 {
+      font-size: 20px;
+      margin: 0;
+      text-transform: uppercase;
+    } */
+
+    .datos {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .dato {
+      width: 50%;
+      margin-bottom: 6px;
+    }
+
+    .dato strong {
+      display: inline-block;
+      width: 130px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      border: 1px solid #666;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      text-align: left;
+    }
+
+    td.center {
+      text-align: center;
+    }
+
+    .firmas {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+    }
+
+    .firmas .columna {
+      width: 45%;
+      text-align: center;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Pedido de Materiales</h1>
+  </header>
+
+  <div class="datos">
+    <div class="dato"><strong>N° Pedido:</strong>
+      <%= pedido.numeroPedido %>
+    </div>
+    <div class="dato"><strong>Fecha:</strong>
+      <%= new Date(pedido.fecha).toLocaleDateString("es-AR") %>
+    </div>
+    <div class="dato"><strong>Área solicitante:</strong>
+      <%= pedido.areaSolicitante %>
+    </div>
+    <div class="dato"><strong>Proyecto:</strong>
+      <%= pedido.proyecto %>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 5%;">#</th>
+        <th style="width: 55%;">Detalle</th>
+        <th style="width: 35%;">Dato Técnico</th>
+        <th style="width: 5%;" class="center">Cantidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% pedido.items.forEach((item, i)=> { %>
+        <tr>
+          <td>
+            <%= i + 1 %>
+          </td>
+          <td>
+            <%= item.detalle %>
+          </td>
+          <td>
+            <%= item.datoTecnico %>
+          </td>
+          <td class="center">
+            <%= item.cantidad %>
+          </td>
+        </tr>
+        <% }) %>
+    </tbody>
+  </table>
+
+  <div class="firmas">
+    <div class="columna">
+      ......................................................<br>
+      Firma solicitante
+    </div>
+    <div class="columna">
+      ......................................................<br>
+      Firma autorizante
+    </div>
+  </div>
+
+  <div class="footer">
+    <div><strong>Creado por:</strong>
+      <%= pedido.creadoPor %>
+    </div>
+    <% if (pedido.editadoPor) { %>
+      <div><strong>Editado por:</strong>
+        <%= pedido.editadoPor %>
+      </div>
+      <% } %>
+  </div>
+
+</body>
+
+</html>
