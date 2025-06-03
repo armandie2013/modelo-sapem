@@ -35,9 +35,10 @@
                     <thead>
                         <tr class="bg-gray-200 text-gray-700 text-center whitespace-nowrap">
                             <th class="border px-2 py-1 w-12">Ítem</th>
-                            <th class="border px-2 py-1 w-[55%]">Detalle</th>
+                            <th class="border px-2 py-1 w-[40%]">Detalle</th>
                             <th class="border px-2 py-1 w-[25%]">Dato Técnico</th>
-                            <th class="border px-2 py-1 w-[10%]">Cant.</th>
+                            <th class="border px-2 py-1 w-[8%]">Cant.</th>
+                            <th class="border px-2 py-1 w-[12%]">Unidad</th>
                             <th class="border px-2 py-1 w-[10%]">Acción</th>
                         </tr>
                     </thead>
@@ -49,6 +50,17 @@
                             <td><input type="text" class="w-full border px-2 py-1" required
                                     oninput="capitalizarPrimeraLetra(this)"></td>
                             <td><input type="number" class="w-full border px-2 py-1" required></td>
+                            <td>
+                                <select class="w-full border px-2 py-1" required>
+                                    <option value="">Seleccione</option>
+                                    <option value="bobina">Bobina</option>
+                                    <option value="metro">Metro</option>
+                                    <option value="litro">Litro</option>
+                                    <option value="kilo">Kilo</option>
+                                    <option value="pieza">Pieza</option>
+                                    <option value="unidad">Unidad</option>
+                                </select>
+                            </td>
                             <td class="text-center">
                                 <button type="button" onclick="eliminarFila(this)"
                                     class="text-red-600">Eliminar</button>
@@ -59,8 +71,8 @@
 
                 <div class="mt-4">
                     <button type="button" onclick="agregarFila()"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        Agregar Fila
+                        class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">
+                        +
                     </button>
                 </div>
             </div>
@@ -92,6 +104,15 @@
             + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
             + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
             + '<td><input type="number" class="w-full border px-2 py-1" required></td>'
+            + '<td><select class="w-full border px-2 py-1" required>'
+            + '<option value="">Seleccione</option>'
+            + '<option value="bobina">Bobina</option>'
+            + '<option value="metro">Metro</option>'
+            + '<option value="litro">Litro</option>'
+            + '<option value="kilo">Kilo</option>'
+            + '<option value="pieza">Pieza</option>'
+            + '<option value="unidad">Unidad</option>'
+            + '</select></td>'
             + '<td class="text-center">'
             + '  <button type="button" onclick="eliminarFila(this)" class="text-red-600">Eliminar</button>'
             + '</td>';
@@ -111,19 +132,20 @@
 
         filas.forEach(fila => {
             const inputs = fila.querySelectorAll("input");
+            const select = fila.querySelector("select");
             const detalle = inputs[0].value.trim();
             const datoTecnico = inputs[1].value.trim();
             const cantidad = parseFloat(inputs[2].value);
+            const unidad = select.value;
 
-            if (detalle && datoTecnico && cantidad > 0) {
-                items.push({ detalle, datoTecnico, cantidad });
+            if (detalle && datoTecnico && cantidad > 0 && unidad) {
+                items.push({ detalle, datoTecnico, cantidad, unidad });
             }
         });
 
         document.getElementById("inputItems").value = JSON.stringify(items);
         return true;
     }
-
     document.addEventListener("DOMContentLoaded", actualizarNumerosItem);
 
     function capitalizarPrimeraLetra(input) {

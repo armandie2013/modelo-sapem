@@ -40,8 +40,17 @@ export async function generarPDFPedidoMaterialService(idPedido) {
   const pedido = await PedidoMaterial.findById(idPedido).lean();
   if (!pedido) throw new Error("Pedido no encontrado");
 
-  const rutaVista = path.join(__dirname, "../views/pedidoMaterialViews/verPedidoMaterialPDF.ejs");
-  const html = await ejs.renderFile(rutaVista, { pedido });
+  const rutaVista = path.join(
+    __dirname,
+    "../views/pedidoMaterialViews/verPedidoMaterialPDF.ejs"
+  );
+  const rutaLogoBase64 = path.resolve("utils/logoBase64.html");
+  const logoDataUri = await fs.readFile(rutaLogoBase64, "utf-8");
+
+  const html = await ejs.renderFile(rutaVista, {
+    pedido,
+    logoDataUri,
+  });
 
   const browser = await puppeteer.launch({
     headless: "new",
@@ -54,7 +63,7 @@ export async function generarPDFPedidoMaterialService(idPedido) {
   const buffer = await page.pdf({
     format: "A4",
     printBackground: true,
-    margin: { top: "20mm", bottom: "20mm", left: "10mm", right: "10mm" },
+    margin: { top: "10mm", bottom: "10mm", left: "10mm", right: "10mm" },
   });
 
   await browser.close();

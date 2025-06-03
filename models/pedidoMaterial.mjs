@@ -4,6 +4,11 @@ const itemSchema = new mongoose.Schema({
   detalle: { type: String, required: true },
   datoTecnico: { type: String, required: true },
   cantidad: { type: Number, required: true },
+  unidad: {
+    type: String,
+    required: true,
+    enum: ["bobina", "metro", "litro", "kilo", "pieza", "unidad"],
+  },
 });
 
 const pedidoMaterialSchema = new mongoose.Schema(

@@ -23,12 +23,17 @@ export async function mostrarFormularioCrearPedidoController(req, res) {
 // Procesar creación
 export async function crearPedidoMaterialController(req, res) {
   try {
+    const itemsConUnidad = JSON.parse(req.body.items).map((item) => ({
+      ...item,
+      unidad: item.unidad || "unidad",
+    }));
+
     const datos = {
       fecha: new Date(),
       numeroPedido: await obtenerSiguienteNumeroPedidoMaterial(),
       areaSolicitante: req.body.areaSolicitante,
       proyecto: req.body.proyecto,
-      items: JSON.parse(req.body.items),
+      items: itemsConUnidad,
       creadoPor: req.session?.usuario
         ? `${req.session.usuario.nombre} ${req.session.usuario.apellido}`
         : "Desconocido",
@@ -37,8 +42,8 @@ export async function crearPedidoMaterialController(req, res) {
     await crearPedidoMaterialService(datos);
     res.redirect("/pedidos-materiales/dashboard");
   } catch (error) {
-    console.error("Error al crear pedido:", error);
-    res.status(500).send("Error al crear el pedido");
+    console.error("Error al crear pedido de material:", error);
+    res.status(500).send("Error interno al crear el pedido.");
   }
 }
 
@@ -91,12 +96,15 @@ export async function mostrarFormularioEditarPedidoController(req, res) {
 // Procesar edicion
 export async function actualizarPedidoMaterialController(req, res) {
   try {
-    const items = JSON.parse(req.body.items);
+    const itemsConUnidad = JSON.parse(req.body.items).map((item) => ({
+      ...item,
+      unidad: item.unidad || "unidad",
+    }));
 
     const datos = {
       areaSolicitante: req.body.areaSolicitante,
       proyecto: req.body.proyecto,
-      items,
+      items: itemsConUnidad,
       editadoPor: req.session?.usuario
         ? `${req.session.usuario.nombre} ${req.session.usuario.apellido}`
         : "Desconocido",
@@ -105,8 +113,8 @@ export async function actualizarPedidoMaterialController(req, res) {
     await actualizarPedidoMaterialService(req.params.id, datos);
     res.redirect("/pedidos-materiales/dashboard");
   } catch (error) {
-    console.error("Error al actualizar pedido:", error);
-    res.status(500).send("Error al actualizar el pedido");
+    console.error("Error al actualizar pedido de material:", error);
+    res.status(500).send("Error interno al actualizar el pedido.");
   }
 }
 

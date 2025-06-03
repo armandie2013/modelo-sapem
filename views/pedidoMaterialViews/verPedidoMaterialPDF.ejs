@@ -84,9 +84,11 @@
 
 <body>
 
-  <header>
-    <h2>Pedido de Materiales</h2>
+  <header style="margin-top: -40px; margin-bottom: 20px;">
+    <img src="<%= logoDataUri %>" alt="Logo" style="max-height: 75px; display: block; margin: 0 auto;">
+    <h2 style="margin: 30px 0 0;">Pedido de Materiales</h2>
   </header>
+
 
   <div class="datos">
     <div class="dato"><strong>N° Pedido:</strong>
@@ -107,11 +109,13 @@
     <thead>
       <tr>
         <th style="width: 5%;">#</th>
-        <th style="width: 55%;">Detalle</th>
-        <th style="width: 35%;">Dato Técnico</th>
-        <th style="width: 5%;" class="center">Cantidad</th>
+        <th style="width: 50%;">Detalle</th>
+        <th style="width: 25%;">Dato Técnico</th>
+        <th style="width: 10%;" class="center">Cantidad</th>
+        <th style="width: 10%;" class="center">Unidad</th>
       </tr>
     </thead>
+
     <tbody>
       <% pedido.items.forEach((item, i)=> { %>
         <tr>
@@ -126,6 +130,9 @@
           </td>
           <td class="center">
             <%= item.cantidad %>
+          </td>
+          <td class="center">
+            <%= item.unidad %>
           </td>
         </tr>
         <% }) %>

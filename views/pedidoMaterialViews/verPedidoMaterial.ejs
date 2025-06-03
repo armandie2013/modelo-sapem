@@ -5,7 +5,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div>
         <p class="text-sm text-gray-500">Número de pedido</p>
-        <p class="text-lg font-semibold text-gray-800"><%= pedido.numeroPedido %></p>
+        <p class="text-lg font-semibold text-gray-800">
+          <%= pedido.numeroPedido %>
+        </p>
       </div>
       <div>
         <p class="text-sm text-gray-500">Fecha</p>
@@ -15,11 +17,15 @@
       </div>
       <div>
         <p class="text-sm text-gray-500">Área solicitante</p>
-        <p class="text-lg font-semibold text-gray-800"><%= pedido.areaSolicitante %></p>
+        <p class="text-lg font-semibold text-gray-800">
+          <%= pedido.areaSolicitante %>
+        </p>
       </div>
       <div>
         <p class="text-sm text-gray-500">Proyecto</p>
-        <p class="text-lg font-semibold text-gray-800"><%= pedido.proyecto %></p>
+        <p class="text-lg font-semibold text-gray-800">
+          <%= pedido.proyecto %>
+        </p>
       </div>
     </div>
 
@@ -29,20 +35,33 @@
         <thead>
           <tr class="bg-gray-200 text-gray-700 text-center whitespace-nowrap">
             <th class="border px-2 py-2 w-12">Ítem</th>
-            <th class="border px-2 py-2 w-[55%]">Detalle</th>
+            <th class="border px-2 py-2 w-[40%]">Detalle</th>
             <th class="border px-2 py-2 w-[25%]">Dato Técnico</th>
             <th class="border px-2 py-2 w-[10%]">Cant.</th>
+            <th class="border px-2 py-2 w-[13%]">Unidad</th>
           </tr>
         </thead>
         <tbody>
-          <% pedido.items.forEach((item, i) => { %>
+          <% pedido.items.forEach((item, i)=> { %>
             <tr>
-              <td class="border px-2 py-2 text-center font-medium"><%= i + 1 %></td>
-              <td class="border px-2 py-2"><%= item.detalle %></td>
-              <td class="border px-2 py-2"><%= item.datoTecnico %></td>
-              <td class="border px-2 py-2 text-center"><%= item.cantidad %></td>
+              <td class="border px-2 py-2 text-center font-medium">
+                <%= i + 1 %>
+              </td>
+              <td class="border px-2 py-2">
+                <%= item.detalle %>
+              </td>
+              <td class="border px-2 py-2">
+                <%= item.datoTecnico %>
+              </td>
+              <td class="border px-2 py-2 text-center">
+                <%= item.cantidad %>
+              </td>
+              <td class="border px-2 py-2 text-center capitalize">
+                <%= item.unidad %>
+              </td>
+
             </tr>
-          <% }) %>
+            <% }) %>
         </tbody>
       </table>
     </div>
@@ -52,21 +71,26 @@
       <% if (pedido.creadoPor) { %>
         <div>
           <p class="text-sm text-gray-500">Creado por</p>
-          <p class="text-base font-medium text-gray-800"><%= pedido.creadoPor %></p>
+          <p class="text-base font-medium text-gray-800">
+            <%= pedido.creadoPor %>
+          </p>
         </div>
-      <% } %>
+        <% } %>
 
-      <% if (pedido.editadoPor) { %>
-        <div>
-          <p class="text-sm text-gray-500">Editado por</p>
-          <p class="text-base font-medium text-gray-800"><%= pedido.editadoPor %></p>
-        </div>
-      <% } %>
+          <% if (pedido.editadoPor) { %>
+            <div>
+              <p class="text-sm text-gray-500">Editado por</p>
+              <p class="text-base font-medium text-gray-800">
+                <%= pedido.editadoPor %>
+              </p>
+            </div>
+            <% } %>
     </div>
 
     <!-- Botón volver -->
     <div class="text-center">
-      <a href="/pedidos-materiales/dashboard" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">
+      <a href="/pedidos-materiales/dashboard"
+        class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">
         Volver al listado
       </a>
     </div>
