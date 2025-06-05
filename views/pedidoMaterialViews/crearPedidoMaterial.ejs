@@ -7,25 +7,25 @@
                 <div class="md:col-span-2">
                     <label class="block text-gray-700 font-medium mb-1">Fecha</label>
                     <input type="text" readonly value="<%= new Date().toLocaleDateString('es-AR') %>"
-                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm">
+                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm border-gray-300">
                 </div>
 
                 <div class="md:col-span-8">
                     <label class="block text-gray-700 font-medium mb-1">Área solicitante</label>
-                    <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg"
+                    <input type="text" name="areaSolicitante" required class="w-full border px-3 py-2 rounded-lg border-gray-300"
                         value="<%= datos?.areaSolicitante || '' %>" oninput="capitalizarPrimeraLetra(this)">
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="block text-gray-700 font-medium mb-1">N° Pedido</label>
                     <input type="text" value="Automáticamente" readonly
-                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm text-center text-gray-500 italic">
+                        class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm text-center text-gray-500 italic border-gray-300">
                 </div>
             </div>
 
             <div class="mb-6">
                 <label class="block text-gray-700 font-medium mb-1">Proyecto</label>
-                <input type="text" name="proyecto" required class="w-full border px-3 py-2 rounded-lg"
+                <input type="text" name="proyecto" required class="w-full border px-3 py-2 rounded-lg border-gray-300"
                     value="<%= datos?.proyecto || '' %>" oninput="capitalizarPrimeraLetra(this)">
             </div>
 
@@ -35,8 +35,8 @@
                     <thead>
                         <tr class="bg-gray-200 text-gray-700 text-center whitespace-nowrap">
                             <th class="border px-2 py-1 w-12">Ítem</th>
-                            <th class="border px-2 py-1 w-[40%]">Detalle</th>
-                            <th class="border px-2 py-1 w-[25%]">Dato Técnico</th>
+                            <th class="border px-2 py-1 w-[55%]">Detalle</th>
+                            <th class="border px-2 py-1 w-[15%]">Dato Técnico</th>
                             <th class="border px-2 py-1 w-[8%]">Cant.</th>
                             <th class="border px-2 py-1 w-[12%]">Unidad</th>
                             <th class="border px-2 py-1 w-[10%]">Acción</th>
@@ -45,13 +45,13 @@
                     <tbody id="cuerpoTabla">
                         <tr>
                             <td class="text-center font-medium">1</td>
-                            <td><input type="text" class="w-full border px-2 py-1" required
+                            <td><input type="text" class="w-full border px-2 py-1 border-gray-300" required
                                     oninput="capitalizarPrimeraLetra(this)"></td>
-                            <td><input type="text" class="w-full border px-2 py-1" required
+                            <td><input type="text" class="w-full border px-2 py-1 border-gray-300" required
                                     oninput="capitalizarPrimeraLetra(this)"></td>
-                            <td><input type="number" class="w-full border px-2 py-1" required></td>
+                            <td><input type="number" class="w-full border px-2 py-1 border-gray-300" required></td>
                             <td>
-                                <select class="w-full border px-2 py-1" required>
+                                <select class="w-full border px-2 py-1 border-gray-300" required>
                                     <option value="">Seleccione</option>
                                     <option value="bobina">Bobina</option>
                                     <option value="metro">Metro</option>
@@ -101,10 +101,10 @@
         const fila = document.createElement("tr");
         fila.innerHTML = ''
             + '<td class="text-center font-medium"></td>'
-            + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
-            + '<td><input type="text" class="w-full border px-2 py-1" required oninput="capitalizarPrimeraLetra(this)"></td>'
-            + '<td><input type="number" class="w-full border px-2 py-1" required></td>'
-            + '<td><select class="w-full border px-2 py-1" required>'
+            + '<td><input type="text" class="w-full border px-2 py-1 border-gray-300" required oninput="capitalizarPrimeraLetra(this)"></td>'
+            + '<td><input type="text" class="w-full border px-2 py-1 border-gray-300" required oninput="capitalizarPrimeraLetra(this)"></td>'
+            + '<td><input type="number" class="w-full border px-2 py-1 border-gray-300" required></td>'
+            + '<td><select class="w-full border px-2 py-1 border-gray-300" required>'
             + '<option value="">Seleccione</option>'
             + '<option value="bobina">Bobina</option>'
             + '<option value="metro">Metro</option>'
