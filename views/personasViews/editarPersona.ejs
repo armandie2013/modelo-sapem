@@ -38,6 +38,7 @@
       <!-- Columna 2: Administración -->
       <div>
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Administración</h2>
+
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Proveedores</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[proveedores][ver]" value="true"
@@ -48,6 +49,19 @@
               <%=persona.modulosPermitidos.proveedores?.editar ? "checked" : "" %>> Editar</label>
           <label><input type="checkbox" name="modulosPermitidos[proveedores][eliminar]" value="true"
               <%=persona.modulosPermitidos.proveedores?.eliminar ? "checked" : "" %>> Eliminar</label>
+        </div>
+
+        <!-- Planes -->
+        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Planes</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[planes][ver]" value="true"
+              <%=persona.modulosPermitidos.planes?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[planes][crear]" value="true"
+              <%=persona.modulosPermitidos.planes?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[planes][editar]" value="true"
+              <%=persona.modulosPermitidos.planes?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[planes][eliminar]" value="true"
+              <%=persona.modulosPermitidos.planes?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
       </div>
 

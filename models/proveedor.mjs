@@ -57,6 +57,16 @@ const proveedorSchema = new mongoose.Schema({
     required: true,
     enum: ["Responsable Inscripto", "Monotributo", "Exento", "Consumidor Final", "Otro"],
   },
+  plan: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Plan",
+  required: false,
+},
+precioPlan: {
+  type: Number,
+  min: 0,
+  required: false,
+},
 }, { timestamps: true });
 
 export default mongoose.model("Proveedor", proveedorSchema);

@@ -102,7 +102,6 @@ import { assert } from '../util/assert.js';
 import { bubble } from '../util/decorators.js';
 import { Deferred } from '../util/Deferred.js';
 import { stringToTypedArray } from '../util/encoding.js';
-import { isErrorLike } from '../util/ErrorLike.js';
 import { BidiElementHandle } from './ElementHandle.js';
 import { BidiFrame } from './Frame.js';
 import { BidiKeyboard, BidiMouse, BidiTouchscreen } from './Input.js';
@@ -244,6 +243,9 @@ let BidiPage = (() => {
         mainFrame() {
             return this.#frame;
         }
+        resize(_params) {
+            throw new Error('Method not implemented for WebDriver BiDi yet.');
+        }
         async focusedFrame() {
             const env_1 = { stack: [], error: void 0, hasError: false };
             try {
@@ -325,7 +327,7 @@ let BidiPage = (() => {
             return this._timeoutSettings.navigationTimeout();
         }
         isJavaScriptEnabled() {
-            return this.#cdpEmulationManager.javascriptEnabled;
+            return this.#frame.browsingContext.isJavaScriptEnabled();
         }
         async setGeolocation(options) {
             const { longitude, latitude, accuracy = 0 } = options;
@@ -347,7 +349,7 @@ let BidiPage = (() => {
             });
         }
         async setJavaScriptEnabled(enabled) {
-            return await this.#cdpEmulationManager.setJavaScriptEnabled(enabled);
+            return await this.#frame.browsingContext.setJavaScriptEnabled(enabled);
         }
         async emulateMediaType(type) {
             return await this.#cdpEmulationManager.emulateMediaType(type);
@@ -744,11 +746,6 @@ let BidiPage = (() => {
             }
             catch (error) {
                 controller.abort();
-                if (isErrorLike(error)) {
-                    if (error.message.includes('no such history entry')) {
-                        return null;
-                    }
-                }
                 throw error;
             }
         }

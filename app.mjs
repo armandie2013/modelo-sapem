@@ -14,6 +14,7 @@ import usuariosRoutes from "./routes/usuariosRoutes.mjs";
 import escuelasRoutes from "./routes/escuelasRoutes.mjs";
 import proveedorRoutes from "./routes/proveedorRoutes.mjs";
 import pedidoMaterialRoutes from "./routes/pedidoMaterialRoutes.mjs";
+import planesRoutes from "./routes/planesRoutes.mjs";
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -87,6 +88,7 @@ app.use("/usuarios", usuariosRoutes);
 app.use("/escuelas", escuelasRoutes);
 app.use("/proveedores", proveedorRoutes);
 app.use("/pedidos-materiales", pedidoMaterialRoutes);
+app.use('/planes', planesRoutes);
 
 // 8. Landing page como ruta principal
 app.get("/", (req, res) => {

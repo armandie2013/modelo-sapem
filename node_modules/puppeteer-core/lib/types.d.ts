@@ -995,6 +995,14 @@ export declare class Connection extends EventEmitter<CDPSessionEvents> {
 }
 
 /**
+ * Thrown if underlying protocol connection has been closed.
+ *
+ * @public
+ */
+export declare class ConnectionClosedError extends ProtocolError {
+}
+
+/**
  * @license
  * Copyright 2020 Google Inc.
  * SPDX-License-Identifier: Apache-2.0
@@ -1150,8 +1158,6 @@ export declare interface ContinueRequestOverrides {
     postData?: string;
     headers?: Record<string, string>;
 }
-
-export declare function convertCookiesPartitionKeyFromPuppeteerToCdp(partitionKey: CookiePartitionKey | string | undefined): Protocol.Network.CookiePartitionKey | undefined;
 
 /**
  * Represents a cookie object.
@@ -1551,6 +1557,9 @@ export declare interface CustomQueryHandler {
     queryAll?: (node: Node, selector: string) => Iterable<Node>;
 }
 
+/**
+ * @public
+ */
 declare interface CustomQuerySelector {
     querySelector(root: Node, selector: string): Awaitable<Node | null>;
     querySelectorAll(root: Node, selector: string): AwaitableIterable<Node>;
@@ -1569,12 +1578,9 @@ declare class CustomQuerySelectorRegistry {
 
 declare namespace CustomQuerySelectors {
     export {
-        CustomQuerySelector,
-        customQuerySelectors
+        CustomQuerySelector
     }
 }
-
-declare const customQuerySelectors: CustomQuerySelectorRegistry;
 
 /**
  * @public
@@ -2255,6 +2261,12 @@ export declare abstract class ElementHandle<ElementType extends Node = Element> 
      * or by calling element.scrollIntoView.
      */
     scrollIntoView(this: ElementHandle<Element>): Promise<void>;
+    /**
+     * Creates a locator based on an ElementHandle. This would not allow
+     * refreshing the element handle if it is stale but it allows re-using other
+     * locator pre-conditions.
+     */
+    asLocator(this: ElementHandle<Element>): Locator<Element>;
     /**
      * If the element is a form input, you can use {@link ElementHandle.autofill}
      * to test if the form is compatible with the browser's autofill
@@ -5565,7 +5577,9 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
      * @param options - Navigation parameters
      * @returns Promise which resolves to the main resource response. In case of
      * multiple redirects, the navigation will resolve with the response of the
-     * last redirect. If can not go back, resolves to `null`.
+     * last redirect.
+     * If the navigation is same page, returns null.
+     * If no history entry is found throws.
      */
     abstract goBack(options?: WaitForOptions): Promise<HTTPResponse | null>;
     /**
@@ -5573,7 +5587,9 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
      * @param options - Navigation Parameter
      * @returns Promise which resolves to the main resource response. In case of
      * multiple redirects, the navigation will resolve with the response of the
-     * last redirect. If can not go forward, resolves to `null`.
+     * last redirect.
+     * If the navigation is same page, returns null.
+     * If no history entry is found throws.
      */
     abstract goForward(options?: WaitForOptions): Promise<HTTPResponse | null>;
     /**
@@ -6371,6 +6387,7 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
     abstract waitForDevicePrompt(options?: WaitTimeoutOptions): Promise<DeviceRequestPrompt>;
 
 
+
 }
 
 /**
@@ -7004,7 +7021,6 @@ declare namespace Puppeteer_2 {
         ProtocolLifeCycleEvent,
         NetworkConditions,
         InternalNetworkConditions,
-        convertCookiesPartitionKeyFromPuppeteerToCdp,
         PredefinedNetworkConditions,
         TracingOptions,
         Tracing,
@@ -7037,6 +7053,7 @@ declare namespace Puppeteer_2 {
         TouchError,
         ProtocolError,
         UnsupportedOperation,
+        ConnectionClosedError,
         EventType,
         Handler,
         CommonEventEmitter,

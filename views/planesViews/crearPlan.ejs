@@ -1,0 +1,254 @@
+<main class="bg-gray-100 min-h-screen py-10 px-4">
+  <form action="/planes/crear" method="POST"
+        class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+    <h1 class="text-2xl font-bold text-center text-gray-800">Crear Plan</h1>
+
+    <% if (errores && errores.length) { %>
+      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-2 shadow-sm text-sm">
+        <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
+        <ul class="list-disc pl-6 space-y-1">
+          <% errores.forEach(e => { %><li><%= e.msg %></li><% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div class="sm:col-span-2">
+        <label class="block font-medium text-gray-700">Nombre del plan</label>
+        <input type="text" name="nombre" required
+               value="<%= (datos && datos.nombre) || '' %>"
+               class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="block font-medium text-gray-700">Detalle</label>
+        <textarea name="detalle" rows="3"
+                  class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"><%= (datos && datos.detalle) || '' %></textarea>
+      </div>
+
+      <div class="sm:col-span-2 md:col-span-1">
+        <label class="block font-medium text-gray-700">Importe (ARS)</label>
+
+        <!-- Wrapper con símbolo $ -->
+        <div class="relative">
+          <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">$</span>
+
+          <!-- Visible (formateado en vivo) -->
+          <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
+                 class="w-full border border-gray-300 pl-7 pr-3 py-2 rounded-lg text-sm"
+                 placeholder="0,00" aria-describedby="importeHelp">
+        </div>
+
+        <!-- Enviado al servidor (numérico con punto) -->
+        <input type="hidden" name="importe" id="importeHidden"
+               value="<%= (datos && datos.importe) || '' %>">
+
+        <p id="importeHelp" class="text-xs text-gray-500 mt-1">
+          Se muestra como <span class="font-mono">$ 12.345,67</span>. Usá el <b>punto</b> para pasar a decimales.
+        </p>
+      </div>
+    </div>
+
+    <div class="text-center pt-2">
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+        Guardar
+      </button>
+      <a href="/planes" class="ml-2 bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</main>
+
+<script>
+(() => {
+  const input = document.getElementById('importeMask');
+  const hidden = document.getElementById('importeHidden');
+
+  // Modelo interno
+  let intDigits = "";           // parte entera, solo dígitos
+  let decDigits = ["0","0"];    // dos dígitos decimales
+  let editingDecimals = false;  // si estamos editando decimales
+  let decPos = 0;               // 0..2 cuántos decimales ya ingresados
+
+  // Inicializar desde hidden si viniera con valor
+  (function initFromHidden() {
+    const v = hidden.value;
+    if (!v) { render(); return; }
+    const n = Number(v);
+    if (Number.isFinite(n)) {
+      const entero = Math.trunc(Math.abs(n)).toString();
+      const dec = Math.round((Math.abs(n) % 1) * 100).toString().padStart(2, "0");
+      intDigits = entero.replace(/^0+(?=\d)/, '');
+      decDigits = [dec[0], dec[1]];
+    }
+    render();
+  })();
+
+  // Helpers
+  function fmtThousands(s) {
+    s = s || "0";
+    s = s.replace(/^0+(?=\d)/, "");
+    if (s === "") s = "0";
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+  function updateHidden() {
+    const num = Number(intDigits || "0") + (Number(decDigits.join("")) / 100);
+    hidden.value = num.toFixed(2);
+  }
+  function render() {
+    const visible = `${fmtThousands(intDigits)},${decDigits.join("")}`;
+    input.value = visible;
+
+    // Caret inteligente: entero por defecto; decimales si estamos editándolos
+    requestAnimationFrame(() => {
+      const commaIndex = visible.indexOf(",");
+      let pos = editingDecimals ? (commaIndex + 1 + decPos) : commaIndex;
+      // seguridad
+      pos = Math.max(0, Math.min(visible.length, pos));
+      input.setSelectionRange(pos, pos);
+    });
+
+    updateHidden();
+  }
+
+  // Sanitiza texto pegado: acepta 12.345,67 | 12345,67 | 12345.67 | 12345
+  function parseAnyNumberLike(str) {
+    let s = (str || "").trim();
+    if (!s) return null;
+    const lastComma = s.lastIndexOf(',');
+    const lastDot = s.lastIndexOf('.');
+    let decSep = null;
+    if (lastComma > -1 || lastDot > -1) decSep = (lastComma > lastDot) ? ',' : '.';
+    if (decSep === ',') { s = s.replace(/\./g, ''); s = s.replace(',', '.'); }
+    else if (decSep === '.') { s = s.replace(/,/g, ''); }
+    else { s = s.replace(/[.,\s]/g, ''); }
+    const n = Number(s);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }
+
+  // beforeinput: control total
+  input.addEventListener('beforeinput', (e) => {
+    const type = e.inputType;
+    const data = e.data;
+
+    // Insertar dígito
+    if (type === 'insertText' && /[0-9]/.test(data || "")) {
+      if (editingDecimals) {
+        if (decPos < 2) {
+          decDigits[decPos] = data;
+          decPos++;
+        } else {
+          // si estaba al final de decimales, arrancamos desde el primero
+          decPos = 0;
+          decDigits[decPos] = data;
+          decPos = 1;
+        }
+      } else {
+        intDigits += data;
+        intDigits = intDigits.replace(/^0+(?=\d)/, ''); // sin ceros a izquierda
+      }
+      e.preventDefault();
+      render();
+      return;
+    }
+
+    // Punto o coma -> entrar a decimales
+    if (type === 'insertText' && (data === '.' || data === ',')) {
+      editingDecimals = true;
+      // si veníamos de entero, empezar a escribir desde el primer decimal
+      decPos = 0;
+      e.preventDefault();
+      render();
+      return;
+    }
+
+    // Backspace
+    if (type === 'deleteContentBackward') {
+      e.preventDefault();
+      if (editingDecimals) {
+        if (decPos > 0) {
+          decPos--;
+          decDigits[decPos] = "0";
+        } else {
+          // si no hay decimales escritos, volvemos a entero
+          editingDecimals = false;
+        }
+      } else {
+        // borrar del entero
+        if (intDigits.length > 0) intDigits = intDigits.slice(0, -1);
+      }
+      render();
+      return;
+    }
+
+    // Pegado
+    if (type === 'insertFromPaste') {
+      e.preventDefault();
+      navigator.clipboard.readText().then(text => {
+        const n = parseAnyNumberLike(text);
+        if (n === null) return;
+        const entero = Math.trunc(n).toString();
+        const dec = Math.round((n % 1) * 100).toString().padStart(2, "0");
+        intDigits = entero.replace(/^0+(?=\d)/, '');
+        decDigits = [dec[0], dec[1]];
+        editingDecimals = false;
+        decPos = 0;
+        render();
+      }).catch(() => {});
+      return;
+    }
+
+    // Bloquear cualquier otra edición directa
+    e.preventDefault();
+  });
+
+  // Click: posicionar bien el caret
+  input.addEventListener('click', () => {
+    const visible = input.value;
+    const commaIndex = visible.indexOf(",");
+    const caret = input.selectionStart || 0;
+
+    // Caso especial: si está en "0,00" (valor inicial), ir a la parte entera
+    const isInitialZero = (fmtThousands(intDigits) === "0" && decDigits.join("") === "00");
+    if (isInitialZero) {
+      editingDecimals = false;
+      decPos = 0;
+      render();
+      return;
+    }
+
+    if (caret > commaIndex) {
+      // clic en decimales: ubicar dentro de 0..2, y si cae fuera, ir al primer decimal
+      editingDecimals = true;
+      const after = caret - (commaIndex + 1);
+      decPos = Math.max(0, Math.min(2, after));
+      if (decPos >= 2) decPos = 1; // evita el "no escribe" al final
+    } else {
+      // clic en entero
+      editingDecimals = false;
+      decPos = 0;
+    }
+    render();
+  });
+
+  // Focus: si está vacío, mostrar 0,00 y poner el cursor en la parte entera
+  input.addEventListener('focus', () => {
+    if (!input.value) {
+      editingDecimals = false;
+      decPos = 0;
+      render();
+    } else {
+      // si hay algo, comportarnos igual que un click para corregir caret
+      input.dispatchEvent(new Event('click'));
+    }
+  });
+
+  // Evitar letras
+  input.addEventListener('keypress', (e) => {
+    const ch = e.key;
+    if (!/[0-9.,]/.test(ch)) e.preventDefault();
+  });
+
+})();
+</script>

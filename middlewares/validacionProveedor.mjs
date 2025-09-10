@@ -47,4 +47,9 @@ export const validacionProveedor = [
   body("condicionIva")
     .trim()
     .notEmpty().withMessage("La condición IVA es obligatoria"),
+  body("plan").optional({ checkFalsy: true }).isMongoId().withMessage("Plan inválido"),
+  body("precioPlan")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 })
+    .withMessage("El precio del plan debe ser un número >= 0"),
 ];
