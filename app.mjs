@@ -7,6 +7,7 @@ import { connectDB } from "./config/dbConfig.mjs";
 import MongoStore from "connect-mongo";
 import { startCargosCron } from "./jobs/cargosCron.mjs";
 import { catchUpCargos } from "./services/cargosService.mjs";
+import pagosRoutes from "./routes/pagosRoutes.mjs";
 
 // Rutas
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
@@ -87,6 +88,7 @@ app.use("/proveedores", proveedorRoutes);
 app.use("/pedidos-materiales", pedidoMaterialRoutes);
 app.use("/planes", planesRoutes);
 app.use("/tareas", cargosRoutes);
+app.use("/pagos", pagosRoutes);
 
 // 8. Landing
 app.get("/", (req, res) => {

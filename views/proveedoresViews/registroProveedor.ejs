@@ -2,19 +2,27 @@
   <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
     <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Registrar Proveedor</h1>
 
-    <% if (typeof errores !=='undefined' && errores.length> 0) { %>
+    <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
       <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-6 shadow-sm">
         <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
         <ul class="list-disc pl-6 text-sm space-y-1">
-          <% errores.forEach(error=> { %>
+          <% errores.forEach(error => { %>
             <li><%= error.msg %></li>
           <% }) %>
         </ul>
       </div>
     <% } %>
 
+    <% 
+      // Activo: si hay datos (re-render con errores), respetar lo que vino; si no, por defecto true
+      const activoChecked = (typeof datos !== 'undefined')
+        ? (datos.activo === 'true' || datos.activo === 'on' || datos.activo === true || datos.activo === 1 || datos.activo === '1')
+        : true;
+    %>
+
     <form action="/proveedores/registrar" method="POST" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
         <!-- Número de proveedor -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Número de proveedor</label>
@@ -98,20 +106,21 @@
           <select name="condicionIva" required class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300">
             <option value="">Seleccione una opción</option>
             <option value="Responsable Inscripto" <%= datos?.condicionIva==="Responsable Inscripto" ? "selected" : "" %>>Responsable Inscripto</option>
-            <option value="Monotributo" <%= datos?.condicionIva==="Monotributo" ? "selected" : "" %>>Monotributo</option>
-            <option value="Exento" <%= datos?.condicionIva==="Exento" ? "selected" : "" %>>Exento</option>
-            <option value="Consumidor Final" <%= datos?.condicionIva==="Consumidor Final" ? "selected" : "" %>>Consumidor Final</option>
-            <option value="Otro" <%= datos?.condicionIva==="Otro" ? "selected" : "" %>>Otro</option>
+            <option value="Monotributo"          <%= datos?.condicionIva==="Monotributo" ? "selected" : "" %>>Monotributo</option>
+            <option value="Exento"               <%= datos?.condicionIva==="Exento" ? "selected" : "" %>>Exento</option>
+            <option value="Consumidor Final"     <%= datos?.condicionIva==="Consumidor Final" ? "selected" : "" %>>Consumidor Final</option>
+            <option value="Otro"                 <%= datos?.condicionIva==="Otro" ? "selected" : "" %>>Otro</option>
           </select>
         </div>
 
-        <!-- 🔹 Plan del proveedor -->
+        <!-- Plan del proveedor -->
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700">Plan</label>
           <select name="plan" class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300">
             <option value="">— Sin plan —</option>
             <% (planes || []).forEach(p => { %>
-              <option value="<%= p._id %>" <%= (datos?.plan && (datos.plan.toString() === p._id.toString())) ? "selected" : "" %>>
+              <option value="<%= p._id %>"
+                <%= (String(datos?.plan || '') === String(p._id)) ? "selected" : "" %>>
                 <%= p.nombre %> — $ <%= Number(p.importe || 0).toLocaleString("es-AR", { minimumFractionDigits: 2 }) %>
               </option>
             <% }) %>
@@ -119,14 +128,12 @@
           <p class="text-xs text-gray-500 mt-1">Si no elegís plan, este proveedor queda sin plan asignado.</p>
         </div>
 
-        <!-- 🔹 Precio override del plan -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Precio del plan (override)</label>
-          <input type="number" name="precioPlan" step="0.01" min="0"
-                 value="<%= (typeof datos?.precioPlan !== 'undefined' && datos.precioPlan !== null && datos.precioPlan !== '') ? datos.precioPlan : '' %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300"
-                 placeholder="Dejar vacío para usar el importe del Plan" />
+        <!-- Activo -->
+        <div class="sm:col-span-2 flex items-center gap-2 mt-2">
+          <input id="chk-activo" type="checkbox" name="activo" value="true" <%= activoChecked ? 'checked' : '' %> >
+          <label for="chk-activo" class="text-gray-700">Activo</label>
         </div>
+
       </div>
 
       <div class="text-center">

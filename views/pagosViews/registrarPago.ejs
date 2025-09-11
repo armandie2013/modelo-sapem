@@ -1,0 +1,264 @@
+<main class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+    <% const modoProveedor = !!proveedor; %>
+
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Registrar Pago</h1>
+        <% if (modoProveedor) { %>
+          <p class="text-gray-600 text-sm">Proveedor:
+            <span class="font-medium"><%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %></span>
+          </p>
+        <% } %>
+      </div>
+
+      <% if (modoProveedor) { %>
+        <a href="/proveedores/<%= proveedor._id %>/ver"
+           class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+      <% } else { %>
+        <a href="/pagos"
+           class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+      <% } %>
+    </div>
+
+    <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
+      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg shadow-sm">
+        <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
+        <ul class="list-disc pl-6 text-sm space-y-1">
+          <% errores.forEach(error => { %><li><%= error.msg %></li><% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form
+      action="<%= modoProveedor ? ('/pagos/proveedores/' + proveedor._id + '/registrar') : '/pagos/registrar' %>"
+      method="POST" class="space-y-6">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+        <% if (!modoProveedor) { %>
+          <!-- Selector de proveedor (modo genérico) -->
+          <div class="sm:col-span-2">
+            <label class="block font-medium text-gray-700">Proveedor</label>
+            <select id="proveedorSelect" name="proveedor" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+              <option value="">Seleccione…</option>
+              <% (proveedores || []).forEach(pr => { %>
+                <option value="<%= pr._id %>" <%= (datos?.proveedor === String(pr._id)) ? 'selected' : '' %>>
+                  #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal || pr._id %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+        <% } %>
+
+        <!-- Período / Cargo -->
+        <div class="sm:col-span-2">
+          <label class="block font-medium text-gray-700">Período / Cargo</label>
+
+          <% if (modoProveedor) { %>
+            <select id="periodoSelect" name="periodo" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+              <option value="">Seleccione…</option>
+              <% (cargosPendientes || []).forEach(c => { %>
+                <option value="<%= c.periodo %>">
+                  <%= c.periodo %> — $ <%= Number(c.importe).toLocaleString('es-AR',{minimumFractionDigits:2}) %>
+                  (<%= c.concepto %>) — saldo: $ <%= Number(c.saldo).toLocaleString('es-AR',{minimumFractionDigits:2}) %>
+                </option>
+              <% }) %>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Solo se muestran cargos con saldo pendiente.</p>
+          <% } else { %>
+            <select id="periodoSelect" name="periodo" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
+              <option value="">Seleccione un proveedor…</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Elegí el proveedor para ver los cargos pendientes.</p>
+          <% } %>
+        </div>
+
+        <!-- Fecha -->
+        <div>
+          <label class="block font-medium text-gray-700">Fecha</label>
+          <input type="date" name="fecha" value="<%= (datos && datos.fecha) || '' %>"
+                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+          <p class="text-xs text-gray-500 mt-1">Si está vacío, se completa con hoy.</p>
+        </div>
+
+        <!-- Importe ARS con máscara -->
+        <div>
+          <label class="block font-medium text-gray-700">Importe (ARS)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">$</span>
+            <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
+                   class="w-full border border-gray-300 pl-7 pr-3 py-2 rounded-lg text-sm"
+                   placeholder="0,00" aria-describedby="importeHelp">
+          </div>
+          <input type="hidden" name="importe" id="importeHidden"
+                 value="<%= (datos && datos.importe != null && datos.importe !== '') ? Number(datos.importe).toFixed(2) : '' %>">
+          <p id="importeHelp" class="text-xs text-gray-500 mt-1">
+            Escribí el monto. Usá punto o coma para decimales. Ej.: $ 12.345,67.
+          </p>
+        </div>
+
+        <!-- Medio de pago -->
+        <div>
+          <label class="block font-medium text-gray-700">Medio de pago</label>
+          <select name="medioPago" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+            <% const medios = [
+              {value: "transferencia", label: "Transferencia"},
+              {value: "efectivo",      label: "Efectivo"},
+              {value: "cheque",        label: "Cheque"},
+              {value: "deposito",      label: "Depósito"},
+              {value: "otro",          label: "Otro"}
+            ]; %>
+            <option value="">Seleccione…</option>
+            <% medios.forEach(m => { %>
+              <option value="<%= m.value %>" <%= (String(datos?.medioPago||'').toLowerCase() === m.value) ? 'selected' : '' %>>
+                <%= m.label %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- N° Comprobante (opcional) -->
+        <div>
+          <label class="block font-medium text-gray-700">N° Comprobante (opcional)</label>
+          <input type="text" name="comprobante" value="<%= datos?.comprobante || '' %>"
+                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+        </div>
+
+        <!-- Detalle -->
+        <div class="sm:col-span-2">
+          <label class="block font-medium text-gray-700">Detalle</label>
+          <textarea name="detalle" rows="3"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"><%= datos?.detalle || '' %></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+          Guardar pago
+        </button>
+
+        <% if (modoProveedor) { %>
+          <a href="/proveedores/<%= proveedor._id %>/ver"
+             class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">Cancelar</a>
+        <% } else { %>
+          <a href="/pagos"
+             class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">Cancelar</a>
+        <% } %>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  // fecha por defecto
+  (function ensureToday() {
+    const el = document.querySelector('input[name="fecha"]');
+    if (el && !el.value) {
+      const tzOffset = new Date().getTimezoneOffset() * 60000;
+      const hoy = new Date(Date.now() - tzOffset).toISOString().slice(0,10);
+      el.value = hoy;
+    }
+  })();
+
+  // carga períodos (modo genérico) al elegir proveedor
+  (function initCargosCombo(){
+    const provSel = document.getElementById('proveedorSelect');
+    const perSel = document.getElementById('periodoSelect');
+    if (!provSel || !perSel) return;
+
+    async function loadCargos(proveedorId){
+      perSel.innerHTML = '<option value="">Cargando…</option>';
+      perSel.disabled = true;
+      try {
+        const res = await fetch(`/pagos/api/cargos-pendientes?proveedor=${encodeURIComponent(proveedorId)}`, { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'Error');
+        const cargos = data.cargos || [];
+        perSel.innerHTML = '<option value="">Seleccione…</option>';
+        cargos.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.periodo;
+          opt.textContent =
+            `${c.periodo} — $ ${Number(c.importe).toLocaleString('es-AR',{minimumFractionDigits:2})} `
+            + `(${c.concepto}) — saldo: $ ${Number(c.saldo).toLocaleString('es-AR',{minimumFractionDigits:2})}`;
+          perSel.appendChild(opt);
+        });
+        perSel.disabled = cargos.length === 0;
+        if (cargos.length === 0) {
+          perSel.innerHTML = '<option value="">Sin cargos pendientes</option>';
+        }
+      } catch(e){
+        perSel.innerHTML = '<option value="">Error al cargar</option>';
+      }
+    }
+
+    provSel.addEventListener('change', () => {
+      const id = provSel.value;
+      if (!id) {
+        perSel.innerHTML = '<option value="">Seleccione un proveedor…</option>';
+        perSel.disabled = true;
+        return;
+      }
+      loadCargos(id);
+    });
+
+    // si vino con proveedor preseleccionado (post con errores)
+    if (provSel.value) loadCargos(provSel.value);
+  })();
+
+  // máscara ARS
+  (() => {
+    const input = document.getElementById('importeMask');
+    const hidden = document.getElementById('importeHidden');
+    let intDigits = ""; let decDigits = ["0","0"]; let editingDecimals = false; let decPos = 0;
+    (function init() {
+      const v = hidden.value;
+      if (!v) { render(); return; }
+      const n = Number(v);
+      if (Number.isFinite(n)) {
+        const entero = Math.trunc(Math.abs(n)).toString();
+        const dec = Math.round((Math.abs(n) % 1) * 100).toString().padStart(2, "0");
+        intDigits = entero.replace(/^0+(?=\d)/, '');
+        decDigits = [dec[0], dec[1]];
+      }
+      render();
+    })();
+    function fmtMiles(s){ s=s||"0"; s=s.replace(/^0+(?=\d)/,""); if(s==="") s="0"; return s.replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+    function updateHidden(){ const num = Number(intDigits||"0") + (Number(decDigits.join(""))/100); hidden.value = num.toFixed(2); }
+    function render(){
+      const visible = `${fmtMiles(intDigits)},${decDigits.join("")}`;
+      input.value = visible;
+      requestAnimationFrame(() => {
+        const commaIndex = visible.indexOf(","); let pos = editingDecimals ? (commaIndex+1+decPos) : commaIndex;
+        pos = Math.max(0, Math.min(visible.length, pos)); input.setSelectionRange(pos, pos);
+      });
+      updateHidden();
+    }
+    function parseAnyNumberLike(str){
+      let s=(str||"").trim(); if(!s) return null;
+      const lastComma=s.lastIndexOf(','), lastDot=s.lastIndexOf('.'); let decSep=null;
+      if(lastComma>-1 || lastDot>-1) decSep=(lastComma>lastDot)?',':'.';
+      if(decSep===','){ s=s.replace(/\./g,''); s=s.replace(',', '.'); }
+      else if(decSep==='.') { s=s.replace(/,/g,''); }
+      else { s=s.replace(/[.,\s]/g,''); }
+      const n=Number(s); return Number.isFinite(n)&&n>=0?n:null;
+    }
+    input.addEventListener('beforeinput', (e)=>{
+      const t=e.inputType, d=e.data;
+      if(t==='insertText' && /[0-9]/.test(d||"")){ if(editingDecimals){ if(decPos<2){ decDigits[decPos]=d; decPos++; } else { decPos=0; decDigits[decPos]=d; decPos=1; } } else { intDigits+=d; intDigits=intDigits.replace(/^0+(?=\d)/,''); } e.preventDefault(); render(); return; }
+      if(t==='insertText' && (d==='.'||d===',')){ editingDecimals=true; decPos=0; e.preventDefault(); render(); return; }
+      if(t==='deleteContentBackward'){ e.preventDefault(); if(editingDecimals){ if(decPos>0){ decPos--; decDigits[decPos]="0"; } else { editingDecimals=false; } } else { if(intDigits.length>0) intDigits=intDigits.slice(0,-1); } render(); return; }
+      if(t==='insertFromPaste'){ e.preventDefault(); navigator.clipboard.readText().then(text=>{ const n=parseAnyNumberLike(text); if(n===null) return; const entero=Math.trunc(n).toString(); const dec=Math.round((n%1)*100).toString().padStart(2,"0"); intDigits=entero.replace(/^0+(?=\d)/,''); decDigits=[dec[0],dec[1]]; editingDecimals=false; decPos=0; render(); }).catch(()=>{}); return; }
+      e.preventDefault();
+    });
+    input.addEventListener('click', ()=>{
+      const visible=input.value; const commaIndex=visible.indexOf(","); const caret=input.selectionStart||0;
+      const isZero=(fmtMiles(intDigits)==="0" && decDigits.join("")==="00"); if(isZero){ editingDecimals=false; decPos=0; render(); return; }
+      if(caret>commaIndex){ editingDecimals=true; const after=caret-(commaIndex+1); decPos=Math.max(0, Math.min(2, after)); if(decPos>=2) decPos=1; } else { editingDecimals=false; decPos=0; }
+      render();
+    });
+    input.addEventListener('focus', ()=>{ if(!input.value){ editingDecimals=false; decPos=0; render(); } else { input.dispatchEvent(new Event('click')); } });
+    input.addEventListener('keypress', (e)=>{ const ch=e.key; if(!/[0-9.,]/.test(ch)) e.preventDefault(); });
+  })();
+</script>

@@ -2,7 +2,6 @@
 import { crearProveedorService } from "../services/proveedorService.mjs";
 import { obtenerSiguienteNumeroDeProveedor } from "../utils/obtenerSiguienteNumeroDeProveedor.mjs";
 import { listarPlanesService } from "../services/planesService.mjs";
-
 import Proveedor from "../models/proveedor.mjs";
 
 // Helper robusto para boolean
@@ -14,11 +13,11 @@ function toBool(v) {
 }
 
 /* =========================================================
- * GET /proveedores/crear
+ * GET /proveedores/registrar
  * =======================================================*/
 export async function mostrarFormularioProveedor(req, res) {
   try {
-    const planes = await listarPlanesService(); // planes activos ordenados
+    const planes = await listarPlanesService();
     res.render("proveedoresViews/registroProveedor", { datos: {}, planes });
   } catch (err) {
     console.error("Error al cargar formulario proveedor:", err);
@@ -27,7 +26,7 @@ export async function mostrarFormularioProveedor(req, res) {
 }
 
 /* =========================================================
- * POST /proveedores/crear
+ * POST /proveedores/registrar
  * =======================================================*/
 export async function crearProveedorController(req, res) {
   try {
@@ -42,17 +41,15 @@ export async function crearProveedorController(req, res) {
 
     const nuevoNumero = await obtenerSiguienteNumeroDeProveedor();
 
-    const activo = toBool(req.body.activo);
+    // activo: si no viene el checkbox, dejamos true por defecto
+    const activo = Object.prototype.hasOwnProperty.call(req.body, "activo")
+      ? toBool(req.body.activo)
+      : true;
+
     const plan = req.body.plan || null;
 
-    // precioPlan (override) opcional
-    let precioPlan = undefined;
-    if (req.body.precioPlan !== "" && req.body.precioPlan != null) {
-      const n = Number(req.body.precioPlan);
-      if (!Number.isNaN(n)) precioPlan = n;
-    }
-
     const nuevoProveedor = {
+      numeroProveedor: nuevoNumero,
       nombreFantasia: (req.body.nombreFantasia || "").trim(),
       nombreReal: (req.body.nombreReal || "").trim(),
       cuit: (req.body.cuit || "").trim(),
@@ -64,10 +61,8 @@ export async function crearProveedorController(req, res) {
       cbu: (req.body.cbu || "").trim(),
       categoria: (req.body.categoria || "").trim(),
       condicionIva: (req.body.condicionIva || "").trim(),
-      numeroProveedor: nuevoNumero,
       activo,
-      plan,
-      ...(typeof precioPlan === "number" ? { precioPlan } : {}), // solo si vino
+      plan, // ObjectId o null
     };
 
     await crearProveedorService(nuevoProveedor);
@@ -84,7 +79,6 @@ export async function crearProveedorController(req, res) {
  * =======================================================*/
 export async function listarProveedoresController(req, res) {
   try {
-    // populate para mostrar nombre/importe del plan en el listado
     const proveedores = await Proveedor.find()
       .populate("plan", "nombre importe activo")
       .lean();
@@ -97,7 +91,7 @@ export async function listarProveedoresController(req, res) {
 }
 
 /* =========================================================
- * GET /proveedores/:id
+ * GET /proveedores/:id/ver
  * =======================================================*/
 export async function verProveedorController(req, res) {
   try {
@@ -148,11 +142,10 @@ export async function actualizarProveedorController(req, res) {
       });
     }
 
-    const activo = toBool(req.body.activo);
+    const activo = toBool(req.body.activo); // si no viene, será false (checkbox destildado)
     const plan = req.body.plan || null;
 
-    // Armamos $set y $unset para manejar el override correctamente
-    const $set = {
+    const update = {
       nombreFantasia: (req.body.nombreFantasia || "").trim(),
       nombreReal: (req.body.nombreReal || "").trim(),
       cuit: (req.body.cuit || "").trim(),
@@ -168,23 +161,9 @@ export async function actualizarProveedorController(req, res) {
       plan,
     };
 
-    const $unset = {};
-
-    // precioPlan (override): vacío => borrar; número => setear; ausente => no tocar
-    if ("precioPlan" in req.body) {
-      if (req.body.precioPlan === "" || req.body.precioPlan == null) {
-        $unset.precioPlan = 1; // elimina override previo
-      } else {
-        const n = Number(req.body.precioPlan);
-        if (!Number.isNaN(n)) $set.precioPlan = n;
-      }
-    }
-
-    const updateDoc = Object.keys($unset).length ? { $set, $unset } : { $set };
-
     const proveedor = await Proveedor.findByIdAndUpdate(
       req.params.id,
-      updateDoc,
+      update,
       { new: true, runValidators: true }
     );
 
@@ -199,7 +178,7 @@ export async function actualizarProveedorController(req, res) {
 }
 
 /* =========================================================
- * POST /proveedores/:id/eliminar
+ * DELETE /proveedores/:id
  * =======================================================*/
 export async function eliminarProveedorController(req, res) {
   try {

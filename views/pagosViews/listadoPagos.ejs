@@ -1,0 +1,62 @@
+<main class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-300">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Pagos</h1>
+      <a href="/pagos/registrar" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+        + Registrar pago
+      </a>
+    </div>
+
+    <!-- Filtros simples -->
+    <form class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+      <select name="proveedor" class="border px-3 py-2 rounded-lg text-sm">
+        <option value="">Todos los proveedores</option>
+        <% (proveedores||[]).forEach(pr => { %>
+          <option value="<%= pr._id %>" <%= (String(filtros?.proveedor||'')===String(pr._id))?'selected':'' %>>
+            #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia %>
+          </option>
+        <% }) %>
+      </select>
+      <input type="date" name="desde" value="<%= filtros?.desde||'' %>" class="border px-3 py-2 rounded-lg text-sm">
+      <input type="date" name="hasta" value="<%= filtros?.hasta||'' %>" class="border px-3 py-2 rounded-lg text-sm">
+      <button class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm">Filtrar</button>
+    </form>
+
+    <div class="overflow-x-auto rounded-xl border border-gray-200">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-700">
+          <tr>
+            <th class="px-4 py-3 text-left">Fecha</th>
+            <th class="px-4 py-3 text-left">Proveedor</th>
+            <th class="px-4 py-3 text-left">Medio</th>
+            <th class="px-4 py-3 text-right">Importe</th>
+            <th class="px-4 py-3 text-left">Comprobante</th>
+            <th class="px-4 py-3 text-left">Detalle</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <% if ((pagos||[]).length === 0) { %>
+            <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">Sin pagos.</td></tr>
+          <% } else { %>
+            <% pagos.forEach(p => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3"><%= new Date(p.fecha).toLocaleDateString('es-AR') %></td>
+                <td class="px-4 py-3"><%= p.proveedor?.nombreFantasia || p.proveedor?.nombreReal || '—' %></td>
+                <td class="px-4 py-3"><%= p.metodo || p.medio || '—' %></td>
+                <td class="px-4 py-3 text-right">$ <%= Number(p.importe||0).toLocaleString('es-AR', {minimumFractionDigits:2}) %></td>
+                <td class="px-4 py-3"><%= p.comprobante || '—' %></td>
+                <td class="px-4 py-3"><%= p.observacion || '—' %></td>
+                <td class="px-4 py-3 text-right">
+                  <form action="/pagos/<%= p._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar pago?')">
+                    <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
