@@ -66,7 +66,11 @@ precioPlan: {
   type: Number,
   min: 0,
   required: false,
-},
+},activo: { type: Boolean, default: true },
+  plan: { type: mongoose.Schema.Types.ObjectId, ref: "Plan", default: null },
+
+  // 👇 nuevo: override del precio del plan
+  precioPlan: { type: Number, default: null }, // si es null, se usa plan.importe
 }, { timestamps: true });
 
 export default mongoose.model("Proveedor", proveedorSchema);

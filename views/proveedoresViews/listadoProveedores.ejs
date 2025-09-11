@@ -1,71 +1,79 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="bg-white max-w-6xl mx-auto p-8 rounded-2xl shadow-xl border border-gray-300">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl text-gray-800">Listado de Proveedores</h1>
-      <% if (usuario?.modulosPermitidos?.proveedores?.crear) { %>
-      <a href="/proveedores/registrar" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
-        Nuevo proveedor
-      </a>
-      <% } %>
+  <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-300">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Proveedores</h1>
+      <div class="flex items-center gap-2">
+        <a href="/proveedores/registrar" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+          + Registrar proveedor
+        </a>
+      </div>
     </div>
 
-    <% if (proveedores.length===0) { %>
-      <p class="text-gray-600 text-center italic">No hay proveedores registrados.</p>
-      <% } else { %>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm table-auto border-collapse">
-            <thead class="bg-gray-100 text-left text-gray-700 font-semibold">
-              <tr>
-                <th class="border px-4 py-2 text-center">#</th>
-                <th class="border px-4 py-2">Nombre Fantasía</th>
-                <th class="border px-4 py-2">Nombre Real</th>
-                <th class="border px-4 py-2">CUIT</th>
-                <th class="border px-4 py-2">Email</th>
-                <th class="border px-4 py-2">Categoría</th>
-                <th class="border px-4 py-2 text-center">Acciones</th>
+    <!-- Tabla -->
+    <div class="overflow-x-auto rounded-xl border border-gray-200">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-700">
+          <tr>
+            <th class="px-4 py-3 text-left">#</th>
+            <th class="px-4 py-3 text-left">Nombre Fantasía</th>
+            <th class="px-4 py-3 text-left">CUIT</th>
+            <th class="px-4 py-3 text-left">Plan</th>
+            <th class="px-4 py-3 text-left">Importe</th>
+            <th class="px-4 py-3 text-left">Estado</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <% if ((proveedores||[]).length === 0) { %>
+            <tr>
+              <td colspan="7" class="px-4 py-6 text-center text-gray-500">Sin proveedores cargados.</td>
+            </tr>
+          <% } else { %>
+            <% proveedores.forEach(p => { 
+                 const activo = (p.activo ?? true);
+                 const tieneOverride = (typeof p.precioPlan === 'number' && !Number.isNaN(p.precioPlan));
+                 const importeMostrado = tieneOverride
+                   ? p.precioPlan
+                   : (typeof p.plan?.importe !== 'undefined' ? p.plan.importe : undefined);
+            %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3"><%= p.numeroProveedor || '-' %></td>
+                <td class="px-4 py-3"><%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %></td>
+                <td class="px-4 py-3"><%= p.cuit || '-' %></td>
+                <td class="px-4 py-3"><%= p.plan?.nombre || '—' %></td>
+                <td class="px-4 py-3">
+                  <% if (typeof importeMostrado !== 'undefined') { %>
+                    $ <%= Number(importeMostrado).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    <% if (tieneOverride) { %>
+                      <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        Override
+                      </span>
+                    <% } %>
+                  <% } else { %>—<% } %>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                    <%= activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+                    <%= activo ? 'Activo' : 'Inactivo' %>
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="inline-flex gap-2">
+                    <a href="/proveedores/<%= p._id %>/ver" class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200">Ver</a>
+                    <a href="/proveedores/<%= p._id %>/editar" class="px-3 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600">Editar</a>
+                    <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
+                      <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST"
+                            onsubmit="return confirm('¿Eliminar proveedor?')">
+                        <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700">Eliminar</button>
+                      </form>
+                    <% } %>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <% proveedores.forEach(p=> { %>
-                <tr class="border-t hover:bg-gray-50 transition">
-                  <td class="border px-4 py-2 text-center">
-                    <%= p.numeroProveedor %>
-                  </td>
-                  <td class="border px-4 py-2">
-                    <%= p.nombreFantasia %>
-                  </td>
-                  <td class="border px-4 py-2">
-                    <%= p.nombreReal %>
-                  </td>
-                  <td class="border px-4 py-2">
-                    <%= p.cuit %>
-                  </td>
-                  <td class="border px-4 py-2">
-                    <%= p.email || '-' %>
-                  </td>
-                  <td class="border px-4 py-2">
-                    <%= p.categoria %>
-                  </td>
-                  <td class="border px-4 py-2 text-center space-x-2">
-                    <% if (usuario?.modulosPermitidos?.proveedores?.ver) { %>
-                      <a href="/proveedores/<%= p._id %>/ver" class="text-blue-600 hover:underline text-sm">Ver</a>
-                      <% } %>
-                        <% if (usuario?.modulosPermitidos?.proveedores?.editar) {%>
-                          <a href="/proveedores/<%= p._id %>/editar"
-                            class="text-yellow-600 hover:underline text-sm">Editar</a>
-                          <% } %>
-                            <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
-                              <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline"
-                                onsubmit="return confirm('¿Eliminar este proveedor?')">
-                                <button type="submit" class="text-red-600 hover:underline text-sm">Eliminar</button>
-                              </form>
-                              <% } %>
-                  </td>
-                </tr>
-                <% }) %>
-            </tbody>
-          </table>
-        </div>
-        <% } %>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>

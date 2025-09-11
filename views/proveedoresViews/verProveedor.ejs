@@ -1,73 +1,92 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Detalle del Proveedor</h1>
+  <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+    <div class="flex items-start justify-between gap-4">
+      <h1 class="text-2xl font-bold text-gray-800">Proveedor #<%= proveedor.numeroProveedor || '-' %></h1>
+      <a href="/proveedores/<%= proveedor._id %>/editar" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition text-sm">Editar</a>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-      <div>
-        <label class="block text-gray-700 font-medium">Número de proveedor</label>
-        <input type="text" value="<%= proveedor.numeroProveedor %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
+      <div class="space-y-2">
+        <div><span class="font-medium text-gray-700">Nombre de fantasía:</span> <%= proveedor.nombreFantasia || '—' %></div>
+        <div><span class="font-medium text-gray-700">Nombre real:</span> <%= proveedor.nombreReal || '—' %></div>
+        <div><span class="font-medium text-gray-700">CUIT:</span> <%= proveedor.cuit || '—' %></div>
+        <div><span class="font-medium text-gray-700">Categoría:</span> <%= proveedor.categoria || '—' %></div>
+        <div><span class="font-medium text-gray-700">Condición IVA:</span> <%= proveedor.condicionIva || '—' %></div>
       </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Nombre de fantasía</label>
-        <input type="text" value="<%= proveedor.nombreFantasia %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Nombre real</label>
-        <input type="text" value="<%= proveedor.nombreReal %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">CUIT</label>
-        <input type="text" value="<%= proveedor.cuit %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Domicilio</label>
-        <input type="text" value="<%= proveedor.domicilio %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Domicilio Fiscal</label>
-        <input type="text" value="<%= proveedor.domicilioFiscal %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Teléfono celular</label>
-        <input type="text" value="<%= proveedor.telefonoCelular || '-' %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Teléfono fijo</label>
-        <input type="text" value="<%= proveedor.telefonoFijo || '-' %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">Email</label>
-        <input type="text" value="<%= proveedor.email || '-' %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div>
-        <label class="block text-gray-700 font-medium">CBU</label>
-        <input type="text" value="<%= proveedor.cbu || '-' %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-gray-700 font-medium">Categoría</label>
-        <input type="text" value="<%= proveedor.categoria %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="block text-gray-700 font-medium">Condición IVA</label>
-        <input type="text" value="<%= proveedor.condicionIva %>" disabled class="w-full border px-3 py-2 rounded-lg bg-gray-100" />
+      <div class="space-y-2">
+        <div><span class="font-medium text-gray-700">Domicilio:</span> <%= proveedor.domicilio || '—' %></div>
+        <div><span class="font-medium text-gray-700">Domicilio Fiscal:</span> <%= proveedor.domicilioFiscal || '—' %></div>
+        <div><span class="font-medium text-gray-700">Tel. Celular:</span> <%= proveedor.telefonoCelular || '—' %></div>
+        <div><span class="font-medium text-gray-700">Tel. Fijo:</span> <%= proveedor.telefonoFijo || '—' %></div>
+        <div><span class="font-medium text-gray-700">E-mail:</span> <%= proveedor.email || '—' %></div>
+        <div><span class="font-medium text-gray-700">CBU:</span> <%= proveedor.cbu || '—' %></div>
       </div>
     </div>
 
-    <div class="text-center mt-8">
-      <a href="/proveedores" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
-        Volver al listado
-      </a>
+    <div class="flex items-center gap-3">
+      <div>
+        <span class="font-medium text-gray-700">Estado:</span>
+        <% const activo = (proveedor.activo ?? true); %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+          <%= activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+          <%= activo ? 'Activo' : 'Inactivo' %>
+        </span>
+      </div>
+      <div>
+        <span class="font-medium text-gray-700">Plan:</span>
+        <%= proveedor.plan?.nombre || 'Sin plan' %>
+        <% if (proveedor.plan && typeof proveedor.plan.importe !== 'undefined') { %>
+          — $ <%= Number(proveedor.plan.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 }) %>
+        <% } %>
+      </div>
     </div>
+
+    <!-- Cuenta (opcional: solo si el controller te pasa {cuenta.detalle, cuenta.saldoTotal}) -->
+    <% if (typeof cuenta !== 'undefined') { %>
+      <hr class="my-2">
+      <h2 class="text-lg font-semibold text-gray-800">Cuenta</h2>
+      <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 text-gray-700">
+            <tr>
+              <th class="px-4 py-2 text-left">Fecha</th>
+              <th class="px-4 py-2 text-left">Tipo</th>
+              <th class="px-4 py-2 text-left">Concepto</th>
+              <th class="px-4 py-2 text-left">Período</th>
+              <th class="px-4 py-2 text-right">Importe</th>
+              <th class="px-4 py-2 text-right">Saldo</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <% if ((cuenta.detalle||[]).length === 0) { %>
+              <tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">Sin movimientos.</td></tr>
+            <% } else { %>
+              <% cuenta.detalle.forEach(m => { %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-2"><%= new Date(m.fecha||m.createdAt).toLocaleDateString('es-AR') %></td>
+                  <td class="px-4 py-2 capitalize"><%= m.tipo %></td>
+                  <td class="px-4 py-2"><%= m.concepto || '—' %></td>
+                  <td class="px-4 py-2"><%= m.periodo || '—' %></td>
+                  <td class="px-4 py-2 text-right">
+                    $ <%= Number(m.importe).toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2}) %>
+                  </td>
+                  <td class="px-4 py-2 text-right">
+                    $ <%= Number(m.saldoParcial).toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2}) %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+          <tfoot>
+            <tr class="bg-gray-50">
+              <td colspan="5" class="px-4 py-3 text-right font-semibold">Saldo total</td>
+              <td class="px-4 py-3 text-right font-semibold">
+                $ <%= Number(cuenta.saldoTotal||0).toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2}) %>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    <% } %>
   </div>
 </main>
