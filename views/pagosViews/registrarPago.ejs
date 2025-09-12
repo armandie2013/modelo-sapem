@@ -7,7 +7,9 @@
         <h1 class="text-2xl font-bold text-gray-800">Registrar Pago</h1>
         <% if (modoProveedor) { %>
           <p class="text-gray-600 text-sm">Proveedor:
-            <span class="font-medium"><%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %></span>
+            <span class="font-medium">
+              <%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %>
+            </span>
           </p>
         <% } %>
       </div>
@@ -16,8 +18,7 @@
         <a href="/proveedores/<%= proveedor._id %>/ver"
            class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
       <% } else { %>
-        <a href="/pagos"
-           class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+        <a href="/pagos" class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
       <% } %>
     </div>
 
@@ -40,7 +41,8 @@
           <!-- Selector de proveedor (modo genérico) -->
           <div class="sm:col-span-2">
             <label class="block font-medium text-gray-700">Proveedor</label>
-            <select id="proveedorSelect" name="proveedor" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+            <select id="proveedorSelect" name="proveedor" required
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
               <option value="">Seleccione…</option>
               <% (proveedores || []).forEach(pr => { %>
                 <option value="<%= pr._id %>" <%= (datos?.proveedor === String(pr._id)) ? 'selected' : '' %>>
@@ -56,18 +58,19 @@
           <label class="block font-medium text-gray-700">Período / Cargo</label>
 
           <% if (modoProveedor) { %>
-            <select id="periodoSelect" name="periodo" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+            <select id="periodoSelect" name="periodo" required
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
               <option value="">Seleccione…</option>
               <% (cargosPendientes || []).forEach(c => { %>
                 <option value="<%= c.periodo %>">
-                  <%= c.periodo %> — $ <%= Number(c.importe).toLocaleString('es-AR',{minimumFractionDigits:2}) %>
-                  (<%= c.concepto %>) — saldo: $ <%= Number(c.saldo).toLocaleString('es-AR',{minimumFractionDigits:2}) %>
+                  <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 }) %> (<%= c.concepto %>)
                 </option>
               <% }) %>
             </select>
             <p class="text-xs text-gray-500 mt-1">Solo se muestran cargos con saldo pendiente.</p>
           <% } else { %>
-            <select id="periodoSelect" name="periodo" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
+            <select id="periodoSelect" name="periodo" required
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
               <option value="">Seleccione un proveedor…</option>
             </select>
             <p class="text-xs text-gray-500 mt-1">Elegí el proveedor para ver los cargos pendientes.</p>
@@ -82,19 +85,20 @@
           <p class="text-xs text-gray-500 mt-1">Si está vacío, se completa con hoy.</p>
         </div>
 
-        <!-- Importe ARS con máscara -->
+        <!-- Importe USD con máscara -->
         <div>
-          <label class="block font-medium text-gray-700">Importe (ARS)</label>
+          <label class="block font-medium text-gray-700">Importe (USD)</label>
           <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">$</span>
+            <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">US$</span>
+            <!-- Aumentamos padding-left para no superponer el texto con "US$" -->
             <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
-                   class="w-full border border-gray-300 pl-7 pr-3 py-2 rounded-lg text-sm"
+                   class="w-full border border-gray-300 pl-12 pr-3 py-2 rounded-lg text-sm"
                    placeholder="0,00" aria-describedby="importeHelp">
           </div>
           <input type="hidden" name="importe" id="importeHidden"
                  value="<%= (datos && datos.importe != null && datos.importe !== '') ? Number(datos.importe).toFixed(2) : '' %>">
           <p id="importeHelp" class="text-xs text-gray-500 mt-1">
-            Escribí el monto. Usá punto o coma para decimales. Ej.: $ 12.345,67.
+            Escribí el monto. Usá punto o coma para decimales. Ej.: <span class="font-mono">US$ 12.345,67</span>.
           </p>
         </div>
 
@@ -156,18 +160,18 @@
     const el = document.querySelector('input[name="fecha"]');
     if (el && !el.value) {
       const tzOffset = new Date().getTimezoneOffset() * 60000;
-      const hoy = new Date(Date.now() - tzOffset).toISOString().slice(0,10);
+      const hoy = new Date(Date.now() - tzOffset).toISOString().slice(0, 10);
       el.value = hoy;
     }
   })();
 
   // carga períodos (modo genérico) al elegir proveedor
-  (function initCargosCombo(){
+  (function initCargosCombo() {
     const provSel = document.getElementById('proveedorSelect');
     const perSel = document.getElementById('periodoSelect');
     if (!provSel || !perSel) return;
 
-    async function loadCargos(proveedorId){
+    async function loadCargos(proveedorId) {
       perSel.innerHTML = '<option value="">Cargando…</option>';
       perSel.disabled = true;
       try {
@@ -180,15 +184,14 @@
           const opt = document.createElement('option');
           opt.value = c.periodo;
           opt.textContent =
-            `${c.periodo} — $ ${Number(c.importe).toLocaleString('es-AR',{minimumFractionDigits:2})} `
-            + `(${c.concepto}) — saldo: $ ${Number(c.saldo).toLocaleString('es-AR',{minimumFractionDigits:2})}`;
+            `${c.periodo} — US$ ${Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })} (${c.concepto})`;
           perSel.appendChild(opt);
         });
         perSel.disabled = cargos.length === 0;
         if (cargos.length === 0) {
           perSel.innerHTML = '<option value="">Sin cargos pendientes</option>';
         }
-      } catch(e){
+      } catch (e) {
         perSel.innerHTML = '<option value="">Error al cargar</option>';
       }
     }
@@ -207,11 +210,12 @@
     if (provSel.value) loadCargos(provSel.value);
   })();
 
-  // máscara ARS
+  // máscara USD (coma decimal, miles con punto, 2 decimales)
   (() => {
     const input = document.getElementById('importeMask');
     const hidden = document.getElementById('importeHidden');
     let intDigits = ""; let decDigits = ["0","0"]; let editingDecimals = false; let decPos = 0;
+
     (function init() {
       const v = hidden.value;
       if (!v) { render(); return; }
@@ -224,6 +228,7 @@
       }
       render();
     })();
+
     function fmtMiles(s){ s=s||"0"; s=s.replace(/^0+(?=\d)/,""); if(s==="") s="0"; return s.replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
     function updateHidden(){ const num = Number(intDigits||"0") + (Number(decDigits.join(""))/100); hidden.value = num.toFixed(2); }
     function render(){

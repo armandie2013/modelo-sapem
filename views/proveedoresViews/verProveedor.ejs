@@ -1,92 +1,166 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
-    <div class="flex items-start justify-between gap-4">
-      <h1 class="text-2xl font-bold text-gray-800">Proveedor #<%= proveedor.numeroProveedor || '-' %></h1>
-      <a href="/proveedores/<%= proveedor._id %>/editar" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition text-sm">Editar</a>
+  <%
+  // Helper USD: US$ 12.345,67 (locale es-AR)
+  const fmtUSD = (v) =>
+    new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(Number(v || 0));
+  %>
+
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Header + acciones -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">
+            Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
+          </h1>
+          <h1 class="text-xl font-bold text-gray-900">
+            Nombre: <%= proveedor.nombreReal %>
+          </h1>
+          <p class="text-sm text-gray-600">
+            CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+            IVA: <%= proveedor.condicionIva || '—' %> ·
+            Estado:
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+              <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+            </span>
+          </p>
+          <p class="text-sm text-gray-600 mt-1">
+            Plan:
+            <% if (proveedor.plan) { %>
+              <span class="font-medium"><%= proveedor.plan.nombre %></span>
+              — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
+              <% if (typeof proveedor.precioPlan === 'number') { %>
+                <span class="text-xs text-gray-500">(override)</span>
+              <% } %>
+            <% } else { %>
+              <span class="text-gray-500">Sin plan</span>
+            <% } %>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
+             class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+            + Registrar pago
+          </a>
+          <!-- (Opcional) acciones futuras
+          <a href="#" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 text-sm">+ Nota de crédito</a>
+          <a href="#" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 text-sm">+ Nota de débito</a>
+          -->
+          <a href="/proveedores" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
+            ← Volver
+          </a>
+        </div>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-      <div class="space-y-2">
-        <div><span class="font-medium text-gray-700">Nombre de fantasía:</span> <%= proveedor.nombreFantasia || '—' %></div>
-        <div><span class="font-medium text-gray-700">Nombre real:</span> <%= proveedor.nombreReal || '—' %></div>
-        <div><span class="font-medium text-gray-700">CUIT:</span> <%= proveedor.cuit || '—' %></div>
-        <div><span class="font-medium text-gray-700">Categoría:</span> <%= proveedor.categoria || '—' %></div>
-        <div><span class="font-medium text-gray-700">Condición IVA:</span> <%= proveedor.condicionIva || '—' %></div>
+    <!-- Resumen -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
+        <p class="text-xs text-gray-500">Total cargos</p>
+        <p class="text-xl font-semibold"><%= fmtUSD(totales.cargo) %></p>
       </div>
-      <div class="space-y-2">
-        <div><span class="font-medium text-gray-700">Domicilio:</span> <%= proveedor.domicilio || '—' %></div>
-        <div><span class="font-medium text-gray-700">Domicilio Fiscal:</span> <%= proveedor.domicilioFiscal || '—' %></div>
-        <div><span class="font-medium text-gray-700">Tel. Celular:</span> <%= proveedor.telefonoCelular || '—' %></div>
-        <div><span class="font-medium text-gray-700">Tel. Fijo:</span> <%= proveedor.telefonoFijo || '—' %></div>
-        <div><span class="font-medium text-gray-700">E-mail:</span> <%= proveedor.email || '—' %></div>
-        <div><span class="font-medium text-gray-700">CBU:</span> <%= proveedor.cbu || '—' %></div>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
+        <p class="text-xs text-gray-500">Notas de débito</p>
+        <p class="text-xl font-semibold"><%= fmtUSD(totales.notaDebito) %></p>
       </div>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <div>
-        <span class="font-medium text-gray-700">Estado:</span>
-        <% const activo = (proveedor.activo ?? true); %>
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-          <%= activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-          <%= activo ? 'Activo' : 'Inactivo' %>
-        </span>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
+        <p class="text-xs text-gray-500">Notas de crédito</p>
+        <p class="text-xl font-semibold"><%= fmtUSD(totales.notaCredito) %></p>
       </div>
-      <div>
-        <span class="font-medium text-gray-700">Plan:</span>
-        <%= proveedor.plan?.nombre || 'Sin plan' %>
-        <% if (proveedor.plan && typeof proveedor.plan.importe !== 'undefined') { %>
-          — $ <%= Number(proveedor.plan.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 }) %>
-        <% } %>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
+        <p class="text-xs text-gray-500">Pagos</p>
+        <p class="text-xl font-semibold"><%= fmtUSD(totales.pagos) %></p>
+      </div>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
+        <p class="text-xs text-gray-500">Saldo total</p>
+        <p class="text-xl font-semibold <%= totales.saldo > 0 ? 'text-red-600' : (totales.saldo < 0 ? 'text-green-700' : 'text-gray-900') %>">
+          <%= fmtUSD(totales.saldo) %>
+        </p>
       </div>
     </div>
 
-    <!-- Cuenta (opcional: solo si el controller te pasa {cuenta.detalle, cuenta.saldoTotal}) -->
-    <% if (typeof cuenta !== 'undefined') { %>
-      <hr class="my-2">
-      <h2 class="text-lg font-semibold text-gray-800">Cuenta</h2>
+    <!-- Detalle por período -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Resumen por período</h2>
+
       <div class="overflow-x-auto rounded-xl border border-gray-200">
         <table class="min-w-full text-sm">
           <thead class="bg-gray-50 text-gray-700">
             <tr>
-              <th class="px-4 py-2 text-left">Fecha</th>
-              <th class="px-4 py-2 text-left">Tipo</th>
-              <th class="px-4 py-2 text-left">Concepto</th>
-              <th class="px-4 py-2 text-left">Período</th>
-              <th class="px-4 py-2 text-right">Importe</th>
-              <th class="px-4 py-2 text-right">Saldo</th>
+              <th class="px-4 py-3 text-left">Período</th>
+              <th class="px-4 py-3 text-right">Cargos</th>
+              <th class="px-4 py-3 text-right">Notas débito</th>
+              <th class="px-4 py-3 text-right">Notas crédito</th>
+              <th class="px-4 py-3 text-right">Pagos</th>
+              <th class="px-4 py-3 text-right">Saldo</th>
             </tr>
           </thead>
-          <tbody class="divide-y">
-            <% if ((cuenta.detalle||[]).length === 0) { %>
-              <tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">Sin movimientos.</td></tr>
+          <tbody class="divide-y divide-gray-100">
+            <% if ((detallePorPeriodo||[]).length === 0) { %>
+              <tr class="bg-gray-50">
+                <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
+              </tr>
             <% } else { %>
-              <% cuenta.detalle.forEach(m => { %>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-4 py-2"><%= new Date(m.fecha||m.createdAt).toLocaleDateString('es-AR') %></td>
-                  <td class="px-4 py-2 capitalize"><%= m.tipo %></td>
-                  <td class="px-4 py-2"><%= m.concepto || '—' %></td>
-                  <td class="px-4 py-2"><%= m.periodo || '—' %></td>
-                  <td class="px-4 py-2 text-right">
-                    $ <%= Number(m.importe).toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2}) %>
-                  </td>
-                  <td class="px-4 py-2 text-right">
-                    $ <%= Number(m.saldoParcial).toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2}) %>
+              <% detallePorPeriodo.forEach(r => { %>
+                <tr class="odd:bg-gray-50 even:bg-white hover:bg-gray-100">
+                  <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
+                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.cargo) %></td>
+                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
+                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
+                  <td class="px-4 py-3 text-right text-green-800"><%= fmtUSD(r.pagos) %></td>
+                  <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-red-600' : (r.saldo < 0 ? 'text-green-700' : '') %>">
+                    <%= fmtUSD(r.saldo) %>
                   </td>
                 </tr>
               <% }) %>
             <% } %>
           </tbody>
-          <tfoot>
-            <tr class="bg-gray-50">
-              <td colspan="5" class="px-4 py-3 text-right font-semibold">Saldo total</td>
-              <td class="px-4 py-3 text-right font-semibold">
-                $ <%= Number(cuenta.saldoTotal||0).toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2}) %>
-              </td>
-            </tr>
-          </tfoot>
         </table>
       </div>
-    <% } %>
+    </div>
+
+    <!-- Timeline últimos movimientos -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Movimientos recientes</h2>
+
+      <% if ((movimientos||[]).length === 0) { %>
+        <p class="text-gray-500 text-sm">Sin movimientos.</p>
+      <% } else { %>
+        <ul class="space-y-3">
+          <% movimientos.forEach(m => { %>
+            <li class="flex items-start justify-between gap-3 border-b pb-3">
+              <div>
+                <div class="text-sm">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                    <%= m.tipo==='cargo' ? 'bg-sky-100 text-sky-800' : (m.tipo==='pago' ? 'bg-green-100 text-green-800' : (m.tipo==='notaCredito' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')) %>">
+                    <%= m.tipo %>
+                  </span>
+                  <span class="ml-2 font-medium"><%= m.concepto %></span>
+                  <% if (m.periodo) { %>
+                    <span class="ml-2 text-gray-500">(<%= m.periodo %>)</span>
+                  <% } %>
+                </div>
+                <div class="text-xs text-gray-500">
+                  <%= new Date(m.fecha).toLocaleString('es-AR') %>
+                  <% if (m.tipo==='pago' && (m.metodo || m.comprobante)) { %>
+                    · <%= (m.metodo||'') %> <%= (m.comprobante ? `#${m.comprobante}` : '') %>
+                  <% } %>
+                </div>
+              </div>
+              <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-red-600' : 'text-green-700' %>">
+                <%= m.signo > 0 ? '+ ' : '- ' %><%= fmtUSD(m.importe) %>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
   </div>
 </main>

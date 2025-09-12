@@ -3,6 +3,8 @@ import { crearProveedorService } from "../services/proveedorService.mjs";
 import { obtenerSiguienteNumeroDeProveedor } from "../utils/obtenerSiguienteNumeroDeProveedor.mjs";
 import { listarPlanesService } from "../services/planesService.mjs";
 import Proveedor from "../models/proveedor.mjs";
+import Pago from "../models/pago.mjs";
+import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 
 // Helper robusto para boolean
 function toBool(v) {
@@ -95,17 +97,138 @@ export async function listarProveedoresController(req, res) {
  * =======================================================*/
 export async function verProveedorController(req, res) {
   try {
-    const proveedor = await Proveedor.findById(req.params.id)
+    const { id } = req.params;
+
+    const proveedor = await Proveedor.findById(id)
       .populate("plan", "nombre importe activo")
       .lean();
 
-    if (!proveedor) {
-      return res.status(404).send("Proveedor no encontrado");
+    if (!proveedor) return res.status(404).send("Proveedor no encontrado");
+
+    // --- Traemos movimientos ---
+    const [cargos, notas, pagos] = await Promise.all([
+      MovimientoProveedor.find({ proveedor: id, tipo: "cargo" }).sort({ periodo: 1 }).lean(),
+      MovimientoProveedor.find({
+        proveedor: id,
+        tipo: { $in: ["notaCredito", "notaDebito"] },
+      })
+        .sort({ fecha: 1 })
+        .lean(),
+      Pago.find({ proveedor: id }).sort({ fecha: 1 }).lean(),
+    ]);
+
+    // Map para obtener periodo desde un cargoId
+    const cargoIdToPeriodo = new Map(cargos.map(c => [String(c._id), c.periodo]));
+
+    // --- Acumuladores por período (YYYY-MM) ---
+    const sumMap = () => new Map(); // periodo -> number
+    const cargoPorPeriodo = sumMap();
+    const ncPorPeriodo = sumMap();
+    const ndPorPeriodo = sumMap();
+    const pagosPorPeriodo = sumMap();
+
+    for (const c of cargos) {
+      const per = c.periodo || "";
+      const val = Number(c.importe || 0);
+      cargoPorPeriodo.set(per, (cargoPorPeriodo.get(per) || 0) + val);
     }
 
-    res.render("proveedoresViews/verProveedor", { proveedor });
+    for (const n of notas) {
+      const per = n.periodo || ""; // si tus notas tienen periodo; si no, podés derivarlo por fecha (YYYY-MM)
+      const val = Number(n.importe || 0);
+      if (n.tipo === "notaCredito") {
+        ncPorPeriodo.set(per, (ncPorPeriodo.get(per) || 0) + val);
+      } else if (n.tipo === "notaDebito") {
+        ndPorPeriodo.set(per, (ndPorPeriodo.get(per) || 0) + val);
+      }
+    }
+
+    for (const p of pagos) {
+      // prioridad: p.periodo -> p.cargo -> (sin periodo)
+      let per = (p.periodo || "").trim();
+      if (!per && p.cargo) per = cargoIdToPeriodo.get(String(p.cargo)) || "";
+      if (!per) continue; // si no hay forma de asignarlo a un período, no afecta el cuadro por período (igual aparece en timeline)
+      const val = Number(p.importe || 0);
+      pagosPorPeriodo.set(per, (pagosPorPeriodo.get(per) || 0) + val);
+    }
+
+    // Conjunto de todos los períodos presentes
+    const periodos = new Set([
+      ...cargoPorPeriodo.keys(),
+      ...ncPorPeriodo.keys(),
+      ...ndPorPeriodo.keys(),
+      ...pagosPorPeriodo.keys(),
+    ]);
+
+    // Armar filas por período (orden ascendente)
+    const detallePorPeriodo = Array.from(periodos)
+      .filter(p => p) // sin vacíos
+      .sort()         // "2025-01" < "2025-02" ...
+      .map(per => {
+        const cargo = cargoPorPeriodo.get(per) || 0;
+        const nc = ncPorPeriodo.get(per) || 0;
+        const nd = ndPorPeriodo.get(per) || 0;
+        const pag = pagosPorPeriodo.get(per) || 0;
+        const saldo = cargo + nd - nc - pag;
+        return { periodo: per, cargo, notaDebito: nd, notaCredito: nc, pagos: pag, saldo };
+      });
+
+    // Totales
+    const totales = detallePorPeriodo.reduce(
+      (acc, r) => {
+        acc.cargo += r.cargo;
+        acc.notaDebito += r.notaDebito;
+        acc.notaCredito += r.notaCredito;
+        acc.pagos += r.pagos;
+        acc.saldo += r.saldo;
+        return acc;
+      },
+      { cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0, saldo: 0 }
+    );
+
+    // Timeline (últimos 20 movimientos combinados)
+    const movimientos = [
+      ...cargos.map(x => ({
+        _id: x._id,
+        tipo: "cargo",
+        fecha: x.fecha || new Date(),
+        periodo: x.periodo || "",
+        concepto: x.concepto || `Cargo ${x.periodo || ""}`,
+        importe: Number(x.importe || 0),
+        signo: +1,
+      })),
+      ...notas.map(x => ({
+        _id: x._id,
+        tipo: x.tipo, // "notaCredito" / "notaDebito"
+        fecha: x.fecha || new Date(),
+        periodo: x.periodo || "",
+        concepto: x.concepto || (x.tipo === "notaCredito" ? "Nota de crédito" : "Nota de débito"),
+        importe: Number(x.importe || 0),
+        signo: x.tipo === "notaCredito" ? -1 : +1,
+      })),
+      ...pagos.map(x => ({
+        _id: x._id,
+        tipo: "pago",
+        fecha: x.fecha || new Date(),
+        periodo: x.periodo || (x.cargo ? (cargoIdToPeriodo.get(String(x.cargo)) || "") : ""),
+        concepto: x.observacion || `Pago ${x.metodo || ""} ${x.comprobante || ""}`.trim(),
+        importe: Number(x.importe || 0),
+        signo: -1,
+        metodo: x.metodo,
+        comprobante: x.comprobante,
+      })),
+    ]
+      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+      .slice(0, 20);
+
+    res.render("proveedoresViews/verProveedor", {
+      proveedor,
+      detallePorPeriodo,
+      totales,
+      movimientos,
+    });
   } catch (error) {
-    console.error("Error al obtener proveedor:", error);
+    console.error("Error al mostrar proveedor:", error);
     res.status(500).send("Error al mostrar proveedor");
   }
 }
