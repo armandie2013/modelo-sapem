@@ -1,13 +1,13 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
   <%
-  // Helper USD: US$ 12.345,67 (locale es-AR)
-  const fmtUSD = (v) =>
-    new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(Number(v || 0));
+    // Helper USD: US$ 12.345,67 (locale es-AR)
+    const fmtUSD = (v) =>
+      new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(v || 0));
   %>
 
   <div class="max-w-6xl mx-auto space-y-6">
@@ -24,12 +24,14 @@
           </h1>
           <p class="text-sm text-gray-600">
             CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-            IVA: <%= proveedor.condicionIva || '—' %> · Tel: <%=proveedor.telefonoCelular%> ·
+            IVA: <%= proveedor.condicionIva || '—' %> ·
+            Tel: <%= proveedor.telefonoCelular || '—' %> ·
             Estado:
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
               <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
             </span>
           </p>
+
           <p class="text-sm text-gray-600 mt-1">
             Plan:
             <% if (proveedor.plan) { %>
@@ -42,32 +44,36 @@
               <span class="text-gray-500">Sin plan</span>
             <% } %>
           </p>
+
+          <!-- <p class="text-sm text-gray-600">
+            Período: <span class="font-semibold"><%= periodo %></span>
+          </p> -->
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
+          <a href="/pagos/proveedores/<%= proveedor._id %>/registrar?periodo=<%= periodo %>"
              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
             + Registrar pago
           </a>
 
-          <!-- Acciones para notas -->
-          <a href="/notas/proveedores/<%= proveedor._id %>/credito"
+          <a href="/notas/proveedores/<%= proveedor._id %>/credito?periodo=<%= periodo %>"
              class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
             + Nota de crédito
           </a>
-          <a href="/notas/proveedores/<%= proveedor._id %>/debito"
+          <a href="/notas/proveedores/<%= proveedor._id %>/debito?periodo=<%= periodo %>"
              class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
             + Nota de débito
           </a>
 
-          <a href="/proveedores" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
+          <a href="/proveedores/<%= proveedor._id %>/ver"
+             class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
             ← Volver
           </a>
         </div>
       </div>
     </div>
 
-    <!-- Resumen -->
+    <!-- Resumen del período -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
         <p class="text-xs text-gray-500">Total cargos</p>
@@ -93,63 +99,20 @@
       </div>
     </div>
 
-    <!-- Detalle por período -->
+    <!-- Movimientos del período -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">Resumen por período</h2>
-
-      <div class="overflow-x-auto rounded-xl border border-gray-200">
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-50 text-gray-700">
-            <tr>
-              <th class="px-4 py-3 text-left">Período</th>
-              <th class="px-4 py-3 text-right">Cargos</th>
-              <th class="px-4 py-3 text-right">Notas débito</th>
-              <th class="px-4 py-3 text-right">Notas crédito</th>
-              <th class="px-4 py-3 text-right">Pagos</th>
-              <th class="px-4 py-3 text-right">Saldo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <% if ((detallePorPeriodo||[]).length === 0) { %>
-              <tr class="bg-gray-50">
-                <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
-              </tr>
-            <% } else { 
-                 // Orden: más viejo primero (YYYY-MM permite orden lexicográfico)
-                 const filasOrdenadas = (detallePorPeriodo || []).slice().sort((a,b) => {
-                   const A = String(a.periodo||'');
-                   const B = String(b.periodo||'');
-                   return A.localeCompare(B);
-                 });
-            %>
-              <% filasOrdenadas.forEach(r => { %>
-                <tr
-                  class="odd:bg-gray-50 even:bg-white hover:bg-gray-100 cursor-pointer periodo-row"
-                  data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
-                  title="Ver detalle del período <%= r.periodo %>"
-                >
-                  <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
-                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.cargo) %></td>
-                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
-                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
-                  <td class="px-4 py-3 text-right text-green-800"><%= fmtUSD(r.pagos) %></td>
-                  <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-red-600' : (r.saldo < 0 ? 'text-green-700' : '') %>">
-                    <%= fmtUSD(r.saldo) %>
-                  </td>
-                </tr>
-              <% }) %>
-            <% } %>
-          </tbody>
-        </table>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h2 class="text-lg font-semibold text-gray-800">Movimientos del período</h2>
+        <span class="text-sm text-gray-600">
+          <span class="hidden sm:inline">Período: </span>
+          <span class="inline-flex items-center rounded-full border border-gray-300 bg-gray-50 px-3 py-1 font-medium">
+            <%= periodo %>
+          </span>
+        </span>
       </div>
-    </div>
 
-    <!-- Timeline últimos movimientos -->
-    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">Movimientos recientes</h2>
-
-      <% if ((movimientos||[]).length === 0) { %>
-        <p class="text-gray-500 text-sm">Sin movimientos.</p>
+      <% if ((movimientos || []).length === 0) { %>
+        <p class="text-gray-500 text-sm">No hay movimientos en este período.</p>
       <% } else { %>
         <ul class="space-y-3">
           <% movimientos.forEach(m => { %>
@@ -157,24 +120,24 @@
               <div>
                 <div class="text-sm">
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                    <%= m.tipo==='cargo'
+                    <%= m.tipo === 'cargo'
                         ? 'bg-sky-100 text-sky-800'
-                        : (m.tipo==='pago'
+                        : (m.tipo === 'pago'
                             ? 'bg-green-100 text-green-800'
-                            : (m.tipo==='credito'
+                            : (m.tipo === 'credito'
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-amber-100 text-amber-800')) %>">
                     <%= m.tipo %>
                   </span>
-                  <span class="ml-2 font-medium"><%= m.concepto %></span>
-                  <% if (m.periodo) { %>
-                    <span class="ml-2 text-gray-500">(<%= m.periodo %>)</span>
-                  <% } %>
+                  <span class="ml-2 font-medium"><%= m.concepto || '(Sin detalle)' %></span>
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-gray-500 mt-1">
                   <%= new Date(m.fecha).toLocaleString('es-AR') %>
-                  <% if (m.tipo==='pago' && (m.metodo || m.comprobante)) { %>
-                    · <%= (m.metodo||'') %> <%= (m.comprobante ? `#${m.comprobante}` : '') %>
+                  <% if (m.creadorNombre && m.creadorNombre !== '—') { %>
+                    · Cargado por <%= m.creadorNombre %>
+                  <% } %>
+                  <% if (m.tipo === 'pago' && (m.metodo || m.comprobante)) { %>
+                    · <%= (m.metodo || '') %> <%= (m.comprobante ? `#${m.comprobante}` : '') %>
                   <% } %>
                 </div>
               </div>
@@ -186,18 +149,6 @@
         </ul>
       <% } %>
     </div>
+
   </div>
 </main>
-
-<script>
-  // Hace clickeables las filas del resumen por período
-  document.querySelectorAll('.periodo-row').forEach(tr => {
-    tr.addEventListener('click', (e) => {
-      const href = tr.dataset.href;
-      if (!href) return;
-      const tag = (e.target.tagName || '').toLowerCase();
-      if (['a','button','input','label','select','svg','path'].includes(tag)) return;
-      window.location.href = href;
-    });
-  });
-</script>

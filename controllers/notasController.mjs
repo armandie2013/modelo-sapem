@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 import Proveedor from "../models/proveedor.mjs";
 import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 import { convertirAFloat } from "../utils/convertirAFloat.mjs";
-import clock from "../utils/clock.mjs"; // ⏱ reloj central
-import { dateWithClockTimeFromLocalDateString } from "../utils/datetime.mjs"; // combina YYYY-MM-DD + hora actual
+import clock from "../utils/clock.mjs";
 
 function normalizarTipo(t) {
   const v = (t || "").toString().trim().toLowerCase();
@@ -21,16 +20,15 @@ export async function apiCargosProveedor(req, res) {
     limit = parseInt(limit, 10);
     if (!Number.isFinite(limit) || limit <= 0 || limit > 24) limit = 6;
 
-    // Viejo -> nuevo (nuevo queda abajo en el select)
     const cargos = await MovimientoProveedor.find({
       proveedor: new mongoose.Types.ObjectId(proveedor),
       tipo: "cargo",
     })
-      .sort({ periodo: 1 })
+      .sort({ periodo: -1 }) // YYYY-MM: orden lexicográfico desc
       .limit(limit)
       .lean();
 
-    const out = cargos.map(c => ({
+    const out = cargos.map((c) => ({
       _id: c._id,
       periodo: c.periodo,
       concepto: c.concepto,
@@ -57,7 +55,7 @@ export async function mostrarFormularioNota(req, res) {
 
   const datos = {
     proveedor: "",
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha: clock.todayYMD(), // yyyy-mm-dd para <input type="date">
     cargoId: "",
     importe: "",
     detalle: "",
@@ -67,7 +65,7 @@ export async function mostrarFormularioNota(req, res) {
     tipoNota,
     proveedor: null,
     proveedores,
-    cargosDeProveedor: null, // se carga via fetch al elegir proveedor
+    cargosDeProveedor: null,
     datos,
     errores: [],
   });
@@ -84,16 +82,12 @@ export async function crearNotaController(req, res) {
   if (!proveedor) errores.push({ msg: "Seleccioná un proveedor." });
   if (!cargoId) errores.push({ msg: "Seleccioná un cargo a imputar." });
 
-  // fecha -> día elegido + HORA ACTUAL DEL CLOCK
-  let fechaDate;
+  // fecha con clock (si viene vacía, hoy)
+  let fechaDate = clock.date();
   if (fecha) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
-      errores.push({ msg: "La fecha no es válida." });
-    } else {
-      fechaDate = dateWithClockTimeFromLocalDateString(fecha);
-    }
-  } else {
-    fechaDate = clock.date();
+    const d = clock.parseYMDToDate(fecha);
+    if (isNaN(d.getTime())) errores.push({ msg: "La fecha no es válida." });
+    else fechaDate = d;
   }
 
   // importe
@@ -128,7 +122,7 @@ export async function crearNotaController(req, res) {
     });
   }
 
-  // Creamos la nota asociada al PERÍODO del cargo, con hora del clock
+  // Crear nota asociada al período del cargo
   await new MovimientoProveedor({
     proveedor,
     tipo: tipoNota,
@@ -136,6 +130,7 @@ export async function crearNotaController(req, res) {
     periodo: cargo.periodo,
     fecha: fechaDate,
     importe: importeNumber,
+    creadoPor: req.session?.usuario?._id || null,
   }).save();
 
   req.session.mensaje = `Nota de ${tipoNota} registrada correctamente`;
@@ -150,20 +145,23 @@ export async function mostrarFormularioNotaProveedor(req, res) {
   if (!tipoNota) return res.status(400).send("Tipo inválido");
 
   const { proveedorId } = req.params;
-  const proveedor = await Proveedor.findById(proveedorId, "nombreFantasia nombreReal numeroProveedor").lean();
+  const proveedor = await Proveedor.findById(
+    proveedorId,
+    "nombreFantasia nombreReal numeroProveedor"
+  ).lean();
   if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-  // Últimos 6 cargos (viejo -> nuevo, como en registrar pago)
+  // Últimos 6 cargos
   const cargosDeProveedor = await MovimientoProveedor.find({
     proveedor: proveedor._id,
     tipo: "cargo",
   })
-    .sort({ periodo: 1 })
+    .sort({ periodo: -1 })
     .limit(6)
     .lean();
 
   const datos = {
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha: clock.todayYMD(),
     cargoId: "",
     importe: "",
     detalle: "",
@@ -193,16 +191,12 @@ export async function crearNotaProveedorController(req, res) {
 
   if (!cargoId) errores.push({ msg: "Seleccioná un cargo a imputar." });
 
-  // fecha -> día elegido + HORA ACTUAL DEL CLOCK
-  let fechaDate;
+  // fecha con clock
+  let fechaDate = clock.date();
   if (fecha) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
-      errores.push({ msg: "La fecha no es válida." });
-    } else {
-      fechaDate = dateWithClockTimeFromLocalDateString(fecha);
-    }
-  } else {
-    fechaDate = clock.date();
+    const d = clock.parseYMDToDate(fecha);
+    if (isNaN(d.getTime())) errores.push({ msg: "La fecha no es válida." });
+    else fechaDate = d;
   }
 
   // importe
@@ -227,7 +221,7 @@ export async function crearNotaProveedorController(req, res) {
       proveedor: proveedorId,
       tipo: "cargo",
     })
-      .sort({ periodo: 1 })
+      .sort({ periodo: -1 })
       .limit(6)
       .lean();
 
@@ -246,8 +240,9 @@ export async function crearNotaProveedorController(req, res) {
     tipo: tipoNota,
     concepto: (detalle || "").trim() || `Nota de ${tipoNota}`,
     periodo: cargo.periodo,
-    fecha: fechaDate, // 👈 con hora del clock
+    fecha: fechaDate,
     importe: importeNumber,
+    creadoPor: req.session?.usuario?._id || null,
   }).save();
 
   req.session.mensaje = `Nota de ${tipoNota} registrada correctamente`;

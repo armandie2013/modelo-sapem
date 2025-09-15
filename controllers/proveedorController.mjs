@@ -323,3 +323,104 @@ export async function eliminarProveedorController(req, res) {
     res.status(500).send("Error al eliminar proveedor");
   }
 }
+
+export async function verPeriodoProveedorController(req, res) {
+  try {
+    const { proveedorId, periodo } = req.params;
+
+    // ✅ Guardas defensivas
+    if (!mongoose.isValidObjectId(proveedorId)) {
+      return res.status(400).send("ID de proveedor inválido");
+    }
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(periodo)) {
+      return res.status(400).send("Formato de período inválido (use YYYY-MM)");
+    }
+
+    const proveedor = await Proveedor.findById(proveedorId)
+  .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular activo plan")
+  .populate("plan", "nombre importe")
+  .lean();
+
+    if (!proveedor) {
+      return res.status(404).send("Proveedor no encontrado");
+    }
+
+    const canPopulateCreador = !!MovimientoProveedor.schema.paths.creadoPor;
+
+    let query = MovimientoProveedor.find({
+      proveedor: new mongoose.Types.ObjectId(proveedorId),
+      periodo: String(periodo),
+    }).sort({ fecha: 1, _id: 1 });
+
+    if (canPopulateCreador) {
+      query = query.populate("creadoPor", "nombreApellido email");
+    }
+
+    const movs = await query.lean();
+
+    // Totales + mapeo
+    const totales = { cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0, saldo: 0 };
+    const movimientos = movs.map((m) => {
+      const tipo = String(m.tipo || "").toLowerCase();
+      const importe = Number(m.importe || 0);
+      let signo = 0;
+
+      if (tipo === "cargo")       { totales.cargo       += importe; signo = +1; }
+      else if (tipo === "debito") { totales.notaDebito  += importe; signo = +1; }
+      else if (tipo === "credito"){ totales.notaCredito += importe; signo = -1; }
+      else if (tipo === "pago")   { totales.pagos       += importe; signo = -1; }
+
+      return {
+        _id: m._id,
+        tipo,
+        concepto: m.concepto || "",
+        periodo: m.periodo,
+        fecha: m.fecha,
+        importe,
+        signo,
+        metodo: m.metodo,
+        comprobante: m.comprobante,
+        creadorNombre:
+          (m.creadoPor && (m.creadoPor.nombreApellido || m.creadoPor.email)) || "—",
+      };
+    });
+
+    // (Opcional) Si tus pagos NO se reflejan en MovimientoProveedor, descomenta este bloque:
+    
+    const pagos = await Pago.find({ proveedor: proveedorId, periodo })
+      .select("fecha importe metodo comprobante periodo")
+      .sort({ fecha: 1, _id: 1 })
+      .lean();
+
+    for (const p of pagos) {
+      totales.pagos += Number(p.importe || 0);
+      movimientos.push({
+        tipo: "pago",
+        concepto: `Pago ${p.metodo || ""}`.trim(),
+        periodo: p.periodo,
+        fecha: p.fecha,
+        importe: p.importe,
+        signo: -1,
+        metodo: p.metodo,
+        comprobante: p.comprobante,
+        creadorNombre: "—",
+      });
+    }
+
+    // Re-ordenar si agregaste pagos
+    movimientos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    
+
+    totales.saldo = (totales.cargo + totales.notaDebito) - (totales.notaCredito + totales.pagos);
+
+    return res.render("proveedoresViews/detallePeriodo", {
+      proveedor,
+      periodo,
+      movimientos,
+      totales,
+    });
+  } catch (err) {
+    console.error("verPeriodoProveedorController error:", err);
+    return res.status(500).send("Error al obtener el detalle del período");
+  }
+}

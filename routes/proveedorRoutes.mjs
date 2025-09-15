@@ -7,6 +7,7 @@ import {
   actualizarProveedorController,
   eliminarProveedorController,
   verProveedorController,
+  verPeriodoProveedorController
 } from "../controllers/proveedorController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
@@ -61,6 +62,13 @@ router.delete(
   verificarSesion,
   verificarPermiso("proveedores", "eliminar"),
   eliminarProveedorController
+);
+// Detalle por período (más info del período clickeado)
+router.get(
+  "/:proveedorId/periodo/:periodo",
+  verificarSesion,
+  verificarPermiso("proveedores", "ver"),
+  verPeriodoProveedorController
 );
 
 export default router;

@@ -4,7 +4,7 @@ import clock from "../utils/clock.mjs";
 
 const { Schema } = mongoose;
 
-function periodoYYYYMM(d = clock.date()) {
+function periodoYYYYMM(d = new Date()) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}`;
@@ -12,7 +12,12 @@ function periodoYYYYMM(d = clock.date()) {
 
 const movimientoProveedorSchema = new Schema(
   {
-    proveedor: { type: Schema.Types.ObjectId, ref: "Proveedor", required: true, index: true },
+    proveedor: {
+      type: Schema.Types.ObjectId,
+      ref: "Proveedor",
+      required: true,
+      index: true,
+    },
 
     // TIPOS: 'cargo', 'pago', 'credito', 'debito'
     tipo: {
@@ -28,7 +33,7 @@ const movimientoProveedorSchema = new Schema(
     // YYYY-MM para cargos mensuales
     periodo: { type: String, match: /^\d{4}-(0[1-9]|1[0-2])$/ },
 
-    // Fecha desde el reloj central
+    // ⏱️ ahora toma la hora del reloj central
     fecha: { type: Date, default: () => clock.date() },
 
     importe: { type: Number, required: true, min: 0 },
@@ -36,8 +41,12 @@ const movimientoProveedorSchema = new Schema(
     // snapshot del plan/importe al momento del cargo
     plan: { type: Schema.Types.ObjectId, ref: "Plan" },
     importePlan: { type: Number, min: 0 },
+
+    // ⬇️ NUEVO: quién creó el movimiento (para mostrar en el detalle)
+    creadoPor: { type: Schema.Types.ObjectId, ref: "Usuario", default: null },
   },
   {
+    // timestamps también con el reloj central
     timestamps: { currentTime: () => clock.nowMs() },
   }
 );
@@ -45,7 +54,7 @@ const movimientoProveedorSchema = new Schema(
 // Índices útiles
 movimientoProveedorSchema.index({ proveedor: 1, createdAt: -1 });
 
-// Evita duplicar el cargo del mismo período
+// Evita duplicar el cargo del mismo período para un proveedor (solo cuando tipo='cargo')
 movimientoProveedorSchema.index(
   { proveedor: 1, periodo: 1, tipo: 1 },
   { unique: true, partialFilterExpression: { tipo: "cargo" } }
