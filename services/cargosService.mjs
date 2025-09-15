@@ -1,23 +1,21 @@
 // services/cargosService.mjs
-import mongoose from "mongoose";
 import Proveedor from "../models/proveedor.mjs";
-import Pago from "../models/pago.mjs";
+import Plan from "../models/plan.mjs";
 import MovimientoProveedor from "../models/movimientoProveedor.mjs";
+import clock from "../utils/clock.mjs";
 
-function periodoYYYYMM(date = new Date()) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
+function periodoYYYYMM(d = clock.date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}`;
 }
 
-export async function generarCargosMensuales(fechaRef = new Date()) {
+export async function generarCargosMensuales(fechaRef = clock.date()) {
   const periodo = periodoYYYYMM(fechaRef);
 
-  // Proveedores activos con plan
-  const proveedores = await Proveedor.find({
-    activo: { $ne: false },
-    plan: { $ne: null }
-  }).populate("plan", "nombre importe activo");
+  // proveedores ACTIVO + con plan asignado
+  const proveedores = await Proveedor.find({ activo: { $ne: false }, plan: { $ne: null } })
+    .populate("plan", "nombre importe activo");
 
   let creados = 0, existentes = 0, errores = 0;
 
@@ -26,7 +24,6 @@ export async function generarCargosMensuales(fechaRef = new Date()) {
       if (!p.plan || p.plan.activo === false) continue;
 
       const concepto = `Cargo mensual plan ${p.plan.nombre} ${periodo}`;
-
       const res = await MovimientoProveedor.updateOne(
         { proveedor: p._id, periodo, tipo: "cargo" },
         {
@@ -34,7 +31,7 @@ export async function generarCargosMensuales(fechaRef = new Date()) {
             proveedor: p._id,
             tipo: "cargo",
             periodo,
-            fecha: new Date(),
+            fecha: clock.date(),
             concepto,
             importe: Number(p.plan.importe),
             plan: p.plan._id,
@@ -55,55 +52,61 @@ export async function generarCargosMensuales(fechaRef = new Date()) {
   return { periodo, creados, existentes, errores };
 }
 
-// Por si se “salteó” algún mes
+// útil al iniciar el server por si se “perdió” el 28
 export async function catchUpCargos(mesesAtras = 1) {
-  const base = new Date();
+  const base = clock.date();
   for (let i = mesesAtras; i >= 0; i--) {
     const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
     await generarCargosMensuales(d);
   }
 }
 
+// Buscar cargo puntual
 export async function buscarCargoPorPeriodo(proveedorId, periodo) {
   return MovimientoProveedor.findOne({
-    proveedor: new mongoose.Types.ObjectId(proveedorId),
+    proveedor: proveedorId,
     tipo: "cargo",
     periodo: String(periodo),
   }).lean();
 }
 
-// Cargos con saldo > 0 (para el select de períodos)
+// listado de cargos con saldo > 0 (para el select de períodos)
 export async function cargosPendientesPorProveedor(proveedorId) {
-  const provId = new mongoose.Types.ObjectId(proveedorId);
+  // Usamos aggregation con lookup a pagos para calcular saldo
+  const pipeline = [
+    { $match: { proveedor: new (await import("mongoose")).default.Types.ObjectId(proveedorId), tipo: "cargo" } },
+    { $sort: { periodo: 1 } },
+    {
+      $lookup: {
+        from: "pagos",
+        localField: "_id",
+        foreignField: "cargo",
+        as: "pagos",
+      }
+    },
+    {
+      $project: {
+        periodo: 1,
+        concepto: 1,
+        importe: 1,
+        pagado: { $sum: "$pagos.importe" },
+      }
+    },
+    {
+      $addFields: {
+        saldo: { $subtract: ["$importe", { $ifNull: ["$pagado", 0] }] }
+      }
+    },
+    { $match: { saldo: { $gt: 0 } } }
+  ];
 
-  const cargos = await MovimientoProveedor.find({
-    proveedor: provId,
-    tipo: "cargo",
-  }).sort({ periodo: 1 }).lean();
-
-  if (!cargos.length) return [];
-
-  // Pagos imputados a cargos de este proveedor
-  const pagos = await Pago.aggregate([
-    { $match: { proveedor: provId, cargo: { $ne: null } } },
-    { $group: { _id: "$cargo", total: { $sum: "$importe" } } }
-  ]);
-
-  const pagadoPorCargo = new Map(pagos.map(p => [String(p._id), p.total || 0]));
-
-  return cargos
-    .map(c => {
-      const pagado = pagadoPorCargo.get(String(c._id)) || 0;
-      const saldo  = (c.importe || 0) - pagado;
-      return {
-        _id: c._id,
-        periodo: c.periodo,
-        concepto: c.concepto,
-        importe: c.importe || 0,
-        pagado,
-        saldo,
-        createdAt: c.createdAt,
-      };
-    })
-    .filter(x => x.saldo > 0);
+  const rows = await MovimientoProveedor.aggregate(pipeline);
+  return rows.map(c => ({
+    _id: c._id,
+    periodo: c.periodo,
+    concepto: c.concepto,
+    importe: c.importe || 0,
+    pagado: c.pagado || 0,
+    saldo: c.saldo || 0,
+  }));
 }

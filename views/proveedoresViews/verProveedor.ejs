@@ -49,10 +49,17 @@
              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
             + Registrar pago
           </a>
-          <!-- (Opcional) acciones futuras
-          <a href="#" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 text-sm">+ Nota de crédito</a>
-          <a href="#" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 text-sm">+ Nota de débito</a>
-          -->
+
+          <!-- Acciones para notas -->
+          <a href="/notas/proveedores/<%= proveedor._id %>/credito"
+             class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
+            + Nota de crédito
+          </a>
+          <a href="/notas/proveedores/<%= proveedor._id %>/debito"
+             class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
+            + Nota de débito
+          </a>
+
           <a href="/proveedores" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
             ← Volver
           </a>
@@ -139,7 +146,13 @@
               <div>
                 <div class="text-sm">
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                    <%= m.tipo==='cargo' ? 'bg-sky-100 text-sky-800' : (m.tipo==='pago' ? 'bg-green-100 text-green-800' : (m.tipo==='notaCredito' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')) %>">
+                    <%= m.tipo==='cargo'
+                        ? 'bg-sky-100 text-sky-800'
+                        : (m.tipo==='pago'
+                            ? 'bg-green-100 text-green-800'
+                            : (m.tipo==='credito'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-amber-100 text-amber-800')) %>">
                     <%= m.tipo %>
                   </span>
                   <span class="ml-2 font-medium"><%= m.concepto %></span>

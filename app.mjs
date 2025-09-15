@@ -1,3 +1,4 @@
+// app.mjs
 import express from "express";
 import path from "path";
 import methodOverride from "method-override";
@@ -20,6 +21,7 @@ import proveedorRoutes from "./routes/proveedorRoutes.mjs";
 import pedidoMaterialRoutes from "./routes/pedidoMaterialRoutes.mjs";
 import planesRoutes from "./routes/planesRoutes.mjs";
 import cargosRoutes from "./routes/cargosRoutes.mjs";
+import notasRoutes from "./routes/notasRoutes.mjs";
 
 // 👇 RELOJ CENTRALIZADO
 import clock from "./utils/clock.mjs";
@@ -27,12 +29,12 @@ import clock from "./utils/clock.mjs";
 const app = express();
 const PORT = process.env.PORT || 3500;
 
-// 2. Middlewares generales
+// 2) Middlewares generales
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-// 3. Sesión
+// 3) Sesión
 app.use(
   session({
     secret: "clave-super-secreta",
@@ -52,40 +54,41 @@ app.use(
   })
 );
 
-// (debug de sesión; quitá en prod)
+// (debug de sesión; quitar en prod)
 app.use((req, res, next) => {
   console.log("🔑 Sesión ID:", req.sessionID);
   console.log(req.session.usuario ? `👤 ${req.session.usuario.email}` : "⚠️ No hay usuario en sesión");
   next();
 });
 
-// 4. EJS + layout
+// 4) EJS + layout
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
 app.use(expressEjsLayouts);
 app.set("layout", "layout");
 
-// 5. Estáticos
+// 5) Estáticos
 app.use(express.static(path.resolve("./public")));
 app.use("/archivos", express.static("C:/upload")); // sugerencia: mover a ENV
 
-// 6. Datos globales para vistas
+// 6) Datos globales para vistas
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.rutaActual = req.path;
 
   // ✅ Helpers de fecha/hora con TZ AR (mostrar SIEMPRE AR; guardar SIEMPRE UTC)
+  const tz = clock.tz || "America/Argentina/Catamarca";
   res.locals.fmtFecha = (d) =>
-    d ? new Date(d).toLocaleDateString("es-AR", { timeZone: clock.tz }) : "—";
+    d ? new Date(d).toLocaleDateString("es-AR", { timeZone: tz }) : "—";
   res.locals.fmtHora = (d) =>
-    d ? new Date(d).toLocaleTimeString("es-AR", { timeZone: clock.tz }) : "—";
+    d ? new Date(d).toLocaleTimeString("es-AR", { timeZone: tz }) : "—";
   res.locals.fmtFechaHora = (d) =>
-    d ? new Date(d).toLocaleString("es-AR", { timeZone: clock.tz }) : "—";
+    d ? new Date(d).toLocaleString("es-AR", { timeZone: tz }) : "—";
 
   next();
 });
 
-// log de requests
+// Log de requests
 app.use((req, res, next) => {
   console.log("🔍", req.method, req.originalUrl);
   next();
@@ -102,7 +105,7 @@ app.get("/debug/time", (req, res) => {
   });
 });
 
-// 7. Rutas
+// 7) Rutas
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);
 app.use("/personas", personasRoutes);
@@ -113,18 +116,19 @@ app.use("/pedidos-materiales", pedidoMaterialRoutes);
 app.use("/planes", planesRoutes);
 app.use("/tareas", cargosRoutes);
 app.use("/pagos", pagosRoutes);
+app.use("/notas", notasRoutes);
 
-// 8. Landing
+// 8) Landing
 app.get("/", (req, res) => {
   res.render("landing", { title: "Inicio" });
 });
 
-// 9. 404
+// 9) 404
 app.use((req, res) => {
   res.status(404).send({ mensaje: "Ruta no encontrada" });
 });
 
-// 10. Listar rutas
+// 10) Listar rutas (debug)
 const listarRutas = (app) => {
   console.log("📋 Rutas registradas:");
   if (!app._router || !app._router.stack) return;
@@ -142,7 +146,7 @@ const listarRutas = (app) => {
 };
 listarRutas(app);
 
-// 11. Boot ordenado (Clock -> DB -> catchUp -> cron -> listen)
+// 11) Boot ordenado (Clock -> DB -> catchUp -> cron -> listen)
 (async () => {
   try {
     // ⏱️ Inicializar reloj (no bloquea el arranque; usa HTTP Date/NTP si puede)

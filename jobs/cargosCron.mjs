@@ -1,5 +1,7 @@
+// jobs/cargosCron.mjs
 import cron from "node-cron";
 import { generarCargosMensuales } from "../services/cargosService.mjs";
+import clock from "../utils/clock.mjs";
 
 export function startCargosCron() {
   // 28 de cada mes a las 06:00, horario de Catamarca
@@ -7,7 +9,7 @@ export function startCargosCron() {
     "0 6 28 * *",
     async () => {
       try {
-        const r = await generarCargosMensuales(new Date());
+        const r = await generarCargosMensuales(clock.date());
         console.log("⏰ Cron cargos ejecutado:", r);
       } catch (e) {
         console.error("⏰ Cron cargos ERROR:", e);

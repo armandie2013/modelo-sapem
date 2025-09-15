@@ -76,6 +76,32 @@
           <label><input type="checkbox" name="modulosPermitidos[pagos][eliminar]" value="true"
               <%=persona.modulosPermitidos.pagos?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
+
+        <!-- 🔹 NUEVO: Notas de crédito -->
+        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de crédito</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[notasCredito][ver]" value="true"
+              <%=persona.modulosPermitidos.notasCredito?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[notasCredito][crear]" value="true"
+              <%=persona.modulosPermitidos.notasCredito?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[notasCredito][editar]" value="true"
+              <%=persona.modulosPermitidos.notasCredito?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[notasCredito][eliminar]" value="true"
+              <%=persona.modulosPermitidos.notasCredito?.eliminar ? "checked" : "" %>> Eliminar</label>
+        </div>
+
+        <!-- 🔹 NUEVO: Notas de débito -->
+        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de débito</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[notasDebito][ver]" value="true"
+              <%=persona.modulosPermitidos.notasDebito?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[notasDebito][crear]" value="true"
+              <%=persona.modulosPermitidos.notasDebito?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[notasDebito][editar]" value="true"
+              <%=persona.modulosPermitidos.notasDebito?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[notasDebito][eliminar]" value="true"
+              <%=persona.modulosPermitidos.notasDebito?.eliminar ? "checked" : "" %>> Eliminar</label>
+        </div>
       </div>
 
       <!-- Columna 3: Gerencia -->

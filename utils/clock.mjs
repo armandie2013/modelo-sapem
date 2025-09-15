@@ -1,61 +1,101 @@
 // utils/clock.mjs
-// Reloj centralizado: guarda UTC en BD y permite sincronizar contra servidores de hora.
-// Usa la cabecera HTTP Date (Cloudflare / Google) como referencia. Reintenta periódicamente.
+// Reloj centralizado con offset opcional desde servidores de hora (HTTP Date).
+// Si no hay internet o falla, usa la hora local del sistema.
 
-let offsetMs = 0;            // diferencia servidorHora - Date.now()
-let lastSyncOk = null;       // Date de la última sync OK (en hora local del proceso)
-let lastError = null;        // string del último error
-let timer = null;
+import http from "node:http";
+import https from "node:https";
 
-const HTTP_TIME_SOURCES = [
-  "https://time.cloudflare.com", // muy rápida
-  "https://google.com",          // también provee Date header
-];
+let offsetMs = 0;          // serverTime - Date.now()
+let lastSyncOk = false;
+let lastSyncAt = null;
 
-const tz = "America/Argentina/Buenos_Aires"; // para formatear en vistas
+function nowMs() {
+  return Date.now() + offsetMs;
+}
+function date() {
+  return new Date(nowMs());
+}
 
-async function fetchHttpDate(url) {
-  const res = await fetch(url, { method: "HEAD", cache: "no-store" });
-  const dateHeader = res.headers.get("date") || res.headers.get("Date");
-  if (!dateHeader) throw new Error(`No Date header from ${url}`);
-  const serverDate = new Date(dateHeader);
-  if (isNaN(serverDate.getTime())) throw new Error(`Invalid Date header from ${url}: ${dateHeader}`);
-  return serverDate;
+// Construye un Date local a partir de 'YYYY-MM-DD' pero con la hora actual del reloj.
+// Ej.: si son 14:23:10 y el usuario elige 2025-09-15 → 2025-09-15 14:23:10 (hora local).
+function dateFromLocalYMD(ymd, base = date()) {
+  if (!ymd) return date();
+  const [y, m, d] = String(ymd).split("-").map(Number);
+  const hh = base.getHours(), mi = base.getMinutes(), ss = base.getSeconds(), ms = base.getMilliseconds();
+  // Importante: usar new Date(y, m-1, d, ...) crea fecha LOCAL (no UTC)
+  return new Date(y, (m || 1) - 1, d || 1, hh, mi, ss, ms);
 }
 
 async function syncOnce() {
-  let lastErr;
-  for (const url of HTTP_TIME_SOURCES) {
+  // Intenta varios hosts rápidos; con HEAD tomamos la cabecera Date
+  const targets = [
+    { proto: "https:", host: "www.google.com", path: "/" },
+    { proto: "https:", host: "cloudflare.com", path: "/" },
+    { proto: "https:", host: "www.bing.com", path: "/" },
+  ];
+
+  for (const t of targets) {
     try {
-      const serverDate = await fetchHttpDate(url);
-      const nowLocal = Date.now();
-      offsetMs = serverDate.getTime() - nowLocal;
-      lastSyncOk = new Date();
-      lastError = null;
-      return true;
-    } catch (e) {
-      lastErr = e;
-    }
+      const serverDate = await fetchDateHeader(t);
+      if (serverDate) {
+        offsetMs = serverDate.getTime() - Date.now();
+        lastSyncOk = true;
+        lastSyncAt = new Date();
+        return;
+      }
+    } catch { /* siguiente target */ }
   }
-  lastError = String(lastErr || "Unknown error");
-  return false;
+
+  // Si llegamos acá, falló todo
+  lastSyncOk = false;
+}
+
+function fetchDateHeader({ proto, host, path }) {
+  const lib = proto === "http:" ? http : https;
+  return new Promise((resolve, reject) => {
+    const req = lib.request(
+      { method: "HEAD", host, path, timeout: 4000 },
+      (res) => {
+        const header = res.headers?.date;
+        if (!header) return reject(new Error("Sin header Date"));
+        const d = new Date(header);
+        if (isNaN(d.getTime())) return reject(new Error("Header Date inválido"));
+        resolve(d);
+      }
+    );
+    req.on("error", reject);
+    req.on("timeout", () => { req.destroy(new Error("timeout")); });
+    req.end();
+  });
 }
 
 async function init({ waitForFirstSync = false, intervalMs = 15 * 60 * 1000 } = {}) {
-  if (waitForFirstSync) {
-    await syncOnce(); // espera primer sync
-  } else {
-    syncOnce().catch(() => {}); // arranca best-effort
-  }
-  if (timer) clearInterval(timer);
-  timer = setInterval(() => { syncOnce().catch(() => {}); }, intervalMs).unref?.();
-}
+  try { await syncOnce(); } catch {}
+  // Reintentos periódicos (no bloquean el event loop)
+  const timer = setInterval(() => { syncOnce().catch(()=>{}); }, intervalMs);
+  timer.unref?.();
 
-function nowMs() { return Date.now() + offsetMs; }
-function date()  { return new Date(nowMs()); }
+  if (waitForFirstSync) {
+    // Si querés bloquear hasta el primer sync, esperá un poco o reintenta
+    if (!lastSyncOk) {
+      // último intento
+      try { await syncOnce(); } catch {}
+    }
+  }
+}
 
 function getStatus() {
-  return { offsetMs, lastSyncOk, lastError, tz };
+  return {
+    offsetMs,
+    lastSyncOk,
+    lastSyncAt,
+  };
 }
 
-export default { init, nowMs, date, getStatus, tz };
+export default {
+  init,
+  nowMs,
+  date,
+  dateFromLocalYMD,
+  getStatus,
+};
