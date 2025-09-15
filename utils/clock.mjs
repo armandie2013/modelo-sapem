@@ -26,6 +26,39 @@ function dateFromLocalYMD(ymd, base = date()) {
   return new Date(y, (m || 1) - 1, d || 1, hh, mi, ss, ms);
 }
 
+/** ------------------- NUEVOS HELPERS ------------------- **/
+
+// Devuelve "YYYY-MM-DD" usando el reloj interno y la TZ indicada (AR por defecto).
+function todayYMD(tz = "America/Argentina/Buenos_Aires") {
+  const now = date(); // usa el clock (incluye offset si se sincronizó)
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const y = parts.find(p => p.type === "year").value;
+  const m = parts.find(p => p.type === "month").value;
+  const d = parts.find(p => p.type === "day").value;
+  return `${y}-${m}-${d}`;
+}
+
+// Devuelve "YYYY-MM" (útil para períodos)
+function todayYM(tz = "America/Argentina/Buenos_Aires") {
+  return todayYMD(tz).slice(0, 7);
+}
+
+// Parsea "YYYY-MM-DD" a Date local, preservando la hora actual del reloj como base.
+function parseYMDToDate(ymd, base = date()) {
+  if (typeof ymd !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
+    return base;
+  }
+  // Reutilizamos el helper existente
+  return dateFromLocalYMD(ymd, base);
+}
+
+/** ------------------------------------------------------ **/
+
 async function syncOnce() {
   // Intenta varios hosts rápidos; con HEAD tomamos la cabecera Date
   const targets = [
@@ -97,5 +130,21 @@ export default {
   nowMs,
   date,
   dateFromLocalYMD,
+  parseYMDToDate,  // 👈 agregado
+  todayYMD,        // 👈 agregado
+  todayYM,         // 👈 agregado
+  getStatus,
+};
+
+// (Opcional) también exportar nombrados, por si alguna vez los querés importar así:
+// import { todayYMD } from '../utils/clock.mjs'
+export {
+  init,
+  nowMs,
+  date,
+  dateFromLocalYMD,
+  parseYMDToDate,
+  todayYMD,
+  todayYM,
   getStatus,
 };
