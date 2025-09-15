@@ -3,8 +3,9 @@ import path from "path";
 import methodOverride from "method-override";
 import expressEjsLayouts from "express-ejs-layouts";
 import session from "express-session";
-import { connectDB } from "./config/dbConfig.mjs";
 import MongoStore from "connect-mongo";
+
+import { connectDB } from "./config/dbConfig.mjs";
 import { startCargosCron } from "./jobs/cargosCron.mjs";
 import { catchUpCargos } from "./services/cargosService.mjs";
 import pagosRoutes from "./routes/pagosRoutes.mjs";
@@ -19,6 +20,9 @@ import proveedorRoutes from "./routes/proveedorRoutes.mjs";
 import pedidoMaterialRoutes from "./routes/pedidoMaterialRoutes.mjs";
 import planesRoutes from "./routes/planesRoutes.mjs";
 import cargosRoutes from "./routes/cargosRoutes.mjs";
+
+// 👇 RELOJ CENTRALIZADO
+import clock from "./utils/clock.mjs";
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -69,6 +73,15 @@ app.use("/archivos", express.static("C:/upload")); // sugerencia: mover a ENV
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.rutaActual = req.path;
+
+  // ✅ Helpers de fecha/hora con TZ AR (mostrar SIEMPRE AR; guardar SIEMPRE UTC)
+  res.locals.fmtFecha = (d) =>
+    d ? new Date(d).toLocaleDateString("es-AR", { timeZone: clock.tz }) : "—";
+  res.locals.fmtHora = (d) =>
+    d ? new Date(d).toLocaleTimeString("es-AR", { timeZone: clock.tz }) : "—";
+  res.locals.fmtFechaHora = (d) =>
+    d ? new Date(d).toLocaleString("es-AR", { timeZone: clock.tz }) : "—";
+
   next();
 });
 
@@ -76,6 +89,17 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   console.log("🔍", req.method, req.originalUrl);
   next();
+});
+
+// 👉 Ruta de diagnóstico de reloj (opcional)
+app.get("/debug/time", (req, res) => {
+  const s = clock.getStatus();
+  res.json({
+    systemNow: new Date().toISOString(),
+    clockNow: clock.date().toISOString(),
+    offsetMs: s.offsetMs,
+    lastSyncOk: s.lastSyncOk,
+  });
 });
 
 // 7. Rutas
@@ -118,12 +142,17 @@ const listarRutas = (app) => {
 };
 listarRutas(app);
 
-// 11. Boot ordenado (DB -> catchUp -> cron -> listen)
-// ⚠️ Elimina cualquier app.listen duplicado fuera de este bloque.
+// 11. Boot ordenado (Clock -> DB -> catchUp -> cron -> listen)
 (async () => {
   try {
+    // ⏱️ Inicializar reloj (no bloquea el arranque; usa HTTP Date/NTP si puede)
+    await clock.init({ waitForFirstSync: false, intervalMs: 15 * 60 * 1000 });
+
     await connectDB();
+
+    // Si en servicios usás clock.date(), esto mantiene “meses perdidos” con la misma base horaria
     await catchUpCargos(1);
+
     startCargosCron();
 
     app.listen(PORT, "0.0.0.0", () => {
