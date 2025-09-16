@@ -1,0 +1,77 @@
+<main class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+      <h1 class="text-2xl font-bold text-gray-900">Crear plan de pago</h1>
+      <p class="text-sm text-gray-600">Sólo se listan comprobantes <b>completos</b> (sin pagos/NC en su período).</p>
+    </div>
+
+    <form method="POST" action="/planes-pago/proveedores/<%= proveedorId %>/crear" class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300 space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Primer período de cuota (YYYY-MM)</label>
+        <input type="month" name="primerPeriodo" value="<%= primerPeriodoSugerido %>" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Cuotas</label>
+        <div class="flex gap-2">
+          <% (cuotasPreset||[]).forEach(n => { %>
+            <label class="inline-flex items-center gap-1 text-sm">
+              <input type="radio" name="cuotas" value="<%= n %>" <%= n===6 ? 'checked' : '' %> />
+              <span><%= n %></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">Comprobantes elegibles</h2>
+        <% if ((movimientosElegibles||[]).length === 0) { %>
+          <p class="text-sm text-gray-500">No hay comprobantes elegibles. Si hay períodos con pagos/NC parciales, cancelarlos antes.</p>
+        <% } else { %>
+          <div class="rounded-xl border border-gray-200 overflow-hidden">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 text-gray-700">
+                <tr>
+                  <th class="px-3 py-2 text-left">Sel</th>
+                  <th class="px-3 py-2 text-left">Período</th>
+                  <th class="px-3 py-2 text-left">Tipo</th>
+                  <th class="px-3 py-2 text-left">Concepto</th>
+                  <th class="px-3 py-2 text-right">Importe</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% movimientosElegibles.forEach(m => { %>
+                  <tr class="odd:bg-gray-50">
+                    <td class="px-3 py-2"><input type="checkbox" name="movimientos" value="<%= m._id %>" /></td>
+                    <td class="px-3 py-2"><%= m.periodo %></td>
+                    <td class="px-3 py-2 capitalize"><%= m.tipo %></td>
+                    <td class="px-3 py-2"><%= m.concepto || '—' %></td>
+                    <td class="px-3 py-2 text-right"><%= new Intl.NumberFormat('es-AR',{style:'currency',currency:'USD'}).format(m.importe) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+      <% if ((movimientosBloqueados||[]).length) { %>
+        <details class="text-sm text-gray-600">
+          <summary class="cursor-pointer">No elegibles (informativo)</summary>
+          <ul class="mt-2 list-disc pl-6">
+            <% movimientosBloqueados.forEach(b => { %>
+              <li><b><%= b.periodo %></b> — <%= b.tipo %> — <%= b.concepto || '—' %> (<%= b.motivo %>)</li>
+            <% }) %>
+          </ul>
+        </details>
+      <% } %>
+
+      <div class="pt-3">
+        <button class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-800 text-sm" <%= (movimientosElegibles||[]).length ? '' : 'disabled' %>>
+          Crear plan
+        </button>
+        <a href="/proveedores/<%= proveedorId %>/ver" class="ml-2 text-sm text-gray-700 hover:underline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</main>

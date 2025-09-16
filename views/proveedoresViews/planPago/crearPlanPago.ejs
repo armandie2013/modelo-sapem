@@ -1,0 +1,117 @@
+<main class="bg-gray-100 min-h-screen py-8 px-4">
+  <%
+    const fmtUSD = (v) =>
+      new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(v || 0));
+  %>
+
+  <div class="max-w-5xl mx-auto space-y-6">
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+      <h1 class="text-xl font-bold text-gray-900">
+        Plan de pago — Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
+      </h1>
+      <p class="text-sm text-gray-600 mt-1">
+        CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+        IVA: <%= proveedor.condicionIva || '—' %> · Tel: <%= proveedor.telefonoCelular || '—' %> ·
+        Estado:
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+          <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+        </span>
+      </p>
+    </div>
+
+    <form action="/planes-pago/proveedores/<%= proveedor._id %>/crear" method="POST"
+          class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm text-gray-700 mb-1">Cantidad de cuotas</label>
+          <select name="cuotas" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+            <% (cuotasPreset || [3,6,9,12]).forEach(n => { %>
+              <option value="<%= n %>"><%= n %> cuotas</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-700 mb-1">Primer período (YYYY-MM)</label>
+          <input type="month" name="primerPeriodo" value="<%= primerPeriodoSugerido %>"
+                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-700 mb-1">Fecha de hoy</label>
+          <input type="date" value="<%= hoy %>" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
+        </div>
+      </div>
+
+      <div class="border-t pt-4">
+        <h2 class="font-semibold text-gray-800 mb-2">Comprobantes elegibles (sin parciales)</h2>
+
+        <% if (!movimientosElegibles || movimientosElegibles.length === 0) { %>
+          <p class="text-sm text-gray-500">No hay cargos / notas de débito elegibles. Si existen comprobantes con pagos parciales, primero deben ser cancelados completamente.</p>
+        <% } else { %>
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th class="px-3 py-2 text-left w-10">Sel.</th>
+                <th class="px-3 py-2 text-left">Tipo</th>
+                <th class="px-3 py-2 text-left">Concepto</th>
+                <th class="px-3 py-2 text-left">Período</th>
+                <th class="px-3 py-2 text-left">Fecha</th>
+                <th class="px-3 py-2 text-right">Importe</th>
+              </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+              <% movimientosElegibles.forEach(m => { %>
+                <tr class="odd:bg-gray-50 even:bg-white">
+                  <td class="px-3 py-2">
+                    <input type="checkbox" name="seleccionIds" value="<%= m._id %>">
+                  </td>
+                  <td class="px-3 py-2"><span class="uppercase"><%= m.tipo %></span></td>
+                  <td class="px-3 py-2"><%= m.concepto || '(Sin detalle)' %></td>
+                  <td class="px-3 py-2"><%= m.periodo || '—' %></td>
+                  <td class="px-3 py-2"><%= new Date(m.fecha).toLocaleDateString('es-AR') %></td>
+                  <td class="px-3 py-2 text-right font-semibold"><%= fmtUSD(m.importe) %></td>
+                </tr>
+              <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (movimientosBloqueados && movimientosBloqueados.length) { %>
+        <div class="border-t pt-4">
+          <h2 class="font-semibold text-gray-800 mb-2">No elegibles (motivo)</h2>
+          <ul class="list-disc ml-5 text-sm text-gray-600">
+            <% movimientosBloqueados.forEach(b => { %>
+              <li>
+                <strong><%= b.tipo %></strong> — <%= b.concepto || '(Sin detalle)' %> — <%= b.periodo || '—' %> —
+                <span class="italic text-gray-500"><%= b.motivo %></span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+
+      <div class="flex flex-wrap gap-2 pt-2">
+        <button type="submit"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm"
+                <%= (!movimientosElegibles || movimientosElegibles.length===0) ? 'disabled' : '' %>>
+          Crear plan de pago
+        </button>
+
+        <a href="/proveedores/<%= proveedor._id %>/ver"
+           class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
+          ← Volver
+        </a>
+      </div>
+    </form>
+  </div>
+</main>

@@ -1,3 +1,4 @@
+// routes/proveedorRoutes.mjs
 import { Router } from "express";
 import {
   mostrarFormularioProveedor,
@@ -9,9 +10,9 @@ import {
   verProveedorController,
   verPeriodoProveedorController
 } from "../controllers/proveedorController.mjs";
+
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
-
 import { validacionProveedor } from "../middlewares/validacionProveedor.mjs";
 import { manejarErroresValidacion } from "../middlewares/errorMiddleware.mjs";
 
@@ -63,12 +64,21 @@ router.delete(
   verificarPermiso("proveedores", "eliminar"),
   eliminarProveedorController
 );
-// Detalle por período (más info del período clickeado)
 router.get(
   "/:proveedorId/periodo/:periodo",
   verificarSesion,
   verificarPermiso("proveedores", "ver"),
   verPeriodoProveedorController
+);
+
+// Compatibilidad: si alguien entra a /proveedores/:id/plan-pago, redirigí al nuevo path
+router.get(
+  "/:proveedorId/plan-pago",
+  verificarSesion,
+  verificarPermiso("planesPago", "crear"),
+  (req, res) => {
+    res.redirect(301, `/planes-pago/proveedores/${req.params.proveedorId}/crear`);
+  }
 );
 
 export default router;

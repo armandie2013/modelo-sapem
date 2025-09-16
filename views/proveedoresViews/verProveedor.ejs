@@ -1,13 +1,14 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
   <%
-  // Helper USD: US$ 12.345,67 (locale es-AR)
-  const fmtUSD = (v) =>
-    new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(Number(v || 0));
+    // Helper USD: US$ 12.345,67 (locale es-AR)
+    const fmtUSD = (v) => {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(v || 0));
+    };
   %>
 
   <div class="max-w-6xl mx-auto space-y-6">
@@ -24,7 +25,8 @@
           </h1>
           <p class="text-sm text-gray-600">
             CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-            IVA: <%= proveedor.condicionIva || '—' %> · Tel: <%=proveedor.telefonoCelular%> ·
+            IVA: <%= proveedor.condicionIva || '—' %> ·
+            Tel: <%= proveedor.telefonoCelular %> ·
             Estado:
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
               <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
@@ -60,7 +62,16 @@
             + Nota de débito
           </a>
 
-          <a href="/proveedores" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
+          <% const puedePlanPago = !!(usuario && usuario.modulosPermitidos && usuario.modulosPermitidos.planesPago && usuario.modulosPermitidos.planesPago.crear); %>
+          <% if (puedePlanPago) { %>
+            <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
+   class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
+  + Plan de pago
+</a>
+          <% } %>
+
+          <a href="/proveedores"
+             class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm">
             ← Volver
           </a>
         </div>

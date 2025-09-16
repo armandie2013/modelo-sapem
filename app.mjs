@@ -22,6 +22,7 @@ import pedidoMaterialRoutes from "./routes/pedidoMaterialRoutes.mjs";
 import planesRoutes from "./routes/planesRoutes.mjs";
 import cargosRoutes from "./routes/cargosRoutes.mjs";
 import notasRoutes from "./routes/notasRoutes.mjs";
+import planPagoRoutes from "./routes/planPagoRoutes.mjs";
 
 // 👇 RELOJ CENTRALIZADO
 import clock from "./utils/clock.mjs";
@@ -117,6 +118,7 @@ app.use("/planes", planesRoutes);
 app.use("/tareas", cargosRoutes);
 app.use("/pagos", pagosRoutes);
 app.use("/notas", notasRoutes);
+app.use("/planes-pago", planPagoRoutes);
 
 // 8) Landing
 app.get("/", (req, res) => {

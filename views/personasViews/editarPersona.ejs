@@ -102,6 +102,18 @@
           <label><input type="checkbox" name="modulosPermitidos[notasDebito][eliminar]" value="true"
               <%=persona.modulosPermitidos.notasDebito?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
+
+        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Plan de pago</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[planesPago][ver]" value="true"
+              <%=persona.modulosPermitidos.planesPago?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[planesPago][crear]" value="true"
+              <%=persona.modulosPermitidos.planesPago?.crear ? "checked" : "" %>> Crear</label>
+          <label><input type="checkbox" name="modulosPermitidos[planesPago][editar]" value="true"
+              <%=persona.modulosPermitidos.planesPago?.editar ? "checked" : "" %>> Editar</label>
+          <label><input type="checkbox" name="modulosPermitidos[planesPago][eliminar]" value="true"
+              <%=persona.modulosPermitidos.planesPago?.eliminar ? "checked" : "" %>> Eliminar</label>
+        </div>
       </div>
 
       <!-- Columna 3: Gerencia -->
