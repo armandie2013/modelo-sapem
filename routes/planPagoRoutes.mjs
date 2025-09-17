@@ -4,8 +4,10 @@ import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
 
 import {
-  mostrarFormularioPlanPago,   // 👈 nombre nuevo
-  crearPlanPagoController,     // 👈 post
+  mostrarFormularioPlanPago,
+  crearPlanPagoController,
+  verPlanPagoController,
+  descargarPlanPagoPdfController     
 } from "../controllers/planPagoController.mjs";
 
 const router = Router();
@@ -24,6 +26,22 @@ router.post(
   verificarSesion,
   verificarPermiso("planesPago", "crear"),
   crearPlanPagoController
+);
+
+// Vista imprimible (HTML)
+router.get(
+  "/:planId/ver",
+  verificarSesion,
+  verificarPermiso("planesPago","ver"),
+  verPlanPagoController
+);
+
+// PDF para firmar
+router.get(
+  "/:planId/pdf",
+  verificarSesion,
+  verificarPermiso("planesPago","ver"),
+  descargarPlanPagoPdfController
 );
 
 export default router;

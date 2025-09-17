@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>Plan de pago — <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '') %></title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 12px; color: #111; }
+    .wrap { max-width: 800px; margin: 0 auto; padding: 16px; }
+    h1 { font-size: 18px; margin: 0 0 6px; }
+    h2 { font-size: 14px; margin: 16px 0 8px; }
+    .muted { color: #666; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #eee; text-align: left; }
+    th { background: #f7f7f7; }
+    .right { text-align: right; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .totals { font-weight: 600; }
+    .signs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+    .sign-box { height: 70px; border-bottom: 1px solid #000; margin-top: 40px; }
+    .small { font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <% const fmtUSD = v => new Intl.NumberFormat('es-AR',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0)); %>
+
+    <div class="card">
+      <h1>Plan de pago</h1>
+      <div class="grid">
+        <div>
+          <div><strong>Proveedor:</strong> <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '—') %></div>
+          <div><strong>Nombre legal:</strong> <%= proveedor?.nombreReal || '—' %></div>
+          <div class="small muted">#<%= proveedor?.numeroProveedor || '—' %> · CUIT: <%= proveedor?.cuit || '—' %></div>
+          <div class="small muted">IVA: <%= proveedor?.condicionIva || '—' %> · Tel: <%= proveedor?.telefonoCelular || '—' %></div>
+        </div>
+        <div>
+          <div><strong>Plan ID:</strong> <%= plan?._id %></div>
+          <div><strong>Fecha:</strong> <%= plan?.fecha ? new Date(plan.fecha).toLocaleDateString('es-AR') : '—' %></div>
+          <div><strong>Primer período:</strong> <%= plan?.primerPeriodo || '—' %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Detalle del plan</h2>
+      <div class="grid">
+        <div>
+          <div><strong>Cuotas:</strong> <%= plan?.cuotasCantidad || 0 %></div>
+          <div><strong>Importe por cuota (base):</strong> <%= fmtUSD(plan?.importeCuota || 0) %></div>
+        </div>
+        <div>
+          <div class="totals"><strong>Total plan:</strong> <%= fmtUSD(plan?.totalPlan || 0) %></div>
+          <div class="small muted">* La última cuota puede ajustar redondeo de centavos.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Comprobantes incluidos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Período</th>
+            <th>Concepto</th>
+            <th class="right">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if ((movimientosOriginales||[]).length === 0) { %>
+            <tr><td colspan="4" class="small muted">No se pudieron determinar los comprobantes originales.</td></tr>
+          <% } else { %>
+            <% movimientosOriginales.forEach(m => { %>
+              <tr>
+                <td><%= m.tipo %></td>
+                <td><%= m.periodo || '—' %></td>
+                <td><%= m.concepto || '(Sin detalle)' %></td>
+                <td class="right"><%= fmtUSD(m.importe) %></td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Cronograma de cuotas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Período</th>
+            <th class="right">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if ((cuotas||[]).length === 0) { %>
+            <tr><td colspan="3" class="small muted">Sin cuotas registradas.</td></tr>
+          <% } else { %>
+            <% cuotas.forEach(c => { %>
+              <tr>
+                <td><%= c.cuotaN %></td>
+                <td><%= c.periodo %></td>
+                <td class="right"><%= fmtUSD(c.importe) %></td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Cláusulas</h2>
+      <ol class="small">
+        <li>Las cuotas se devengan en los períodos indicados. La última puede ajustar redondeo de centavos.</li>
+        <li>Los comprobantes originales quedan compensados mediante notas de crédito por reversa del plan.</li>
+        <li>Este documento debe ser firmado por ambas partes.</li>
+      </ol>
+    </div>
+
+    <div class="signs">
+      <div>
+        <div class="sign-box"></div>
+        <div><strong>Firma Proveedor</strong></div>
+        <div class="small muted"><%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '') %></div>
+      </div>
+      <div>
+        <div class="sign-box"></div>
+        <div><strong>Firma Empresa</strong></div>
+        <div class="small muted">Aclaración y sello</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

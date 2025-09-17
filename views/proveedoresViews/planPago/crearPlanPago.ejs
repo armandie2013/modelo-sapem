@@ -1,27 +1,60 @@
 <main class="bg-gray-100 min-h-screen py-8 px-4">
-  <%
-    const fmtUSD = (v) =>
-      new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(Number(v || 0));
+  <% const fmtUSD=(v)=>
+    new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(Number(v || 0));
   %>
 
-  <div class="max-w-5xl mx-auto space-y-6">
+  <div class="max-w-6xl mx-auto space-y-6">
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <h1 class="text-xl font-bold text-gray-900">
-        Plan de pago — Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
-      </h1>
-      <p class="text-sm text-gray-600 mt-1">
-        CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-        IVA: <%= proveedor.condicionIva || '—' %> · Tel: <%= proveedor.telefonoCelular || '—' %> ·
-        Estado:
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-          <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
-        </span>
-      </p>
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">
+            Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
+          </h1>
+          <h1 class="text-xl font-bold text-gray-900">
+            Nombre: <%= proveedor.nombreReal %>
+          </h1>
+          <p class="text-sm text-gray-600">
+            CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+            IVA: <%= proveedor.condicionIva || '—' %> ·
+            Tel: <%= proveedor.telefonoCelular %> ·
+            Estado:
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+              <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+            </span>
+          </p>
+          <p class="text-sm text-gray-600 mt-1">
+            Plan:
+            <% if (proveedor.plan) { %>
+              <span class="font-medium"><%= proveedor.plan.nombre %></span>
+              — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
+              <% if (typeof proveedor.precioPlan==='number' ) { %>
+                <span class="text-xs text-gray-500">(override)</span>
+              <% } %>
+            <% } else { %>
+              <span class="text-gray-500">Sin plan</span>
+            <% } %>
+          </p>
+        </div>
+
+        <!-- Botones Ver/Descargar PDF si existe un plan previo -->
+        <% if (ultimoPlan) { %>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <a href="/planes-pago/<%= ultimoPlan._id %>/ver"
+               class="bg-white border border-purple-600 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 text-sm text-center">
+              Ver plan vigente
+            </a>
+            <a href="/planes-pago/<%= ultimoPlan._id %>/pdf" target="_blank"
+               class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm text-center">
+              Descargar plan (PDF)
+            </a>
+          </div>
+        <% } %>
+      </div>
     </div>
 
     <form action="/planes-pago/proveedores/<%= proveedor._id %>/crear" method="POST"
@@ -31,7 +64,7 @@
         <div>
           <label class="block text-sm text-gray-700 mb-1">Cantidad de cuotas</label>
           <select name="cuotas" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
-            <% (cuotasPreset || [3,6,9,12]).forEach(n => { %>
+            <% (cuotasPreset || [3,6,9,12]).forEach(n=> { %>
               <option value="<%= n %>"><%= n %> cuotas</option>
             <% }) %>
           </select>
@@ -41,69 +74,91 @@
           <label class="block text-sm text-gray-700 mb-1">Primer período (YYYY-MM)</label>
           <input type="month" name="primerPeriodo" value="<%= primerPeriodoSugerido %>"
                  class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+          <p class="text-xs text-gray-500 mt-1">Por defecto proponemos el mes siguiente; podés cambiarlo.</p>
         </div>
 
         <div>
           <label class="block text-sm text-gray-700 mb-1">Fecha de hoy</label>
-          <input type="date" value="<%= hoy %>" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
+          <input type="date" value="<%= hoy %>" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"
+                 disabled>
         </div>
       </div>
 
       <div class="border-t pt-4">
         <h2 class="font-semibold text-gray-800 mb-2">Comprobantes elegibles (sin parciales)</h2>
 
-        <% if (!movimientosElegibles || movimientosElegibles.length === 0) { %>
+        <% if (!movimientosElegibles || movimientosElegibles.length===0) { %>
           <p class="text-sm text-gray-500">No hay cargos / notas de débito elegibles. Si existen comprobantes con pagos parciales, primero deben ser cancelados completamente.</p>
         <% } else { %>
           <div class="overflow-x-auto rounded-xl border border-gray-200">
             <table class="min-w-full text-sm">
               <thead class="bg-gray-50 text-gray-700">
-              <tr>
-                <th class="px-3 py-2 text-left w-10">Sel.</th>
-                <th class="px-3 py-2 text-left">Tipo</th>
-                <th class="px-3 py-2 text-left">Concepto</th>
-                <th class="px-3 py-2 text-left">Período</th>
-                <th class="px-3 py-2 text-left">Fecha</th>
-                <th class="px-3 py-2 text-right">Importe</th>
-              </tr>
+                <tr>
+                  <th class="px-3 py-2 text-left w-10">Sel.</th>
+                  <th class="px-3 py-2 text-left">Tipo</th>
+                  <th class="px-3 py-2 text-left">Concepto</th>
+                  <th class="px-3 py-2 text-left">Período</th>
+                  <th class="px-3 py-2 text-left">Fecha</th>
+                  <th class="px-3 py-2 text-right">Importe</th>
+                </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
-              <% movimientosElegibles.forEach(m => { %>
-                <tr class="odd:bg-gray-50 even:bg-white">
-                  <td class="px-3 py-2">
-                    <input type="checkbox" name="seleccionIds" value="<%= m._id %>">
-                  </td>
-                  <td class="px-3 py-2"><span class="uppercase"><%= m.tipo %></span></td>
-                  <td class="px-3 py-2"><%= m.concepto || '(Sin detalle)' %></td>
-                  <td class="px-3 py-2"><%= m.periodo || '—' %></td>
-                  <td class="px-3 py-2"><%= new Date(m.fecha).toLocaleDateString('es-AR') %></td>
-                  <td class="px-3 py-2 text-right font-semibold"><%= fmtUSD(m.importe) %></td>
-                </tr>
-              <% }) %>
+                <% movimientosElegibles.forEach(m=> { %>
+                  <tr class="odd:bg-gray-50 even:bg-white">
+                    <td class="px-3 py-2">
+                      <input type="checkbox" name="seleccionIds" value="<%= m._id %>"
+                             data-importe="<%= Number(m.importe || 0) %>">
+                    </td>
+                    <td class="px-3 py-2"><span class="uppercase"><%= m.tipo %></span></td>
+                    <td class="px-3 py-2"><%= m.concepto || '(Sin detalle)' %></td>
+                    <td class="px-3 py-2"><%= m.periodo || '—' %></td>
+                    <td class="px-3 py-2"><%= new Date(m.fecha).toLocaleDateString('es-AR') %></td>
+                    <td class="px-3 py-2 text-right font-semibold"><%= fmtUSD(m.importe) %></td>
+                  </tr>
+                <% }) %>
               </tbody>
             </table>
           </div>
         <% } %>
       </div>
 
-      <% if (movimientosBloqueados && movimientosBloqueados.length) { %>
-        <div class="border-t pt-4">
-          <h2 class="font-semibold text-gray-800 mb-2">No elegibles (motivo)</h2>
-          <ul class="list-disc ml-5 text-sm text-gray-600">
-            <% movimientosBloqueados.forEach(b => { %>
-              <li>
-                <strong><%= b.tipo %></strong> — <%= b.concepto || '(Sin detalle)' %> — <%= b.periodo || '—' %> —
-                <span class="italic text-gray-500"><%= b.motivo %></span>
-              </li>
-            <% }) %>
-          </ul>
+      <!-- Resumen dinámico del plan -->
+      <div id="resumenPlan" class="bg-gray-50 border border-gray-200 rounded-xl p-4 hidden">
+        <h3 class="font-semibold text-gray-800 mb-2">Resumen del plan</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+          <div>
+            <p class="text-xs text-gray-500">Total seleccionado</p>
+            <p class="text-lg font-bold" id="rpTotal">$0,00</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Cuota base</p>
+            <p class="text-lg font-bold" id="rpCuotaBase">$0,00</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Última cuota (ajuste)</p>
+            <p class="text-lg font-bold" id="rpCuotaFinal">$0,00</p>
+          </div>
         </div>
-      <% } %>
+
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-100 text-gray-700">
+              <tr>
+                <th class="px-3 py-2 text-left">#</th>
+                <th class="px-3 py-2 text-left">Período</th>
+                <th class="px-3 py-2 text-right">Importe</th>
+              </tr>
+            </thead>
+            <tbody id="rpCuotasBody" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
 
       <div class="flex flex-wrap gap-2 pt-2">
-        <button type="submit"
+        <button type="submit" id="btnCrearPlan"
                 class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm"
-                <%= (!movimientosElegibles || movimientosElegibles.length===0) ? 'disabled' : '' %>>
+                <%=(!movimientosElegibles || movimientosElegibles.length===0) ? 'disabled' : '' %>>
           Crear plan de pago
         </button>
 
@@ -115,3 +170,96 @@
     </form>
   </div>
 </main>
+
+<script>
+  (function () {
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    const fmt = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n || 0);
+
+    const checkboxes = $$('input[name="seleccionIds"]');
+    const cuotasSel = $('select[name="cuotas"]');
+    const perInput = $('input[name="primerPeriodo"]');
+    const resumenBox = $('#resumenPlan');
+    const btnCrear = $('#btnCrearPlan');
+
+    const rpTotal = $('#rpTotal');
+    const rpCuotaBase = $('#rpCuotaBase');
+    const rpCuotaFinal = $('#rpCuotaFinal');
+    const rpCuotasBody = $('#rpCuotasBody');
+
+    // Helpers YYYY-MM
+    function addMonthsYM(ym, k) {
+      const [y, m] = (ym || '1970-01').split('-').map(x => parseInt(x, 10));
+      const d = new Date(y, (m - 1) + k, 1);
+      const yy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${yy}-${mm}`;
+    }
+    function nextMonthYM() {
+      const d = new Date();
+      return addMonthsYM(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, 1);
+    }
+
+    // Si por algún motivo vino vacío, propone mes siguiente
+    if (perInput && (!perInput.value || !/^\d{4}-(0[1-9]|1[0-2])$/.test(perInput.value))) {
+      perInput.value = nextMonthYM();
+    }
+
+    function calcularYRender() {
+      // suma en CENTAVOS para evitar flotantes
+      const seleccion = checkboxes.filter(ch => ch.checked);
+      const totalCents = seleccion
+        .map(ch => Math.round((parseFloat(ch.dataset.importe || '0') || 0) * 100))
+        .reduce((a, b) => a + b, 0);
+
+      const cuotas = parseInt(cuotasSel?.value || '0', 10);
+      const startYM = perInput?.value;
+
+      // Habilitar/deshabilitar botón
+      const ok = totalCents > 0 && Number.isInteger(cuotas) && cuotas > 0 && /^\d{4}-(0[1-9]|1[0-2])$/.test(startYM || '');
+      btnCrear.disabled = !ok;
+
+      if (!ok) {
+        resumenBox.classList.add('hidden');
+        rpCuotasBody.innerHTML = '';
+        rpTotal.textContent = fmt(0);
+        rpCuotaBase.textContent = fmt(0);
+        rpCuotaFinal.textContent = fmt(0);
+        return;
+      }
+
+      const base = Math.floor(totalCents / cuotas);
+      const resto = totalCents - base * cuotas;
+
+      rpTotal.textContent = fmt(totalCents / 100);
+      rpCuotaBase.textContent = fmt(base / 100);
+      rpCuotaFinal.textContent = fmt((base + resto) / 100);
+
+      // Render tabla cuotas
+      const rows = [];
+      for (let i = 1; i <= cuotas; i++) {
+        const importe = (i === cuotas) ? (base + resto) : base;
+        const periodo = addMonthsYM(startYM, i - 1);
+        rows.push(
+          `<tr>
+            <td class="px-3 py-2">${i}/${cuotas}</td>
+            <td class="px-3 py-2">${periodo}</td>
+            <td class="px-3 py-2 text-right font-medium">${fmt(importe / 100)}</td>
+          </tr>`
+        );
+      }
+      rpCuotasBody.innerHTML = rows.join('');
+      resumenBox.classList.remove('hidden');
+    }
+
+    // Eventos
+    checkboxes.forEach(ch => ch.addEventListener('change', calcularYRender));
+    cuotasSel?.addEventListener('change', calcularYRender);
+    perInput?.addEventListener('change', calcularYRender);
+
+    // Primer render por si viene algo preseleccionado
+    calcularYRender();
+  })();
+</script>

@@ -14,61 +14,66 @@
 
     <!-- Header + acciones -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">
-            Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
-          </h1>
-          <h1 class="text-xl font-bold text-gray-900">
-            Nombre: <%= proveedor.nombreReal %>
-          </h1>
-          <p class="text-sm text-gray-600">
-            CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-            IVA: <%= proveedor.condicionIva || '—' %> ·
-            Tel: <%= proveedor.telefonoCelular || '—' %> ·
-            Estado:
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-              <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
-            </span>
-          </p>
+      <div class="flex flex-col gap-4">
+        <!-- Primera fila: Título + botón Volver arriba a la derecha -->
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
+            </h1>
+            <h1 class="text-xl font-bold text-gray-900">
+              Nombre: <%= proveedor.nombreReal %>
+            </h1>
+            <p class="text-sm text-gray-600">
+              CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+              IVA: <%= proveedor.condicionIva || '—' %> ·
+              Tel: <%= proveedor.telefonoCelular || '—' %> ·
+              Estado:
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+                <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+              </span>
+            </p>
 
-          <p class="text-sm text-gray-600 mt-1">
-            Plan:
-            <% if (proveedor.plan) { %>
-              <span class="font-medium"><%= proveedor.plan.nombre %></span>
-              — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
-              <% if (typeof proveedor.precioPlan === 'number') { %>
-                <span class="text-xs text-gray-500">(override)</span>
+            <p class="text-sm text-gray-600 mt-1">
+              Plan:
+              <% if (proveedor.plan) { %>
+                <span class="font-medium"><%= proveedor.plan.nombre %></span>
+                — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
+                <% if (typeof proveedor.precioPlan === 'number') { %>
+                  <span class="text-xs text-gray-500">(override)</span>
+                <% } %>
+              <% } else { %>
+                <span class="text-gray-500">Sin plan</span>
               <% } %>
-            <% } else { %>
-              <span class="text-gray-500">Sin plan</span>
-            <% } %>
-          </p>
+            </p>
+          </div>
 
-          <!-- <p class="text-sm text-gray-600">
-            Período: <span class="font-semibold"><%= periodo %></span>
-          </p> -->
+          <!-- Botón Volver arriba a la derecha -->
+          <div class="shrink-0">
+            <a href="/proveedores/<%= proveedor._id %>/ver"
+               class="inline-flex items-center bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm">
+              ← Volver
+            </a>
+          </div>
         </div>
 
-        <div class="flex flex-wrap gap-2">
-          <a href="/pagos/proveedores/<%= proveedor._id %>/registrar?periodo=<%= periodo %>"
-             class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-            + Registrar pago
-          </a>
+        <!-- Fila de acciones, alineada abajo a la izquierda -->
+        <div class="pt-3 mt-1 border-t border-gray-200">
+          <div class="flex flex-row flex-wrap items-center justify-start gap-2">
+            <a href="/pagos/proveedores/<%= proveedor._id %>/registrar?periodo=<%= periodo %>"
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+              + Registrar pago
+            </a>
 
-          <a href="/notas/proveedores/<%= proveedor._id %>/credito?periodo=<%= periodo %>"
-             class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
-            + Nota de crédito
-          </a>
-          <a href="/notas/proveedores/<%= proveedor._id %>/debito?periodo=<%= periodo %>"
-             class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
-            + Nota de débito
-          </a>
-
-          <a href="/proveedores/<%= proveedor._id %>/ver"
-             class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
-            ← Volver
-          </a>
+            <a href="/notas/proveedores/<%= proveedor._id %>/credito?periodo=<%= periodo %>"
+               class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
+              + Nota de crédito
+            </a>
+            <a href="/notas/proveedores/<%= proveedor._id %>/debito?periodo=<%= periodo %>"
+               class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
+              + Nota de débito
+            </a>
+          </div>
         </div>
       </div>
     </div>
