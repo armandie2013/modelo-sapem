@@ -10,7 +10,89 @@ function normalizarTipo(t) {
   return v === "credito" || v === "debito" ? v : null;
 }
 
-// ---------- API: últimos N cargos del proveedor ----------
+/* =========================================================
+ * Helpers internos (filtrado anti-plan de pago)
+ * =======================================================*/
+
+/**
+ * Devuelve "cargos ajustables" para NC/ND:
+ *  - tipo: "cargo"
+ *  - NO pertenecen a Plan (planPagoId:null)
+ *  - NO fueron revertidos por Plan (existe crédito con planPagoId != null y aplicaA = cargo._id)
+ */
+async function cargosAjustables(proveedorId, limit = 6) {
+  const oid = new mongoose.Types.ObjectId(proveedorId);
+
+  // cargos candidatos
+  const cargos = await MovimientoProveedor.find({
+    proveedor: oid,
+    tipo: "cargo",
+    planPagoId: null,
+  })
+    .sort({ periodo: -1 }) // YYYY-MM desc
+    .lean();
+
+  if (!cargos.length) return [];
+
+  // ids de esos cargos
+  const ids = cargos.map((c) => c._id);
+
+  // créditos de reversa de plan que apuntan a esos cargos
+  const reversas = await MovimientoProveedor.find(
+    {
+      proveedor: oid,
+      tipo: "credito",
+      planPagoId: { $ne: null },
+      aplicaA: { $in: ids },
+    },
+    { aplicaA: 1, _id: 0 }
+  ).lean();
+
+  const noAjustar = new Set(reversas.map((r) => String(r.aplicaA)));
+
+  // filtramos y garantizamos números
+  const filtrados = cargos
+    .filter((c) => !noAjustar.has(String(c._id)))
+    .map((c) => ({
+      _id: c._id,
+      periodo: c.periodo,
+      concepto: c.concepto,
+      importe: Number(c.importe ?? 0),
+    }));
+
+  return filtrados.slice(0, limit);
+}
+
+/**
+ * Valida que un cargo sea "ajustable" para NC/ND según las reglas de arriba.
+ * Devuelve el cargo o null si no corresponde.
+ */
+async function cargoAjustableById(proveedorId, cargoId) {
+  const oid = new mongoose.Types.ObjectId(proveedorId);
+  const cid = new mongoose.Types.ObjectId(cargoId);
+
+  const cargo = await MovimientoProveedor.findOne({
+    _id: cid,
+    proveedor: oid,
+    tipo: "cargo",
+    planPagoId: null,
+  }).lean();
+  if (!cargo) return null;
+
+  const reversa = await MovimientoProveedor.exists({
+    proveedor: oid,
+    tipo: "credito",
+    planPagoId: { $ne: null },
+    aplicaA: cid,
+  });
+  if (reversa) return null;
+
+  return cargo;
+}
+
+/* =========================================================
+ * API: últimos N cargos ajustables del proveedor
+ * =======================================================*/
 export async function apiCargosProveedor(req, res) {
   try {
     const { proveedor } = req.query;
@@ -20,19 +102,14 @@ export async function apiCargosProveedor(req, res) {
     limit = parseInt(limit, 10);
     if (!Number.isFinite(limit) || limit <= 0 || limit > 24) limit = 6;
 
-    const cargos = await MovimientoProveedor.find({
-      proveedor: new mongoose.Types.ObjectId(proveedor),
-      tipo: "cargo",
-    })
-      .sort({ periodo: -1 }) // YYYY-MM: orden lexicográfico desc
-      .limit(limit)
-      .lean();
+    const cargos = await cargosAjustables(proveedor, limit);
 
+    // aseguramos números para evitar NaN en el front
     const out = cargos.map((c) => ({
       _id: c._id,
       periodo: c.periodo,
       concepto: c.concepto,
-      importe: c.importe || 0,
+      importe: Number(c.importe ?? 0),
     }));
 
     res.json({ ok: true, cargos: out });
@@ -42,7 +119,9 @@ export async function apiCargosProveedor(req, res) {
   }
 }
 
-// ===================== FLUJO GENÉRICO =====================
+/* =========================================================
+ * FLUJO GENÉRICO
+ * =======================================================*/
 
 // GET /notas/:tipo/registrar
 export async function mostrarFormularioNota(req, res) {
@@ -96,15 +175,15 @@ export async function crearNotaController(req, res) {
     errores.push({ msg: "El importe debe ser mayor a 0." });
   }
 
-  // validar cargo
+  // validar cargo "ajustable"
   let cargo = null;
   if (!errores.length) {
-    cargo = await MovimientoProveedor.findOne({
-      _id: new mongoose.Types.ObjectId(cargoId),
-      proveedor: new mongoose.Types.ObjectId(proveedor),
-      tipo: "cargo",
-    }).lean();
-    if (!cargo) errores.push({ msg: "El cargo seleccionado no existe." });
+    try {
+      cargo = await cargoAjustableById(proveedor, cargoId);
+    } catch {
+      cargo = null;
+    }
+    if (!cargo) errores.push({ msg: "El cargo seleccionado no es ajustable (pertenece a un Plan o fue revertido)." });
   }
 
   if (errores.length) {
@@ -137,7 +216,9 @@ export async function crearNotaController(req, res) {
   res.redirect("/proveedores");
 }
 
-// ===================== FLUJO CON PROVEEDOR =====================
+/* =========================================================
+ * FLUJO CON PROVEEDOR
+ * =======================================================*/
 
 // GET /notas/proveedores/:proveedorId/:tipo
 export async function mostrarFormularioNotaProveedor(req, res) {
@@ -151,14 +232,8 @@ export async function mostrarFormularioNotaProveedor(req, res) {
   ).lean();
   if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-  // Últimos 6 cargos
-  const cargosDeProveedor = await MovimientoProveedor.find({
-    proveedor: proveedor._id,
-    tipo: "cargo",
-  })
-    .sort({ periodo: -1 })
-    .limit(6)
-    .lean();
+  // Últimos 6 cargos AJUSTABLES (ya filtrados contra Planes)
+  const cargosDeProveedor = await cargosAjustables(proveedor._id, 6);
 
   const datos = {
     fecha: clock.todayYMD(),
@@ -205,25 +280,19 @@ export async function crearNotaProveedorController(req, res) {
     errores.push({ msg: "El importe debe ser mayor a 0." });
   }
 
-  // validar cargo
+  // validar cargo "ajustable"
   let cargo = null;
   if (!errores.length) {
-    cargo = await MovimientoProveedor.findOne({
-      _id: new mongoose.Types.ObjectId(cargoId),
-      proveedor: new mongoose.Types.ObjectId(proveedorId),
-      tipo: "cargo",
-    }).lean();
-    if (!cargo) errores.push({ msg: "El cargo seleccionado no existe." });
+    try {
+      cargo = await cargoAjustableById(proveedorId, cargoId);
+    } catch {
+      cargo = null;
+    }
+    if (!cargo) errores.push({ msg: "El cargo seleccionado no es ajustable (pertenece a un Plan o fue revertido)." });
   }
 
   if (errores.length) {
-    const cargosDeProveedor = await MovimientoProveedor.find({
-      proveedor: proveedorId,
-      tipo: "cargo",
-    })
-      .sort({ periodo: -1 })
-      .limit(6)
-      .lean();
+    const cargosDeProveedor = await cargosAjustables(proveedorId, 6);
 
     return res.status(400).render("notasViews/registrarNota", {
       tipoNota,

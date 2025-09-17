@@ -12,15 +12,16 @@ import { addMonthsYM, cents, fromCents } from "../utils/moneyAndDates.mjs";
  * =======================================================*/
 
 /**
- * Lista movimientos ELEGIBLES (cargo/debito, sin planPago, y sin pagos/creditos aplicados)
- * y también devuelve los BLOQUEADOS (porque tienen algo aplicado o no matchean).
+ * Lista movimientos ELEGIBLES (cargo/debito, sin planPago, sin pagos/creditos aplicados
+ * y NO bloqueados para pago) y también devuelve los BLOQUEADOS.
  */
 async function listarElegiblesSinParciales(proveedorId) {
-  // 1) Candidatos base
+  // 1) Candidatos base (sin plan y no bloqueados)
   const movs = await MovimientoProveedor.find({
     proveedor: proveedorId,
     tipo: { $in: ["cargo", "debito"] },
-    planPagoId: null,          // aún no fueron usados en otro plan
+    planPagoId: null,                  // aún no usados en un plan
+    bloqueadoParaPago: { $ne: true },  // y no marcados como no pagables
   })
     .select("_id tipo concepto periodo fecha importe")
     .sort({ fecha: 1, _id: 1 })
@@ -32,7 +33,7 @@ async function listarElegiblesSinParciales(proveedorId) {
 
   const movIds = movs.map(m => m._id);
 
-  // 2) Créditos aplicados explícitamente a esos movimientos (reversas / NC con aplicaA)
+  // 2) Créditos con aplicaA a esos movimientos (reversas/NC aplicadas)
   const creditosAgg = await MovimientoProveedor.aggregate([
     { $match: { tipo: "credito", aplicaA: { $in: movIds } } },
     { $group: { _id: "$aplicaA", total: { $sum: "$importe" } } },
@@ -68,7 +69,7 @@ async function listarElegiblesSinParciales(proveedorId) {
   return { elegibles, bloqueados };
 }
 
-/* Utilidades para fechas sugeridas en el formulario (evita depender de todayYM/YMD) */
+/* Utilidades para fechas sugeridas en el formulario */
 function hoyYMDLocal(d = clock.date()) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -103,7 +104,7 @@ export async function mostrarFormularioPlanPago(req, res) {
     cuotasPreset: [3, 6, 9, 12],
     primerPeriodoSugerido: hoyYMLocal(),
     hoy: hoyYMDLocal(),
-    pagosSinImputar: 0,                    // Puedes quitar este campo de la vista si ya no lo usás
+    pagosSinImputar: 0,                    // si no lo usás en la vista, podés quitarlo
   });
 }
 
@@ -111,7 +112,8 @@ export async function mostrarFormularioPlanPago(req, res) {
  * POST Crear plan de pago
  *  - Sólo acepta movimientos COMPLETOS (sin pagos/NC aplicados)
  *  - Reversa total de cada movimiento elegido (crédito aplicaA)
- *  - Genera N cuotas (cargos futuros), última ajusta por redondeo
+ *  - Genera N cuotas (débitos futuros), última ajusta por redondeo
+ *  - Marca los comprobantes originales como bloqueados para pago
  * =======================================================*/
 export async function crearPlanPagoController(req, res) {
   const { proveedorId } = req.params;
@@ -145,7 +147,7 @@ export async function crearPlanPagoController(req, res) {
   for (const id of ids) {
     const m = elegiblesById.get(String(id));
     if (!m) {
-      return res.status(400).send("La selección contiene comprobantes no elegibles (parciales o ya aplicados).");
+      return res.status(400).send("La selección contiene comprobantes no elegibles (parciales, ya aplicados o bloqueados).");
     }
     seleccion.push(m);
   }
@@ -174,6 +176,12 @@ export async function crearPlanPagoController(req, res) {
       creadoPor: req.usuario?._id || null,
     });
 
+    // 1.5) ✅ Marcar los comprobantes originales como parte del plan y NO pagables
+    await MovimientoProveedor.updateMany(
+      { _id: { $in: seleccion.map(m => m._id) } },
+      { $set: { planPagoId: plan._id, bloqueadoParaPago: true } }
+    );
+
     // 2) Reversas (créditos) 1:1 para cada movimiento seleccionado
     const creditos = seleccion.map(m => ({
       proveedor: proveedorId,
@@ -188,13 +196,13 @@ export async function crearPlanPagoController(req, res) {
     }));
     await MovimientoProveedor.insertMany(creditos);
 
-    // 3) Cargos de cuotas futuras
+    // 3) Débitos de cuotas futuras
     const cargos = [];
     for (let i = 1; i <= cuotasInt; i++) {
       const importeCents = i === cuotasInt ? (cuotaBaseCents + resto) : cuotaBaseCents;
       cargos.push({
         proveedor: proveedorId,
-        tipo: "cargo",
+        tipo: "debito", // ← usamos 'debito' para cuotas del plan
         concepto: `Plan de pago #${plan._id} — cuota ${i}/${cuotasInt}`,
         periodo: addMonthsYM(primerPeriodo, i - 1),
         fecha: clock.date(),

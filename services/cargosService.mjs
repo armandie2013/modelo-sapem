@@ -1,6 +1,5 @@
 // services/cargosService.mjs
-import Proveedor from "../models/proveedor.mjs";
-import Plan from "../models/plan.mjs";
+import mongoose from "mongoose";
 import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 import clock from "../utils/clock.mjs";
 
@@ -10,10 +9,12 @@ function periodoYYYYMM(d = clock.date()) {
   return `${y}-${m}`;
 }
 
+// --- Cargos mensuales (tu lógica anterior, sin tocar) ---
 export async function generarCargosMensuales(fechaRef = clock.date()) {
   const periodo = periodoYYYYMM(fechaRef);
+  const Proveedor = (await import("../models/proveedor.mjs")).default;
+  const Plan = (await import("../models/plan.mjs")).default;
 
-  // proveedores ACTIVO + con plan asignado
   const proveedores = await Proveedor.find({ activo: { $ne: false }, plan: { $ne: null } })
     .populate("plan", "nombre importe activo");
 
@@ -25,7 +26,7 @@ export async function generarCargosMensuales(fechaRef = clock.date()) {
 
       const concepto = `Cargo mensual plan ${p.plan.nombre} ${periodo}`;
       const res = await MovimientoProveedor.updateOne(
-        { proveedor: p._id, periodo, tipo: "cargo" },
+        { proveedor: p._id, periodo, tipo: "cargo", planPagoId: null }, // <- ojo planPagoId:null
         {
           $setOnInsert: {
             proveedor: p._id,
@@ -36,6 +37,7 @@ export async function generarCargosMensuales(fechaRef = clock.date()) {
             importe: Number(p.plan.importe),
             plan: p.plan._id,
             importePlan: Number(p.plan.importe),
+            planPagoId: null,
           },
         },
         { upsert: true }
@@ -52,7 +54,6 @@ export async function generarCargosMensuales(fechaRef = clock.date()) {
   return { periodo, creados, existentes, errores };
 }
 
-// útil al iniciar el server por si se “perdió” el 28
 export async function catchUpCargos(mesesAtras = 1) {
   const base = clock.date();
   for (let i = mesesAtras; i >= 0; i--) {
@@ -61,21 +62,41 @@ export async function catchUpCargos(mesesAtras = 1) {
   }
 }
 
-// Buscar cargo puntual
+// Busca primero CUOTA de plan en ese período; si no hay, vuelve a cargo “suelto”
 export async function buscarCargoPorPeriodo(proveedorId, periodo) {
+  const oid = new mongoose.Types.ObjectId(proveedorId);
+
+  // 1) ¿Hay cuota (debito) de plan en ese período?
+  const cuota = await MovimientoProveedor.findOne({
+    proveedor: oid,
+    tipo: "debito",
+    periodo: String(periodo),
+    planPagoId: { $ne: null },
+  }).lean();
+
+  if (cuota) return cuota;
+
+  // 2) Si no, un cargo normal del período (que NO esté marcado por plan)
   return MovimientoProveedor.findOne({
-    proveedor: proveedorId,
+    proveedor: oid,
     tipo: "cargo",
     periodo: String(periodo),
+    planPagoId: null,
   }).lean();
 }
 
-// listado de cargos con saldo > 0 (para el select de períodos)
+/**
+ * Devuelve “pendientes” para el combo de pagos:
+ * - CARGOS normales (planPagoId:null) con saldo >0
+ * - CUOTAS de plan (tipo:debito, planPagoId!=null) con saldo >0
+ * Asegura NUMEROS para importe/pagado/saldo (evita NaN en vistas).
+ */
 export async function cargosPendientesPorProveedor(proveedorId) {
-  // Usamos aggregation con lookup a pagos para calcular saldo
-  const pipeline = [
-    { $match: { proveedor: new (await import("mongoose")).default.Types.ObjectId(proveedorId), tipo: "cargo" } },
-    { $sort: { periodo: 1 } },
+  const oid = new mongoose.Types.ObjectId(proveedorId);
+
+  // CARGOS normales
+  const pipelineCargos = [
+    { $match: { proveedor: oid, tipo: "cargo", planPagoId: null } },
     {
       $lookup: {
         from: "pagos",
@@ -86,27 +107,69 @@ export async function cargosPendientesPorProveedor(proveedorId) {
     },
     {
       $project: {
+        _id: 1,
         periodo: 1,
         concepto: 1,
-        importe: 1,
-        pagado: { $sum: "$pagos.importe" },
+        importe: { $ifNull: ["$importe", 0] },
+        pagado: { $sum: { $map: { input: { $ifNull: ["$pagos", []] }, as: "p", in: { $ifNull: ["$$p.importe", 0] } } } },
+      }
+    },
+    { $addFields: { saldo: { $subtract: ["$importe", "$pagado"] }, tipo: "cargo", cuotaN: null, cuotasTotal: null } },
+    { $match: { saldo: { $gt: 0 } } },
+  ];
+
+  // CUOTAS de plan (debito)
+  const pipelineCuotas = [
+    { $match: { proveedor: oid, tipo: "debito", planPagoId: { $ne: null } } },
+    {
+      $lookup: {
+        from: "pagos",
+        localField: "_id",
+        foreignField: "cargo",
+        as: "pagos",
       }
     },
     {
-      $addFields: {
-        saldo: { $subtract: ["$importe", { $ifNull: ["$pagado", 0] }] }
+      $lookup: {
+        from: "planpagos",
+        localField: "planPagoId",
+        foreignField: "_id",
+        as: "plan",
       }
     },
-    { $match: { saldo: { $gt: 0 } } }
+    { $unwind: "$plan" },
+    {
+      $project: {
+        _id: 1,
+        periodo: 1,
+        concepto: 1,
+        importe: { $ifNull: ["$importe", 0] },
+        pagado: { $sum: { $map: { input: { $ifNull: ["$pagos", []] }, as: "p", in: { $ifNull: ["$$p.importe", 0] } } } },
+        cuotaN: { $ifNull: ["$cuotaN", null] },
+        cuotasTotal: { $ifNull: ["$plan.cuotasCantidad", null] },
+      }
+    },
+    { $addFields: { saldo: { $subtract: ["$importe", "$pagado"] }, tipo: "debito" } },
+    { $match: { saldo: { $gt: 0 } } },
   ];
 
-  const rows = await MovimientoProveedor.aggregate(pipeline);
-  return rows.map(c => ({
-    _id: c._id,
-    periodo: c.periodo,
-    concepto: c.concepto,
-    importe: c.importe || 0,
-    pagado: c.pagado || 0,
-    saldo: c.saldo || 0,
+  // Unimos ambas: cargos + cuotas
+  const rows = await MovimientoProveedor.aggregate([
+    ...pipelineCargos,
+    { $unionWith: { coll: "movimientoproveedors", pipeline: pipelineCuotas } },
+    { $sort: { periodo: 1, _id: 1 } },
+  ]);
+
+  // Normalizamos a NUMBER siempre
+  return rows.map(r => ({
+    _id: r._id,
+    periodo: r.periodo,
+    concepto: r.concepto,
+    tipo: r.tipo,                 // 'cargo' o 'debito'
+    cuotaN: r.cuotaN ?? null,
+    cuotasTotal: r.cuotasTotal ?? null,
+    importe: Number(r.importe ?? 0),
+    pagado: Number(r.pagado ?? 0),
+    saldo: Number(r.saldo ?? 0),  // <- evita NaN
   }));
 }

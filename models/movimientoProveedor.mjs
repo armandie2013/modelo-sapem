@@ -44,6 +44,8 @@ const movimientoProveedorSchema = new Schema(
 
     // quién creó el movimiento (para mostrar en el detalle)
     creadoPor: { type: Schema.Types.ObjectId, ref: "Usuario", default: null },
+
+    bloqueadoParaPago: { type: Boolean, default: false }, // ✅ NUEVO
   },
   {
     // timestamps también con el reloj central
