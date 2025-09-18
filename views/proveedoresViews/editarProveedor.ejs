@@ -1,121 +1,149 @@
-<main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Editar Proveedor</h1>
+<main class="bg-gray-100 min-h-screen py-8 px-4">
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+    <header class="mb-6">
+      <h1 class="text-xl font-bold text-gray-900 text-center">Editar proveedor</h1>
+      <p class="text-center text-xs text-gray-500 mt-1">Todos los campos son obligatorios, excepto “Plan” y “Activo”.</p>
+    </header>
 
-    <% if (typeof errores !=='undefined' && errores.length> 0) { %>
-      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-6 shadow-sm">
-        <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
-        <ul class="list-disc pl-6 text-sm space-y-1">
-          <% errores.forEach(error=> { %>
+    <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
+      <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-6">
+        <h2 class="font-semibold text-sm mb-2">Por favor corregí los siguientes errores:</h2>
+        <ul class="list-disc pl-5 text-sm space-y-1">
+          <% errores.forEach(error => { %>
             <li><%= error.msg %></li>
           <% }) %>
         </ul>
       </div>
     <% } %>
 
-    <form action="/proveedores/<%= proveedor._id %>/editar" method="POST" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%
+      const ctl = "w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
+      const lbl = "block text-xs font-medium text-gray-700";
+      const req = '<span class="text-red-600 ml-0.5">*</span>';
+      const planSel = String(proveedor?.plan?._id || proveedor?.plan || '');
+    %>
+
+    <form action="/proveedores/<%= proveedor._id %>/editar" method="POST" class="space-y-5">
+
+      <!-- Fila 1: Número + Plan (plan opcional) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Número de proveedor</label>
+          <label class="<%= lbl %>">Número de proveedor</label>
           <input type="text" value="<%= proveedor.numeroProveedor %>" disabled
                  class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Nombre de fantasía</label>
-          <input type="text" name="nombreFantasia" value="<%= proveedor.nombreFantasia %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Nombre real</label>
-          <input type="text" name="nombreReal" value="<%= proveedor.nombreReal %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">CUIT</label>
-          <input type="text" name="cuit" value="<%= proveedor.cuit %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Domicilio</label>
-          <input type="text" name="domicilio" value="<%= proveedor.domicilio %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Domicilio Fiscal</label>
-          <input type="text" name="domicilioFiscal" value="<%= proveedor.domicilioFiscal %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Teléfono celular</label>
-          <input type="text" name="telefonoCelular" value="<%= proveedor.telefonoCelular %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Teléfono fijo</label>
-          <input type="text" name="telefonoFijo" value="<%= proveedor.telefonoFijo %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">E-mail</label>
-          <input type="email" name="email" value="<%= proveedor.email %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">CBU</label>
-          <input type="text" name="cbu" value="<%= proveedor.cbu %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Categoría</label>
-          <input type="text" name="categoria" value="<%= proveedor.categoria %>"
-                 class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Condición IVA</label>
-          <select name="condicionIva" required class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300">
-            <option value="">Seleccione una opción</option>
-            <% const opciones=["Responsable Inscripto", "Monotributo" , "Exento" , "Consumidor Final" , "Otro" ]; %>
-            <% opciones.forEach(op=> { %>
-              <option value="<%= op %>" <%= proveedor.condicionIva===op ? "selected" : "" %>><%= op %></option>
-            <% }) %>
-          </select>
-        </div>
-
-        <!-- Plan -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Plan</label>
-          <select name="plan" class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300">
+          <label class="<%= lbl %>">Plan (opcional)</label>
+          <select name="plan" class="<%= ctl %>">
             <option value="">— Sin plan —</option>
             <% (planes || []).forEach(p => { %>
-              <option value="<%= p._id %>"
-                <%= (String(proveedor?.plan?._id || proveedor?.plan || '') === String(p._id)) ? "selected" : "" %>>
-                <%= p.nombre %> — $ <%= Number(p.importe || 0).toLocaleString("es-AR", { minimumFractionDigits: 2 }) %>
+              <option value="<%= p._id %>" <%= (planSel === String(p._id)) ? "selected" : "" %>>
+                <%= p.nombre %> — US$ <%= Number(p.importe || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
               </option>
             <% }) %>
           </select>
           <p class="text-xs text-gray-500 mt-1">Si no elegís plan, el proveedor queda sin plan asignado.</p>
         </div>
+      </div>
 
-        <!-- Activo -->
-        <div class="sm:col-span-2 flex items-center gap-2 mt-2">
-          <input id="chk-activo" type="checkbox" name="activo" value="true" <%= (proveedor.activo ?? true) ? 'checked' : '' %> >
-          <label for="chk-activo" class="text-gray-700">Activo</label>
+      <!-- Fila 2: Nombres -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="<%= lbl %>">Nombre de fantasía <%- req %></label>
+          <input type="text" name="nombreFantasia" value="<%= proveedor.nombreFantasia || '' %>" required
+                 autocomplete="organization" class="<%= ctl %>" placeholder="Ej: Eléctricos Norte" />
+        </div>
+        <div>
+          <label class="<%= lbl %>">Nombre real (razón social) <%- req %></label>
+          <input type="text" name="nombreReal" value="<%= proveedor.nombreReal || '' %>" required
+                 autocomplete="organization" class="<%= ctl %>" placeholder="Ej: Eléctricos Norte S.R.L." />
         </div>
       </div>
 
-      <div class="text-center">
-        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition">
+      <!-- Fila 3: CUIT + Categoría -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="<%= lbl %>">CUIT <%- req %></label>
+          <input type="text" name="cuit" value="<%= proveedor.cuit || '' %>" required
+                 inputmode="numeric" pattern="[0-9]{11}" maxlength="11"
+                 title="11 dígitos sin guiones" class="<%= ctl %>" placeholder="Ej: 20300123456" />
+        </div>
+        <div>
+          <label class="<%= lbl %>">Categoría <%- req %></label>
+          <input type="text" name="categoria" value="<%= proveedor.categoria || '' %>" required
+                 class="<%= ctl %>" placeholder="Ej: Electricista" />
+        </div>
+      </div>
+
+      <!-- Fila 4: IVA + Email -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="<%= lbl %>">Condición IVA <%- req %></label>
+          <select name="condicionIva" required class="<%= ctl %>">
+            <option value="" disabled <%= proveedor?.condicionIva ? '' : 'selected' %>>Seleccione una opción</option>
+            <% const opciones=["Responsable Inscripto","Monotributo","Exento","Consumidor Final","Otro"]; %>
+            <% opciones.forEach(op=> { %>
+              <option value="<%= op %>" <%= (proveedor.condicionIva === op) ? "selected" : "" %>><%= op %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="<%= lbl %>">E-mail <%- req %></label>
+          <input type="email" name="email" value="<%= proveedor.email || '' %>" required
+                 autocomplete="email" class="<%= ctl %>" placeholder="ejemplo@dominio.com" />
+        </div>
+      </div>
+
+      <!-- Fila 5: Domicilios -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="<%= lbl %>">Domicilio <%- req %></label>
+          <input type="text" name="domicilio" value="<%= proveedor.domicilio || '' %>" required
+                 autocomplete="street-address" class="<%= ctl %>" placeholder="Calle, número, localidad" />
+        </div>
+        <div>
+          <label class="<%= lbl %>">Domicilio fiscal <%- req %></label>
+          <input type="text" name="domicilioFiscal" value="<%= proveedor.domicilioFiscal || '' %>" required
+                 class="<%= ctl %>" placeholder="Calle, número, localidad" />
+        </div>
+      </div>
+
+      <!-- Fila 6: Teléfonos -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="<%= lbl %>">Teléfono celular <%- req %></label>
+          <input type="text" name="telefonoCelular" value="<%= proveedor.telefonoCelular || '' %>" required
+                 inputmode="tel" pattern="[0-9]{10}" maxlength="10"
+                 title="10 dígitos (sin espacios ni guiones)" class="<%= ctl %>" placeholder="Ej: 3834000000" />
+        </div>
+        <div>
+          <label class="<%= lbl %>">Teléfono fijo <%- req %></label>
+          <input type="text" name="telefonoFijo" value="<%= proveedor.telefonoFijo || '' %>" required
+                 inputmode="tel" pattern="[0-9]{10}" maxlength="10"
+                 title="10 dígitos (sin espacios ni guiones)" class="<%= ctl %>" placeholder="Ej: 3834400000" />
+        </div>
+      </div>
+
+      <!-- Fila 7: CBU + Activo (opcional) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="<%= lbl %>">CBU <%- req %></label>
+          <input type="text" name="cbu" value="<%= proveedor.cbu || '' %>" required
+                 inputmode="numeric" pattern="[0-9]{22}" maxlength="22"
+                 title="22 dígitos" class="<%= ctl %>" placeholder="22 dígitos" />
+        </div>
+
+        <div class="flex items-center gap-2 mt-6 md:mt-0">
+          <input id="chk-activo" type="checkbox" name="activo" value="true" <%= (proveedor.activo ?? true) ? 'checked' : '' %> >
+          <label for="chk-activo" class="text-sm text-gray-700">Activo (opcional)</label>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex items-center justify-center pt-2">
+        <button type="submit"
+                class="inline-flex items-center bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition text-sm">
           Guardar cambios
         </button>
       </div>
@@ -124,21 +152,31 @@
 </main>
 
 <script>
-/* Capitalización y restricciones numéricas */
-(function(){
+  // Capitaliza la primera letra de cada palabra
+  function capitalizarPalabras(texto) {
+    return (texto || '').toLowerCase().replace(/(^\w|\s\w)/g, l => l.toUpperCase());
+  }
+
   const camposTexto = ["nombreFantasia","nombreReal","domicilio","domicilioFiscal","categoria"];
   camposTexto.forEach(name => {
     const input = document.querySelector(`input[name="${name}"]`);
-    if (input) input.addEventListener("blur", () => {
-      input.value = input.value.toLowerCase().replace(/(^\w|\s\w)/g, l => l.toUpperCase());
-    });
+    if (input) input.addEventListener("blur", () => { input.value = capitalizarPalabras(input.value); });
   });
+
+  // Restricciones numéricas + mensajes inline
   const restricciones = { cuit:11, telefonoCelular:10, telefonoFijo:10, cbu:22 };
   Object.entries(restricciones).forEach(([campo, max]) => {
     const input = document.querySelector(`input[name="${campo}"]`);
-    if (input) input.addEventListener("input", () => {
+    if (!input) return;
+    input.addEventListener("input", () => {
       input.value = input.value.replace(/\D/g, "").slice(0, max);
+      // Si está vacío, no forzamos mensaje; si tiene algo, pedimos longitud exacta
+      if (input.value.length === 0) {
+        input.setCustomValidity("");
+      } else {
+        input.setCustomValidity(input.value.length === max ? "" : `Debe tener ${max} dígitos`);
+      }
     });
   });
-})();
+  // “Activo” es opcional: sin validaciones adicionales
 </script>

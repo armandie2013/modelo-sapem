@@ -137,7 +137,7 @@
                   <span class="ml-2 font-medium"><%= m.concepto || '(Sin detalle)' %></span>
                 </div>
                 <div class="text-xs text-gray-500 mt-1">
-                  <%= new Date(m.fecha).toLocaleString('es-AR') %>
+                  <%= fmtFechaHora(m.fecha) %>
                   <% if (m.creadorNombre && m.creadorNombre !== '—') { %>
                     · Cargado por <%= m.creadorNombre %>
                   <% } %>

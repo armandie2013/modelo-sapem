@@ -28,7 +28,7 @@
             <p class="text-sm text-gray-600">
               CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
               IVA: <%= proveedor.condicionIva || '—' %> ·
-              Tel: <%= proveedor.telefonoCelular %> ·
+              Tel: <%= proveedor.telefonoCelular || '—' %> ·
               Estado:
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
                 <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
@@ -113,7 +113,7 @@
       </div>
     </div>
 
-    <!-- Detalle por período -->
+    <!-- Detalle por período (zebra + hover con índice) -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
       <h2 class="text-lg font-semibold text-gray-800 mb-4">Resumen por período</h2>
 
@@ -129,23 +129,21 @@
               <th class="px-4 py-3 text-right">Saldo</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-gray-200">
             <% if ((detallePorPeriodo||[]).length === 0) { %>
               <tr class="bg-gray-50">
                 <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
               </tr>
             <% } else { 
-                 // Orden: más viejo primero (YYYY-MM permite orden lexicográfico)
-                 const filasOrdenadas = (detallePorPeriodo || []).slice().sort((a,b) => {
-                   const A = String(a.periodo||'');
-                   const B = String(b.periodo||'');
-                   return A.localeCompare(B);
-                 });
+                 const filasOrdenadas = (detallePorPeriodo || [])
+                   .slice()
+                   .sort((a,b) => String(a.periodo||'').localeCompare(String(b.periodo||'')));
             %>
-              <% filasOrdenadas.forEach(r => { %>
+              <% filasOrdenadas.forEach((r, i) => { %>
                 <tr
-                  class="odd:bg-gray-50 even:bg-white hover:bg-gray-100 cursor-pointer periodo-row"
+                  class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
                   data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
+                  role="link" tabindex="0"
                   title="Ver detalle del período <%= r.periodo %>"
                 >
                   <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
@@ -164,16 +162,17 @@
       </div>
     </div>
 
-    <!-- Timeline últimos movimientos -->
+    <!-- Timeline últimos movimientos (zebra + hover con índice) -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
       <h2 class="text-lg font-semibold text-gray-800 mb-4">Movimientos recientes</h2>
 
       <% if ((movimientos||[]).length === 0) { %>
         <p class="text-gray-500 text-sm">Sin movimientos.</p>
       <% } else { %>
-        <ul class="space-y-3">
-          <% movimientos.forEach(m => { %>
-            <li class="flex items-start justify-between gap-3 border-b pb-3">
+        <ul class="rounded-xl border border-gray-200 overflow-hidden">
+          <% movimientos.forEach((m, idx) => { %>
+            <li class="flex items-start justify-between gap-3 px-3 py-3 border-b border-gray-200 last:border-0
+                       <%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
               <div>
                 <div class="text-sm">
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
@@ -192,7 +191,7 @@
                   <% } %>
                 </div>
                 <div class="text-xs text-gray-500">
-                  <%= new Date(m.fecha).toLocaleString('es-AR') %>
+                  <%= fmtFechaHora(m.fecha) %>
                   <% if (m.tipo==='pago' && (m.metodo || m.comprobante)) { %>
                     · <%= (m.metodo||'') %> <%= (m.comprobante ? `#${m.comprobante}` : '') %>
                   <% } %>
@@ -210,14 +209,27 @@
 </main>
 
 <script>
-  // Hace clickeables las filas del resumen por período
-  document.querySelectorAll('.periodo-row').forEach(tr => {
-    tr.addEventListener('click', (e) => {
-      const href = tr.dataset.href;
-      if (!href) return;
-      const tag = (e.target.tagName || '').toLowerCase();
-      if (['a','button','input','label','select','svg','path'].includes(tag)) return;
-      window.location.href = href;
+  // Hace clickeables las filas del resumen por período (y accesibles con teclado)
+  (function () {
+    const rows = document.querySelectorAll('tr.periodo-row, tr[data-href]');
+    rows.forEach(tr => {
+      const go = () => {
+        const href = tr.dataset.href;
+        if (href) window.location.href = href;
+      };
+
+      tr.addEventListener('click', (e) => {
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (['a','button','input','label','select','svg','path','textarea'].includes(tag)) return;
+        go();
+      });
+
+      tr.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          go();
+        }
+      });
     });
-  });
+  })();
 </script>

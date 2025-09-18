@@ -5,11 +5,11 @@ import methodOverride from "method-override";
 import expressEjsLayouts from "express-ejs-layouts";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-
+import { fmtHora, fmtHoraCorta, fmtFecha, fmtFechaHora } from "./utils/formatFechas.mjs";
 import { connectDB } from "./config/dbConfig.mjs";
 import { startCargosCron } from "./jobs/cargosCron.mjs";
 import { catchUpCargos } from "./services/cargosService.mjs";
-import pagosRoutes from "./routes/pagosRoutes.mjs";
+
 
 // Rutas
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
@@ -22,6 +22,7 @@ import pedidoMaterialRoutes from "./routes/pedidoMaterialRoutes.mjs";
 import planesRoutes from "./routes/planesRoutes.mjs";
 import cargosRoutes from "./routes/cargosRoutes.mjs";
 import notasRoutes from "./routes/notasRoutes.mjs";
+import pagosRoutes from "./routes/pagosRoutes.mjs";
 import planPagoRoutes from "./routes/planPagoRoutes.mjs";
 
 // 👇 RELOJ CENTRALIZADO
@@ -77,14 +78,11 @@ app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.rutaActual = req.path;
 
-  // ✅ Helpers de fecha/hora con TZ AR (mostrar SIEMPRE AR; guardar SIEMPRE UTC)
-  const tz = clock.tz || "America/Argentina/Catamarca";
-  res.locals.fmtFecha = (d) =>
-    d ? new Date(d).toLocaleDateString("es-AR", { timeZone: tz }) : "—";
-  res.locals.fmtHora = (d) =>
-    d ? new Date(d).toLocaleTimeString("es-AR", { timeZone: tz }) : "—";
-  res.locals.fmtFechaHora = (d) =>
-    d ? new Date(d).toLocaleString("es-AR", { timeZone: tz }) : "—";
+  // Helpers de fecha/hora (24h + “hs”) traídos del módulo
+  res.locals.fmtHora = fmtHora;
+  res.locals.fmtHoraCorta = fmtHoraCorta;
+  res.locals.fmtFecha = fmtFecha;
+  res.locals.fmtFechaHora = fmtFechaHora;
 
   next();
 });
