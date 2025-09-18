@@ -1,25 +1,40 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
   <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
     <% const modoProveedor = !!proveedor; %>
+    <% const _mostrarTodos = (typeof mostrarTodos !== 'undefined') ? !!mostrarTodos : false; %>
 
     <div class="flex items-start justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-800">Registrar Pago</h1>
         <% if (modoProveedor) { %>
-          <p class="text-gray-600 text-sm">Proveedor:
-            <span class="font-medium">
-              <%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %>
-            </span>
+          <p class="text-gray-600 text-sm">
+            Proveedor: <span class="font-medium"><%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %></span>
+          </p>
+          <p class="text-[11px] text-gray-500 mt-1">
+            Mostrando <%= _mostrarTodos ? 'todos los períodos con saldo' : 'períodos vencidos y mes en curso' %>.
+          </p>
+        <% } else { %>
+          <p class="text-[11px] text-gray-500 mt-1">
+            Por defecto se listan períodos vencidos y el mes en curso. Podés ver todos con el conmutador.
           </p>
         <% } %>
       </div>
 
-      <% if (modoProveedor) { %>
-        <a href="/proveedores/<%= proveedor._id %>/ver"
-           class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
-      <% } else { %>
-        <a href="/pagos" class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
-      <% } %>
+      <div class="flex items-center gap-2">
+        <% if (modoProveedor) { %>
+          <a
+            href="/pagos/proveedores/<%= proveedor._id %>/registrar<%= _mostrarTodos ? '' : '?all=1' %>"
+            class="text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 transition"
+            title="<%= _mostrarTodos ? 'Ver solo vencidos + mes actual' : 'Ver todos los períodos' %>"
+          >
+            <%= _mostrarTodos ? 'Ver solo vencidos + mes actual' : 'Ver todos los períodos' %>
+          </a>
+          <a href="/proveedores/<%= proveedor._id %>/ver"
+             class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+        <% } else { %>
+          <a href="/pagos" class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+        <% } %>
+      </div>
     </div>
 
     <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
@@ -32,20 +47,22 @@
     <% } %>
 
     <form
-      action="<%= modoProveedor ? ('/pagos/proveedores/' + proveedor._id + '/registrar') : '/pagos/registrar' %>"
-      method="POST" class="space-y-6">
-
+      action="<%= modoProveedor ? ('/pagos/proveedores/' + proveedor._id + '/registrar' + (_mostrarTodos ? '?all=1' : '')) : '/pagos/registrar' %>"
+      method="POST" class="space-y-6"
+    >
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
 
         <% if (!modoProveedor) { %>
           <!-- Selector de proveedor (modo genérico) -->
           <div class="sm:col-span-2">
-            <label class="block font-medium text-gray-700">Proveedor</label>
+            <div class="flex items-center justify-between">
+              <label class="block font-medium text-gray-700">Proveedor</label>
+            </div>
             <select id="proveedorSelect" name="proveedor" required
                     class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
               <option value="">Seleccione…</option>
               <% (proveedores || []).forEach(pr => { %>
-                <option value="<%= pr._id %>" <%= (datos?.proveedor === String(pr._id)) ? 'selected' : '' %>>
+                <option value="<%= pr._id %>" <%= (String(datos?.proveedor||'') === String(pr._id)) ? 'selected' : '' %>>
                   #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal || pr._id %>
                 </option>
               <% }) %>
@@ -55,25 +72,46 @@
 
         <!-- Período / Cargo -->
         <div class="sm:col-span-2">
-          <label class="block font-medium text-gray-700">Período / Cargo</label>
+          <div class="flex items-center justify-between">
+            <label class="block font-medium text-gray-700">Período / Cargo</label>
+
+            <% if (!modoProveedor) { %>
+              <!-- Toggle ver todos (modo genérico) -->
+              <label class="inline-flex items-center gap-2 text-xs text-gray-700 select-none">
+                <input id="toggleAllPeriods" type="checkbox" class="rounded border-gray-300">
+                Ver todos
+              </label>
+            <% } %>
+          </div>
 
           <% if (modoProveedor) { %>
             <select id="periodoSelect" name="periodo" required
                     class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
-              <option value="">Seleccione…</option>
-              <% (cargosPendientes || []).forEach(c => { %>
-                <option value="<%= c.periodo %>">
-                  <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 }) %> (<%= c.concepto %>)
-                </option>
-              <% }) %>
+              <% if ((cargosPendientes||[]).length === 0) { %>
+                <option value="">Sin cargos <%= _mostrarTodos ? 'pendientes' : 'elegibles' %></option>
+              <% } else { %>
+                <option value="">Seleccione…</option>
+                <% (cargosPendientes || []).forEach(c => { %>
+                  <option
+                    value="<%= c.periodo %>"
+                    <%= (String(datos?.periodo||'') === String(c.periodo)) ? 'selected' : '' %>>
+                    <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    (<%= c.concepto %>)
+                  </option>
+                <% }) %>
+              <% } %>
             </select>
-            <p class="text-xs text-gray-500 mt-1">Solo se muestran cargos con saldo pendiente.</p>
+            <p class="text-xs text-gray-500 mt-1">
+              <%= _mostrarTodos ? 'Se muestran todos los períodos con saldo.' : 'Se muestran vencidos y el mes en curso.' %>
+            </p>
           <% } else { %>
             <select id="periodoSelect" name="periodo" required
                     class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
               <option value="">Seleccione un proveedor…</option>
             </select>
-            <p class="text-xs text-gray-500 mt-1">Elegí el proveedor para ver los cargos pendientes.</p>
+            <p class="text-xs text-gray-500 mt-1">
+              Por defecto: vencidos + mes en curso. Activá “Ver todos” para incluir futuros.
+            </p>
           <% } %>
         </div>
 
@@ -90,7 +128,6 @@
           <label class="block font-medium text-gray-700">Importe (USD)</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">US$</span>
-            <!-- Aumentamos padding-left para no superponer el texto con "US$" -->
             <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
                    class="w-full border border-gray-300 pl-12 pr-3 py-2 rounded-lg text-sm"
                    placeholder="0,00" aria-describedby="importeHelp">
@@ -165,34 +202,51 @@
     }
   })();
 
-  // carga períodos (modo genérico) al elegir proveedor
+  // carga períodos (modo genérico) al elegir proveedor + toggle "ver todos"
   (function initCargosCombo() {
     const provSel = document.getElementById('proveedorSelect');
-    const perSel = document.getElementById('periodoSelect');
+    const perSel  = document.getElementById('periodoSelect');
+    const toggle  = document.getElementById('toggleAllPeriods');
     if (!provSel || !perSel) return;
+
+    const prePeriodo = "<%= String(datos?.periodo || '') %>";
+    let showAll = false; // por defecto: solo vencidos + mes actual
 
     async function loadCargos(proveedorId) {
       perSel.innerHTML = '<option value="">Cargando…</option>';
       perSel.disabled = true;
       try {
-        const res = await fetch(`/pagos/api/cargos-pendientes?proveedor=${encodeURIComponent(proveedorId)}`, { credentials: 'same-origin' });
+        const url = `/pagos/api/cargos-pendientes?proveedor=${encodeURIComponent(proveedorId)}${showAll ? '&all=1' : ''}`;
+        const res = await fetch(url, { credentials: 'same-origin' });
         const data = await res.json();
         if (!data.ok) throw new Error(data.error || 'Error');
+
         const cargos = data.cargos || [];
-        perSel.innerHTML = '<option value="">Seleccione…</option>';
+        perSel.innerHTML = '';
+        if (cargos.length === 0) {
+          perSel.innerHTML = '<option value="">Sin cargos ' + (showAll ? 'pendientes' : 'elegibles') + '</option>';
+          perSel.disabled = true;
+          return;
+        }
+        const opt0 = document.createElement('option');
+        opt0.value = '';
+        opt0.textContent = 'Seleccione…';
+        perSel.appendChild(opt0);
+
         cargos.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.periodo;
-          opt.textContent =
-            `${c.periodo} — US$ ${Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })} (${c.concepto})`;
+          opt.textContent = `${c.periodo} — US$ ${Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${c.concepto})`;
           perSel.appendChild(opt);
         });
-        perSel.disabled = cargos.length === 0;
-        if (cargos.length === 0) {
-          perSel.innerHTML = '<option value="">Sin cargos pendientes</option>';
+
+        perSel.disabled = false;
+        if (prePeriodo) {
+          perSel.value = prePeriodo; // re-seleccionar si venía de un submit con errores
         }
       } catch (e) {
         perSel.innerHTML = '<option value="">Error al cargar</option>';
+        perSel.disabled = true;
       }
     }
 
@@ -206,15 +260,25 @@
       loadCargos(id);
     });
 
-    // si vino con proveedor preseleccionado (post con errores)
+    if (toggle) {
+      toggle.addEventListener('change', () => {
+        showAll = toggle.checked;
+        if (provSel.value) loadCargos(provSel.value);
+      });
+    }
+
+    // si vino proveedor preseleccionado (post con errores), cargar
     if (provSel.value) loadCargos(provSel.value);
   })();
 
   // máscara USD (coma decimal, miles con punto, 2 decimales)
   (() => {
-    const input = document.getElementById('importeMask');
+    const input  = document.getElementById('importeMask');
     const hidden = document.getElementById('importeHidden');
-    let intDigits = ""; let decDigits = ["0","0"]; let editingDecimals = false; let decPos = 0;
+    let intDigits = "";
+    let decDigits = ["0","0"];
+    let editingDecimals = false;
+    let decPos = 0;
 
     (function init() {
       const v = hidden.value;
@@ -235,8 +299,10 @@
       const visible = `${fmtMiles(intDigits)},${decDigits.join("")}`;
       input.value = visible;
       requestAnimationFrame(() => {
-        const commaIndex = visible.indexOf(","); let pos = editingDecimals ? (commaIndex+1+decPos) : commaIndex;
-        pos = Math.max(0, Math.min(visible.length, pos)); input.setSelectionRange(pos, pos);
+        const commaIndex = visible.indexOf(",");
+        let pos = editingDecimals ? (commaIndex+1+decPos) : commaIndex;
+        pos = Math.max(0, Math.min(visible.length, pos));
+        input.setSelectionRange(pos, pos);
       });
       updateHidden();
     }
@@ -251,19 +317,62 @@
     }
     input.addEventListener('beforeinput', (e)=>{
       const t=e.inputType, d=e.data;
-      if(t==='insertText' && /[0-9]/.test(d||"")){ if(editingDecimals){ if(decPos<2){ decDigits[decPos]=d; decPos++; } else { decPos=0; decDigits[decPos]=d; decPos=1; } } else { intDigits+=d; intDigits=intDigits.replace(/^0+(?=\d)/,''); } e.preventDefault(); render(); return; }
+      if(t==='insertText' && /[0-9]/.test(d||"")){
+        if(editingDecimals){
+          if(decPos<2){ decDigits[decPos]=d; decPos++; }
+          else { decPos=0; decDigits[decPos]=d; decPos=1; }
+        } else {
+          intDigits+=d; intDigits=intDigits.replace(/^0+(?=\d)/,'');
+        }
+        e.preventDefault(); render(); return;
+      }
       if(t==='insertText' && (d==='.'||d===',')){ editingDecimals=true; decPos=0; e.preventDefault(); render(); return; }
-      if(t==='deleteContentBackward'){ e.preventDefault(); if(editingDecimals){ if(decPos>0){ decPos--; decDigits[decPos]="0"; } else { editingDecimals=false; } } else { if(intDigits.length>0) intDigits=intDigits.slice(0,-1); } render(); return; }
-      if(t==='insertFromPaste'){ e.preventDefault(); navigator.clipboard.readText().then(text=>{ const n=parseAnyNumberLike(text); if(n===null) return; const entero=Math.trunc(n).toString(); const dec=Math.round((n%1)*100).toString().padStart(2,"0"); intDigits=entero.replace(/^0+(?=\d)/,''); decDigits=[dec[0],dec[1]]; editingDecimals=false; decPos=0; render(); }).catch(()=>{}); return; }
+      if(t==='deleteContentBackward'){
+        e.preventDefault();
+        if(editingDecimals){
+          if(decPos>0){ decPos--; decDigits[decPos]="0"; }
+          else { editingDecimals=false; }
+        } else {
+          if(intDigits.length>0) intDigits=intDigits.slice(0,-1);
+        }
+        render(); return;
+      }
+      if(t==='insertFromPaste'){
+        e.preventDefault();
+        navigator.clipboard.readText().then(text=>{
+          const n=parseAnyNumberLike(text); if(n===null) return;
+          const entero=Math.trunc(n).toString();
+          const dec=Math.round((n%1)*100).toString().padStart(2,"0");
+          intDigits=entero.replace(/^0+(?=\d)/,'');
+          decDigits=[dec[0],dec[1]];
+          editingDecimals=false; decPos=0; render();
+        }).catch(()=>{});
+        return;
+      }
       e.preventDefault();
     });
     input.addEventListener('click', ()=>{
-      const visible=input.value; const commaIndex=visible.indexOf(","); const caret=input.selectionStart||0;
-      const isZero=(fmtMiles(intDigits)==="0" && decDigits.join("")==="00"); if(isZero){ editingDecimals=false; decPos=0; render(); return; }
-      if(caret>commaIndex){ editingDecimals=true; const after=caret-(commaIndex+1); decPos=Math.max(0, Math.min(2, after)); if(decPos>=2) decPos=1; } else { editingDecimals=false; decPos=0; }
+      const visible=input.value;
+      const commaIndex=visible.indexOf(",");
+      const caret=input.selectionStart||0;
+      const isZero=(fmtMiles(intDigits)==="0" && decDigits.join("")==="00");
+      if(isZero){ editingDecimals=false; decPos=0; render(); return; }
+      if(caret>commaIndex){
+        editingDecimals=true;
+        const after=caret-(commaIndex+1);
+        decPos=Math.max(0, Math.min(2, after));
+        if(decPos>=2) decPos=1;
+      } else {
+        editingDecimals=false; decPos=0;
+      }
       render();
     });
-    input.addEventListener('focus', ()=>{ if(!input.value){ editingDecimals=false; decPos=0; render(); } else { input.dispatchEvent(new Event('click')); } });
-    input.addEventListener('keypress', (e)=>{ const ch=e.key; if(!/[0-9.,]/.test(ch)) e.preventDefault(); });
+    input.addEventListener('focus', ()=>{
+      if(!input.value){ editingDecimals=false; decPos=0; render(); }
+      else { input.dispatchEvent(new Event('click')); }
+    });
+    input.addEventListener('keypress', (e)=>{
+      const ch=e.key; if(!/[0-9.,]/.test(ch)) e.preventDefault();
+    });
   })();
 </script>

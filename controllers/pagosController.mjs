@@ -8,6 +8,17 @@ import clock from "../utils/clock.mjs";
 
 const PERIODO_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 
+// ── Helpers nuevos ─────────────────────────────────────────────────────────────
+const yyyymm = (d) => {
+  const dt = d instanceof Date ? d : new Date(d);
+  return dt.toISOString().slice(0, 7); // "YYYY-MM"
+};
+// Regla: "vencen el 10, se cuenta desde el 1" => elegibles: períodos <= mes actual
+const esPeriodoElegible = (periodoStr, ahora = clock.date()) => {
+  if (!PERIODO_RE.test(String(periodoStr || ""))) return false;
+  return String(periodoStr) <= yyyymm(ahora);
+};
+
 function normalizarMedioPago(v) {
   const val = (v || "").toString().trim().toLowerCase();
   const allowed = new Set(["transferencia","efectivo","cheque","deposito","otro"]);
@@ -113,7 +124,19 @@ export async function mostrarFormularioPagoProveedor(req, res) {
   const proveedor = await Proveedor.findById(proveedorId, "nombreFantasia nombreReal cuit").lean();
   if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-  const cargosPendientes = await cargosPendientesPorProveedor(proveedorId);
+  // ✅ Mostrar solo vencidos + mes actual por defecto; con ?all=1 mostrar todos
+  const mostrarTodos = req.query.all === "1";
+  let cargosPendientes = await cargosPendientesPorProveedor(proveedorId);
+
+  if (!mostrarTodos) {
+    const ahora = clock.date();
+    const elegibles = [];
+    for (const c of (cargosPendientes || [])) {
+      const per = String(c.periodo || "");
+      if (esPeriodoElegible(per, ahora)) elegibles.push(c);
+    }
+    cargosPendientes = elegibles;
+  }
 
   const datos = {
     fecha: new Date().toISOString().slice(0, 10),
@@ -127,7 +150,9 @@ export async function mostrarFormularioPagoProveedor(req, res) {
   res.render("pagosViews/registrarPago", {
     proveedor, proveedores: null,
     cargosPendientes,
-    datos, errores: []
+    datos, errores: [],
+    // 👇 Para que la vista pueda mostrar el toggle "ver todos"
+    mostrarTodos
   });
 }
 
@@ -143,6 +168,12 @@ export async function crearPagoProveedorController(req, res) {
 
   if (!PERIODO_RE.test(String(periodo || ""))) errores.push({ msg: "Seleccioná un período válido (YYYY-MM)." });
 
+  // ✅ Validación de elegibilidad (vencidos + mes actual), salvo ?all=1
+  const mostrarTodos = req.query.all === "1";
+  if (!mostrarTodos && !esPeriodoElegible(periodo, clock.date())) {
+    errores.push({ msg: "Solo se permiten períodos vencidos y el mes en curso." });
+  }
+
   const cargo = (!errores.length && periodo) ? await buscarCargoPorPeriodo(proveedorId, periodo) : null;
   if (!cargo && !errores.length) errores.push({ msg: "No existe un cargo para el período seleccionado." });
 
@@ -154,12 +185,19 @@ export async function crearPagoProveedorController(req, res) {
   if (isNaN(fechaDate.getTime())) errores.push({ msg: "La fecha no es válida." });
 
   if (errores.length) {
-    const cargosPendientes = await cargosPendientesPorProveedor(proveedorId);
+    // Volvemos a calcular la lista para re-render, respetando el criterio (all o no)
+    let cargosPendientes = await cargosPendientesPorProveedor(proveedorId);
+    if (!mostrarTodos) {
+      const ahora = clock.date();
+      cargosPendientes = (cargosPendientes || []).filter(c => esPeriodoElegible(String(c.periodo || ""), ahora));
+    }
+
     return res.status(400).render("pagosViews/registrarPago", {
       proveedor, proveedores: null,
       cargosPendientes,
       datos: { ...req.body, medioPago: metodo || (req.body.medioPago || "") },
-      errores
+      errores,
+      mostrarTodos
     });
   }
 
@@ -184,8 +222,17 @@ export async function apiCargosPendientes(req, res) {
   try {
     const { proveedor } = req.query;
     if (!proveedor) return res.status(400).json({ ok: false, error: "Falta proveedor" });
-    const cargos = await cargosPendientesPorProveedor(proveedor);
-    res.json({ ok: true, cargos });
+
+    // ✅ Por defecto solo elegibles; con ?all=1 devolver todos
+    const mostrarTodos = req.query.all === "1";
+    let cargos = await cargosPendientesPorProveedor(proveedor);
+
+    if (!mostrarTodos) {
+      const ahora = clock.date();
+      cargos = (cargos || []).filter(c => esPeriodoElegible(String(c.periodo || ""), ahora));
+    }
+
+    res.json({ ok: true, cargos, mostrarTodos });
   } catch (e) {
     console.error("apiCargosPendientes err:", e);
     res.status(500).json({ ok: false, error: "Error interno" });
