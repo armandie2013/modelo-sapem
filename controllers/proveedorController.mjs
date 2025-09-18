@@ -6,6 +6,8 @@ import Proveedor from "../models/proveedor.mjs";
 import Pago from "../models/pago.mjs";
 import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 import mongoose from "mongoose";
+import { cargosPendientesPorProveedor } from "../services/cargosService.mjs";
+import clock from "../utils/clock.mjs";
 
 // Helper robusto para boolean
 function toBool(v) {
@@ -79,14 +81,74 @@ export async function crearProveedorController(req, res) {
 
 /* =========================================================
  * GET /proveedores
+ * -> LISTA con saldo (deuda) por proveedor
  * =======================================================*/
 export async function listarProveedoresController(req, res) {
   try {
+    // 1) Traemos proveedores + plan
     const proveedores = await Proveedor.find()
       .populate("plan", "nombre importe activo")
       .lean();
 
-    res.render("proveedoresViews/listadoProveedores", { proveedores });
+    // 2) Agregamos totales por proveedor
+    const [movAgg, pagosAgg] = await Promise.all([
+      MovimientoProveedor.aggregate([
+        {
+          $project: {
+            proveedor: 1,
+            tipo: 1,
+            imp: { $ifNull: ["$importe", 0] },
+          },
+        },
+        {
+          $group: {
+            _id: "$proveedor",
+            totalMovs: {
+              $sum: {
+                $cond: [
+                  { $in: ["$tipo", ["cargo", "debito"]] },
+                  "$imp",
+                  {
+                    $cond: [
+                      { $eq: ["$tipo", "credito"] },
+                      { $multiply: ["$imp", -1] },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ]),
+      Pago.aggregate([
+        {
+          $group: {
+            _id: "$proveedor",
+            totalPagos: { $sum: { $ifNull: ["$importe", 0] } },
+          },
+        },
+      ]),
+    ]);
+
+    // 3) Construimos mapa proveedorId -> saldo
+    const saldoMap = new Map();
+    for (const r of movAgg) {
+      saldoMap.set(String(r._id), Number(r.totalMovs || 0));
+    }
+    for (const r of pagosAgg) {
+      const k = String(r._id);
+      const prev = Number(saldoMap.get(k) || 0);
+      saldoMap.set(k, prev - Number(r.totalPagos || 0));
+    }
+
+    // 4) Adjuntamos saldoTotal a cada proveedor
+    const proveedoresConSaldo = proveedores.map(p => ({
+      ...p,
+      saldoTotal: Number(saldoMap.get(String(p._id)) || 0),
+    }));
+
+    res.render("proveedoresViews/listadoProveedores", { proveedores: proveedoresConSaldo });
   } catch (error) {
     console.error("Error al listar proveedores:", error);
     res.status(500).send("Error al listar proveedores");
@@ -113,35 +175,18 @@ export async function verProveedorController(req, res) {
       {
         $group: {
           _id: "$periodo",
-          cargo: {
-            $sum: { $cond: [{ $eq: ["$tipo", "cargo"] }, "$importe", 0] },
-          },
-          notaDebito: {
-            $sum: { $cond: [{ $eq: ["$tipo", "debito"] }, "$importe", 0] },
-          },
-          notaCredito: {
-            $sum: { $cond: [{ $eq: ["$tipo", "credito"] }, "$importe", 0] },
-          },
+          cargo: { $sum: { $cond: [{ $eq: ["$tipo", "cargo"] }, "$importe", 0] } },
+          notaDebito: { $sum: { $cond: [{ $eq: ["$tipo", "debito"] }, "$importe", 0] } },
+          notaCredito: { $sum: { $cond: [{ $eq: ["$tipo", "credito"] }, "$importe", 0] } },
         },
       },
       {
-        $project: {
-          _id: 0,
-          periodo: "$_id",
-          cargo: 1,
-          notaDebito: 1,
-          notaCredito: 1,
-        },
+        $project: { _id: 0, periodo: "$_id", cargo: 1, notaDebito: 1, notaCredito: 1 },
       },
     ]),
     Pago.aggregate([
       { $match: { proveedor: oid } },
-      {
-        $group: {
-          _id: "$periodo",
-          pagos: { $sum: "$importe" },
-        },
-      },
+      { $group: { _id: "$periodo", pagos: { $sum: "$importe" } } },
       { $project: { _id: 0, periodo: "$_id", pagos: 1 } },
     ]),
   ]);
@@ -159,13 +204,7 @@ export async function verProveedorController(req, res) {
   }
   for (const r of pagosAgg) {
     const prev =
-      mapa.get(r.periodo) || {
-        periodo: r.periodo,
-        cargo: 0,
-        notaDebito: 0,
-        notaCredito: 0,
-        pagos: 0,
-      };
+      mapa.get(r.periodo) || { periodo: r.periodo, cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0 };
     prev.pagos = r.pagos || 0;
     mapa.set(r.periodo, prev);
   }
@@ -175,7 +214,7 @@ export async function verProveedorController(req, res) {
     // Saldo = cargos + ND - NC - pagos
     r.saldo = (r.cargo + r.notaDebito) - (r.notaCredito + r.pagos);
   });
-  // Ordená por período desc
+  // Orden desc
   detallePorPeriodo.sort((a, b) =>
     a.periodo > b.periodo ? -1 : a.periodo < b.periodo ? 1 : 0
   );
@@ -191,9 +230,7 @@ export async function verProveedorController(req, res) {
     },
     { cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0 }
   );
-  totales.saldo =
-    (totales.cargo + totales.notaDebito) -
-    (totales.notaCredito + totales.pagos);
+  totales.saldo = (totales.cargo + totales.notaDebito) - (totales.notaCredito + totales.pagos);
 
   // --- Movimientos recientes (unificados)
   const [movs, pagos] = await Promise.all([
@@ -210,13 +247,10 @@ export async function verProveedorController(req, res) {
   ]);
 
   const movimientos = [
-    // cargos y notas del mismo modelo
     ...movs.map((m) => ({
       ...m,
-      // signo: cargo+ / debito+ / credito- / pago- (pago llega abajo)
       signo: m.tipo === "cargo" || m.tipo === "debito" ? +1 : -1,
     })),
-    // pagos del modelo Pago
     ...pagos.map((p) => ({
       tipo: "pago",
       concepto: `Pago ${p.metodo || ""}`.trim(),
@@ -231,13 +265,22 @@ export async function verProveedorController(req, res) {
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
     .slice(0, 100);
 
-  // Ajustá el path si tu vista se llama distinto
+  // --- NUEVO: saldo vencido (períodos <= mes actual) usando cargosPendientesPorProveedor
+  const pendientes = await cargosPendientesPorProveedor(proveedorId);
+  const now = clock.date();
+  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const saldoVencido = (pendientes || [])
+    .filter(r => r && r.saldo > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
+    .reduce((acc, r) => acc + Number(r.saldo || 0), 0);
+
   res.render("proveedoresViews/verProveedor", {
-    title:"Proveedor",
+    title: "Proveedor",
     proveedor,
     totales,
     detallePorPeriodo,
     movimientos,
+    saldoVencido, // 👈 enviado a la vista
   });
 }
 
@@ -273,7 +316,7 @@ export async function actualizarProveedorController(req, res) {
       });
     }
 
-    const activo = toBool(req.body.activo); // si no viene, será false (checkbox destildado)
+    const activo = toBool(req.body.activo);
     const plan = req.body.plan || null;
 
     const update = {
@@ -324,11 +367,13 @@ export async function eliminarProveedorController(req, res) {
   }
 }
 
+/* =========================================================
+ * GET /proveedores/:proveedorId/periodo/:periodo
+ * =======================================================*/
 export async function verPeriodoProveedorController(req, res) {
   try {
     const { proveedorId, periodo } = req.params;
 
-    // ✅ Guardas defensivas
     if (!mongoose.isValidObjectId(proveedorId)) {
       return res.status(400).send("ID de proveedor inválido");
     }
@@ -337,9 +382,9 @@ export async function verPeriodoProveedorController(req, res) {
     }
 
     const proveedor = await Proveedor.findById(proveedorId)
-  .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular activo plan")
-  .populate("plan", "nombre importe")
-  .lean();
+      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular activo plan")
+      .populate("plan", "nombre importe")
+      .lean();
 
     if (!proveedor) {
       return res.status(404).send("Proveedor no encontrado");
@@ -385,8 +430,7 @@ export async function verPeriodoProveedorController(req, res) {
       };
     });
 
-    // (Opcional) Si tus pagos NO se reflejan en MovimientoProveedor, descomenta este bloque:
-    
+    // Si los pagos NO están en MovimientoProveedor, también los agregamos desde Pago:
     const pagos = await Pago.find({ proveedor: proveedorId, periodo })
       .select("fecha importe metodo comprobante periodo")
       .sort({ fecha: 1, _id: 1 })
@@ -407,9 +451,8 @@ export async function verPeriodoProveedorController(req, res) {
       });
     }
 
-    // Re-ordenar si agregaste pagos
+    // Orden por fecha (asc)
     movimientos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-    
 
     totales.saldo = (totales.cargo + totales.notaDebito) - (totales.notaCredito + totales.pagos);
 

@@ -9,6 +9,16 @@
         maximumFractionDigits: 2
       }).format(Number(v || 0));
     };
+
+    // Mes actual (YYYY-MM) para filtrar vencidos
+    const _now = new Date();
+    const MES_ACTUAL = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
+
+    // Comprobantes vencidos: saldo > 0 y periodo <= MES_ACTUAL
+    const vencidos = (detallePorPeriodo || [])
+      .filter(r => Number(r.saldo || 0) > 0 && String(r.periodo || '') <= MES_ACTUAL)
+      .sort((a,b) => String(a.periodo||'').localeCompare(String(b.periodo||'')));
+    const totalVencidos = vencidos.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
   %>
 
   <div class="max-w-6xl mx-auto space-y-6">
@@ -26,14 +36,16 @@
               Nombre: <%= proveedor.nombreReal %>
             </h1>
             <p class="text-sm text-gray-600">
-              CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-              IVA: <%= proveedor.condicionIva || '—' %> ·
-              Tel: <%= proveedor.telefonoCelular || '—' %> ·
-              Estado:
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-                <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
-              </span>
-            </p>
+  CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+  IVA: <%= proveedor.condicionIva || '—' %> ·
+  Tel: <%= proveedor.telefonoCelular || '—' %> ·
+  Estado:
+  <span
+    class="ml-1.5 inline-flex items-center justify-center w-16 px-1.5 py-[2px] rounded-full text-[10px] font-medium
+           <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+    <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+  </span>
+</p>
             <p class="text-sm text-gray-600 mt-1">
               Plan:
               <% if (proveedor.plan) { %>
@@ -88,7 +100,17 @@
     </div>
 
     <!-- Resumen -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
+        <p class="text-xs text-gray-500">Saldo de la cuenta</p>
+        <p class="text-xl font-semibold <%= saldoVencido > 0 ? 'text-red-600' : 'text-gray-900' %>">
+          <%= fmtUSD(saldoVencido) %>
+        </p>
+        <p class="mt-1 text-[11px] text-gray-500">
+          Incluye períodos hasta este mes (vencen el 10, se cuenta desde el 1).
+        </p>
+      </div>
+
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
         <p class="text-xs text-gray-500">Total cargos</p>
         <p class="text-xl font-semibold"><%= fmtUSD(totales.cargo) %></p>
@@ -111,6 +133,52 @@
           <%= fmtUSD(totales.saldo) %>
         </p>
       </div>
+    </div>
+
+    <!-- (MOVIDO) Comprobantes vencidos -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Comprobantes vencidos</h2>
+        <div class="text-sm text-gray-600">
+          <span class="mr-3">Períodos ≤ <span class="font-mono font-medium"><%= MES_ACTUAL %></span></span>
+          <span>Total: <span class="font-semibold <%= totalVencidos > 0 ? 'text-red-600' : 'text-gray-800' %>"><%= fmtUSD(totalVencidos) %></span></span>
+        </div>
+      </div>
+
+      <% if (vencidos.length === 0) { %>
+        <p class="text-gray-500 text-sm">No hay comprobantes vencidos.</p>
+      <% } else { %>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th class="px-4 py-3 text-left">Período</th>
+                <th class="px-4 py-3 text-right">Saldo pendiente</th>
+                <th class="px-4 py-3 text-left w-28">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <% vencidos.forEach((r, i) => { %>
+                <tr
+                  class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
+                  data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
+                  role="link" tabindex="0"
+                  title="Ver detalle del período <%= r.periodo %>"
+                >
+                  <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
+                  <td class="px-4 py-3 text-right text-red-600 font-semibold"><%= fmtUSD(r.saldo) %></td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-100 text-rose-800">
+                      Vencido
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+      <p class="mt-2 text-[11px] text-gray-500">Las cuotas/comprobantes vencen el día 10, pero se consideran en mora desde el día 1 del mes vigente.</p>
     </div>
 
     <!-- Detalle por período (zebra + hover con índice) -->
@@ -209,7 +277,7 @@
 </main>
 
 <script>
-  // Hace clickeables las filas del resumen por período (y accesibles con teclado)
+  // Hace clickeables las filas del resumen por período y vencidos (y accesibles con teclado)
   (function () {
     const rows = document.querySelectorAll('tr.periodo-row, tr[data-href]');
     rows.forEach(tr => {
