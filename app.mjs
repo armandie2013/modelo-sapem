@@ -24,6 +24,7 @@ import cargosRoutes from "./routes/cargosRoutes.mjs";
 import notasRoutes from "./routes/notasRoutes.mjs";
 import pagosRoutes from "./routes/pagosRoutes.mjs";
 import planPagoRoutes from "./routes/planPagoRoutes.mjs";
+import tareasRoutes from "./routes/tareasRoutes.mjs";
 
 // 👇 RELOJ CENTRALIZADO
 import clock from "./utils/clock.mjs";
@@ -117,6 +118,7 @@ app.use("/tareas", cargosRoutes);
 app.use("/pagos", pagosRoutes);
 app.use("/notas", notasRoutes);
 app.use("/planes-pago", planPagoRoutes);
+app.use(tareasRoutes);
 
 // 8) Landing
 app.get("/", (req, res) => {
@@ -146,16 +148,16 @@ const listarRutas = (app) => {
 };
 listarRutas(app);
 
-// 11) Boot ordenado (Clock -> DB -> catchUp -> cron -> listen)
+// 11) Boot ordenado (Clock -> DB -> cron -> listen)
 (async () => {
   try {
-    // ⏱️ Inicializar reloj (no bloquea el arranque; usa HTTP Date/NTP si puede)
     await clock.init({ waitForFirstSync: false, intervalMs: 15 * 60 * 1000 });
-
     await connectDB();
 
-    // Si en servicios usás clock.date(), esto mantiene “meses perdidos” con la misma base horaria
-    await catchUpCargos(1);
+    // ❌ Evitar backfill automático (era la causa del segundo período)
+    // await catchUpCargos(1);
+    // Si alguna vez necesitás recomponer: ejecutalo a mano con el valor deseado.
+    // await catchUpCargos(0);
 
     startCargosCron();
 

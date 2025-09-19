@@ -61,8 +61,15 @@ const personaSchema = new mongoose.Schema({
       editar: { type: Boolean, default: false },
       eliminar: { type: Boolean, default: false },
     },
-    // otros módulos...
-  }, // ← Nuevo campo
+
+    // 🔹 NUEVO: módulo de tareas programadas
+    tareas: {
+      ver: { type: Boolean, default: false },       // Ver /tareas/cargos
+      ejecutar: { type: Boolean, default: false },  // Disparar manualmente generación
+    },
+
+    // (otros módulos a futuro…)
+  },
 });
 
 const PersonaDisponible = mongoose.model("PersonaDisponible", personaSchema);

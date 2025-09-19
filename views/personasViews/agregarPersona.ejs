@@ -35,6 +35,7 @@
       <!-- Columna 2: Administración -->
       <div>
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Administración</h2>
+
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Proveedores</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[proveedores][ver]" value="true"> Ver</label>
@@ -59,7 +60,7 @@
           <label><input type="checkbox" name="modulosPermitidos[pagos][eliminar]" value="true"> Eliminar</label>
         </div>
 
-        <!-- 🔹 NUEVO: Notas de crédito -->
+        <!-- Notas de crédito -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de crédito</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[notasCredito][ver]" value="true"> Ver</label>
@@ -68,7 +69,7 @@
           <label><input type="checkbox" name="modulosPermitidos[notasCredito][eliminar]" value="true"> Eliminar</label>
         </div>
 
-        <!-- 🔹 NUEVO: Notas de débito -->
+        <!-- Notas de débito -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de débito</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[notasDebito][ver]" value="true"> Ver</label>
@@ -83,6 +84,13 @@
           <label><input type="checkbox" name="modulosPermitidos[planesPago][crear]" value="true"> Crear</label>
           <label><input type="checkbox" name="modulosPermitidos[planesPago][editar]" value="true"> Editar</label>
           <label><input type="checkbox" name="modulosPermitidos[planesPago][eliminar]" value="true"> Eliminar</label>
+        </div>
+
+        <!-- 🔹 NUEVO: Tareas programadas -->
+        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Tareas programadas</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[tareas][ver]" value="true"> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[tareas][ejecutar]" value="true"> Ejecutar</label>
         </div>
       </div>
 
@@ -108,7 +116,7 @@
       <div>
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Técnica</h2>
 
-        <!-- Viaticos -->
+        <!-- Viáticos -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Viáticos</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true"> Ver</label>

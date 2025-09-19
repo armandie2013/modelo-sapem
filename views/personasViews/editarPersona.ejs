@@ -77,7 +77,7 @@
               <%=persona.modulosPermitidos.pagos?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
 
-        <!-- 🔹 NUEVO: Notas de crédito -->
+        <!-- Notas de crédito -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de crédito</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[notasCredito][ver]" value="true"
@@ -90,7 +90,7 @@
               <%=persona.modulosPermitidos.notasCredito?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
 
-        <!-- 🔹 NUEVO: Notas de débito -->
+        <!-- Notas de débito -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de débito</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[notasDebito][ver]" value="true"
@@ -113,6 +113,15 @@
               <%=persona.modulosPermitidos.planesPago?.editar ? "checked" : "" %>> Editar</label>
           <label><input type="checkbox" name="modulosPermitidos[planesPago][eliminar]" value="true"
               <%=persona.modulosPermitidos.planesPago?.eliminar ? "checked" : "" %>> Eliminar</label>
+        </div>
+
+        <!-- 🔹 NUEVO: Tareas programadas -->
+        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Tareas programadas</p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+          <label><input type="checkbox" name="modulosPermitidos[tareas][ver]" value="true"
+              <%=persona.modulosPermitidos.tareas?.ver ? "checked" : "" %>> Ver</label>
+          <label><input type="checkbox" name="modulosPermitidos[tareas][ejecutar]" value="true"
+              <%=persona.modulosPermitidos.tareas?.ejecutar ? "checked" : "" %>> Ejecutar</label>
         </div>
       </div>
 
@@ -142,7 +151,7 @@
       <div>
         <h2 class="font-bold text-gray-800 mb-1 text-sm">Técnica</h2>
 
-         <!-- Viaticos -->
+        <!-- Viaticos -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Viáticos</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true"
@@ -155,7 +164,7 @@
               <%=persona.modulosPermitidos.viaticos?.eliminar ? "checked" : "" %>> Eliminar</label>
         </div>
 
-         <!-- Pedido de materiales -->
+        <!-- Pedido de materiales -->
         <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Pedido de Materiales</p>
         <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
           <label><input type="checkbox" name="modulosPermitidos[materiales][ver]" value="true"

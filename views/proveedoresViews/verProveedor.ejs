@@ -36,16 +36,16 @@
               Nombre: <%= proveedor.nombreReal %>
             </h1>
             <p class="text-sm text-gray-600">
-  CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-  IVA: <%= proveedor.condicionIva || '—' %> ·
-  Tel: <%= proveedor.telefonoCelular || '—' %> ·
-  Estado:
-  <span
-    class="ml-1.5 inline-flex items-center justify-center w-16 px-1.5 py-[2px] rounded-full text-[10px] font-medium
-           <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-    <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
-  </span>
-</p>
+              CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+              IVA: <%= proveedor.condicionIva || '—' %> ·
+              Tel: <%= proveedor.telefonoCelular || '—' %> ·
+              Estado:
+              <span
+                class="ml-1.5 inline-flex items-center justify-center w-16 px-1.5 py-[2px] rounded-full text-[10px] font-medium
+                       <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+                <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+              </span>
+            </p>
             <p class="text-sm text-gray-600 mt-1">
               Plan:
               <% if (proveedor.plan) { %>
@@ -69,33 +69,49 @@
           </div>
         </div>
 
-        <!-- Fila de acciones, alineada abajo a la izquierda -->
-        <div class="pt-3 mt-1 border-t border-gray-200">
-          <div class="flex flex-row flex-wrap items-center justify-start gap-2">
-            <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
-               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-              + Registrar pago
-            </a>
+        <!-- Fila de acciones (solo si hay permisos) -->
+        <%
+          const perms = (usuario && usuario.modulosPermitidos) || {};
+          const puedeRegistrarPago = !!(perms.pagos?.crear || perms.pagos?.registrar);
+          const puedeNotaCredito   = !!(perms.notas?.credito?.crear || perms.notasCredito?.crear);
+          const puedeNotaDebito    = !!(perms.notas?.debito?.crear  || perms.notasDebito?.crear);
+          const puedePlanPago      = !!(perms.planesPago?.crear);
+          const hayAcciones = puedeRegistrarPago || puedeNotaCredito || puedeNotaDebito || puedePlanPago;
+        %>
 
-            <!-- Acciones para notas -->
-            <a href="/notas/proveedores/<%= proveedor._id %>/credito"
-               class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
-              + Nota de crédito
-            </a>
-            <a href="/notas/proveedores/<%= proveedor._id %>/debito"
-               class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
-              + Nota de débito
-            </a>
+        <% if (hayAcciones) { %>
+          <div class="pt-3 mt-1 border-t border-gray-200">
+            <div class="flex flex-row flex-wrap items-center justify-start gap-2">
+              <% if (puedeRegistrarPago) { %>
+                <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
+                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+                  + Registrar pago
+                </a>
+              <% } %>
 
-            <% const puedePlanPago = !!(usuario && usuario.modulosPermitidos && usuario.modulosPermitidos.planesPago && usuario.modulosPermitidos.planesPago.crear); %>
-            <% if (puedePlanPago) { %>
-              <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
-                 class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
-                + Plan de pago
-              </a>
-            <% } %>
+              <% if (puedeNotaCredito) { %>
+                <a href="/notas/proveedores/<%= proveedor._id %>/credito"
+                   class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
+                  + Nota de crédito
+                </a>
+              <% } %>
+
+              <% if (puedeNotaDebito) { %>
+                <a href="/notas/proveedores/<%= proveedor._id %>/debito"
+                   class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
+                  + Nota de débito
+                </a>
+              <% } %>
+
+              <% if (puedePlanPago) { %>
+                <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
+                   class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
+                  + Plan de pago
+                </a>
+              <% } %>
+            </div>
           </div>
-        </div>
+        <% } %>
       </div>
     </div>
 
@@ -128,14 +144,14 @@
         <p class="text-xl font-semibold"><%= fmtUSD(totales.pagos) %></p>
       </div>
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Saldo total</p>
+        <p class="text-xs text-gray-500">Deuda total</p>
         <p class="text-xl font-semibold <%= totales.saldo > 0 ? 'text-red-600' : (totales.saldo < 0 ? 'text-green-700' : 'text-gray-900') %>">
           <%= fmtUSD(totales.saldo) %>
         </p>
       </div>
     </div>
 
-    <!-- (MOVIDO) Comprobantes vencidos -->
+    <!-- Comprobantes vencidos -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Comprobantes vencidos</h2>
@@ -178,105 +194,163 @@
           </table>
         </div>
       <% } %>
-      <p class="mt-2 text-[11px] text-gray-500">Las cuotas/comprobantes vencen el día 10, pero se consideran en mora desde el día 1 del mes vigente.</p>
+      <p class="mt-2 text-[11px] text-gray-500">Los comprobantes vencen el día 10, pero se consideran en mora desde el día 1 del mes vigente.</p>
     </div>
 
-    <!-- Detalle por período (zebra + hover con índice) -->
+    <!-- Detalle por período (colapsable) -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">Resumen por período</h2>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-800">Resumen por período</h2>
+        <button
+          type="button"
+          class="toggle-section inline-flex items-center gap-1.5 text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-md transition"
+          data-target="#sec-resumen"
+          aria-controls="sec-resumen"
+          aria-expanded="false">
+          <span data-text>Ver</span>
+          <svg class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
 
-      <div class="overflow-x-auto rounded-xl border border-gray-200">
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-50 text-gray-700">
-            <tr>
-              <th class="px-4 py-3 text-left">Período</th>
-              <th class="px-4 py-3 text-right">Cargos</th>
-              <th class="px-4 py-3 text-right">Notas débito</th>
-              <th class="px-4 py-3 text-right">Notas crédito</th>
-              <th class="px-4 py-3 text-right">Pagos</th>
-              <th class="px-4 py-3 text-right">Saldo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <% if ((detallePorPeriodo||[]).length === 0) { %>
-              <tr class="bg-gray-50">
-                <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
+      <div id="sec-resumen" class="hidden">
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th class="px-4 py-3 text-left">Período</th>
+                <th class="px-4 py-3 text-right">Cargos</th>
+                <th class="px-4 py-3 text-right">Notas débito</th>
+                <th class="px-4 py-3 text-right">Notas crédito</th>
+                <th class="px-4 py-3 text-right">Pagos</th>
+                <th class="px-4 py-3 text-right">Saldo</th>
               </tr>
-            <% } else { 
-                 const filasOrdenadas = (detallePorPeriodo || [])
-                   .slice()
-                   .sort((a,b) => String(a.periodo||'').localeCompare(String(b.periodo||'')));
-            %>
-              <% filasOrdenadas.forEach((r, i) => { %>
-                <tr
-                  class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
-                  data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
-                  role="link" tabindex="0"
-                  title="Ver detalle del período <%= r.periodo %>"
-                >
-                  <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
-                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.cargo) %></td>
-                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
-                  <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
-                  <td class="px-4 py-3 text-right text-green-800"><%= fmtUSD(r.pagos) %></td>
-                  <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-red-600' : (r.saldo < 0 ? 'text-green-700' : '') %>">
-                    <%= fmtUSD(r.saldo) %>
-                  </td>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <% if ((detallePorPeriodo||[]).length === 0) { %>
+                <tr class="bg-gray-50">
+                  <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
                 </tr>
-              <% }) %>
-            <% } %>
-          </tbody>
-        </table>
+              <% } else { 
+                   const filasOrdenadas = (detallePorPeriodo || [])
+                     .slice()
+                     .sort((a,b) => String(a.periodo||'').localeCompare(String(b.periodo||'')));
+              %>
+                <% filasOrdenadas.forEach((r, i) => { %>
+                  <tr
+                    class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
+                    data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
+                    role="link" tabindex="0"
+                    title="Ver detalle del período <%= r.periodo %>"
+                  >
+                    <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
+                    <td class="px-4 py-3 text-right"><%= fmtUSD(r.cargo) %></td>
+                    <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
+                    <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
+                    <td class="px-4 py-3 text-right text-green-800"><%= fmtUSD(r.pagos) %></td>
+                    <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-red-600' : (r.saldo < 0 ? 'text-green-700' : '') %>">
+                      <%= fmtUSD(r.saldo) %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Timeline últimos movimientos (zebra + hover con índice) -->
+    <!-- Timeline últimos movimientos (colapsable) -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">Movimientos recientes</h2>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-800">Movimientos recientes</h2>
+        <button
+          type="button"
+          class="toggle-section inline-flex items-center gap-1.5 text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-md transition"
+          data-target="#sec-movimientos"
+          aria-controls="sec-movimientos"
+          aria-expanded="false">
+          <span data-text>Ver</span>
+          <svg class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
 
-      <% if ((movimientos||[]).length === 0) { %>
-        <p class="text-gray-500 text-sm">Sin movimientos.</p>
-      <% } else { %>
-        <ul class="rounded-xl border border-gray-200 overflow-hidden">
-          <% movimientos.forEach((m, idx) => { %>
-            <li class="flex items-start justify-between gap-3 px-3 py-3 border-b border-gray-200 last:border-0
-                       <%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
-              <div>
-                <div class="text-sm">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                    <%= m.tipo==='cargo'
-                        ? 'bg-sky-100 text-sky-800'
-                        : (m.tipo==='pago'
-                            ? 'bg-green-100 text-green-800'
-                            : (m.tipo==='credito'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-amber-100 text-amber-800')) %>">
-                    <%= m.tipo %>
-                  </span>
-                  <span class="ml-2 font-medium"><%= m.concepto %></span>
-                  <% if (m.periodo) { %>
-                    <span class="ml-2 text-gray-500">(<%= m.periodo %>)</span>
-                  <% } %>
+      <div id="sec-movimientos" class="hidden">
+        <% if ((movimientos||[]).length === 0) { %>
+          <p class="text-gray-500 text-center text-sm">Sin movimientos.</p>
+        <% } else { %>
+          <ul class="rounded-xl border border-gray-200 overflow-hidden">
+            <% movimientos.forEach((m, idx) => { %>
+              <li class="flex items-start justify-between gap-3 px-3 py-3 border-b border-gray-200 last:border-0
+                         <%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
+                <div>
+                  <div class="text-sm">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                      <%= m.tipo==='cargo'
+                          ? 'bg-sky-100 text-sky-800'
+                          : (m.tipo==='pago'
+                              ? 'bg-green-100 text-green-800'
+                              : (m.tipo==='credito'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800')) %>">
+                      <%= m.tipo %>
+                    </span>
+                    <span class="ml-2 font-medium"><%= m.concepto %></span>
+                    <% if (m.periodo) { %>
+                      <span class="ml-2 text-gray-500">(<%= m.periodo %>)</span>
+                    <% } %>
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    <%= fmtFechaHora(m.fecha) %>
+                    <% if (m.tipo==='pago' && (m.metodo || m.comprobante)) { %>
+                      · <%= (m.metodo||'') %> <%= (m.comprobante ? `#${m.comprobante}` : '') %>
+                    <% } %>
+                  </div>
                 </div>
-                <div class="text-xs text-gray-500">
-                  <%= fmtFechaHora(m.fecha) %>
-                  <% if (m.tipo==='pago' && (m.metodo || m.comprobante)) { %>
-                    · <%= (m.metodo||'') %> <%= (m.comprobante ? `#${m.comprobante}` : '') %>
-                  <% } %>
+                <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-red-600' : 'text-green-700' %>">
+                  <%= m.signo > 0 ? '+ ' : '- ' %><%= fmtUSD(m.importe) %>
                 </div>
-              </div>
-              <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-red-600' : 'text-green-700' %>">
-                <%= m.signo > 0 ? '+ ' : '- ' %><%= fmtUSD(m.importe) %>
-              </div>
-            </li>
-          <% }) %>
-        </ul>
-      <% } %>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
     </div>
   </div>
 </main>
 
 <script>
+  // Toggle genérico para secciones colapsables
+  (function () {
+    function setupToggle(btn) {
+      const sel = btn.dataset.target;
+      const target = document.querySelector(sel);
+      if (!target) return;
+      const txt = btn.querySelector('[data-text]');
+      const icon = btn.querySelector('svg');
+
+      const setState = (open) => {
+        btn.setAttribute('aria-expanded', String(open));
+        if (txt) txt.textContent = open ? 'Ocultar' : 'Ver';
+        if (icon) icon.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+      };
+
+      btn.addEventListener('click', () => {
+        const willOpen = target.classList.contains('hidden');
+        target.classList.toggle('hidden');
+        setState(willOpen);
+      });
+
+      // estado inicial: cerrado
+      setState(false);
+    }
+
+    document.querySelectorAll('.toggle-section').forEach(setupToggle);
+  })();
+
   // Hace clickeables las filas del resumen por período y vencidos (y accesibles con teclado)
   (function () {
     const rows = document.querySelectorAll('tr.periodo-row, tr[data-href]');
