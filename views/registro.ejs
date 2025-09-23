@@ -4,119 +4,187 @@
               animate-fade-in text-sm max-w-sm w-full text-center transition-opacity duration-500 backdrop-blur-sm">
     <ul class="space-y-1">
       <% errores.forEach(e=> { %>
-        <li>
-          <%= e.mensaje %>
-        </li>
-        <% }) %>
+        <li><%= e.mensaje %></li>
+      <% }) %>
     </ul>
   </div>
-  <% } %>
+<% } %>
 
-    <!-- Formulario -->
-    <div class="flex justify-center items-center min-h-[calc(100vh-220px)] bg-gray-100 px-4">
-      <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-gray-200">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Crear cuenta</h2>
-        <p class="text-sm text-gray-500 text-center mb-6">Ingresa tus datos para registrarte</p>
+<!-- Formulario -->
+<div class="flex justify-center items-center min-h-[calc(100vh-220px)] bg-gray-100 px-4">
+  <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-gray-200">
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Crear cuenta</h2>
+    <p class="text-sm text-gray-500 text-center mb-6">Ingresa tus datos para registrarte</p>
 
-        <form action="/registro" method="POST" class="space-y-4">
-          <div>
-            <label for="nombre" class="block text-sm text-gray-700 mb-1">Nombre</label>
-            <input type="text" id="nombre" name="nombre" required
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej: Juan" value="<%= usuario?.nombre || '' %>">
-          </div>
-
-          <div>
-            <label for="apellido" class="block text-sm text-gray-700 mb-1">Apellido</label>
-            <input type="text" id="apellido" name="apellido" required
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej: Pérez" value="<%= usuario?.apellido || '' %>">
-          </div>
-
-          <div>
-            <label for="dni" class="block text-sm text-gray-700 mb-1">DNI</label>
-            <input type="number" id="dni" name="dni" required
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej: 30123456" value="<%= usuario?.dni || '' %>">
-          </div>
-
-          <div>
-            <label for="email" class="block text-sm text-gray-700 mb-1">Correo electrónico</label>
-            <input type="email" id="email" name="email" required
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="correo@ejemplo.com" value="<%= usuario?.email || '' %>">
-          </div>
-
-          <div>
-            <label for="password" class="block text-sm text-gray-700 mb-1">Contraseña</label>
-            <input type="password" id="password" name="password" required
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="********">
-          </div>
-
-          <div>
-            <label for="confirmarPassword" class="block text-sm text-gray-700 mb-1">Repetir Contraseña</label>
-            <input type="password" id="confirmarPassword" name="confirmarPassword" required
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="********">
-          </div>
-
-          <div class="pt-3">
-            <button type="submit"
-              class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
-              Registrarse
-            </button>
-          </div>
-        </form>
+    <form action="/registro" method="POST" class="space-y-4" id="formRegistro">
+      <div>
+        <label for="nombre" class="block text-sm text-gray-700 mb-1">Nombre</label>
+        <input type="text" id="nombre" name="nombre" required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Ej: Juan" value="<%= usuario?.nombre || '' %>">
       </div>
-    </div>
 
-    <!-- Capitaliza nombre y apellido -->
-    <script>
-      function capitalizarPrimeraLetra(texto) {
-        return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
-      }
+      <div>
+        <label for="apellido" class="block text-sm text-gray-700 mb-1">Apellido</label>
+        <input type="text" id="apellido" name="apellido" required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Ej: Pérez" value="<%= usuario?.apellido || '' %>">
+      </div>
 
-      function aplicarCapitalizacion(input) {
-        input.addEventListener("input", function () {
-          const palabras = this.value.split(" ").map(capitalizarPrimeraLetra);
-          this.value = palabras.join(" ");
-        });
-      }
+      <div>
+        <label for="dni" class="block text-sm text-gray-700 mb-1">DNI</label>
+        <!-- Solo números, exactamente 8 -->
+        <input
+          type="text"
+          id="dni"
+          name="dni"
+          required
+          inputmode="numeric"
+          autocomplete="off"
+          pattern="\\d{8}"
+          minlength="8"
+          maxlength="8"
+          title="Ingrese exactamente 8 dígitos (0–9)"
+          aria-describedby="dniHelp dniError"
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Ej: 30123456"
+          value="<%= usuario?.dni || '' %>">
+        <p id="dniHelp" class="mt-1 text-xs text-gray-500">Debe tener exactamente 8 dígitos (solo números).</p>
+        <p id="dniError" class="mt-1 text-xs text-red-600 hidden">El DNI debe tener exactamente 8 dígitos.</p>
+      </div>
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const campoNombre = document.getElementById("nombre");
-        const campoApellido = document.getElementById("apellido");
+      <div>
+        <label for="email" class="block text-sm text-gray-700 mb-1">Correo electrónico</label>
+        <input type="email" id="email" name="email" required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="correo@ejemplo.com" value="<%= usuario?.email || '' %>">
+      </div>
 
-        if (campoNombre) aplicarCapitalizacion(campoNombre);
-        if (campoApellido) aplicarCapitalizacion(campoApellido);
+      <div>
+        <label for="password" class="block text-sm text-gray-700 mb-1">Contraseña</label>
+        <input type="password" id="password" name="password" required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="********">
+      </div>
 
-        // Ocultar el toast automáticamente
-        const toast = document.getElementById("toastErrores");
-        if (toast) {
-          setTimeout(() => {
-            toast.classList.add("opacity-0", "-translate-y-2");
-            setTimeout(() => toast.remove(), 600);
-          }, 4000);
+      <div>
+        <label for="confirmarPassword" class="block text-sm text-gray-700 mb-1">Repetir Contraseña</label>
+        <input type="password" id="confirmarPassword" name="confirmarPassword" required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="********">
+      </div>
+
+      <div class="pt-3">
+        <button type="submit"
+          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+          Registrarse
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Capitaliza nombre y apellido + validación de DNI -->
+<script>
+  function capitalizarPrimeraLetra(texto) {
+    return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
+  }
+
+  function aplicarCapitalizacion(input) {
+    input.addEventListener("input", function () {
+      const palabras = this.value.split(" ").map(capitalizarPrimeraLetra);
+      this.value = palabras.join(" ");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const campoNombre = document.getElementById("nombre");
+    const campoApellido = document.getElementById("apellido");
+    const form = document.getElementById("formRegistro");
+    const dni = document.getElementById("dni");
+    const dniError = document.getElementById("dniError");
+
+    if (campoNombre) aplicarCapitalizacion(campoNombre);
+    if (campoApellido) aplicarCapitalizacion(campoApellido);
+
+    // --- Helpers DNI ---
+    const CONTROL_KEYS = new Set([
+      "Backspace","Delete","ArrowLeft","ArrowRight","ArrowUp","ArrowDown",
+      "Home","End","Tab","Enter","Escape"
+    ]);
+
+    function isDigitKey(e) {
+      // Permite atajos (copy/paste/etc.)
+      if (e.ctrlKey || e.metaKey) return true;
+      if (CONTROL_KEYS.has(e.key)) return true;
+      // Solo 0-9
+      return /^[0-9]$/.test(e.key);
+    }
+
+    function sanitizeDni(v) {
+      return (v || "").replace(/\D/g, "").slice(0, 8);
+    }
+
+    // function validarDni() {
+    //   dni.value = sanitizeDni(dni.value);
+    //   const ok = /^\d{8}$/.test(dni.value);
+    //   dni.setCustomValidity(ok ? "" : "El DNI debe tener exactamente 8 dígitos");
+    //   if (dniError) dniError.classList.toggle("hidden", ok);
+    //   dni.classList.toggle("border-red-500", !ok);
+    //   return ok;
+    // }
+
+    if (dni) {
+      // Bloquea puntos, letras y símbolos al tipear
+      dni.addEventListener("keydown", (e) => {
+        if (!isDigitKey(e)) {
+          e.preventDefault();
         }
       });
-    </script>
 
-    <!-- Estilo de animación -->
-    <style>
-      @keyframes fade-in {
-        from {
-          opacity: 0;
-          transform: translateY(-20px) translateX(-50%);
+      // Sanitiza lo tipeado y refuerza la longitud
+      dni.addEventListener("input", validarDni);
+
+      // Pegar: solo dígitos
+      dni.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text") || "";
+        const limpio = sanitizeDni(text);
+        const start = dni.selectionStart ?? dni.value.length;
+        const end = dni.selectionEnd ?? dni.value.length;
+        const nuevo = (dni.value.slice(0, start) + limpio + dni.value.slice(end)).slice(0, 8);
+        dni.value = nuevo;
+        validarDni();
+      });
+
+      dni.addEventListener("blur", validarDni);
+    }
+
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        if (!validarDni()) {
+          e.preventDefault();
+          dni.focus();
         }
+      });
+    }
 
-        to {
-          opacity: 1;
-          transform: translateY(0) translateX(-50%);
-        }
-      }
+    // Ocultar el toast automáticamente
+    const toast = document.getElementById("toastErrores");
+    if (toast) {
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "-translate-y-2");
+        setTimeout(() => toast.remove(), 600);
+      }, 4000);
+    }
+  });
+</script>
 
-      .animate-fade-in {
-        animation: fade-in 0.4s ease-out forwards;
-      }
-    </style>
+<!-- Estilo de animación -->
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+    to   { opacity: 1; transform: translateY(0) translateX(-50%); }
+  }
+  .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+</style>
