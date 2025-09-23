@@ -1,146 +1,136 @@
 <main class="bg-gray-100 min-h-screen py-8 px-4">
-  <div class="max-w-6xl mx-auto bg-white p-5 md:p-6 rounded-2xl shadow-lg border border-gray-300">
+  <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Proveedores</h1>
-      <div class="flex items-center gap-2">
-        <a
-          href="/proveedores/registrar"
-          class="bg-blue-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-blue-800 transition text-xs sm:text-sm"
-        >
-          + Registrar proveedor
-        </a>
-      </div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+      <h1 class="text-2xl font-bold text-gray-800">Proveedores</h1>
+      <a
+        href="/proveedores/registrar"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm"
+      >
+        + Registrar proveedor
+      </a>
     </div>
 
     <!-- Tabla -->
-    <div class="overflow-x-auto rounded-xl border border-gray-200">
-      <table class="w-full text-xs sm:text-[13px] table-auto">
-        <thead class="bg-gray-50 text-gray-700 font-semibold">
-          <tr>
-            <th class="px-2 md:px-3 py-2 text-left w-10">#</th>
-            <th class="px-2 md:px-3 py-2 text-left">Nombre Real</th>
-            <th class="px-2 md:px-3 py-2 text-left hidden lg:table-cell">Nombre Fantasía</th>
-            <!-- <th class="px-2 md:px-3 py-2 text-left hidden xl:table-cell">CUIT</th> -->
-            <th class="px-2 md:px-3 py-2 text-left hidden xl:table-cell">Plan</th>
-            <th class="px-2 md:px-3 py-2 text-right">Importe</th>
-            <th class="px-2 md:px-3 py-2 text-right">Deuda</th>
-            <th class="px-2 md:px-3 py-2 text-left">Estado</th>
-            <th class="px-2 md:px-3 py-2 text-right w-32 sm:w-40 lg:w-48">Acciones</th>
+    <div class="rounded-xl border border-gray-200 overflow-x-auto">
+  <table class="w-full table-auto text-sm">
+    <!-- Anchos pensados para que los nombres se lean completos -->
+    <colgroup>
+      <col style="width:3.25rem;" />      <!-- # -->
+      <col style="width:28rem;" />        <!-- Nombre Real -->
+      <col style="width:26rem;" />        <!-- Nombre Fantasía -->
+      <col style="width:20rem;" />        <!-- Plan -->
+      <col style="width:9.5rem;" />       <!-- Importe -->
+      <col style="width:9.5rem;" />       <!-- Deuda -->
+      <col style="width:7rem;" />         <!-- Estado -->
+      <col style="width:12rem;" />        <!-- Acciones -->
+    </colgroup>
+
+    <thead class="bg-gray-50 text-gray-700 font-medium">
+      <tr>
+        <th class="px-3 py-2 text-left">#</th>
+        <th class="px-3 py-2 text-left">Nombre Real</th>
+        <th class="px-3 py-2 text-left">Nombre Fantasía</th>
+        <th class="px-3 py-2 text-left">Plan</th>
+        <th class="px-3 py-2 text-right">Importe</th>
+        <th class="px-3 py-2 text-right">Deuda</th>
+        <th class="px-3 py-2 text-left">Estado</th>
+        <th class="px-3 py-2 text-right">Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-gray-200">
+      <% if ((proveedores||[]).length === 0) { %>
+        <tr>
+          <td colspan="8" class="px-3 py-6 text-center text-gray-500">Sin proveedores cargados.</td>
+        </tr>
+      <% } else { %>
+        <% proveedores.forEach(p => {
+             const activo = (p.activo ?? true);
+             const tieneOverride = (typeof p.precioPlan === 'number' && !Number.isNaN(p.precioPlan));
+             const importeMostrado = tieneOverride
+               ? p.precioPlan
+               : (typeof p.plan?.importe !== 'undefined' ? p.plan.importe : undefined);
+             const deuda = Number(p.saldoTotal || 0);
+        %>
+          <tr class="hover:bg-gray-50">
+            <!-- # -->
+            <td class="px-3 py-2 align-middle text-gray-700">
+              <%= p.numeroProveedor || '-' %>
+            </td>
+
+            <!-- Nombre real: sin truncate, permite salto de línea -->
+            <td class="px-3 py-2 align-middle text-gray-900">
+              <div class="whitespace-normal break-words" title="<%= p.nombreReal %>">
+                <%= p.nombreReal %>
+              </div>
+            </td>
+
+            <!-- Nombre fantasía: sin truncate, permite salto de línea -->
+            <td class="px-3 py-2 align-middle text-gray-700">
+              <div class="whitespace-normal break-words"
+                   title="<%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>">
+                <%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>
+              </div>
+            </td>
+
+            <!-- Plan (también sin truncate para nombres largos) -->
+            <td class="px-3 py-2 align-middle text-gray-700">
+              <div class="whitespace-normal break-words" title="<%= p.plan?.nombre || '—' %>">
+                <%= p.plan?.nombre || '—' %>
+              </div>
+            </td>
+
+            <!-- Importe -->
+            <td class="px-3 py-2 align-middle text-right">
+              <% if (typeof importeMostrado !== 'undefined') { %>
+                <span class="whitespace-nowrap tabular-nums font-medium">
+                  US$ <%= Number(importeMostrado).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </span>
+                <% if (tieneOverride) { %>
+                  <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">
+                    Override
+                  </span>
+                <% } %>
+              <% } else { %>—<% } %>
+            </td>
+
+            <!-- Deuda -->
+            <td class="px-3 py-2 align-middle text-right">
+              <span class="whitespace-nowrap tabular-nums font-medium <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
+                US$ <%= Number(deuda).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+              </span>
+            </td>
+
+            <!-- Estado -->
+            <td class="px-3 py-2 align-middle">
+              <span class="inline-flex items-center justify-center w-16 px-1.5 py-[2px] rounded-full text-[11px] font-medium
+                <%= activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+                <%= activo ? 'Activo' : 'Inactivo' %>
+              </span>
+            </td>
+
+            <!-- Acciones -->
+            <td class="px-3 py-2 align-middle">
+              <div class="flex justify-end items-center gap-2 min-w-[10rem]">
+                <a href="/proveedores/<%= p._id %>/ver"
+                   class="px-2.5 py-1.5 rounded bg-green-100 hover:bg-green-200 text-gray-800 text-xs">Ver</a>
+                <a href="/proveedores/<%= p._id %>/editar"
+                   class="px-2.5 py-1.5 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-xs">Editar</a>
+                <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
+                  <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
+                        onsubmit="return confirm('¿Eliminar proveedor?')">
+                    <button class="px-2.5 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 text-xs">Eliminar</button>
+                  </form>
+                <% } %>
+              </div>
+            </td>
           </tr>
-        </thead>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
 
-        <tbody>
-          <% if ((proveedores||[]).length === 0) { %>
-            <tr class="odd:bg-white even:bg-gray-50">
-              <td colspan="9" class="px-2 md:px-3 py-6 text-center text-gray-500">
-                Sin proveedores cargados.
-              </td>
-            </tr>
-          <% } else { %>
-            <% proveedores.forEach(p => {
-                 const activo = (p.activo ?? true);
-                 const tieneOverride = (typeof p.precioPlan === 'number' && !Number.isNaN(p.precioPlan));
-                 const importeMostrado = tieneOverride
-                   ? p.precioPlan
-                   : (typeof p.plan?.importe !== 'undefined' ? p.plan.importe : undefined);
-                 const deuda = Number(p.saldoTotal || 0);
-            %>
-              <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-                <td class="px-2 md:px-3 py-2 align-middle text-gray-700">
-                  <%= p.numeroProveedor || '-' %>
-                </td>
-
-                <td class="px-2 md:px-3 py-2 align-middle text-gray-900">
-                  <div class="truncate max-w-[220px]" title="<%= p.nombreReal %>">
-                    <%= p.nombreReal %>
-                  </div>
-                </td>
-
-                <td class="px-2 md:px-3 py-2 align-middle text-gray-700 hidden lg:table-cell">
-                  <div class="truncate max-w-[220px]" title="<%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>">
-                    <%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>
-                  </div>
-                </td>
-
-                <!-- <td class="px-2 md:px-3 py-2 align-middle text-gray-700 hidden xl:table-cell">
-                  <%= p.cuit || '-' %>
-                </td> -->
-
-                <td class="px-2 md:px-3 py-2 align-middle text-gray-700 hidden xl:table-cell">
-                  <div class="truncate max-w-[220px]" title="<%= p.plan?.nombre || '—' %>">
-                    <%= p.plan?.nombre || '—' %>
-                  </div>
-                </td>
-
-                <!-- Importe: símbolo a la izquierda, cifra a la derecha, ancho fijo -->
-                <td class="px-2 md:px-3 py-2 align-middle text-right whitespace-nowrap">
-                  <% if (typeof importeMostrado !== 'undefined') { %>
-                    <span class="inline-flex items-baseline justify-between w-24 sm:w-28 md:w-32">
-                      <span class="text-gray-500 shrink-0 px-6">US$</span>
-                      <span class="tabular-nums font-medium text-right truncate">
-                        <%= Number(importeMostrado).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                      </span>
-                    </span>
-                    <% if (tieneOverride) { %>
-                      <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">
-                        Override
-                      </span>
-                    <% } %>
-                  <% } else { %>—<% } %>
-                </td>
-
-                <!-- Deuda: símbolo a la izquierda, cifra a la derecha, ancho fijo -->
-                <td class="px-2 md:px-3 py-2 align-middle text-right whitespace-nowrap">
-                  <span class="inline-flex items-baseline justify-between w-24 sm:w-28 md:w-32">
-                    <span class="text-gray-500 shrink-0 px-6">US$</span>
-                    <span class="tabular-nums font-medium text-right truncate <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
-                      <%= Number(deuda).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                    </span>
-                  </span>
-                </td>
-
-                <!-- Estado (badge compacto, ancho fijo) -->
-                <td class="px-2 md:px-3 py-2 align-middle">
-                  <span class="inline-flex items-center justify-center w-16 px-1.5 py-[2px] rounded-full text-[10px] font-medium
-                    <%= activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-                    <%= activo ? 'Activo' : 'Inactivo' %>
-                  </span>
-                </td>
-
-                <!-- Acciones -->
-                <td class="px-2 md:px-3 py-2 align-middle text-right">
-                  <div class="flex justify-end items-center gap-2">
-                    <a
-                      href="/proveedores/<%= p._id %>/ver"
-                      class="px-2 py-1 rounded bg-green-100 hover:bg-green-200 text-gray-800 text-[11px] sm:text-[12px]"
-                    >Ver</a>
-
-                    <a
-                      href="/proveedores/<%= p._id %>/editar"
-                      class="px-2 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-[11px] sm:text-[12px]"
-                    >Editar</a>
-
-                    <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
-                      <form
-                        action="/proveedores/<%= p._id %>?_method=DELETE"
-                        method="POST"
-                        onsubmit="return confirm('¿Eliminar proveedor?')"
-                        class="inline-block m-0"
-                      >
-                        <button class="px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-[11px] sm:text-[12px]">
-                          Eliminar
-                        </button>
-                      </form>
-                    <% } %>
-                  </div>
-                </td>
-              </tr>
-            <% }) %>
-          <% } %>
-        </tbody>
-      </table>
-    </div>
   </div>
 </main>
-

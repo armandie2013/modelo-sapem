@@ -41,8 +41,7 @@
           required
           inputmode="numeric"
           autocomplete="off"
-          pattern="\\d{8}"
-          minlength="8"
+          pattern="[0-9]{8}"
           maxlength="8"
           title="Ingrese exactamente 8 dígitos (0–9)"
           aria-describedby="dniHelp dniError"
@@ -89,7 +88,6 @@
   function capitalizarPrimeraLetra(texto) {
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
   }
-
   function aplicarCapitalizacion(input) {
     input.addEventListener("input", function () {
       const palabras = this.value.split(" ").map(capitalizarPrimeraLetra);
@@ -117,7 +115,6 @@
       // Permite atajos (copy/paste/etc.)
       if (e.ctrlKey || e.metaKey) return true;
       if (CONTROL_KEYS.has(e.key)) return true;
-      // Solo 0-9
       return /^[0-9]$/.test(e.key);
     }
 
@@ -125,24 +122,22 @@
       return (v || "").replace(/\D/g, "").slice(0, 8);
     }
 
-    // function validarDni() {
-    //   dni.value = sanitizeDni(dni.value);
-    //   const ok = /^\d{8}$/.test(dni.value);
-    //   dni.setCustomValidity(ok ? "" : "El DNI debe tener exactamente 8 dígitos");
-    //   if (dniError) dniError.classList.toggle("hidden", ok);
-    //   dni.classList.toggle("border-red-500", !ok);
-    //   return ok;
-    // }
+    function validarDni() {
+      dni.value = sanitizeDni(dni.value);
+      const ok = /^[0-9]{8}$/.test(dni.value);
+      dni.setCustomValidity(ok ? "" : "El DNI debe tener exactamente 8 dígitos (0–9).");
+      if (dniError) dniError.classList.toggle("hidden", ok);
+      dni.classList.toggle("border-red-500", !ok);
+      return ok;
+    }
 
     if (dni) {
       // Bloquea puntos, letras y símbolos al tipear
       dni.addEventListener("keydown", (e) => {
-        if (!isDigitKey(e)) {
-          e.preventDefault();
-        }
+        if (!isDigitKey(e)) e.preventDefault();
       });
 
-      // Sanitiza lo tipeado y refuerza la longitud
+      // Sanitiza lo tipeado y refuerza la longitud + mensaje propio
       dni.addEventListener("input", validarDni);
 
       // Pegar: solo dígitos
@@ -152,12 +147,12 @@
         const limpio = sanitizeDni(text);
         const start = dni.selectionStart ?? dni.value.length;
         const end = dni.selectionEnd ?? dni.value.length;
-        const nuevo = (dni.value.slice(0, start) + limpio + dni.value.slice(end)).slice(0, 8);
-        dni.value = nuevo;
+        dni.value = (dni.value.slice(0, start) + limpio + dni.value.slice(end)).slice(0, 8);
         validarDni();
       });
 
       dni.addEventListener("blur", validarDni);
+      dni.addEventListener("invalid", () => validarDni()); // por si dispara el nativo
     }
 
     if (form) {
