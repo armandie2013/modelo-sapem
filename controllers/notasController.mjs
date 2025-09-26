@@ -1,3 +1,6 @@
+
+// SE PUEDEN HACER NOTAS DE CREDITO O DEBITO DE LOS ULTIMOS 18 MESES //
+
 // controllers/notasController.mjs
 import mongoose from "mongoose";
 import Proveedor from "../models/proveedor.mjs";
@@ -11,6 +14,20 @@ function normalizarTipo(t) {
 }
 
 /* =========================================================
+ * Límite temporal para NC/ND
+ * =======================================================*/
+const LIMITE_MESES_NOTAS = 18;
+
+function _dateFromPeriodo(yyyyMM) {
+  const [y, m] = String(yyyyMM).split("-").map(Number);
+  if (!y || !m) return null;
+  return new Date(y, m - 1, 1);
+}
+function _mesesEntre(a, b) {
+  return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+}
+
+/* =========================================================
  * Helpers internos (filtrado anti-plan de pago)
  * =======================================================*/
 
@@ -19,11 +36,11 @@ function normalizarTipo(t) {
  *  - tipo: "cargo"
  *  - NO pertenecen a Plan (planPagoId:null)
  *  - NO fueron revertidos por Plan (existe crédito con planPagoId != null y aplicaA = cargo._id)
+ *  - ⚠️ Solo últimos LIMITE_MESES_NOTAS meses
  */
-async function cargosAjustables(proveedorId, limit = 6) {
+async function cargosAjustables(proveedorId, limit = LIMITE_MESES_NOTAS) {
   const oid = new mongoose.Types.ObjectId(proveedorId);
 
-  // cargos candidatos
   const cargos = await MovimientoProveedor.find({
     proveedor: oid,
     tipo: "cargo",
@@ -34,7 +51,6 @@ async function cargosAjustables(proveedorId, limit = 6) {
 
   if (!cargos.length) return [];
 
-  // ids de esos cargos
   const ids = cargos.map((c) => c._id);
 
   // créditos de reversa de plan que apuntan a esos cargos
@@ -49,10 +65,15 @@ async function cargosAjustables(proveedorId, limit = 6) {
   ).lean();
 
   const noAjustar = new Set(reversas.map((r) => String(r.aplicaA)));
+  const ahora = clock.date();
 
-  // filtramos y garantizamos números
   const filtrados = cargos
     .filter((c) => !noAjustar.has(String(c._id)))
+    .filter((c) => {
+      const d = _dateFromPeriodo(c.periodo);
+      if (!d) return false;
+      return _mesesEntre(d, ahora) <= LIMITE_MESES_NOTAS;
+    })
     .map((c) => ({
       _id: c._id,
       periodo: c.periodo,
@@ -60,12 +81,13 @@ async function cargosAjustables(proveedorId, limit = 6) {
       importe: Number(c.importe ?? 0),
     }));
 
-  return filtrados.slice(0, limit);
+  const maxMostrar = Math.min(Number(limit || LIMITE_MESES_NOTAS), LIMITE_MESES_NOTAS);
+  return filtrados.slice(0, maxMostrar);
 }
 
 /**
- * Valida que un cargo sea "ajustable" para NC/ND según las reglas de arriba.
- * Devuelve el cargo o null si no corresponde.
+ * Valida que un cargo sea "ajustable" para NC/ND.
+ * Incluye tope de 18 meses.
  */
 async function cargoAjustableById(proveedorId, cargoId) {
   const oid = new mongoose.Types.ObjectId(proveedorId);
@@ -87,6 +109,10 @@ async function cargoAjustableById(proveedorId, cargoId) {
   });
   if (reversa) return null;
 
+  const d = _dateFromPeriodo(cargo.periodo);
+  if (!d) return null;
+  if (_mesesEntre(d, clock.date()) > LIMITE_MESES_NOTAS) return null;
+
   return cargo;
 }
 
@@ -100,11 +126,12 @@ export async function apiCargosProveedor(req, res) {
     if (!proveedor) return res.json({ ok: false, error: "Falta proveedor" });
 
     limit = parseInt(limit, 10);
-    if (!Number.isFinite(limit) || limit <= 0 || limit > 24) limit = 6;
+    if (!Number.isFinite(limit) || limit <= 0 || limit > LIMITE_MESES_NOTAS) {
+      limit = LIMITE_MESES_NOTAS;
+    }
 
     const cargos = await cargosAjustables(proveedor, limit);
 
-    // aseguramos números para evitar NaN en el front
     const out = cargos.map((c) => ({
       _id: c._id,
       periodo: c.periodo,
@@ -134,7 +161,7 @@ export async function mostrarFormularioNota(req, res) {
 
   const datos = {
     proveedor: "",
-    fecha: clock.todayYMD(), // yyyy-mm-dd para <input type="date">
+    fecha: clock.todayYMD(),
     cargoId: "",
     importe: "",
     detalle: "",
@@ -161,7 +188,7 @@ export async function crearNotaController(req, res) {
   if (!proveedor) errores.push({ msg: "Seleccioná un proveedor." });
   if (!cargoId) errores.push({ msg: "Seleccioná un cargo a imputar." });
 
-  // fecha con clock (si viene vacía, hoy)
+  // fecha
   let fechaDate = clock.date();
   if (fecha) {
     const d = clock.parseYMDToDate(fecha);
@@ -175,7 +202,7 @@ export async function crearNotaController(req, res) {
     errores.push({ msg: "El importe debe ser mayor a 0." });
   }
 
-  // validar cargo "ajustable"
+  // validar cargo
   let cargo = null;
   if (!errores.length) {
     try {
@@ -183,7 +210,12 @@ export async function crearNotaController(req, res) {
     } catch {
       cargo = null;
     }
-    if (!cargo) errores.push({ msg: "El cargo seleccionado no es ajustable (pertenece a un Plan o fue revertido)." });
+    if (!cargo) {
+      errores.push({
+        msg:
+          "El cargo seleccionado no es ajustable (pertenece a un Plan, fue revertido o supera el límite de 18 meses).",
+      });
+    }
   }
 
   if (errores.length) {
@@ -201,14 +233,15 @@ export async function crearNotaController(req, res) {
     });
   }
 
-  // Crear nota asociada al período del cargo
+  // ✅ Crear nota asociada al cargo y al período del cargo
   await new MovimientoProveedor({
-    proveedor,
+    proveedor,                    // <-- corregido (antes: proveedorId)
     tipo: tipoNota,
     concepto: (detalle || "").trim() || `Nota de ${tipoNota}`,
     periodo: cargo.periodo,
     fecha: fechaDate,
     importe: importeNumber,
+    aplicaA: cargo._id,           // <-- importante: vincula la NC/ND al cargo
     creadoPor: req.session?.usuario?._id || null,
   }).save();
 
@@ -232,8 +265,8 @@ export async function mostrarFormularioNotaProveedor(req, res) {
   ).lean();
   if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-  // Últimos 6 cargos AJUSTABLES (ya filtrados contra Planes)
-  const cargosDeProveedor = await cargosAjustables(proveedor._id, 6);
+  // Últimos cargos AJUSTABLES (acotados por 18 meses)
+  const cargosDeProveedor = await cargosAjustables(proveedor._id, LIMITE_MESES_NOTAS);
 
   const datos = {
     fecha: clock.todayYMD(),
@@ -266,7 +299,7 @@ export async function crearNotaProveedorController(req, res) {
 
   if (!cargoId) errores.push({ msg: "Seleccioná un cargo a imputar." });
 
-  // fecha con clock
+  // fecha
   let fechaDate = clock.date();
   if (fecha) {
     const d = clock.parseYMDToDate(fecha);
@@ -280,7 +313,7 @@ export async function crearNotaProveedorController(req, res) {
     errores.push({ msg: "El importe debe ser mayor a 0." });
   }
 
-  // validar cargo "ajustable"
+  // validar cargo
   let cargo = null;
   if (!errores.length) {
     try {
@@ -288,11 +321,16 @@ export async function crearNotaProveedorController(req, res) {
     } catch {
       cargo = null;
     }
-    if (!cargo) errores.push({ msg: "El cargo seleccionado no es ajustable (pertenece a un Plan o fue revertido)." });
+    if (!cargo) {
+      errores.push({
+        msg:
+          "El cargo seleccionado no es ajustable (pertenece a un Plan, fue revertido o supera el límite de 18 meses).",
+      });
+    }
   }
 
   if (errores.length) {
-    const cargosDeProveedor = await cargosAjustables(proveedorId, 6);
+    const cargosDeProveedor = await cargosAjustables(proveedorId, LIMITE_MESES_NOTAS);
 
     return res.status(400).render("notasViews/registrarNota", {
       tipoNota,
@@ -304,6 +342,7 @@ export async function crearNotaProveedorController(req, res) {
     });
   }
 
+  // ✅ Guardar nota con vínculo al cargo (aplicaA)
   await new MovimientoProveedor({
     proveedor: proveedorId,
     tipo: tipoNota,
@@ -311,6 +350,7 @@ export async function crearNotaProveedorController(req, res) {
     periodo: cargo.periodo,
     fecha: fechaDate,
     importe: importeNumber,
+    aplicaA: cargo._id,           // <-- faltaba acá
     creadoPor: req.session?.usuario?._id || null,
   }).save();
 
