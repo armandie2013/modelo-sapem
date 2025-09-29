@@ -17,12 +17,21 @@ function toBool(v) {
   return v === true || v === "true" || v === "on" || v === "1" || v === 1;
 }
 
+// 🔤 Orden alfabético por nombre de plan (colación española)
+const ordenarPorNombrePlan = (arr) =>
+  [...(arr || [])].sort((a, b) =>
+    String(a?.nombre || "").localeCompare(String(b?.nombre || ""), "es", {
+      sensitivity: "base",
+      numeric: true,
+    })
+  );
+
 /* =========================================================
  * GET /proveedores/registrar
  * =======================================================*/
 export async function mostrarFormularioProveedor(req, res) {
   try {
-    const planes = await listarPlanesService();
+    const planes = ordenarPorNombrePlan(await listarPlanesService());
     res.render("proveedoresViews/registroProveedor", { datos: {}, planes });
   } catch (err) {
     console.error("Error al cargar formulario proveedor:", err);
@@ -36,7 +45,7 @@ export async function mostrarFormularioProveedor(req, res) {
 export async function crearProveedorController(req, res) {
   try {
     if (req.erroresValidacion) {
-      const planes = await listarPlanesService();
+      const planes = ordenarPorNombrePlan(await listarPlanesService());
       return res.status(400).render("proveedoresViews/registroProveedor", {
         errores: req.erroresValidacion,
         datos: req.body,
@@ -82,6 +91,7 @@ export async function crearProveedorController(req, res) {
 /* =========================================================
  * GET /proveedores
  * -> LISTA con saldo (deuda) por proveedor
+ * (NO se modifica el orden del dashboard)
  * =======================================================*/
 export async function listarProveedoresController(req, res) {
   try {
@@ -292,7 +302,7 @@ export async function mostrarFormularioEditarProveedor(req, res) {
     const proveedor = await Proveedor.findById(req.params.id).lean();
     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-    const planes = await listarPlanesService();
+    const planes = ordenarPorNombrePlan(await listarPlanesService());
     res.render("proveedoresViews/editarProveedor", { proveedor, planes });
   } catch (error) {
     console.error("Error al cargar proveedor para editar:", error);
@@ -307,7 +317,7 @@ export async function actualizarProveedorController(req, res) {
   try {
     if (req.erroresValidacion) {
       const proveedor = await Proveedor.findById(req.params.id).lean();
-      const planes = await listarPlanesService();
+      const planes = ordenarPorNombrePlan(await listarPlanesService());
       return res.status(400).render("proveedoresViews/editarProveedor", {
         proveedor,
         errores: req.erroresValidacion,
