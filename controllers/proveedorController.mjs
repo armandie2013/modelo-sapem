@@ -1,4 +1,6 @@
 // controllers/proveedorController.mjs
+import fs from "fs";
+import path from "path";
 import { crearProveedorService } from "../services/proveedorService.mjs";
 import { obtenerSiguienteNumeroDeProveedor } from "../utils/obtenerSiguienteNumeroDeProveedor.mjs";
 import { listarPlanesService } from "../services/planesService.mjs";
@@ -13,9 +15,27 @@ import puppeteer from "puppeteer";
 // Helper robusto para boolean
 function toBool(v) {
   if (Array.isArray(v)) {
-    return v.some(x => x === true || x === "true" || x === "on" || x === "1" || x === 1);
+    return v.some(
+      (x) => x === true || x === "true" || x === "on" || x === "1" || x === 1
+    );
   }
   return v === true || v === "true" || v === "on" || v === "1" || v === 1;
+}
+
+// Lee utils/logoBase64.html.
+// - Si el archivo tiene un <img src="...">, toma el src.
+// - Si sólo contiene el data URI, lo usa tal cual.
+function leerLogoDataUriDesdeHtml() {
+  try {
+    const p = path.resolve(process.cwd(), "utils", "logoBase64.html");
+    if (!fs.existsSync(p)) return null;
+    const txt = fs.readFileSync(p, "utf8").trim();
+    const m = txt.match(/<img[^>]*src=["']([^"']+)["']/i);
+    return m && m[1] ? m[1] : txt.startsWith("data:") ? txt : null;
+  } catch (e) {
+    console.warn("No se pudo leer utils/logoBase64.html:", e?.message || e);
+    return null;
+  }
 }
 
 // 🔤 Orden alfabético por nombre de plan (colación española)
@@ -154,12 +174,14 @@ export async function listarProveedoresController(req, res) {
     }
 
     // 4) Adjuntamos saldoTotal a cada proveedor
-    const proveedoresConSaldo = proveedores.map(p => ({
+    const proveedoresConSaldo = proveedores.map((p) => ({
       ...p,
       saldoTotal: Number(saldoMap.get(String(p._id)) || 0),
     }));
 
-    res.render("proveedoresViews/listadoProveedores", { proveedores: proveedoresConSaldo });
+    res.render("proveedoresViews/listadoProveedores", {
+      proveedores: proveedoresConSaldo,
+    });
   } catch (error) {
     console.error("Error al listar proveedores:", error);
     res.status(500).send("Error al listar proveedores");
@@ -186,13 +208,25 @@ export async function verProveedorController(req, res) {
       {
         $group: {
           _id: "$periodo",
-          cargo: { $sum: { $cond: [{ $eq: ["$tipo", "cargo"] }, "$importe", 0] } },
-          notaDebito: { $sum: { $cond: [{ $eq: ["$tipo", "debito"] }, "$importe", 0] } },
-          notaCredito: { $sum: { $cond: [{ $eq: ["$tipo", "credito"] }, "$importe", 0] } },
+          cargo: {
+            $sum: { $cond: [{ $eq: ["$tipo", "cargo"] }, "$importe", 0] },
+          },
+          notaDebito: {
+            $sum: { $cond: [{ $eq: ["$tipo", "debito"] }, "$importe", 0] },
+          },
+          notaCredito: {
+            $sum: { $cond: [{ $eq: ["$tipo", "credito"] }, "$importe", 0] },
+          },
         },
       },
       {
-        $project: { _id: 0, periodo: "$_id", cargo: 1, notaDebito: 1, notaCredito: 1 },
+        $project: {
+          _id: 0,
+          periodo: "$_id",
+          cargo: 1,
+          notaDebito: 1,
+          notaCredito: 1,
+        },
       },
     ]),
     Pago.aggregate([
@@ -214,8 +248,13 @@ export async function verProveedorController(req, res) {
     });
   }
   for (const r of pagosAgg) {
-    const prev =
-      mapa.get(r.periodo) || { periodo: r.periodo, cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0 };
+    const prev = mapa.get(r.periodo) || {
+      periodo: r.periodo,
+      cargo: 0,
+      notaDebito: 0,
+      notaCredito: 0,
+      pagos: 0,
+    };
     prev.pagos = r.pagos || 0;
     mapa.set(r.periodo, prev);
   }
@@ -223,7 +262,7 @@ export async function verProveedorController(req, res) {
   let detallePorPeriodo = Array.from(mapa.values());
   detallePorPeriodo.forEach((r) => {
     // Saldo = cargos + ND - NC - pagos
-    r.saldo = (r.cargo + r.notaDebito) - (r.notaCredito + r.pagos);
+    r.saldo = r.cargo + r.notaDebito - (r.notaCredito + r.pagos);
   });
   // Orden desc
   detallePorPeriodo.sort((a, b) =>
@@ -241,7 +280,8 @@ export async function verProveedorController(req, res) {
     },
     { cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0 }
   );
-  totales.saldo = (totales.cargo + totales.notaDebito) - (totales.notaCredito + totales.pagos);
+  totales.saldo =
+    totales.cargo + totales.notaDebito - (totales.notaCredito + totales.pagos);
 
   // --- Movimientos recientes (unificados)
   const [movs, pagos] = await Promise.all([
@@ -279,10 +319,19 @@ export async function verProveedorController(req, res) {
   // --- NUEVO: saldo vencido (períodos <= mes actual) usando cargosPendientesPorProveedor
   const pendientes = await cargosPendientesPorProveedor(proveedorId);
   const now = clock.date();
-  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}`;
 
   const saldoVencido = (pendientes || [])
-    .filter(r => r && r.saldo > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
+    .filter(
+      (r) =>
+        r &&
+        r.saldo > 0 &&
+        typeof r.periodo === "string" &&
+        r.periodo <= mesActual
+    )
     .reduce((acc, r) => acc + Number(r.saldo || 0), 0);
 
   res.render("proveedoresViews/verProveedor", {
@@ -346,11 +395,10 @@ export async function actualizarProveedorController(req, res) {
       plan,
     };
 
-    const proveedor = await Proveedor.findByIdAndUpdate(
-      req.params.id,
-      update,
-      { new: true, runValidators: true }
-    );
+    const proveedor = await Proveedor.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
@@ -393,7 +441,9 @@ export async function verPeriodoProveedorController(req, res) {
     }
 
     const proveedor = await Proveedor.findById(proveedorId)
-      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular activo plan")
+      .select(
+        "numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular activo plan"
+      )
       .populate("plan", "nombre importe")
       .lean();
 
@@ -415,16 +465,31 @@ export async function verPeriodoProveedorController(req, res) {
     const movs = await query.lean();
 
     // Totales + mapeo
-    const totales = { cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0, saldo: 0 };
+    const totales = {
+      cargo: 0,
+      notaDebito: 0,
+      notaCredito: 0,
+      pagos: 0,
+      saldo: 0,
+    };
     const movimientos = movs.map((m) => {
       const tipo = String(m.tipo || "").toLowerCase();
       const importe = Number(m.importe || 0);
       let signo = 0;
 
-      if (tipo === "cargo")       { totales.cargo       += importe; signo = +1; }
-      else if (tipo === "debito") { totales.notaDebito  += importe; signo = +1; }
-      else if (tipo === "credito"){ totales.notaCredito += importe; signo = -1; }
-      else if (tipo === "pago")   { totales.pagos       += importe; signo = -1; }
+      if (tipo === "cargo") {
+        totales.cargo += importe;
+        signo = +1;
+      } else if (tipo === "debito") {
+        totales.notaDebito += importe;
+        signo = +1;
+      } else if (tipo === "credito") {
+        totales.notaCredito += importe;
+        signo = -1;
+      } else if (tipo === "pago") {
+        totales.pagos += importe;
+        signo = -1;
+      }
 
       return {
         _id: m._id,
@@ -437,7 +502,8 @@ export async function verPeriodoProveedorController(req, res) {
         metodo: m.metodo,
         comprobante: m.comprobante,
         creadorNombre:
-          (m.creadoPor && (m.creadoPor.nombreApellido || m.creadoPor.email)) || "—",
+          (m.creadoPor && (m.creadoPor.nombreApellido || m.creadoPor.email)) ||
+          "—",
       };
     });
 
@@ -465,7 +531,10 @@ export async function verPeriodoProveedorController(req, res) {
     // Orden por fecha (asc)
     movimientos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-    totales.saldo = (totales.cargo + totales.notaDebito) - (totales.notaCredito + totales.pagos);
+    totales.saldo =
+      totales.cargo +
+      totales.notaDebito -
+      (totales.notaCredito + totales.pagos);
 
     return res.render("proveedoresViews/detallePeriodo", {
       proveedor,
@@ -484,28 +553,68 @@ export async function descargarEstadoCuentaPdfController(req, res) {
     const { proveedorId } = req.params;
 
     const proveedor = await Proveedor.findById(proveedorId)
-      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular")
+      .select(
+        "numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular"
+      )
       .lean();
 
     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-    // Último pago registrado (fecha ↓, createdAt ↓)
-    const ultimoPago = await Pago.findOne({ proveedor: proveedorId })
-      .select("fecha periodo metodo comprobante importe createdAt")
-      .sort({ fecha: -1, createdAt: -1 })
-      .lean();
+    // Helper: período anterior a "YYYY-MM"
+    function prevPeriodo(yyyyMm) {
+      if (!yyyyMm) return null;
+      const [y, m] = String(yyyyMm).split("-").map(Number);
+      if (!y || !m) return null;
+      const d = new Date(y, m - 2, 1); // (m-1)-1 por Date 0-index
+      const yy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      return `${yy}-${mm}`;
+    }
 
     // Pendientes vencidos usando tu servicio
     const now = clock.date();
-    const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const mesActual = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}`;
 
     const pendientesRaw = await cargosPendientesPorProveedor(proveedorId);
 
+    // Vencidos (saldo > 0, periodo <= mes actual) orden ASC por periodo
     const pendientes = (pendientesRaw || [])
-      .filter(r => r && Number(r.saldo) > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
+      .filter(
+        (r) =>
+          r &&
+          Number(r.saldo) > 0 &&
+          typeof r.periodo === "string" &&
+          r.periodo <= mesActual
+      )
       .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)));
 
-    const totalPendiente = pendientes.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
+    const totalPendiente = pendientes.reduce(
+      (acc, r) => acc + Number(r.saldo || 0),
+      0
+    );
+
+    // Último pago = pago del período anterior al primer deudor
+    let ultimoPago = null;
+    const primerDeudor = pendientes?.[0]?.periodo || null;
+
+    if (primerDeudor) {
+      const periodoAnterior = prevPeriodo(primerDeudor);
+      if (periodoAnterior) {
+        ultimoPago = await Pago.findOne({
+          proveedor: proveedorId,
+          periodo: periodoAnterior,
+          estado: { $ne: "anulado" }, // ajustá si tu flag difiere
+        })
+          .select("fecha periodo metodo comprobante importe createdAt")
+          .sort({ fecha: -1, createdAt: -1 })
+          .lean();
+      }
+    }
+
+    // 👇 NUEVO: cargar logo desde utils/logoBase64.html
+    const logoDataUri = leerLogoDataUriDesdeHtml();
 
     // Render EJS a HTML
     const html = await new Promise((resolve, reject) => {
@@ -518,12 +627,13 @@ export async function descargarEstadoCuentaPdfController(req, res) {
           ultimoPago,
           pendientes,
           totalPendiente,
+          logoDataUri, // 👈 ahora disponible en la vista
         },
         (err, str) => (err ? reject(err) : resolve(str))
       );
     });
 
-    // Generar PDF con Puppeteer (igual que plan de pago)
+    // Generar PDF con Puppeteer
     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
     try {
       const page = await browser.newPage();
@@ -538,7 +648,9 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `inline; filename="EstadoCuenta-${String(proveedor?.numeroProveedor || proveedorId)}.pdf"`
+        `inline; filename="EstadoCuenta-${String(
+          proveedor?.numeroProveedor || proveedorId
+        )}.pdf"`
       );
       return res.send(pdf);
     } finally {

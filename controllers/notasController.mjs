@@ -16,7 +16,7 @@ function normalizarTipo(t) {
 /* =========================================================
  * Límite temporal para NC/ND
  * =======================================================*/
-const LIMITE_MESES_NOTAS = 18;
+const LIMITE_MESES_NOTAS = 24;
 
 function _dateFromPeriodo(yyyyMM) {
   const [y, m] = String(yyyyMM).split("-").map(Number);
