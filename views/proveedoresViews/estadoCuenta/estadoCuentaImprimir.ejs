@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>Estado de cuenta — <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '') %></title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 12px; color: #111; }
+    .wrap { max-width: 800px; margin: 0 auto; padding: 16px; }
+    h1 { font-size: 18px; margin: 0 0 6px; }
+    h2 { font-size: 14px; margin: 16px 0 8px; }
+    .muted { color: #666; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #eee; text-align: left; }
+    th { background: #f7f7f7; }
+    .right { text-align: right; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .totals { font-weight: 600; }
+    .small { font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <% const fmtUSD = v => new Intl.NumberFormat('es-AR',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0)); %>
+
+    <!-- Header -->
+    <div class="card">
+      <h1>Estado de cuenta</h1>
+      <div class="grid">
+        <div>
+          <div><strong>Proveedor:</strong> <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '—') %></div>
+          <div><strong>Nombre legal:</strong> <%= proveedor?.nombreReal || '—' %></div>
+          <div class="small muted">#<%= proveedor?.numeroProveedor || '—' %> · CUIT: <%= proveedor?.cuit || '—' %></div>
+          <div class="small muted">IVA: <%= proveedor?.condicionIva || '—' %> · Tel: <%= proveedor?.telefonoCelular || '—' %></div>
+        </div>
+        <div>
+          <div><strong>Fecha reporte:</strong> <%= (hoy ? new Date(hoy).toLocaleDateString('es-AR') : '') %></div>
+          <div><strong>Total pendiente:</strong> <span class="totals"><%= fmtUSD(totalPendiente || 0) %></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Último pago -->
+    <div class="card">
+      <h2>Último pago registrado</h2>
+      <% if (!ultimoPago) { %>
+        <div class="small muted">No hay pagos registrados.</div>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Período</th>
+              <th>Método</th>
+              <th>Comprobante</th>
+              <th class="right">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><%= new Date(ultimoPago.fecha).toLocaleDateString('es-AR') %></td>
+              <td><%= ultimoPago.periodo || '—' %></td>
+              <td><%= ultimoPago.metodo || '—' %></td>
+              <td><%= ultimoPago.comprobante || '—' %></td>
+              <td class="right"><%= fmtUSD(ultimoPago.importe || 0) %></td>
+            </tr>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+
+    <!-- Períodos adeudados -->
+    <div class="card">
+      <h2>Períodos adeudados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Concepto</th>
+            <th class="right">Importe</th>
+            <th class="right">Pagado</th>
+            <th class="right">Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!pendientes || pendientes.length === 0) { %>
+            <tr><td colspan="5" class="small muted">Sin períodos vencidos con saldo pendiente.</td></tr>
+          <% } else { %>
+            <% pendientes.forEach(p => { %>
+              <tr>
+                <td><%= p.periodo %></td>
+                <td><%= p.concepto || (p.cuotaN ? `Cuota ${p.cuotaN}/${p.cuotasTotal||''}` : '—') %></td>
+                <td class="right"><%= fmtUSD(p.importe || 0) %></td>
+                <td class="right"><%= fmtUSD(p.pagado || 0) %></td>
+                <td class="right"><%= fmtUSD(p.saldo || 0) %></td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totales -->
+    <div class="card">
+      <div class="grid">
+        <div>
+          <div class="small muted">* Se muestran solo períodos vencidos (<= mes actual) con saldo > 0.</div>
+        </div>
+        <div class="right">
+          <div class="totals">Total pendiente: <%= fmtUSD(totalPendiente || 0) %></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

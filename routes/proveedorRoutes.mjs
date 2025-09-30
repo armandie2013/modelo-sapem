@@ -8,7 +8,8 @@ import {
   actualizarProveedorController,
   eliminarProveedorController,
   verProveedorController,
-  verPeriodoProveedorController
+  verPeriodoProveedorController,
+  descargarEstadoCuentaPdfController,
 } from "../controllers/proveedorController.mjs";
 
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
@@ -79,6 +80,13 @@ router.get(
   (req, res) => {
     res.redirect(301, `/planes-pago/proveedores/${req.params.proveedorId}/crear`);
   }
+);
+
+router.get(
+  "/:proveedorId/estado-cuenta/pdf",
+  verificarSesion,
+  verificarPermiso("proveedores", "ver"),
+  descargarEstadoCuentaPdfController
 );
 
 export default router;

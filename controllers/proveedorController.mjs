@@ -8,6 +8,7 @@ import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 import mongoose from "mongoose";
 import { cargosPendientesPorProveedor } from "../services/cargosService.mjs";
 import clock from "../utils/clock.mjs";
+import puppeteer from "puppeteer";
 
 // Helper robusto para boolean
 function toBool(v) {
@@ -475,5 +476,76 @@ export async function verPeriodoProveedorController(req, res) {
   } catch (err) {
     console.error("verPeriodoProveedorController error:", err);
     return res.status(500).send("Error al obtener el detalle del período");
+  }
+}
+
+export async function descargarEstadoCuentaPdfController(req, res) {
+  try {
+    const { proveedorId } = req.params;
+
+    const proveedor = await Proveedor.findById(proveedorId)
+      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular")
+      .lean();
+
+    if (!proveedor) return res.status(404).send("Proveedor no encontrado");
+
+    // Último pago registrado (fecha ↓, createdAt ↓)
+    const ultimoPago = await Pago.findOne({ proveedor: proveedorId })
+      .select("fecha periodo metodo comprobante importe createdAt")
+      .sort({ fecha: -1, createdAt: -1 })
+      .lean();
+
+    // Pendientes vencidos usando tu servicio
+    const now = clock.date();
+    const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+    const pendientesRaw = await cargosPendientesPorProveedor(proveedorId);
+
+    const pendientes = (pendientesRaw || [])
+      .filter(r => r && Number(r.saldo) > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
+      .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)));
+
+    const totalPendiente = pendientes.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
+
+    // Render EJS a HTML
+    const html = await new Promise((resolve, reject) => {
+      res.render(
+        "proveedoresViews/estadoCuenta/estadoCuentaImprimir",
+        {
+          layout: false,
+          proveedor,
+          hoy: new Date(),
+          ultimoPago,
+          pendientes,
+          totalPendiente,
+        },
+        (err, str) => (err ? reject(err) : resolve(str))
+      );
+    });
+
+    // Generar PDF con Puppeteer (igual que plan de pago)
+    const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: "networkidle0" });
+
+      const pdf = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: { top: "18mm", right: "14mm", bottom: "18mm", left: "14mm" },
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="EstadoCuenta-${String(proveedor?.numeroProveedor || proveedorId)}.pdf"`
+      );
+      return res.send(pdf);
+    } finally {
+      await browser.close();
+    }
+  } catch (err) {
+    console.error("descargarEstadoCuentaPdfController error:", err);
+    return res.status(500).send("Error al generar el Estado de cuenta");
   }
 }
