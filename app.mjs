@@ -9,6 +9,8 @@ import { fmtHora, fmtHoraCorta, fmtFecha, fmtFechaHora } from "./utils/formatFec
 import { connectDB } from "./config/dbConfig.mjs";
 import { startCargosCron } from "./jobs/cargosCron.mjs";
 import { catchUpCargos } from "./services/cargosService.mjs";
+import cambioRoutes from "./routes/cambioRoutes.mjs";
+import { usdNavbarMiddleware } from "./middlewares/usdNavbar.mjs";
 
 
 // Rutas
@@ -105,6 +107,12 @@ app.get("/debug/time", (req, res) => {
   });
 });
 
+// 6.1) Middleware USD para navbar (excluye /api/*)
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) return next();
+  return usdNavbarMiddleware(req, res, next);
+});
+
 // 7) Rutas
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);
@@ -119,6 +127,7 @@ app.use("/pagos", pagosRoutes);
 app.use("/notas", notasRoutes);
 app.use("/planes-pago", planPagoRoutes);
 app.use(tareasRoutes);
+app.use("/api/cambio", cambioRoutes);
 
 // 8) Landing
 app.get("/", (req, res) => {
