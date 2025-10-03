@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { cargosPendientesPorProveedor } from "../services/cargosService.mjs";
 import clock from "../utils/clock.mjs";
 import puppeteer from "puppeteer";
+import { cambioService } from "../services/cambioService.mjs";
 
 // Helper robusto para boolean
 function toBool(v) {
@@ -553,9 +554,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
     const { proveedorId } = req.params;
 
     const proveedor = await Proveedor.findById(proveedorId)
-      .select(
-        "numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular"
-      )
+      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular")
       .lean();
 
     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
@@ -565,7 +564,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       if (!yyyyMm) return null;
       const [y, m] = String(yyyyMm).split("-").map(Number);
       if (!y || !m) return null;
-      const d = new Date(y, m - 2, 1); // (m-1)-1 por Date 0-index
+      const d = new Date(y, m - 2, 1);
       const yy = d.getFullYear();
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       return `${yy}-${mm}`;
@@ -573,39 +572,26 @@ export async function descargarEstadoCuentaPdfController(req, res) {
 
     // Pendientes vencidos usando tu servicio
     const now = clock.date();
-    const mesActual = `${now.getFullYear()}-${String(
-      now.getMonth() + 1
-    ).padStart(2, "0")}`;
+    const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     const pendientesRaw = await cargosPendientesPorProveedor(proveedorId);
 
-    // Vencidos (saldo > 0, periodo <= mes actual) orden ASC por periodo
     const pendientes = (pendientesRaw || [])
-      .filter(
-        (r) =>
-          r &&
-          Number(r.saldo) > 0 &&
-          typeof r.periodo === "string" &&
-          r.periodo <= mesActual
-      )
+      .filter(r => r && Number(r.saldo) > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
       .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)));
 
-    const totalPendiente = pendientes.reduce(
-      (acc, r) => acc + Number(r.saldo || 0),
-      0
-    );
+    const totalPendiente = pendientes.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
 
     // Último pago = pago del período anterior al primer deudor
     let ultimoPago = null;
     const primerDeudor = pendientes?.[0]?.periodo || null;
-
     if (primerDeudor) {
       const periodoAnterior = prevPeriodo(primerDeudor);
       if (periodoAnterior) {
         ultimoPago = await Pago.findOne({
           proveedor: proveedorId,
           periodo: periodoAnterior,
-          estado: { $ne: "anulado" }, // ajustá si tu flag difiere
+          estado: { $ne: "anulado" },
         })
           .select("fecha periodo metodo comprobante importe createdAt")
           .sort({ fecha: -1, createdAt: -1 })
@@ -613,8 +599,14 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       }
     }
 
-    // 👇 NUEVO: cargar logo desde utils/logoBase64.html
+    // Logo
     const logoDataUri = leerLogoDataUriDesdeHtml();
+
+    // ✅ Tipo de cambio de ayer hábil (desde middleware o servicio)
+    let usdAyer = res.locals.usdAyer || null;
+    if (!usdAyer) {
+      try { usdAyer = await cambioService.usdAyer(); } catch { usdAyer = null; }
+    }
 
     // Render EJS a HTML
     const html = await new Promise((resolve, reject) => {
@@ -627,13 +619,14 @@ export async function descargarEstadoCuentaPdfController(req, res) {
           ultimoPago,
           pendientes,
           totalPendiente,
-          logoDataUri, // 👈 ahora disponible en la vista
+          logoDataUri,
+          usdAyer,               // 👈 lo pasamos a la vista
         },
         (err, str) => (err ? reject(err) : resolve(str))
       );
     });
 
-    // Generar PDF con Puppeteer
+    // PDF
     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
     try {
       const page = await browser.newPage();
@@ -648,9 +641,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `inline; filename="EstadoCuenta-${String(
-          proveedor?.numeroProveedor || proveedorId
-        )}.pdf"`
+        `inline; filename="EstadoCuenta-${String(proveedor?.numeroProveedor || proveedorId)}.pdf"`
       );
       return res.send(pdf);
     } finally {

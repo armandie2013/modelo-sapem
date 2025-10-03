@@ -1,12 +1,24 @@
-<nav class="bg-blue-800 text-white py-4 px-6 z-50 relative">
+<nav class="nav-hover bg-blue-800 text-white py-4 px-6 z-50 relative">
+  <!-- Hover para links de nivel superior (los que llevan .navlink) -->
+  <style>
+    .nav-hover a.navlink {
+      padding: .25rem .5rem;
+      border-radius: .5rem;
+      transition: background-color .15s ease;
+    }
+    .nav-hover a.navlink:hover {
+      background: rgba(255,255,255,0.12);
+    }
+  </style>
+
   <div class="container mx-auto flex justify-between items-center">
-    <!-- Logo -->
-    <a href="/" class="text-lg font-semibold">Catamarca Telecomunicaciones SAPEM</a>
+    <!-- Logo / Marca -->
+    <a href="/" class="text-lg font-semibold navlink">Catamarca Telecomunicaciones SAPEM</a>
 
     <!-- Zona derecha (desktop): USD + menú -->
     <div class="hidden md:flex items-center gap-6">
       <!-- USD (ayer hábil) + histórico -->
-      <div class="relative flex items-center gap-3 border p-2 rounded-md">
+      <div class="relative flex items-center gap-3 border border-white/20 p-2 rounded-md">
         <% if (usdAyer && usdAyer.tipoCotizacion) { %>
           <div class="text-xs text-white/90">
             <span class="opacity-80">
@@ -14,7 +26,7 @@
               <%= new Intl.DateTimeFormat('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' })
                     .format(new Date(String(usdAyer.fecha)+'T00:00:00')) %>
             </span>
-            <span class="font-semibold">USD</span>:
+            <span class="font-semibold ml-1">USD:</span>
             <span class="font-mono">
               <%= new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})
                     .format(usdAyer.tipoCotizacion) %>
@@ -29,7 +41,7 @@
 
         <!-- Botón para abrir panel de histórico -->
         <button id="usdToggle" type="button"
-                class="text-xs bg-white/10 hover:bg-white/20 rounded-md px-2 py-1">
+                class="text-xs bg-white/10 hover:bg-white/20 rounded-md px-2 py-1 transition-colors">
           Histórico
         </button>
 
@@ -43,10 +55,10 @@
           <label class="block text-xs text-gray-600 mt-2 mb-1">Buscar por fecha</label>
           <input id="usdDate" type="date" class="w-full border rounded px-2 py-1 text-sm" />
           <button id="usdFetch"
-                  class="mt-2 w-full text-xs bg-indigo-600 text-white rounded px-2 py-1 hover:bg-indigo-700">
+                  class="mt-2 w-full text-xs bg-indigo-600 text-white rounded px-2 py-1 hover:bg-indigo-700 transition-colors">
             Consultar
           </button>
-          <div id="usdResult" class="mt-2 text-center text-xs text-red-700"></div>
+          <div id="usdResult" class="mt-2 text-center text-xs text-gray-700"></div>
         </div>
       </div>
 
@@ -55,18 +67,24 @@
         <% if (usuario && usuario.rol) { %>
           <!-- Administración -->
           <div class="relative">
-            <button onclick="toggleDropdown('adminDropdown')" class="hover:underline focus:outline-none">Administración ▾</button>
+            <button onclick="toggleDropdown('adminDropdown')"
+                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
+              Administración ▾
+            </button>
             <ul id="adminDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
               <li><a href="/proveedores" class="block px-4 py-2 hover:bg-gray-200">Listado de Proveedores</a></li>
               <li><a href="/proveedores/registrar" class="block px-4 py-2 hover:bg-gray-200">Registrar Proveedor</a></li>
+
               <li><hr class="my-1 border-gray-200"></li>
               <li><a href="/planes" class="block px-4 py-2 hover:bg-gray-200">Planes</a></li>
               <li><a href="/planes/crear" class="block px-4 py-2 hover:bg-gray-200">Crear Plan</a></li>
+
               <li><hr class="my-1 border-gray-200"></li>
               <li><a href="/pagos" class="block px-4 py-2 hover:bg-gray-200">Listado de Pagos</a></li>
               <li><a href="/pagos/registrar" class="block px-4 py-2 hover:bg-gray-200">Registrar Pago</a></li>
               <li><a href="/notas/credito/registrar" class="block px-4 py-2 hover:bg-gray-200">Nota de Crédito</a></li>
               <li><a href="/notas/debito/registrar" class="block px-4 py-2 hover:bg-gray-200">Nota de Débito</a></li>
+
               <li><hr class="my-1 border-gray-200"></li>
               <li><a href="/tareas/cargos" class="block px-4 py-2 hover:bg-gray-200">Cargos mensuales</a></li>
             </ul>
@@ -74,7 +92,10 @@
 
           <!-- Gerencia -->
           <div class="relative">
-            <button onclick="toggleDropdown('gerenciaDropdown')" class="hover:underline focus:outline-none">Gerencia ▾</button>
+            <button onclick="toggleDropdown('gerenciaDropdown')"
+                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
+              Gerencia ▾
+            </button>
             <ul id="gerenciaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
               <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Indicadores</a></li>
             </ul>
@@ -82,7 +103,10 @@
 
           <!-- Proyectos -->
           <div class="relative">
-            <button onclick="toggleDropdown('proyectosDropdown')" class="hover:underline focus:outline-none">Proyectos ▾</button>
+            <button onclick="toggleDropdown('proyectosDropdown')"
+                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
+              Proyectos ▾
+            </button>
             <ul id="proyectosDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
               <li><a href="/escuelas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Escuelas</a></li>
               <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Nuevo Proyecto</a></li>
@@ -91,7 +115,10 @@
 
           <!-- Técnica -->
           <div class="relative">
-            <button onclick="toggleDropdown('tecnicaDropdown')" class="hover:underline focus:outline-none">Técnica ▾</button>
+            <button onclick="toggleDropdown('tecnicaDropdown')"
+                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
+              Técnica ▾
+            </button>
             <ul id="tecnicaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
               <li><a href="/viaticos/dashboard" class="block px-4 py-2 hover:bg-gray-200">Viáticos</a></li>
               <li><a href="/pedidos-materiales/dashboard" class="block px-4 py-2 hover:bg-gray-200">Pedido de Materiales</a></li>
@@ -102,7 +129,10 @@
           <% if (usuario.rol==='admin' ) { %>
             <!-- Accesos admin -->
             <div class="relative">
-              <button onclick="toggleDropdown('adminAccessDropdown')" class="hover:underline focus:outline-none">Acceso Admin ▾</button>
+              <button onclick="toggleDropdown('adminAccessDropdown')"
+                      class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
+                Acceso Admin ▾
+              </button>
               <ul id="adminAccessDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
                 <li><a href="/personas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Personal SAPEM</a></li>
                 <li><a href="/usuarios/dashboard" class="block px-4 py-2 hover:bg-gray-200">Usuarios Registrados</a></li>
@@ -112,25 +142,25 @@
 
           <!-- Logout -->
           <form action="/logout" method="POST" class="ml-2">
-            <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800">Cerrar sesión</button>
+            <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800 transition-colors">Cerrar sesión</button>
           </form>
 
         <% } else { %>
           <!-- Visitantes -->
           <ul class="flex items-center space-x-6">
             <% if (rutaActual==="/registro" ) { %>
-              <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
+              <li><a href="/login" class="hover:underline navlink">Iniciar sesión</a></li>
             <% } else if (rutaActual==="/login" ) { %>
-              <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+              <li><a href="/registro" class="hover:underline navlink">Registrarse</a></li>
             <% } else { %>
-              <li><a href="/login" class="hover:underline">Iniciar sesión</a></li>
-              <li><a href="/registro" class="hover:underline">Registrarse</a></li>
+              <li><a href="/login" class="hover:underline navlink">Iniciar sesión</a></li>
+              <li><a href="/registro" class="hover:underline navlink">Registrarse</a></li>
             <% } %>
           </ul>
         <% } %>
       </div>
 
-      <!-- Botón hamburguesa (movil, a la derecha de todo) -->
+      <!-- Botón hamburguesa (móvil, a la derecha) -->
       <button id="menu-toggle" class="md:hidden">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -162,14 +192,19 @@
           <label class="block text-xs text-white/80 mb-1">Histórico</label>
           <div class="flex gap-2">
             <input id="usdDateM" type="date" class="flex-1 rounded px-2 py-1 text-xs text-black" />
-            <button id="usdFetchM" class="bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs">Consultar</button>
+            <button id="usdFetchM" class="bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs transition-colors">Consultar</button>
           </div>
           <div id="usdResultM" class="mt-2 text-xs"></div>
         </div>
       </div>
 
-      <!-- (…tu mismo menú móvil o enlaces de siempre aquí…) -->
-      <!-- Si ya tenías items móviles, colócalos debajo -->
+      <!-- Links móviles (si sos visitante) -->
+      <% if (!usuario || !usuario.rol) { %>
+        <ul class="flex flex-col gap-2">
+          <li><a href="/login" class="navlink">Iniciar sesión</a></li>
+          <li><a href="/registro" class="navlink">Registrarse</a></li>
+        </ul>
+      <% } %>
     </div>
   </div>
 </nav>
@@ -181,7 +216,7 @@
     const menu = document.getElementById("menu");
     menuToggle?.addEventListener("click", () => menu.classList.toggle("hidden"));
 
-    // Dropdowns (tu lógica existente)
+    // Dropdowns
     window.toggleDropdown = function toggleDropdown(id) {
       document.querySelectorAll("ul[id$='Dropdown']").forEach(el => {
         if (el.id !== id) el.classList.add("hidden");
@@ -189,6 +224,7 @@
       document.getElementById(id)?.classList.toggle("hidden");
     };
 
+    // Cerrar dropdowns haciendo click fuera
     document.addEventListener("click", function (e) {
       const isDropdownBtn = e.target.closest("button[onclick^='toggleDropdown']");
       const openDropdown = document.querySelector("ul[id$='Dropdown']:not(.hidden)");

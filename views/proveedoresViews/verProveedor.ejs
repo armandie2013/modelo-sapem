@@ -15,9 +15,10 @@
     const MES_ACTUAL = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
 
     // Comprobantes vencidos: saldo > 0 y periodo <= MES_ACTUAL
+    // ⇢ ORDEN DESCENDENTE (más nuevos primero)
     const vencidos = (detallePorPeriodo || [])
       .filter(r => Number(r.saldo || 0) > 0 && String(r.periodo || '') <= MES_ACTUAL)
-      .sort((a,b) => String(a.periodo||'').localeCompare(String(b.periodo||'')));
+      .sort((a,b) => String(b.periodo||'').localeCompare(String(a.periodo||'')));
     const totalVencidos = vencidos.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
   %>
 
@@ -250,9 +251,10 @@
                   <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
                 </tr>
               <% } else { 
+                   // ⇢ ORDEN DESCENDENTE (más nuevos primero)
                    const filasOrdenadas = (detallePorPeriodo || [])
                      .slice()
-                     .sort((a,b) => String(a.periodo||'').localeCompare(String(b.periodo||'')));
+                     .sort((a,b) => String(b.periodo||'').localeCompare(String(a.periodo||'')));
               %>
                 <% filasOrdenadas.forEach((r, i) => { %>
                   <tr
@@ -298,9 +300,14 @@
       <div id="sec-movimientos" class="hidden">
         <% if ((movimientos||[]).length === 0) { %>
           <p class="text-gray-500 text-center text-sm">Sin movimientos.</p>
-        <% } else { %>
+        <% } else { 
+             // ⇢ ORDEN DESCENDENTE por fecha (más nuevos primero)
+             const movsOrdenados = (movimientos || [])
+               .slice()
+               .sort((a,b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+        %>
           <ul class="rounded-xl border border-gray-200 overflow-hidden">
-            <% movimientos.forEach((m, idx) => { %>
+            <% movsOrdenados.forEach((m, idx) => { %>
               <li class="flex items-start justify-between gap-3 px-3 py-3 border-b border-gray-200 last:border-0
                          <%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
                 <div>

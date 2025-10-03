@@ -76,6 +76,16 @@
     .small {
       font-size: 11px;
     }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+      background: #eef4ff;
+      color: #143f7a;
+      border: 1px solid #d7e3ff;
+    }
   </style>
 </head>
 
@@ -92,6 +102,16 @@
   <div class="wrap">
     <% const fmtUSD=v=> new
       Intl.NumberFormat('es-AR',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
+      const fmtARS = v => new
+      Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
+      const tc = Number(usdAyer?.tipoCotizacion || 0);
+      function fmtFechaISOaDMY(iso) {
+      try {
+      return new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
+      .format(new Date(String(iso)+'T00:00:00'));
+      } catch { return iso || ''; }
+      }
+      const fechaTC = usdAyer?.fecha ? fmtFechaISOaDMY(usdAyer.fecha) : null;
       %>
 
       <!-- Header -->
@@ -115,14 +135,33 @@
             <div><strong>Fecha reporte:</strong>
               <%= (hoy ? new Date(hoy).toLocaleDateString('es-AR') : '' ) %>
             </div>
-            <div><strong>Total pendiente:</strong> <span class="totals">
+            <div style="margin-top:4px;">
+              <% if (tc> 0) { %>
+                <span class="badge">
+                  USD: <strong>
+                    <%= new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(tc) %>
+                  </strong>
+                  <%= fechaTC ? ` · ${fechaTC}` : '' %>
+                </span>
+                <% } else { %>
+                  <span class="small muted">TC de ayer no disponible</span>
+                  <% } %>
+            </div>
+            <div class="small muted" style="margin-top:6px;">
+              <strong>Total pendiente (USD):</strong> <span class="totals">
                 <%= fmtUSD(totalPendiente || 0) %>
-              </span></div>
+              </span>
+              <% if (tc> 0) { %><br />
+                <strong>Total pendiente (ARS):</strong> <span class="totals">
+                  <%= fmtARS((totalPendiente||0) * tc) %>
+                </span>
+                <% } %>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Último pago -->
+      <!-- Último pago (como lo tenías) -->
       <div class="card">
         <h2>Último pago registrado</h2>
         <% if (!ultimoPago) { %>
@@ -158,13 +197,10 @@
                 </tr>
               </tbody>
             </table>
-            <div class="small muted" style="margin-top:6px">
-              <!-- * Corresponde al <strong>período inmediatamente anterior</strong> al primer período deudor mostrado. -->
-            </div>
             <% } %>
       </div>
 
-      <!-- Períodos adeudados -->
+      <!-- Períodos adeudados (exactamente como estaba antes) -->
       <div class="card">
         <h2>Períodos adeudados</h2>
         <table>
@@ -210,16 +246,20 @@
       <!-- Totales -->
       <div class="card">
         <div class="grid">
-          <div>
-            <!-- <div class="small muted">* Se muestran solo períodos vencidos (<= mes actual) con saldo > 0.</div> -->
-          </div>
+          <div></div>
           <div class="right">
-            <div class="totals">Total pendiente: <%= fmtUSD(totalPendiente || 0) %>
+            <div class="totals">Total pendiente (USD): <%= fmtUSD(totalPendiente || 0) %>
             </div>
+            <% if (tc> 0) { %>
+              <div class="totals">Total pendiente (ARS): <%= fmtARS((totalPendiente || 0) * tc) %>
+              </div>
+              <% } %>
           </div>
         </div>
       </div>
 
+      <div class="small muted">* Cotización valida solo por el día de la fecha, para solicitarla nuevamente comunicarse
+        al teléfono 03834-017741.</div>
   </div>
 </body>
 
