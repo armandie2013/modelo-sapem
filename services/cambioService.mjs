@@ -28,11 +28,21 @@ function parseBcraUsdResponse(data) {
 
     // Buscar explícitamente USD o, en su defecto, el primer item con tipoCotizacion numérico
     let item =
-      detalle.find((d) => String(d?.codigoMoneda || "").toUpperCase() === "USD") ||
-      detalle.find((d) => /D[ÓO]LAR/.test(String(d?.descripcion || "").toUpperCase())) ||
-      detalle.find((d) => d && d.tipoCotizacion !== undefined && d.tipoCotizacion !== null);
+      detalle.find(
+        (d) => String(d?.codigoMoneda || "").toUpperCase() === "USD"
+      ) ||
+      detalle.find((d) =>
+        /D[ÓO]LAR/.test(String(d?.descripcion || "").toUpperCase())
+      ) ||
+      detalle.find(
+        (d) => d && d.tipoCotizacion !== undefined && d.tipoCotizacion !== null
+      );
 
-    if (item && item.tipoCotizacion !== undefined && item.tipoCotizacion !== null) {
+    if (
+      item &&
+      item.tipoCotizacion !== undefined &&
+      item.tipoCotizacion !== null
+    ) {
       const tipo = Number(item.tipoCotizacion);
       if (!Number.isNaN(tipo)) {
         return {
@@ -83,7 +93,9 @@ export async function getUsdPorFechaConFallback(
   maxDias = Number(process.env.USD_MAX_FALLBACK_DAYS || 7)
 ) {
   // Construimos fecha en "local" para alinear con el backend (clock)
-  const [Y, M, D] = String(fechaISO).split("-").map((n) => Number(n));
+  const [Y, M, D] = String(fechaISO)
+    .split("-")
+    .map((n) => Number(n));
   if (!Y || !M || !D) throw new Error("Fecha inválida");
 
   let attempts = 0;
@@ -94,7 +106,11 @@ export async function getUsdPorFechaConFallback(
 
     const cot = await getUsdPorFecha(iso);
     if (cot && typeof cot.tipoCotizacion === "number") {
-      return { fechaSolicitada: fechaISO, encontradoEn: cot.fecha || iso, cotizacion: cot };
+      return {
+        fechaSolicitada: fechaISO,
+        encontradoEn: cot.fecha || iso,
+        cotizacion: cot,
+      };
     }
 
     // retrocede un día
@@ -125,3 +141,13 @@ export async function getUsdDiaAnteriorConFallback(maxDias) {
 
 // Alias por compatibilidad (si algo usaba getUsdAyer)
 export const getUsdAyer = getUsdDiaAnteriorConFallback;
+
+// ⬇️ pegá esto al final de services/cambioService.mjs
+export const cambioService = {
+  // nombres "amigables" para cómo lo usás en controllers
+  usdUltima: getUsdUltima,
+  usdPorFecha: getUsdPorFecha,
+  usdPorFechaConFallback: getUsdPorFechaConFallback,
+  usdDiaAnteriorConFallback: getUsdDiaAnteriorConFallback,
+  usdAyer: getUsdAyer,
+};
