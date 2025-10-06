@@ -24,26 +24,33 @@
 
   <div class="max-w-6xl mx-auto space-y-6">
 
-    <!-- Header + acciones -->
-    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <div class="flex flex-col gap-4">
-        <!-- Primera fila: título + botón Volver arriba a la derecha -->
-        <div class="flex items-start justify-between gap-4">
+    <!-- Header + acciones (estilo mejorado) -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 relative overflow-hidden">
+      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/70 via-sky-500/70 to-emerald-500/70"></div>
+
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <!-- Avatar con inicial -->
+          <div class="h-12 w-12 shrink-0 rounded-xl bg-indigo-100 text-indigo-700 grid place-items-center font-bold">
+            <%= (proveedor.nombreReal||'?').slice(0,1).toUpperCase() %>
+          </div>
+
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
               Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
             </h1>
-            <h1 class="text-xl font-bold text-gray-900">
-              Nombre: <%= proveedor.nombreReal %>
-            </h1>
-            <p class="text-sm text-gray-600">
-              CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-              IVA: <%= proveedor.condicionIva || '—' %> ·
-              Tel: <%= proveedor.telefonoCelular || '—' %> ·
-              Estado:
-              <span
-                class="ml-1.5 inline-flex items-center justify-center w-16 px-1.5 py-[2px] rounded-full text-[10px] font-medium
-                       <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
+            <p class="text-sm text-gray-700 font-medium mt-0.5">
+              Nombre: <span class="text-gray-900"><%= proveedor.nombreReal %></span>
+            </p>
+            <p class="text-sm text-gray-600 mt-0.5">
+              CUIT <span><%= proveedor.cuit || '—' %></span> ·
+              IVA <%= proveedor.condicionIva || '—' %> ·
+              Tel <%= proveedor.telefonoCelular || '—' %>
+              <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1
+                <%= (proveedor.activo ?? true)
+                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                  : 'bg-gray-100 text-gray-600 ring-gray-300' %>">
+                <span class="h-1.5 w-1.5 rounded-full <%= (proveedor.activo ?? true) ? 'bg-emerald-500' : 'bg-gray-400' %>"></span>
                 <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
               </span>
             </p>
@@ -51,212 +58,139 @@
               Plan:
               <% if (proveedor.plan) { %>
                 <span class="font-medium"><%= proveedor.plan.nombre %></span>
-                — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
+                — <span><%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %></span>
                 <% if (typeof proveedor.precioPlan === 'number') { %>
-                  <span class="text-xs text-gray-500">(override)</span>
+                  <span class="text-xs text-gray-500 ml-1">(override)</span>
                 <% } %>
               <% } else { %>
                 <span class="text-gray-500">Sin plan</span>
               <% } %>
             </p>
           </div>
-
-          <!-- Botón Volver arriba a la derecha -->
-          <div class="shrink-0">
-            <a href="/proveedores"
-               class="inline-flex items-center bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm">
-              ← Volver
-            </a>
-          </div>
         </div>
 
-        <!-- Fila de acciones (solo si hay permisos) -->
-        <%
-          const perms = (usuario && usuario.modulosPermitidos) || {};
-          const puedeRegistrarPago = !!(perms.pagos?.crear || perms.pagos?.registrar);
-          const puedeNotaCredito   = !!(perms.notas?.credito?.crear || perms.notasCredito?.crear);
-          const puedeNotaDebito    = !!(perms.notas?.debito?.crear  || perms.notasDebito?.crear);
-          const puedePlanPago      = !!(perms.planesPago?.crear);
-          const hayAcciones = puedeRegistrarPago || puedeNotaCredito || puedeNotaDebito || puedePlanPago;
-        %>
-
-        <% if (hayAcciones) { %>
-          <div class="pt-3 mt-1 border-t border-gray-200">
-            <div class="flex flex-row flex-wrap items-center justify-start gap-2">
-              <% if (puedeRegistrarPago) { %>
-                <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
-                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-                  + Registrar pago
-                </a>
-              <% } %>
-
-              <% if (puedeNotaCredito) { %>
-                <a href="/notas/proveedores/<%= proveedor._id %>/credito"
-                   class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm">
-                  + Nota de crédito
-                </a>
-              <% } %>
-
-              <% if (puedeNotaDebito) { %>
-                <a href="/notas/proveedores/<%= proveedor._id %>/debito"
-                   class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm">
-                  + Nota de débito
-                </a>
-              <% } %>
-
-              <% if (puedePlanPago) { %>
-                <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
-                   class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
-                  + Plan de pago
-                </a>
-              <% } %>
-            </div>
-          </div>
-        <% } %>
+        <!-- Acciones rápidas -->
+        <div class="shrink-0 flex items-center gap-2">
+          <a href="/proveedores/<%= proveedor._id %>/estado-cuenta/pdf" target="_blank"
+             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-indigo-700 hover:text-white ring-1 ring-indigo-200 hover:ring-indigo-500 hover:bg-indigo-600 bg-indigo-50">
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M12.5 3H17v4.5a1 1 0 11-2 0V6.41l-7.3 7.29a1 1 0 11-1.4-1.42L13.59 5H12.5a1 1 0 110-2z"></path>
+              <path d="M5 5h4a1 1 0 010 2H6.41l-.7.7V15h7.3l.7-.7V11a1 1 0 112 0v4a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
+            </svg>
+            Estado de cuenta
+          </a>
+          <a href="/proveedores"
+             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:text-gray-900 ring-1 ring-gray-200 hover:ring-gray-300 bg-white">
+            ← Volver
+          </a>
+          
+        </div>
       </div>
+
+      <!-- Fila de acciones (solo si hay permisos) -->
+      <%
+        const perms = (usuario && usuario.modulosPermitidos) || {};
+        const puedeRegistrarPago = !!(perms.pagos?.crear || perms.pagos?.registrar);
+        const puedeNotaCredito   = !!(perms.notas?.credito?.crear || perms.notasCredito?.crear);
+        const puedeNotaDebito    = !!(perms.notas?.debito?.crear  || perms.notasDebito?.crear);
+        const puedePlanPago      = !!(perms.planesPago?.crear);
+        const hayAcciones = puedeRegistrarPago || puedeNotaCredito || puedeNotaDebito || puedePlanPago;
+      %>
+
+      <% if (hayAcciones) { %>
+        <div class="pt-3 mt-4 border-t border-gray-200">
+          <div class="flex flex-row flex-wrap items-center justify-start gap-2">
+            <% if (puedeRegistrarPago) { %>
+              <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
+                 class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm ring-1 ring-blue-500/10">
+                + Registrar pago
+              </a>
+            <% } %>
+
+            <% if (puedeNotaCredito) { %>
+              <a href="/notas/proveedores/<%= proveedor._id %>/credito"
+                 class="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm shadow-sm ring-1 ring-emerald-500/10">
+                + Nota de crédito
+              </a>
+            <% } %>
+
+            <% if (puedeNotaDebito) { %>
+              <a href="/notas/proveedores/<%= proveedor._id %>/debito"
+                 class="inline-flex items-center gap-1.5 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm shadow-sm ring-1 ring-amber-500/10">
+                + Nota de débito
+              </a>
+            <% } %>
+
+            <% if (puedePlanPago) { %>
+              <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
+                 class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10">
+                + Plan de pago
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
     </div>
 
-    <!-- Resumen -->
+    <!-- Resumen (tarjetas KPI) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Saldo de la cuenta</p>
-        <p class="text-xl font-semibold <%= saldoVencido > 0 ? 'text-red-600' : 'text-gray-900' %>">
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Saldo de la cuenta</p>
+        <p class="mt-1 text-xl font-semibold <%= saldoVencido > 0 ? 'text-rose-600' : 'text-gray-900' %>">
           <%= fmtUSD(saldoVencido) %>
         </p>
-        <p class="mt-1 text-[11px] text-gray-500">
-          Incluye períodos hasta este mes (vencen el 10, se cuenta desde el 1).
-        </p>
+        <p class="mt-1 text-[11px] text-gray-500">Incluye períodos hasta este mes (vencen el 10).</p>
       </div>
 
-      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Total cargos</p>
-        <p class="text-xl font-semibold"><%= fmtUSD(totales.cargo) %></p>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Total cargos</p>
+        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.cargo) %></p>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Notas de débito</p>
-        <p class="text-xl font-semibold"><%= fmtUSD(totales.notaDebito) %></p>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Notas de débito</p>
+        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.notaDebito) %></p>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Notas de crédito</p>
-        <p class="text-xl font-semibold"><%= fmtUSD(totales.notaCredito) %></p>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Notas de crédito</p>
+        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.notaCredito) %></p>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Pagos</p>
-        <p class="text-xl font-semibold"><%= fmtUSD(totales.pagos) %></p>
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Pagos</p>
+        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.pagos) %></p>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-300">
-        <p class="text-xs text-gray-500">Deuda total</p>
-        <p class="text-xl font-semibold <%= totales.saldo > 0 ? 'text-red-600' : (totales.saldo < 0 ? 'text-green-700' : 'text-gray-900') %>">
+      <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Deuda total</p>
+        <p class="mt-1 text-xl font-semibold <%= totales.saldo > 0 ? 'text-rose-600' : (totales.saldo < 0 ? 'text-emerald-700' : 'text-gray-900') %>">
           <%= fmtUSD(totales.saldo) %>
         </p>
       </div>
     </div>
 
-    <!-- Comprobantes vencidos -->
-    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+    <!-- Comprobantes vencidos (tabla con header sticky) -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Comprobantes vencidos</h2>
         <div class="text-sm text-gray-600">
-          <span class="mr-3">Períodos ≤ <span class="font-mono font-medium"><%= MES_ACTUAL %></span></span>
-          <span>Total: <span class="font-semibold <%= totalVencidos > 0 ? 'text-red-600' : 'text-gray-800' %>"><%= fmtUSD(totalVencidos) %></span></span>
+          <span class="mr-3">Períodos ≤ <span class="font-medium"><%= MES_ACTUAL %></span></span>
+          <span>Total: <span class="font-semibold <%= totalVencidos > 0 ? 'text-rose-600' : 'text-gray-800' %>"><%= fmtUSD(totalVencidos) %></span></span>
         </div>
       </div>
 
       <% if (vencidos.length === 0) { %>
         <p class="text-gray-500 text-sm">No hay comprobantes vencidos.</p>
       <% } else { %>
-        <div class="overflow-x-auto rounded-xl border border-gray-200">
-          <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-700">
-              <tr>
-                <th class="px-4 py-3 text-left">Período</th>
-                <th class="px-4 py-3 text-right">Saldo pendiente</th>
-                <th class="px-4 py-3 text-left w-28">Estado</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <% vencidos.forEach((r, i) => { %>
-                <tr
-                  class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
-                  data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
-                  role="link" tabindex="0"
-                  title="Ver detalle del período <%= r.periodo %>"
-                >
-                  <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
-                  <td class="px-4 py-3 text-right text-red-600 font-semibold"><%= fmtUSD(r.saldo) %></td>
-                  <td class="px-4 py-3">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-100 text-rose-800">
-                      Vencido
-                    </span>
-                  </td>
+        <div class="overflow-hidden rounded-xl border border-gray-200">
+          <div class="max-h-[360px] overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 text-gray-700 sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th class="px-4 py-3 text-left font-semibold">Período</th>
+                  <th class="px-4 py-3 text-right font-semibold">Saldo pendiente</th>
+                  <th class="px-4 py-3 text-left w-28 font-semibold">Estado</th>
                 </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-
-      <!-- FRASE/ENLACE: Reporte Estado de cuenta (abajo-derecha) -->
-      <div class="mt-3 flex items-center justify-end">
-        <a
-          href="/proveedores/<%= proveedor._id %>/estado-cuenta/pdf"
-          target="_blank"
-          class="text-sm text-gray-600 hover:text-indigo-700 hover:underline inline-flex items-center gap-1"
-          title="Abrir reporte de Estado de cuenta en PDF"
-        >
-          Reporte: Estado de cuenta
-          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M12.5 3H17v4.5a1 1 0 11-2 0V6.41l-7.3 7.29a1 1 0 11-1.4-1.42L13.59 5H12.5a1 1 0 110-2z"></path>
-            <path d="M5 5h4a1 1 0 010 2H6.41l-.7.7V15h7.3l.7-.7V11a1 1 0 112 0v4a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
-          </svg>
-        </a>
-      </div>
-
-      <p class="mt-2 text-[11px] text-gray-500">Los comprobantes vencen el día 10, pero se consideran en mora desde el día 1 del mes vigente.</p>
-    </div>
-
-    <!-- Detalle por período (colapsable) -->
-    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold text-gray-800">Resumen por período</h2>
-        <button
-          type="button"
-          class="toggle-section inline-flex items-center gap-1.5 text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-md transition"
-          data-target="#sec-resumen"
-          aria-controls="sec-resumen"
-          aria-expanded="false">
-          <span data-text>Ver</span>
-          <svg class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
-          </svg>
-        </button>
-      </div>
-
-      <div id="sec-resumen" class="hidden">
-        <div class="overflow-x-auto rounded-xl border border-gray-200">
-          <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-700">
-              <tr>
-                <th class="px-4 py-3 text-left">Período</th>
-                <th class="px-4 py-3 text-right">Cargos</th>
-                <th class="px-4 py-3 text-right">Notas débito</th>
-                <th class="px-4 py-3 text-right">Notas crédito</th>
-                <th class="px-4 py-3 text-right">Pagos</th>
-                <th class="px-4 py-3 text-right">Saldo</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <% if ((detallePorPeriodo||[]).length === 0) { %>
-                <tr class="bg-gray-50">
-                  <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
-                </tr>
-              <% } else { 
-                   // ⇢ ORDEN DESCENDENTE (más nuevos primero)
-                   const filasOrdenadas = (detallePorPeriodo || [])
-                     .slice()
-                     .sort((a,b) => String(b.periodo||'').localeCompare(String(a.periodo||'')));
-              %>
-                <% filasOrdenadas.forEach((r, i) => { %>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <% vencidos.forEach((r, i) => { %>
                   <tr
                     class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
                     data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
@@ -264,34 +198,102 @@
                     title="Ver detalle del período <%= r.periodo %>"
                   >
                     <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
-                    <td class="px-4 py-3 text-right"><%= fmtUSD(r.cargo) %></td>
-                    <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
-                    <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
-                    <td class="px-4 py-3 text-right text-green-800"><%= fmtUSD(r.pagos) %></td>
-                    <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-red-600' : (r.saldo < 0 ? 'text-green-700' : '') %>">
-                      <%= fmtUSD(r.saldo) %>
+                    <td class="px-4 py-3 text-right text-rose-600 font-semibold"><%= fmtUSD(r.saldo) %></td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+                        Vencido
+                      </span>
                     </td>
                   </tr>
                 <% }) %>
-              <% } %>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+
+      <p class="mt-2 text-[11px] text-gray-500">Los comprobantes vencen el día 10, pero se consideran en mora desde el día 1 del mes vigente.</p>
+    </div>
+
+    <!-- Detalle por período (colapsable) -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-800">Resumen por período</h2>
+        <button
+          type="button"
+          class="toggle-section inline-flex items-center gap-1.5 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg ring-1 ring-gray-200 transition"
+          data-target="#sec-resumen"
+          aria-controls="sec-resumen"
+          aria-expanded="false">
+          <span data-text>Ver</span>
+          <svg class="w-4 h-4 transition-transform will-change-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="sec-resumen" class="hidden">
+        <div class="overflow-hidden rounded-xl border border-gray-200">
+          <div class="max-h-[440px] overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 text-gray-700 sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th class="px-4 py-3 text-left font-semibold">Período</th>
+                  <th class="px-4 py-3 text-right font-semibold">Cargos</th>
+                  <th class="px-4 py-3 text-right font-semibold">Notas débito</th>
+                  <th class="px-4 py-3 text-right font-semibold">Notas crédito</th>
+                  <th class="px-4 py-3 text-right font-semibold">Pagos</th>
+                  <th class="px-4 py-3 text-right font-semibold">Saldo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <% if ((detallePorPeriodo||[]).length === 0) { %>
+                  <tr class="bg-gray-50">
+                    <td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin movimientos.</td>
+                  </tr>
+                <% } else { 
+                     // ⇢ ORDEN DESCENDENTE (más nuevos primero)
+                     const filasOrdenadas = (detallePorPeriodo || [])
+                       .slice()
+                       .sort((a,b) => String(b.periodo||'').localeCompare(String(a.periodo||'')));
+                %>
+                  <% filasOrdenadas.forEach((r, i) => { %>
+                    <tr
+                      class="periodo-row <%= (i % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors cursor-pointer"
+                      data-href="/proveedores/<%= proveedor._id %>/periodo/<%= r.periodo %>"
+                      role="link" tabindex="0"
+                      title="Ver detalle del período <%= r.periodo %>"
+                    >
+                      <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
+                      <td class="px-4 py-3 text-right"><%= fmtUSD(r.cargo) %></td>
+                      <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
+                      <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
+                      <td class="px-4 py-3 text-right text-emerald-800"><%= fmtUSD(r.pagos) %></td>
+                      <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-rose-600' : (r.saldo < 0 ? 'text-emerald-700' : '') %>">
+                        <%= fmtUSD(r.saldo) %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Timeline últimos movimientos (colapsable) -->
-    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-semibold text-gray-800">Movimientos recientes</h2>
         <button
           type="button"
-          class="toggle-section inline-flex items-center gap-1.5 text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-md transition"
+          class="toggle-section inline-flex items-center gap-1.5 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg ring-1 ring-gray-200 transition"
           data-target="#sec-movimientos"
           aria-controls="sec-movimientos"
           aria-expanded="false">
           <span data-text>Ver</span>
-          <svg class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <svg class="w-4 h-4 transition-transform will-change-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
           </svg>
         </button>
@@ -308,18 +310,17 @@
         %>
           <ul class="rounded-xl border border-gray-200 overflow-hidden">
             <% movsOrdenados.forEach((m, idx) => { %>
-              <li class="flex items-start justify-between gap-3 px-3 py-3 border-b border-gray-200 last:border-0
-                         <%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
+              <li class="flex items-start justify-between gap-3 px-3 py-3 border-b border-gray-200 last:border-0 <%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
                 <div>
                   <div class="text-sm">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
                       <%= m.tipo==='cargo'
-                          ? 'bg-sky-100 text-sky-800'
+                          ? 'bg-sky-100 text-sky-800 ring-1 ring-sky-200'
                           : (m.tipo==='pago'
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200'
                               : (m.tipo==='credito'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : 'bg-amber-100 text-amber-800')) %>">
+                                  ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200'
+                                  : 'bg-amber-100 text-amber-800 ring-1 ring-amber-200')) %>">
                       <%= m.tipo %>
                     </span>
                     <span class="ml-2 font-medium"><%= m.concepto %></span>
@@ -334,7 +335,7 @@
                     <% } %>
                   </div>
                 </div>
-                <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-red-600' : 'text-green-700' %>">
+                <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-rose-600' : 'text-emerald-700' %>">
                   <%= m.signo > 0 ? '+ ' : '- ' %><%= fmtUSD(m.importe) %>
                 </div>
               </li>

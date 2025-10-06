@@ -9,61 +9,86 @@
   %>
 
   <div class="max-w-6xl mx-auto space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300">
+
+    <!-- Header + acciones (con botón Volver dentro del cuadro) -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 relative overflow-hidden">
+      <!-- franja superior sutil -->
+      <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/70 via-sky-500/70 to-emerald-500/70"></div>
+
       <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">
-            Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
-          </h1>
-          <h1 class="text-xl font-bold text-gray-900">
-            Nombre: <%= proveedor.nombreReal %>
-          </h1>
-          <p class="text-sm text-gray-600">
-            CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
-            IVA: <%= proveedor.condicionIva || '—' %> ·
-            Tel: <%= proveedor.telefonoCelular %> ·
-            Estado:
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (proveedor.activo ?? true) ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' %>">
-              <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
-            </span>
-          </p>
-          <p class="text-sm text-gray-600 mt-1">
-            Plan:
-            <% if (proveedor.plan) { %>
-              <span class="font-medium"><%= proveedor.plan.nombre %></span>
-              — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
-              <% if (typeof proveedor.precioPlan==='number' ) { %>
-                <span class="text-xs text-gray-500">(override)</span>
+        <div class="flex items-start gap-3">
+          <!-- avatar con inicial -->
+          <div class="h-10 w-10 shrink-0 rounded-lg bg-indigo-100 text-indigo-700 grid place-items-center font-semibold">
+            <%= (proveedor.nombreReal||'?').slice(0,1).toUpperCase() %>
+          </div>
+
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
+              Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
+            </h1>
+            <h1 class="text-xl font-bold text-gray-900">
+              Nombre: <%= proveedor.nombreReal %>
+            </h1>
+            <p class="text-sm text-gray-600">
+              CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+              IVA: <%= proveedor.condicionIva || '—' %> ·
+              Tel: <%= proveedor.telefonoCelular %> ·
+              Estado:
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ring-1
+                           <%= (proveedor.activo ?? true) ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-gray-100 text-gray-700 ring-gray-300' %>">
+                <span class="h-1.5 w-1.5 rounded-full <%= (proveedor.activo ?? true) ? 'bg-emerald-500' : 'bg-gray-400' %>"></span>
+                <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+              </span>
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+              Plan:
+              <% if (proveedor.plan) { %>
+                <span class="font-medium"><%= proveedor.plan.nombre %></span>
+                — <%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %>
+                <% if (typeof proveedor.precioPlan==='number' ) { %>
+                  <span class="text-xs text-gray-500">(override)</span>
+                <% } %>
+              <% } else { %>
+                <span class="text-gray-500">Sin plan</span>
               <% } %>
-            <% } else { %>
-              <span class="text-gray-500">Sin plan</span>
-            <% } %>
-          </p>
+            </p>
+          </div>
         </div>
 
-        <!-- Botones Ver/Descargar PDF si existe un plan previo -->
-        <% if (ultimoPlan) { %>
-          <div class="flex flex-col sm:flex-row gap-2">
+        <!-- Acciones a la derecha (incluye Volver) -->
+        <div class="flex flex-col sm:flex-row gap-2">
+          <!-- <a href="/proveedores/<%= proveedor._id %>/ver"
+             class="inline-flex items-center justify-center bg-gray-50 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm ring-1 ring-gray-200">
+            ← Volver
+          </a> -->
+
+          <% if (ultimoPlan) { %>
             <a href="/planes-pago/<%= ultimoPlan._id %>/ver"
-               class="bg-white border border-purple-600 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 text-sm text-center">
+               class="inline-flex items-center justify-center bg-white ring-1 ring-purple-600/80 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 text-sm">
               Ver plan vigente
             </a>
             <a href="/planes-pago/<%= ultimoPlan._id %>/pdf" target="_blank"
-               class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm text-center">
+               class="inline-flex items-center justify-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm shadow-sm">
               Descargar plan (PDF)
             </a>
-          </div>
-        <% } %>
+          <% } %>
+          <a href="/proveedores/<%= proveedor._id %>/ver"
+             class="inline-flex items-center justify-center bg-gray-50 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm ring-1 ring-gray-200">
+            ← Volver
+          </a>
+        </div>
       </div>
     </div>
 
+    <!-- Form crear plan -->
     <form action="/planes-pago/proveedores/<%= proveedor._id %>/crear" method="POST"
-          class="bg-white p-6 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+          class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 space-y-6">
 
+      <!-- Campos -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm text-gray-700 mb-1">Cantidad de cuotas</label>
-          <select name="cuotas" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+          <select name="cuotas" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30" required>
             <% (cuotasPreset || [3,6,9,12]).forEach(n=> { %>
               <option value="<%= n %>"><%= n %> cuotas</option>
             <% }) %>
@@ -73,51 +98,53 @@
         <div>
           <label class="block text-sm text-gray-700 mb-1">Primer período (YYYY-MM)</label>
           <input type="month" name="primerPeriodo" value="<%= primerPeriodoSugerido %>"
-                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30" required>
           <p class="text-xs text-gray-500 mt-1">Por defecto proponemos el mes siguiente; podés cambiarlo.</p>
         </div>
 
         <div>
           <label class="block text-sm text-gray-700 mb-1">Fecha de hoy</label>
-          <input type="date" value="<%= hoy %>" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"
-                 disabled>
+          <input type="date" value="<%= hoy %>" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm bg-gray-50" disabled>
         </div>
       </div>
 
+      <!-- Tabla comprobantes -->
       <div class="border-t pt-4">
         <h2 class="font-semibold text-gray-800 mb-2">Comprobantes elegibles (sin parciales)</h2>
 
         <% if (!movimientosElegibles || movimientosElegibles.length===0) { %>
           <p class="text-sm text-gray-500">No hay cargos / notas de débito elegibles. Si existen comprobantes con pagos parciales, primero deben ser cancelados completamente.</p>
         <% } else { %>
-          <div class="overflow-x-auto rounded-xl border border-gray-200">
-            <table class="min-w-full text-sm">
-              <thead class="bg-gray-50 text-gray-700">
-                <tr>
-                  <th class="px-3 py-2 text-left w-10">Sel.</th>
-                  <th class="px-3 py-2 text-left">Tipo</th>
-                  <th class="px-3 py-2 text-left">Concepto</th>
-                  <th class="px-3 py-2 text-left">Período</th>
-                  <th class="px-3 py-2 text-left">Fecha</th>
-                  <th class="px-3 py-2 text-right">Importe</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <% movimientosElegibles.forEach(m=> { %>
-                  <tr class="odd:bg-gray-50 even:bg-white">
-                    <td class="px-3 py-2">
-                      <input type="checkbox" name="seleccionIds" value="<%= m._id %>"
-                             data-importe="<%= Number(m.importe || 0) %>">
-                    </td>
-                    <td class="px-3 py-2"><span class="uppercase"><%= m.tipo %></span></td>
-                    <td class="px-3 py-2"><%= m.concepto || '(Sin detalle)' %></td>
-                    <td class="px-3 py-2"><%= m.periodo || '—' %></td>
-                    <td class="px-3 py-2"><%= new Date(m.fecha).toLocaleDateString('es-AR') %></td>
-                    <td class="px-3 py-2 text-right font-semibold"><%= fmtUSD(m.importe) %></td>
+          <div class="overflow-hidden rounded-xl border border-gray-200">
+            <div class="max-h-[420px] overflow-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-700 sticky top-0 z-10 shadow-sm">
+                  <tr>
+                    <th class="px-3 py-2 text-left w-10 font-semibold">Sel.</th>
+                    <th class="px-3 py-2 text-left font-semibold">Tipo</th>
+                    <th class="px-3 py-2 text-left font-semibold">Concepto</th>
+                    <th class="px-3 py-2 text-left font-semibold">Período</th>
+                    <th class="px-3 py-2 text-left font-semibold">Fecha</th>
+                    <th class="px-3 py-2 text-right font-semibold">Importe</th>
                   </tr>
-                <% }) %>
-              </tbody>
-            </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <% movimientosElegibles.forEach(m=> { %>
+                    <tr class="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors">
+                      <td class="px-3 py-2">
+                        <input type="checkbox" name="seleccionIds" value="<%= m._id %>"
+                               data-importe="<%= Number(m.importe || 0) %>">
+                      </td>
+                      <td class="px-3 py-2"><span class="uppercase"><%= m.tipo %></span></td>
+                      <td class="px-3 py-2"><%= m.concepto || '(Sin detalle)' %></td>
+                      <td class="px-3 py-2"><%= m.periodo || '—' %></td>
+                      <td class="px-3 py-2"><%= new Date(m.fecha).toLocaleDateString('es-AR') %></td>
+                      <td class="px-3 py-2 text-right font-semibold"><%= fmtUSD(m.importe) %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
           </div>
         <% } %>
       </div>
@@ -127,45 +154,48 @@
         <h3 class="font-semibold text-gray-800 mb-2">Resumen del plan</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-          <div>
+          <div class="bg-white/60 rounded-lg p-3 ring-1 ring-gray-200">
             <p class="text-xs text-gray-500">Total seleccionado</p>
             <p class="text-lg font-bold" id="rpTotal">$0,00</p>
           </div>
-          <div>
+          <div class="bg-white/60 rounded-lg p-3 ring-1 ring-gray-200">
             <p class="text-xs text-gray-500">Cuota base</p>
             <p class="text-lg font-bold" id="rpCuotaBase">$0,00</p>
           </div>
-          <div>
+          <div class="bg-white/60 rounded-lg p-3 ring-1 ring-gray-200">
             <p class="text-xs text-gray-500">Última cuota (ajuste)</p>
             <p class="text-lg font-bold" id="rpCuotaFinal">$0,00</p>
           </div>
         </div>
 
-        <div class="overflow-x-auto rounded-lg border border-gray-200">
-          <table class="min-w-full text-sm">
-            <thead class="bg-gray-100 text-gray-700">
-              <tr>
-                <th class="px-3 py-2 text-left">#</th>
-                <th class="px-3 py-2 text-left">Período</th>
-                <th class="px-3 py-2 text-right">Importe</th>
-              </tr>
-            </thead>
-            <tbody id="rpCuotasBody" class="divide-y divide-gray-100"></tbody>
-          </table>
+        <div class="overflow-hidden rounded-lg border border-gray-200">
+          <div class="max-h-[360px] overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-100 text-gray-700 sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th class="px-3 py-2 text-left font-semibold">#</th>
+                  <th class="px-3 py-2 text-left font-semibold">Período</th>
+                  <th class="px-3 py-2 text-right font-semibold">Importe</th>
+                </tr>
+              </thead>
+              <tbody id="rpCuotasBody" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
+      <!-- Acciones -->
       <div class="flex flex-wrap gap-2 pt-2">
         <button type="submit" id="btnCrearPlan"
-                class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm"
+                class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 <%=(!movimientosElegibles || movimientosElegibles.length===0) ? 'disabled' : '' %>>
           Crear plan de pago
         </button>
 
-        <a href="/proveedores/<%= proveedor._id %>/ver"
-           class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm">
+        <!-- <a href="/proveedores/<%= proveedor._id %>/ver"
+           class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm ring-1 ring-gray-200">
           ← Volver
-        </a>
+        </a> -->
       </div>
     </form>
   </div>
