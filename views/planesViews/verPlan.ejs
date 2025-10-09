@@ -1,44 +1,82 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="bg-white max-w-4xl mx-auto p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
-    <h1 class="text-2xl font-bold text-gray-800">Plan: <%= plan.nombre %></h1>
+  <div class="bg-white max-w-4xl mx-auto p-8 rounded-2xl shadow-lg border border-gray-200 relative overflow-hidden space-y-6">
+    <!-- Franja superior sutil (match crear/editar/listado) -->
+    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/70 via-sky-500/70 to-emerald-500/70"></div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-      <div class="border border-gray-200 rounded-lg p-4">
-        <p class="text-gray-500 font-medium">Detalle</p>
-        <p class="text-gray-800 mt-1"><%= plan.detalle || '-' %></p>
-      </div>
-      <div class="border border-gray-200 rounded-lg p-4">
-        <p class="text-gray-500 font-medium">Importe</p>
-        <p class="text-gray-800 mt-1">
-          $ <%= Number(plan.importe || 0).toLocaleString("es-AR", { minimumFractionDigits: 2 }) %>
+    <% 
+      // Helpers
+      const fmtUSD = (v) => 'US$ ' + Number(v || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const puedeEditar = !!(usuario?.modulosPermitidos?.planes?.editar);
+    %>
+
+    <!-- Header con acciones -->
+    <header class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Plan</h1>
+        <p class="text-sm text-gray-600">
+          <span class="text-gray-500">Nombre:</span>
+          <span class="font-medium text-gray-900"><%= plan.nombre %></span>
         </p>
       </div>
-      <div class="border border-gray-200 rounded-lg p-4">
-        <p class="text-gray-500 font-medium">Estado</p>
-        <p class="mt-1">
-          <span class="inline-block px-2 py-1 rounded text-xs font-semibold
-            <%= plan.activo ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700' %>">
-            <%= plan.activo ? "Activo" : "Inactivo" %>
+      <div class="flex items-center gap-2">
+        <% if (puedeEditar) { %>
+          <!-- <a href="/planes/<%= plan._id %>/editar"
+             class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10">
+            Editar
+          </a> -->
+        <% } %>
+        <a href="/planes"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:text-gray-900 ring-1 ring-gray-200 hover:ring-gray-300 bg-white">
+          ← Volver
+        </a>
+      </div>
+    </header>
+
+    <!-- Datos del plan -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div class="rounded-xl border border-gray-200 p-4 bg-white/70">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Detalle</p>
+        <p class="text-gray-800 mt-1"><%= plan.detalle || '-' %></p>
+      </div>
+
+      <div class="rounded-xl border border-gray-200 p-4 bg-white/70">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Importe</p>
+        <p class="text-gray-900 font-semibold mt-1"><%= fmtUSD(plan.importe) %></p>
+      </div>
+
+      <div class="rounded-xl border border-gray-200 p-4 bg-white/70">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Estado</p>
+        <p class="mt-2">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ring-1
+                       <%= plan.activo ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-gray-100 text-gray-700 ring-gray-300' %>">
+            <span class="h-1.5 w-1.5 rounded-full <%= plan.activo ? 'bg-emerald-500' : 'bg-gray-400' %>"></span>
+            <%= plan.activo ? 'Activo' : 'Inactivo' %>
           </span>
         </p>
       </div>
-      <div class="border border-gray-200 rounded-lg p-4">
-        <p class="text-gray-500 font-medium">Creado</p>
-        <p class="text-gray-800 mt-1"><%= new Date(plan.createdAt).toLocaleString("es-AR") %></p>
-      </div>
-    </div>
 
-    <div class="flex items-center gap-2">
-      <% if (usuario?.modulosPermitidos?.planes?.editar) { %>
+      <div class="rounded-xl border border-gray-200 p-4 bg-white/70">
+        <p class="text-[11px] tracking-wide uppercase text-gray-500">Creado</p>
+        <p class="text-gray-800 mt-1"><%= new Date(plan.createdAt).toLocaleString('es-AR') %></p>
+        <% if (plan.updatedAt) { %>
+          <p class="text-[11px] tracking-wide uppercase text-gray-500 mt-3">Actualizado</p>
+          <p class="text-gray-800 mt-1"><%= new Date(plan.updatedAt).toLocaleString('es-AR') %></p>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- Acciones secundarias (repetición útil para scroll largo, opcional) -->
+    <footer class="flex items-center justify-end gap-2 pt-2">
+      <% if (puedeEditar) { %>
         <a href="/planes/<%= plan._id %>/editar"
-           class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition text-sm">
+           class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10">
           Editar
         </a>
       <% } %>
       <a href="/planes"
-         class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+         class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm ring-1 ring-gray-200">
         Volver
       </a>
-    </div>
+    </footer>
   </div>
 </main>

@@ -1,10 +1,37 @@
 <main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-200 relative overflow-hidden space-y-6">
 
-    <h1 class="text-2xl font-bold text-center text-gray-800">Editar Plan</h1>
+    <!-- Franja superior sutil (match vista proveedores/crear) -->
+    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/70 via-sky-500/70 to-emerald-500/70"></div>
+
+    <!-- Header con volver + eliminar -->
+    <header class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Editar Plan</h1>
+        <p class="text-sm text-gray-600">Actualizá el nombre, el detalle y el importe (USD).</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="/planes"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:text-gray-900 ring-1 ring-gray-200 hover:ring-gray-300 bg-white">
+          ← Volver
+        </a>
+
+        <% if (usuario?.modulosPermitidos?.planes?.eliminar) { %>
+          <!-- Form de eliminar separado del principal (sin anidación) -->
+          <form action="/planes/<%= datos._id %>/eliminar" method="POST"
+                onsubmit="return confirm('¿Eliminar plan? Esta acción no se puede deshacer.');">
+            <button type="submit"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-red-700 ring-1 ring-red-200 hover:bg-red-50 hover:ring-red-300 transition">
+              Eliminar
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </header>
 
     <% if (errores && errores.length) { %>
-      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg mb-2 shadow-sm text-sm">
+      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg shadow-sm text-sm">
         <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
         <ul class="list-disc pl-6 space-y-1">
           <% errores.forEach(e => { %><li><%= e.msg %></li><% }) %>
@@ -13,28 +40,47 @@
     <% } %>
 
     <!-- FORM PRINCIPAL: EDITAR -->
-    <form action="/planes/<%= datos._id %>/editar" method="POST" class="space-y-6">
+    <form action="/planes/<%= datos._id %>/editar" method="POST" class="space-y-6" id="formEditarPlan">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+        <!-- Nombre -->
         <div class="sm:col-span-2">
-          <label class="block font-medium text-gray-700">Nombre del plan</label>
-          <input type="text" name="nombre" required
-                 value="<%= datos.nombre || '' %>"
-                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+          <label for="nombrePlan" class="block font-medium text-gray-800">Nombre del plan</label>
+          <input
+            type="text"
+            name="nombre"
+            id="nombrePlan"
+            required
+            maxlength="27"
+            value="<%= (datos.nombre || '') %>"
+            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+            aria-describedby="nombreHelp nombreCount"
+            style="text-transform: uppercase"
+          >
+          <div class="flex items-center justify-between mt-1">
+            <p id="nombreHelp" class="text-xs text-gray-500">
+              Debe tener entre
+              <span class="font-medium">20 y 27 caracteres</span> (incluye espacios).
+            </p>
+            <p id="nombreCount" class="text-xs text-gray-500">0 / 27</p>
+          </div>
+          <p id="nombreError" class="hidden mt-1 text-xs text-red-600">El nombre debe tener entre 20 y 27 caracteres.</p>
         </div>
 
+        <!-- Detalle -->
         <div class="sm:col-span-2">
-          <label class="block font-medium text-gray-700">Detalle</label>
+          <label class="block font-medium text-gray-800">Detalle</label>
           <textarea name="detalle" rows="3"
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"><%= datos.detalle || '' %></textarea>
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"><%= datos.detalle || '' %></textarea>
         </div>
 
-        <!-- Importe con máscara -->
+        <!-- Importe (columna izquierda) -->
         <div class="sm:col-span-2 md:col-span-1">
-          <label class="block font-medium text-gray-700">Importe (USD)</label>
+          <label class="block font-medium text-gray-800">Importe (USD)</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">US$</span>
             <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
-                   class="w-full border border-gray-300 pl-10 pr-3 py-2 rounded-lg text-sm"
+                   class="w-full border border-gray-300 pl-10 pr-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                    placeholder="0,00" aria-describedby="importeHelp">
           </div>
           <!-- hidden que se envía al backend -->
@@ -42,43 +88,91 @@
                  value="<%= (typeof datos.importe !== 'undefined' && datos.importe !== null) ? Number(datos.importe).toFixed(2) : '' %>">
 
           <p id="importeHelp" class="text-xs text-gray-500 mt-1">
-            <!-- Se muestra como <span class="font-mono">$ 12.345,67</span>. Usá el <b>punto</b> (o coma) para pasar a decimales. -->
+            Mostrado con separador local (<span class="font-mono">12.345,67</span>). Se envía con punto decimal.
           </p>
         </div>
 
-        <!-- Activo: SOLO checkbox (sin hidden con el mismo name) -->
-        <div class="sm:col-span-2 flex items-center gap-2 mt-2">
-          <input id="chk-activo" type="checkbox" name="activo" value="true"
-                 <%= (datos.activo ?? true) ? 'checked' : '' %>>
-          <label for="chk-activo" class="text-gray-700">Activo</label>
+        <!-- Activo (misma línea que Importe, sin cambiar tamaño del checkbox) -->
+        <div class="sm:col-span-2 md:col-span-1 self-end">
+          <label for="chk-activo" class="inline-flex items-center gap-2">
+            <input id="chk-activo" type="checkbox" name="activo" value="true"
+                   <%= (datos.activo ?? true) ? 'checked' : '' %>>
+            <span class="text-gray-700 select-none">Activo</span>
+          </label>
         </div>
+
       </div>
 
-      <div class="flex items-center justify-center gap-2 pt-2">
-        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+      <!-- Footer botones: Guardar / Cancelar (ordenados) -->
+      <div class="flex flex-col sm:flex-row sm:justify-end gap-2 pt-2">
+        <button type="submit" id="btnSubmit"
+                class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition shadow-sm ring-1 ring-indigo-500/10 disabled:opacity-50 disabled:cursor-not-allowed">
           Guardar
         </button>
-        <a href="/planes" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">
+        <a href="/planes" class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-200 transition ring-1 ring-gray-200">
           Cancelar
         </a>
       </div>
     </form>
 
-    <!-- FORM SEPARADO: ELIMINAR (evita forms anidados) -->
-    <% if (usuario?.modulosPermitidos?.planes?.eliminar) { %>
-      <div class="text-center pt-4">
-        <form action="/planes/<%= datos._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar plan?')">
-          <button class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
-            Eliminar
-          </button>
-        </form>
-      </div>
-    <% } %>
-
   </div>
 </main>
 
 <script>
+/* ==============================
+   Nombre (MAYÚSCULAS, 20–27 chars)
+   ============================== */
+(function () {
+  var MIN_LEN = 20;
+  var MAX_LEN = 27;
+
+  var form    = document.getElementById('formEditarPlan');
+  var input   = document.getElementById('nombrePlan');
+  var counter = document.getElementById('nombreCount');
+  var errorEl = document.getElementById('nombreError');
+  var submit  = document.getElementById('btnSubmit');
+
+  function normalize() {
+    var v = (input.value || '')
+      .toUpperCase()
+      .replace(/\r?\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trimStart();
+
+    if (v.length > MAX_LEN) v = v.slice(0, MAX_LEN);
+    input.value = v;
+
+    counter.textContent = v.length + ' / ' + MAX_LEN;
+
+    var ok = (v.length >= MIN_LEN && v.length <= MAX_LEN);
+    if (ok) {
+      errorEl.classList.add('hidden');
+      input.classList.remove('border-red-400', 'focus:border-red-500', 'focus:ring-red-200');
+    }
+    if (submit) submit.disabled = !ok;
+  }
+
+  // Inicial
+  normalize();
+  input.addEventListener('input', normalize);
+  input.addEventListener('blur', normalize);
+
+  // Validación en submit (doble seguro)
+  form.addEventListener('submit', function (e) {
+    normalize();
+    var len = (input.value || '').length;
+    if (len < MIN_LEN || len > MAX_LEN) {
+      e.preventDefault();
+      errorEl.classList.remove('hidden');
+      input.classList.add('border-red-400', 'focus:border-red-500', 'focus:ring-red-200');
+      input.focus();
+    }
+  });
+})();
+
+/* ==========================
+   Importe con máscara USD
+   ========================== */
 (() => {
   const input = document.getElementById('importeMask');
   const hidden = document.getElementById('importeHidden');
@@ -152,15 +246,8 @@
     // Insertar dígito
     if (type === 'insertText' && /[0-9]/.test(data || "")) {
       if (editingDecimals) {
-        if (decPos < 2) {
-          decDigits[decPos] = data;
-          decPos++;
-        } else {
-          // si estaba al final, reemplazamos desde el primer decimal
-          decPos = 0;
-          decDigits[decPos] = data;
-          decPos = 1;
-        }
+        if (decPos < 2) { decDigits[decPos] = data; decPos++; }
+        else { decPos = 0; decDigits[decPos] = data; decPos = 1; }
       } else {
         intDigits += data;
         intDigits = intDigits.replace(/^0+(?=\d)/, '');
