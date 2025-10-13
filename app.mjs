@@ -12,8 +12,6 @@ import { catchUpCargos } from "./services/cargosService.mjs";
 import cambioRoutes from "./routes/cambioRoutes.mjs";
 import { usdNavbarMiddleware } from "./middlewares/usdNavbar.mjs";
 
-
-// Rutas
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
 import personasRoutes from "./routes/personasRoutes.mjs";
 import authRoutes from "./routes/authRoutes.mjs";
@@ -28,18 +26,15 @@ import pagosRoutes from "./routes/pagosRoutes.mjs";
 import planPagoRoutes from "./routes/planPagoRoutes.mjs";
 import tareasRoutes from "./routes/tareasRoutes.mjs";
 
-// 👇 RELOJ CENTRALIZADO
 import clock from "./utils/clock.mjs";
 
 const app = express();
 const PORT = process.env.PORT || 3500;
 
-// 2) Middlewares generales
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-// 3) Sesión
 app.use(
   session({
     secret: "clave-super-secreta",
@@ -48,10 +43,10 @@ app.use(
     rolling: true,
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
-      ttl: 60 * 60, // 1h
+      ttl: 60 * 60,
     }),
     cookie: {
-      maxAge: 1000 * 60 * 60, // 1h
+      maxAge: 1000 * 60 * 60,
       httpOnly: true,
       sameSite: "lax",
       // secure: true, // en HTTPS
@@ -59,44 +54,35 @@ app.use(
   })
 );
 
-// (debug de sesión; quitar en prod)
 app.use((req, res, next) => {
   console.log("🔑 Sesión ID:", req.sessionID);
   console.log(req.session.usuario ? `👤 ${req.session.usuario.email}` : "⚠️ No hay usuario en sesión");
   next();
 });
 
-// 4) EJS + layout
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
 app.use(expressEjsLayouts);
 app.set("layout", "layout");
 
-// 5) Estáticos
 app.use(express.static(path.resolve("./public")));
-app.use("/archivos", express.static("C:/upload")); // sugerencia: mover a ENV
+app.use("/archivos", express.static("C:/upload"));
 
-// 6) Datos globales para vistas
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.rutaActual = req.path;
-
-  // Helpers de fecha/hora (24h + “hs”) traídos del módulo
   res.locals.fmtHora = fmtHora;
   res.locals.fmtHoraCorta = fmtHoraCorta;
   res.locals.fmtFecha = fmtFecha;
   res.locals.fmtFechaHora = fmtFechaHora;
-
   next();
 });
 
-// Log de requests
 app.use((req, res, next) => {
   console.log("🔍", req.method, req.originalUrl);
   next();
 });
 
-// 👉 Ruta de diagnóstico de reloj (opcional)
 app.get("/debug/time", (req, res) => {
   const s = clock.getStatus();
   res.json({
@@ -107,13 +93,11 @@ app.get("/debug/time", (req, res) => {
   });
 });
 
-// 6.1) Middleware USD para navbar (excluye /api/*)
 app.use((req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
   return usdNavbarMiddleware(req, res, next);
 });
 
-// 7) Rutas
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);
 app.use("/personas", personasRoutes);
@@ -129,17 +113,14 @@ app.use("/planes-pago", planPagoRoutes);
 app.use(tareasRoutes);
 app.use("/api/cambio", cambioRoutes);
 
-// 8) Landing
 app.get("/", (req, res) => {
   res.render("landing", { title: "Inicio" });
 });
 
-// 9) 404
 app.use((req, res) => {
   res.status(404).send({ mensaje: "Ruta no encontrada" });
 });
 
-// 10) Listar rutas (debug)
 const listarRutas = (app) => {
   console.log("📋 Rutas registradas:");
   if (!app._router || !app._router.stack) return;
@@ -157,16 +138,13 @@ const listarRutas = (app) => {
 };
 listarRutas(app);
 
-// 11) Boot ordenado (Clock -> DB -> cron -> listen)
 (async () => {
   try {
     await clock.init({ waitForFirstSync: false, intervalMs: 15 * 60 * 1000 });
     await connectDB();
 
-    // ❌ Evitar backfill automático (era la causa del segundo período)
+    // Evitamos backfill automático
     // await catchUpCargos(1);
-    // Si alguna vez necesitás recomponer: ejecutalo a mano con el valor deseado.
-    // await catchUpCargos(0);
 
     startCargosCron();
 

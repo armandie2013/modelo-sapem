@@ -1,17 +1,18 @@
 // services/cambioService.mjs
-import { http } from "./http.mjs";
+// Servicio de cotizaciones con parse robusto y fallback histórico
+
+import { httpGet } from "./http.mjs";
 import clock from "../utils/clock.mjs";
 
 /**
- * La API real responde algo así:
+ * Formato esperado (resumen):
  * {
- *   "status": 200,
- *   "metadata": {...},
- *   "results": [
+ *   status: 200,
+ *   results: [
  *     {
- *       "fecha": "YYYY-MM-DD",
- *       "detalle": [
- *         { "codigoMoneda":"USD", "descripcion":"DOLAR E.E.U.U.", "tipoCotizacion": 1423.00000000, ... }
+ *       fecha: "YYYY-MM-DD",
+ *       detalle: [
+ *         { codigoMoneda: "USD", descripcion: "DOLAR E.E.U.U.", tipoCotizacion: 1234.56 }
  *       ]
  *     }
  *   ]
@@ -19,6 +20,11 @@ import clock from "../utils/clock.mjs";
  */
 
 function parseBcraUsdResponse(data) {
+  // Si la API devolvió "n/d" o vacío, tratamos como null
+  if (data == null || (typeof data === "string" && data.trim().toLowerCase() === "n/d")) {
+    return null;
+  }
+
   const results = data?.results;
   if (!Array.isArray(results) || results.length === 0) return null;
 
@@ -26,27 +32,16 @@ function parseBcraUsdResponse(data) {
     const fecha = typeof r?.fecha === "string" ? r.fecha.slice(0, 10) : null;
     const detalle = Array.isArray(r?.detalle) ? r.detalle : [];
 
-    // Buscar explícitamente USD o, en su defecto, el primer item con tipoCotizacion numérico
-    let item =
-      detalle.find(
-        (d) => String(d?.codigoMoneda || "").toUpperCase() === "USD"
-      ) ||
-      detalle.find((d) =>
-        /D[ÓO]LAR/.test(String(d?.descripcion || "").toUpperCase())
-      ) ||
-      detalle.find(
-        (d) => d && d.tipoCotizacion !== undefined && d.tipoCotizacion !== null
-      );
+    const item =
+      detalle.find((d) => String(d?.codigoMoneda || "").toUpperCase() === "USD") ||
+      detalle.find((d) => /D[ÓO]LAR/.test(String(d?.descripcion || "").toUpperCase())) ||
+      detalle.find((d) => d && d.tipoCotizacion !== undefined && d.tipoCotizacion !== null);
 
-    if (
-      item &&
-      item.tipoCotizacion !== undefined &&
-      item.tipoCotizacion !== null
-    ) {
+    if (item && item.tipoCotizacion != null) {
       const tipo = Number(item.tipoCotizacion);
       if (!Number.isNaN(tipo)) {
         return {
-          fecha: fecha || new Date().toISOString().slice(0, 10),
+          fecha: fecha || toLocalISO(clock.date()),
           tipoCotizacion: tipo,
         };
       }
@@ -63,39 +58,37 @@ function toLocalISO(d) {
 }
 
 function ayerISO() {
-  // Usamos tu reloj centralizado (clock) para evitar desfasajes
   const now = clock.date();
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
   return toLocalISO(d);
 }
 
-/** Última cotización publicada (sin fecha; puede ser HOY si ya publicaron) */
+/** Última cotización publicada (puede ser HOY si ya publicaron) */
 export async function getUsdUltima() {
-  const { data } = await http.get("/Cotizaciones/USD");
+  const { data } = await httpGet("/Cotizaciones/USD", {
+    cacheTtlMs: Number(process.env.CAMBIO_CACHE_TTL_MS || 30_000),
+  });
   return parseBcraUsdResponse(data);
 }
 
 /** Cotización USD para una fecha exacta (puede devolver null si no hubo publicación ese día) */
 export async function getUsdPorFecha(fechaISO) {
-  const { data } = await http.get("/Cotizaciones/USD", {
+  const { data } = await httpGet("/Cotizaciones/USD", {
     params: { fechadesde: fechaISO, fechahasta: fechaISO },
+    cacheTtlMs: Number(process.env.CAMBIO_CACHE_TTL_MS || 30_000),
   });
   return parseBcraUsdResponse(data);
 }
 
 /**
- * Fallback histórico: intenta fecha exacta y si no hay, retrocede 1 día
- * hasta `maxDias` (default 7).
- * Devuelve: { fechaSolicitada, encontradoEn, cotizacion: { fecha, tipoCotizacion } } o null
+ * Intenta fecha exacta y, si no hay, retrocede 1 día hasta `maxDias` (por defecto 7).
+ * Devuelve: { fechaSolicitada, encontradoEn, cotizacion } o null
  */
 export async function getUsdPorFechaConFallback(
   fechaISO,
   maxDias = Number(process.env.USD_MAX_FALLBACK_DAYS || 7)
 ) {
-  // Construimos fecha en "local" para alinear con el backend (clock)
-  const [Y, M, D] = String(fechaISO)
-    .split("-")
-    .map((n) => Number(n));
+  const [Y, M, D] = String(fechaISO).split("-").map((n) => Number(n));
   if (!Y || !M || !D) throw new Error("Fecha inválida");
 
   let attempts = 0;
@@ -103,51 +96,40 @@ export async function getUsdPorFechaConFallback(
 
   while (attempts <= maxDias) {
     const iso = toLocalISO(d);
-
     const cot = await getUsdPorFecha(iso);
     if (cot && typeof cot.tipoCotizacion === "number") {
-      return {
-        fechaSolicitada: fechaISO,
-        encontradoEn: cot.fecha || iso,
-        cotizacion: cot,
-      };
+      return { fechaSolicitada: fechaISO, encontradoEn: cot.fecha || iso, cotizacion: cot };
     }
-
-    // retrocede un día
-    d.setDate(d.getDate() - 1);
+    d.setDate(d.getDate() - 1); // retrocede un día
     attempts += 1;
   }
   return null;
 }
 
-/** Día anterior a hoy (según clock) con fallback hacia atrás a hábiles previos */
-export async function getUsdDiaAnteriorConFallback(maxDias) {
+/** Dólar del día anterior (según clock) con fallback hacia atrás. Si no hay nada, intenta última publicada. */
+export async function getUsdDiaAnteriorConFallback(
+  maxDias = Number(process.env.USD_MAX_FALLBACK_DAYS || 7)
+) {
   const isoAyer = ayerISO();
   const found = await getUsdPorFechaConFallback(isoAyer, maxDias);
-  // Si no encontró nada en la ventana, devolvemos la última publicada como súper fallback
   if (!found) {
     const ultima = await getUsdUltima();
     if (ultima) {
-      return {
-        fechaSolicitada: isoAyer,
-        encontradoEn: ultima.fecha,
-        cotizacion: ultima,
-      };
+      return { fechaSolicitada: isoAyer, encontradoEn: ultima.fecha, cotizacion: ultima };
     }
     return null;
   }
   return found;
 }
 
-// Alias por compatibilidad (si algo usaba getUsdAyer)
 export const getUsdAyer = getUsdDiaAnteriorConFallback;
 
-// ⬇️ pegá esto al final de services/cambioService.mjs
 export const cambioService = {
-  // nombres "amigables" para cómo lo usás en controllers
   usdUltima: getUsdUltima,
   usdPorFecha: getUsdPorFecha,
   usdPorFechaConFallback: getUsdPorFechaConFallback,
   usdDiaAnteriorConFallback: getUsdDiaAnteriorConFallback,
   usdAyer: getUsdAyer,
 };
+
+export default cambioService;

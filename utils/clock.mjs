@@ -2,8 +2,8 @@
 // Reloj centralizado con offset opcional desde servidores de hora (HTTP Date).
 // Si no hay internet o falla, usa la hora local del sistema.
 
-import http from "node:http";
-import https from "node:https";
+import * as http from "node:http";
+import * as https from "node:https";
 
 let offsetMs = 0;          // serverTime - Date.now()
 let lastSyncOk = false;
@@ -37,9 +37,9 @@ function todayYMD(tz = "America/Argentina/Buenos_Aires") {
     month: "2-digit",
     day: "2-digit",
   }).formatToParts(now);
-  const y = parts.find(p => p.type === "year").value;
-  const m = parts.find(p => p.type === "month").value;
-  const d = parts.find(p => p.type === "day").value;
+  const y = parts.find(p => p.type === "year")?.value ?? String(now.getFullYear());
+  const m = parts.find(p => p.type === "month")?.value ?? String(now.getMonth() + 1).padStart(2, "0");
+  const d = parts.find(p => p.type === "day")?.value ?? String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 

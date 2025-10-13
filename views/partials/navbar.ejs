@@ -1,29 +1,32 @@
 <nav class="nav-hover bg-blue-800 text-white py-4 px-6 z-50 relative">
-  <!-- Hover para links de nivel superior (los que llevan .navlink) -->
   <style>
     .nav-hover a.navlink {
-      padding: .25rem .5rem;
-      border-radius: .5rem;
-      transition: background-color .15s ease;
+      padding:.25rem .5rem;border-radius:.5rem;transition:background-color .15s ease
     }
-    .nav-hover a.navlink:hover {
-      background: rgba(255,255,255,0.12);
-    }
+    .nav-hover a.navlink:hover { background: rgba(255,255,255,0.12) }
   </style>
 
-  <div class="container mx-auto flex justify-between items-center">
-    <!-- Logo / Marca -->
+  <div class="container mx-auto flex justify-between items-center relative">
+    <!-- Marca -->
     <a href="/" class="text-lg font-semibold navlink">Catamarca Telecomunicaciones SAPEM</a>
 
-    <!-- Zona derecha (desktop): USD + menú -->
+    <!-- Botón hamburguesa (visible sólo en mobile) -->
+    <button id="menu-toggle" class="md:hidden inline-flex items-center justify-center p-2 rounded hover:bg-white/10 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+      <span class="sr-only">Abrir menú</span>
+    </button>
+
+    <!-- Zona derecha (DESKTOP): USD + menú -->
     <div class="hidden md:flex items-center gap-6">
-      <!-- USD (ayer hábil) + histórico -->
+      <!-- USD (ayer) + histórico -->
       <div class="relative flex items-center gap-3 border border-white/20 p-2 rounded-md">
         <% if (usdAyer && usdAyer.tipoCotizacion) { %>
           <div class="text-xs text-white/90">
             <span class="opacity-80">
               Fecha
-              <%= new Intl.DateTimeFormat('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' })
+              <%= new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
                     .format(new Date(String(usdAyer.fecha)+'T00:00:00')) %>
             </span>
             <span class="font-semibold ml-1">USD:</span>
@@ -39,15 +42,13 @@
           </div>
         <% } %>
 
-        <!-- Botón para abrir panel de histórico -->
         <button id="usdToggle" type="button"
                 class="text-xs bg-white/10 hover:bg-white/20 rounded-md px-2 py-1 transition-colors">
           Histórico
         </button>
 
-        <!-- Panel histórico -->
         <div id="usdPanel"
-             class="hidden absolute right-0 top-full mt-2 w-72 bg-white text-gray-800 rounded-lg shadow-lg p-3 z-50">
+             class="hidden absolute right-0 top-full mt-2 w-72 bg-white text-gray-800 rounded-lg shadow-lg p-3 z-[60]">
           <div class="flex items-start justify-between">
             <p class="text-sm font-medium">Cotización histórica</p>
             <button id="usdClose" class="text-gray-500 hover:text-gray-700">&times;</button>
@@ -65,61 +66,54 @@
       <!-- Menú principal (desktop) -->
       <div class="flex items-center space-x-8">
         <% if (usuario && usuario.rol) { %>
-          <!-- Administración -->
           <div class="relative">
             <button onclick="toggleDropdown('adminDropdown')"
                     class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
               Administración ▾
             </button>
-            <ul id="adminDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
+            <ul id="adminDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
               <li><a href="/proveedores" class="block px-4 py-2 hover:bg-gray-200">Listado de Proveedores</a></li>
               <li><a href="/proveedores/registrar" class="block px-4 py-2 hover:bg-gray-200">Registrar Proveedor</a></li>
-
               <li><hr class="my-1 border-gray-200"></li>
               <li><a href="/planes" class="block px-4 py-2 hover:bg-gray-200">Planes</a></li>
               <li><a href="/planes/crear" class="block px-4 py-2 hover:bg-gray-200">Crear Plan</a></li>
-
               <li><hr class="my-1 border-gray-200"></li>
               <li><a href="/pagos" class="block px-4 py-2 hover:bg-gray-200">Listado de Pagos</a></li>
               <li><a href="/pagos/registrar" class="block px-4 py-2 hover:bg-gray-200">Registrar Pago</a></li>
               <li><a href="/notas/credito/registrar" class="block px-4 py-2 hover:bg-gray-200">Nota de Crédito</a></li>
               <li><a href="/notas/debito/registrar" class="block px-4 py-2 hover:bg-gray-200">Nota de Débito</a></li>
-
               <li><hr class="my-1 border-gray-200"></li>
               <li><a href="/tareas/cargos" class="block px-4 py-2 hover:bg-gray-200">Cargos mensuales</a></li>
             </ul>
           </div>
 
-          <!-- Gerencia -->
           <div class="relative">
             <button onclick="toggleDropdown('gerenciaDropdown')"
                     class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
               Gerencia ▾
             </button>
-            <ul id="gerenciaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
+            <ul id="gerenciaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
               <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Indicadores</a></li>
             </ul>
           </div>
 
-          <!-- Proyectos -->
           <div class="relative">
             <button onclick="toggleDropdown('proyectosDropdown')"
                     class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
               Proyectos ▾
             </button>
-            <ul id="proyectosDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
+            <ul id="proyectosDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
               <li><a href="/escuelas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Escuelas</a></li>
               <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Nuevo Proyecto</a></li>
             </ul>
           </div>
 
-          <!-- Técnica -->
           <div class="relative">
             <button onclick="toggleDropdown('tecnicaDropdown')"
                     class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
               Técnica ▾
             </button>
-            <ul id="tecnicaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
+            <ul id="tecnicaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
               <li><a href="/viaticos/dashboard" class="block px-4 py-2 hover:bg-gray-200">Viáticos</a></li>
               <li><a href="/pedidos-materiales/dashboard" class="block px-4 py-2 hover:bg-gray-200">Pedido de Materiales</a></li>
               <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Control de Stock</a></li>
@@ -127,26 +121,22 @@
           </div>
 
           <% if (usuario.rol==='admin' ) { %>
-            <!-- Accesos admin -->
             <div class="relative">
               <button onclick="toggleDropdown('adminAccessDropdown')"
                       class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
                 Acceso Admin ▾
               </button>
-              <ul id="adminAccessDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-50">
+              <ul id="adminAccessDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
                 <li><a href="/personas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Personal SAPEM</a></li>
                 <li><a href="/usuarios/dashboard" class="block px-4 py-2 hover:bg-gray-200">Usuarios Registrados</a></li>
               </ul>
             </div>
           <% } %>
 
-          <!-- Logout -->
           <form action="/logout" method="POST" class="ml-2">
             <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800 transition-colors">Cerrar sesión</button>
           </form>
-
         <% } else { %>
-          <!-- Visitantes -->
           <ul class="flex items-center space-x-6">
             <% if (rutaActual==="/registro" ) { %>
               <li><a href="/login" class="hover:underline navlink">Iniciar sesión</a></li>
@@ -159,25 +149,17 @@
           </ul>
         <% } %>
       </div>
-
-      <!-- Botón hamburguesa (móvil, a la derecha) -->
-      <button id="menu-toggle" class="md:hidden">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
     </div>
 
     <!-- Menú móvil -->
-    <div id="menu"
-      class="hidden md:hidden flex-col absolute top-full left-0 w-full bg-blue-800 z-40 px-4 py-4 space-y-4">
-      <!-- USD en móvil -->
+    <div id="menu" class="hidden md:hidden flex-col absolute top-full left-0 w-full bg-blue-800 z-[65] px-4 py-4 space-y-4">
+      <!-- USD -->
       <div class="text-sm">
         <% if (usdAyer && usdAyer.tipoCotizacion) { %>
           <div>
             <span class="font-semibold">USD</span>
             <span class="opacity-80">
-              (ayer <%= new Intl.DateTimeFormat('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' })
+              (ayer <%= new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
                           .format(new Date(String(usdAyer.fecha)+'T00:00:00')) %>)
             </span>:
             <span class="font-mono">
@@ -198,8 +180,66 @@
         </div>
       </div>
 
-      <!-- Links móviles (si sos visitante) -->
-      <% if (!usuario || !usuario.rol) { %>
+      <!-- Links móviles según sesión -->
+      <% if (usuario && usuario.rol) { %>
+        <div class="grid gap-2 text-sm">
+          <details class="bg-white/10 rounded-md">
+            <summary class="cursor-pointer px-3 py-2">Administración</summary>
+            <ul class="px-3 pb-2">
+              <li><a href="/proveedores" class="block py-1">Listado de Proveedores</a></li>
+              <li><a href="/proveedores/registrar" class="block py-1">Registrar Proveedor</a></li>
+              <li><hr class="my-1 border-white/20"></li>
+              <li><a href="/planes" class="block py-1">Planes</a></li>
+              <li><a href="/planes/crear" class="block py-1">Crear Plan</a></li>
+              <li><hr class="my-1 border-white/20"></li>
+              <li><a href="/pagos" class="block py-1">Listado de Pagos</a></li>
+              <li><a href="/pagos/registrar" class="block py-1">Registrar Pago</a></li>
+              <li><a href="/notas/credito/registrar" class="block py-1">Nota de Crédito</a></li>
+              <li><a href="/notas/debito/registrar" class="block py-1">Nota de Débito</a></li>
+              <li><hr class="my-1 border-white/20"></li>
+              <li><a href="/tareas/cargos" class="block py-1">Cargos mensuales</a></li>
+            </ul>
+          </details>
+
+          <details class="bg-white/10 rounded-md">
+            <summary class="cursor-pointer px-3 py-2">Gerencia</summary>
+            <ul class="px-3 pb-2">
+              <li><a href="#" class="block py-1">Indicadores</a></li>
+            </ul>
+          </details>
+
+          <details class="bg-white/10 rounded-md">
+            <summary class="cursor-pointer px-3 py-2">Proyectos</summary>
+            <ul class="px-3 pb-2">
+              <li><a href="/escuelas/dashboard" class="block py-1">Escuelas</a></li>
+              <li><a href="#" class="block py-1">Nuevo Proyecto</a></li>
+            </ul>
+          </details>
+
+          <details class="bg-white/10 rounded-md">
+            <summary class="cursor-pointer px-3 py-2">Técnica</summary>
+            <ul class="px-3 pb-2">
+              <li><a href="/viaticos/dashboard" class="block py-1">Viáticos</a></li>
+              <li><a href="/pedidos-materiales/dashboard" class="block py-1">Pedido de Materiales</a></li>
+              <li><a href="#" class="block py-1">Control de Stock</a></li>
+            </ul>
+          </details>
+
+          <% if (usuario.rol==='admin') { %>
+            <details class="bg-white/10 rounded-md">
+              <summary class="cursor-pointer px-3 py-2">Acceso Admin</summary>
+              <ul class="px-3 pb-2">
+                <li><a href="/personas/dashboard" class="block py-1">Personal SAPEM</a></li>
+                <li><a href="/usuarios/dashboard" class="block py-1">Usuarios Registrados</a></li>
+              </ul>
+            </details>
+          <% } %>
+
+          <form action="/logout" method="POST" class="pt-1">
+            <button class="w-full bg-red-600 px-3 py-2 rounded hover:bg-red-700 transition-colors">Cerrar sesión</button>
+          </form>
+        </div>
+      <% } else { %>
         <ul class="flex flex-col gap-2">
           <li><a href="/login" class="navlink">Iniciar sesión</a></li>
           <li><a href="/registro" class="navlink">Registrarse</a></li>
@@ -216,7 +256,7 @@
     const menu = document.getElementById("menu");
     menuToggle?.addEventListener("click", () => menu.classList.toggle("hidden"));
 
-    // Dropdowns
+    // Dropdowns (desktop)
     window.toggleDropdown = function toggleDropdown(id) {
       document.querySelectorAll("ul[id$='Dropdown']").forEach(el => {
         if (el.id !== id) el.classList.add("hidden");
@@ -224,7 +264,7 @@
       document.getElementById(id)?.classList.toggle("hidden");
     };
 
-    // Cerrar dropdowns haciendo click fuera
+    // Cerrar dropdowns haciendo click fuera (desktop)
     document.addEventListener("click", function (e) {
       const isDropdownBtn = e.target.closest("button[onclick^='toggleDropdown']");
       const openDropdown = document.querySelector("ul[id$='Dropdown']:not(.hidden)");
@@ -236,9 +276,8 @@
     // ---- Helpers de formato ----
     function formatISOtoDMY(iso) {
       try {
-        return new Intl.DateTimeFormat('es-AR', {
-          day:'2-digit', month:'2-digit', year:'numeric'
-        }).format(new Date(String(iso) + 'T00:00:00'));
+        return new Intl.DateTimeFormat('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' })
+          .format(new Date(String(iso) + 'T00:00:00'));
       } catch { return iso; }
     }
 
@@ -270,18 +309,16 @@
         } else {
           outEl.textContent = j.error || "Sin datos para esa fecha";
         }
-      } catch (err) {
+      } catch {
         outEl.textContent = "Error consultando la API";
       }
     }
 
-    // Desktop
     document.getElementById("usdFetch")?.addEventListener("click", () => {
       const d = (document.getElementById("usdDate") || {}).value;
       queryUsd(d, document.getElementById("usdResult"));
     });
 
-    // Móvil
     document.getElementById("usdFetchM")?.addEventListener("click", () => {
       const d = (document.getElementById("usdDateM") || {}).value;
       queryUsd(d, document.getElementById("usdResultM"));
