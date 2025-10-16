@@ -1,4 +1,3 @@
-// jobs/cargosCron.mjs
 import cron from "node-cron";
 import { generarCargosMensuales } from "../services/cargosService.mjs";
 import clock from "../utils/clock.mjs";

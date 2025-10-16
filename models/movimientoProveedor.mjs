@@ -1,4 +1,3 @@
-// models/movimientoProveedor.mjs
 import mongoose from "mongoose";
 import clock from "../utils/clock.mjs";
 
@@ -45,7 +44,10 @@ const movimientoProveedorSchema = new Schema(
     // quién creó el movimiento (para mostrar en el detalle)
     creadoPor: { type: Schema.Types.ObjectId, ref: "Usuario", default: null },
 
-    bloqueadoParaPago: { type: Boolean, default: false }, // ✅ NUEVO
+    // para identificar entradas generadas por procesos automáticos (cron)
+    creadoPorSistema: { type: Boolean, default: false },
+
+    bloqueadoParaPago: { type: Boolean, default: false },
   },
   {
     // timestamps también con el reloj central
@@ -53,20 +55,16 @@ const movimientoProveedorSchema = new Schema(
   }
 );
 
-// ⬇️ Campos nuevos para Plan de Pago / cuotas / reversas
+// Campos para Plan de Pago / cuotas / reversas
 movimientoProveedorSchema.add({
   planPagoId: { type: Schema.Types.ObjectId, ref: "PlanPago", default: null, index: true },
   cuotaN:     { type: Number, default: null }, // 1..N para cuotas del plan
   aplicaA:    { type: Schema.Types.ObjectId, ref: "MovimientoProveedor", default: null, index: true },
-  // 'aplicaA' lo usan los créditos de reversa para indicar qué cargo original compensan
 });
 
-// Índices útiles
 movimientoProveedorSchema.index({ proveedor: 1, createdAt: -1 });
 
-// ⚠️ Índice único de cargo mensual SIN plan de pago
-// Antes: { unique: true, partialFilterExpression: { tipo: "cargo" } }
-// Ahora: restringimos a cargos que NO provienen de plan de pago
+// Índice único de cargo mensual SIN plan de pago
 movimientoProveedorSchema.index(
   { proveedor: 1, periodo: 1, tipo: 1 },
   { unique: true, partialFilterExpression: { tipo: "cargo", planPagoId: null } }
@@ -78,7 +76,6 @@ movimientoProveedorSchema.pre("validate", function (next) {
     if (!this.periodo && this.fecha instanceof Date && !isNaN(this.fecha)) {
       this.periodo = periodoYYYYMM(this.fecha);
     }
-    // Si no hay concepto y el cargo es por plan "mensual" (no PlanPago/cuota)
     if (!this.concepto && this.plan && typeof this.importePlan === "number" && !this.planPagoId) {
       this.concepto = `Cargo mensual plan ${this.plan} ${this.periodo || ""}`.trim();
     }

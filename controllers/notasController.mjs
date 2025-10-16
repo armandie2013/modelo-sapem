@@ -1,4 +1,3 @@
-
 // SE PUEDEN HACER NOTAS DE CREDITO O DEBITO DE LOS ULTIMOS 18 MESES //
 
 // controllers/notasController.mjs
@@ -238,14 +237,14 @@ export async function crearNotaController(req, res) {
 
   // ✅ Crear nota asociada al cargo y al período del cargo
   await new MovimientoProveedor({
-    proveedor,                    // <-- corregido (antes: proveedorId)
+    proveedor,                    // <-- correcto
     tipo: tipoNota,
     concepto: (detalle || "").trim() || `Nota de ${tipoNota}`,
     periodo: cargo.periodo,
     fecha: fechaDate,
     importe: importeNumber,
-    aplicaA: cargo._id,           // <-- importante: vincula la NC/ND al cargo
-    creadoPor: req.session?.usuario?._id || null,
+    aplicaA: cargo._id,           // <-- vínculo con el cargo
+    creadoPor: req.usuario?._id || null,  // 👈 usa req.usuario
   }).save();
 
   req.session.mensaje = `Nota de ${tipoNota} registrada correctamente`;
@@ -353,8 +352,8 @@ export async function crearNotaProveedorController(req, res) {
     periodo: cargo.periodo,
     fecha: fechaDate,
     importe: importeNumber,
-    aplicaA: cargo._id,           // <-- faltaba acá
-    creadoPor: req.session?.usuario?._id || null,
+    aplicaA: cargo._id,
+    creadoPor: req.usuario?._id || null,   // 👈 usa req.usuario
   }).save();
 
   req.session.mensaje = `Nota de ${tipoNota} registrada correctamente`;

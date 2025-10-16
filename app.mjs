@@ -1,4 +1,3 @@
-// app.mjs
 import express from "express";
 import path from "path";
 import methodOverride from "method-override";
@@ -53,6 +52,12 @@ app.use(
     },
   })
 );
+
+// 👇 hidratar req.usuario desde la sesión (¡clave!)
+app.use((req, res, next) => {
+  req.usuario = req.session?.usuario || null;
+  next();
+});
 
 app.use((req, res, next) => {
   console.log("🔑 Sesión ID:", req.sessionID);

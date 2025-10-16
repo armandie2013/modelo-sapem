@@ -1,4 +1,3 @@
-// models/pago.mjs
 import mongoose from "mongoose";
 import clock from "../utils/clock.mjs"; // reloj centralizado
 
@@ -36,18 +35,16 @@ const pagoSchema = new mongoose.Schema(
     comprobante: { type: String, default: "" },
     observacion: { type: String, default: "" },
 
-    creadoPor: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario" },
+    creadoPor: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", default: null },
   },
   {
     timestamps: { currentTime: () => clock.nowMs() },
   }
 );
 
-// Índices útiles
 pagoSchema.index({ proveedor: 1, periodo: 1 });
 pagoSchema.index({ createdAt: -1 });
 
-// Si no enviaron "periodo", lo inferimos desde "fecha"
 pagoSchema.pre("validate", function (next) {
   if (!this.periodo && this.fecha instanceof Date && !isNaN(this.fecha)) {
     this.periodo = periodoYYYYMM(this.fecha);

@@ -1,4 +1,3 @@
-// controllers/pagosController.mjs
 import { crearPagoService, listarPagosService, eliminarPagoService } from "../services/pagosService.mjs";
 import Proveedor from "../models/proveedor.mjs";
 import Pago from "../models/pago.mjs";
@@ -40,7 +39,7 @@ export async function mostrarFormularioPago(req, res) {
   const datos = {
     proveedor: req.query.proveedor || "",
     periodo: "",
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha: clock.todayYMD(),       // 👈 alineado con clock
     medioPago: "transferencia",
     comprobante: "",
     detalle: "",
@@ -94,7 +93,7 @@ export async function crearPagoController(req, res) {
     metodo,
     comprobante,
     observacion,
-    creadoPor: req.session?.usuario?._id || null,
+    creadoPor: req.usuario?._id || null,   // 👈 usa req.usuario
   }).save();
 
   req.session.mensaje = "Pago registrado correctamente";
@@ -139,7 +138,7 @@ export async function mostrarFormularioPagoProveedor(req, res) {
   }
 
   const datos = {
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha: clock.todayYMD(),       // 👈 alineado con clock
     periodo: "",
     medioPago: "transferencia",
     comprobante: "",
@@ -210,7 +209,7 @@ export async function crearPagoProveedorController(req, res) {
     metodo,
     comprobante: (comprobante || "").trim(),
     observacion: (detalle || "").trim(),
-    creadoPor: req.session?.usuario?._id || null,
+    creadoPor: req.usuario?._id || null,  // 👈 usa req.usuario
   }).save();
 
   req.session.mensaje = "Pago registrado correctamente";

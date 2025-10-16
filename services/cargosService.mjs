@@ -1,4 +1,3 @@
-// services/cargosService.mjs
 import mongoose from "mongoose";
 import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 import clock from "../utils/clock.mjs";
@@ -56,6 +55,8 @@ export async function generarCargosMensuales(fechaRef = clock.date()) {
               plan: p.plan._id,
               importePlan: Number(p.plan.importe),
               planPagoId: null,
+              creadoPor: null,
+              creadoPorSistema: true, // ← cron
             },
           },
           { upsert: true }
@@ -105,7 +106,6 @@ export async function cargosPendientesPorProveedor(proveedorId) {
   const pipelineCargos = [
     { $match: { proveedor: oid, tipo: "cargo", planPagoId: null } },
 
-    // Pagos aplicados al cargo
     {
       $lookup: {
         from: "pagos",
@@ -157,7 +157,6 @@ export async function cargosPendientesPorProveedor(proveedorId) {
       }
     },
 
-    // Proyección de totales
     {
       $project: {
         _id: 1,
@@ -197,7 +196,6 @@ export async function cargosPendientesPorProveedor(proveedorId) {
       },
     },
 
-    // Saldo = importe + debitos - (pagos + creditos)
     {
       $addFields: {
         saldo: {
@@ -212,11 +210,10 @@ export async function cargosPendientesPorProveedor(proveedorId) {
       },
     },
 
-    // Solo pendientes reales
     { $match: { saldo: { $gt: 0 } } },
   ];
 
-  // CUOTAS de plan (como ya tenías)
+  // CUOTAS de plan
   const pipelineCuotas = [
     { $match: { proveedor: oid, tipo: "debito", planPagoId: { $ne: null } } },
     {
@@ -264,19 +261,17 @@ export async function cargosPendientesPorProveedor(proveedorId) {
     { $match: { saldo: { $gt: 0 } } },
   ];
 
-  // Unimos ambas: cargos + cuotas
   const rows = await MovimientoProveedor.aggregate([
     ...pipelineCargos,
     { $unionWith: { coll: "movimientoproveedors", pipeline: pipelineCuotas } },
     { $sort: { periodo: 1, _id: 1 } },
   ]);
 
-  // Normalizamos NUMBER siempre
   return rows.map((r) => ({
     _id: r._id,
     periodo: r.periodo,
     concepto: r.concepto,
-    tipo: r.tipo, // 'cargo' o 'debito'
+    tipo: r.tipo,
     cuotaN: r.cuotaN ?? null,
     cuotasTotal: r.cuotasTotal ?? null,
     importe: Number(r.importe ?? 0),

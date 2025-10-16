@@ -1,4 +1,3 @@
-// controllers/proveedorController.mjs
 import fs from "fs";
 import path from "path";
 import { crearProveedorService } from "../services/proveedorService.mjs";
@@ -13,7 +12,10 @@ import clock from "../utils/clock.mjs";
 import puppeteer from "puppeteer";
 import { cambioService } from "../services/cambioService.mjs";
 
-// Helper robusto para boolean
+// ──────────────────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────────────────
+
 function toBool(v) {
   if (Array.isArray(v)) {
     return v.some(
@@ -23,7 +25,6 @@ function toBool(v) {
   return v === true || v === "true" || v === "on" || v === "1" || v === 1;
 }
 
-// Lee utils/logoBase64.html
 function leerLogoDataUriDesdeHtml() {
   try {
     const p = path.resolve(process.cwd(), "utils", "logoBase64.html");
@@ -44,6 +45,13 @@ const ordenarPorNombrePlan = (arr) =>
       numeric: true,
     })
   );
+
+// Arma "Nombre Apellido" o cae en email/guión
+function nombreApellido(o) {
+  if (!o) return "—";
+  const nom = [o.nombre || "", o.apellido || ""].join(" ").trim();
+  return nom || o.email || "—";
+}
 
 /* =========================================================
  * GET /proveedores/registrar
@@ -237,22 +245,41 @@ export async function verProveedorController(req, res) {
   );
   totales.saldo = totales.cargo + totales.notaDebito - (totales.notaCredito + totales.pagos);
 
+  // Movimientos/pagos recientes con creadoPor y observación (singular en Pago)
   const [movs, pagos] = await Promise.all([
     MovimientoProveedor.find({ proveedor: proveedorId })
-      .select("tipo concepto periodo fecha importe")
+      .select("tipo concepto periodo fecha importe metodo comprobante creadoPor")
       .sort({ fecha: -1, createdAt: -1 })
-      .limit(100).lean(),
+      .limit(100)
+      .populate("creadoPor", "nombre apellido email")
+      .lean(),
     Pago.find({ proveedor: proveedorId })
-      .select("fecha importe metodo comprobante periodo")
+      .select("fecha importe metodo comprobante periodo observacion creadoPor")
       .sort({ fecha: -1, createdAt: -1 })
-      .limit(100).lean(),
+      .limit(100)
+      .populate("creadoPor", "nombre apellido email")
+      .lean(),
   ]);
 
   const movimientos = [
-    ...movs.map((m) => ({ ...m, signo: m.tipo === "cargo" || m.tipo === "debito" ? +1 : -1 })),
+    ...movs.map((m) => ({
+      ...m,
+      signo: m.tipo === "cargo" || m.tipo === "debito" ? +1 : -1,
+      // en movimientos no hay observacion; dejamos vacío
+      observacion: "",
+      creadorNombre: nombreApellido(m.creadoPor),
+    })),
     ...pagos.map((p) => ({
-      tipo: "pago", concepto: `Pago ${p.metodo || ""}`.trim(), periodo: p.periodo, fecha: p.fecha,
-      importe: p.importe, metodo: p.metodo, comprobante: p.comprobante, signo: -1,
+      tipo: "pago",
+      concepto: `Pago ${p.metodo || ""}`.trim(),
+      periodo: p.periodo,
+      fecha: p.fecha,
+      importe: p.importe,
+      metodo: p.metodo,
+      comprobante: p.comprobante,
+      observacion: p.observacion || "",
+      signo: -1,
+      creadorNombre: nombreApellido(p.creadoPor),
     })),
   ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 100);
 
@@ -377,19 +404,26 @@ export async function verPeriodoProveedorController(req, res) {
 
     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
 
-    const canPopulateCreador = !!MovimientoProveedor.schema.paths.creadoPor;
-
-    let query = MovimientoProveedor.find({
+    // Movimientos del período (sin observación) + pagos (con observacion)
+    const movs = await MovimientoProveedor.find({
       proveedor: new mongoose.Types.ObjectId(proveedorId),
       periodo: String(periodo),
-    }).sort({ fecha: 1, _id: 1 });
+    })
+      .select("tipo concepto periodo fecha importe metodo comprobante creadoPor")
+      .sort({ fecha: 1, _id: 1 })
+      .populate("creadoPor", "nombre apellido email")
+      .lean();
 
-    if (canPopulateCreador) query = query.populate("creadoPor", "nombreApellido email");
-
-    const movs = await query.lean();
+    const pagos = await Pago.find({ proveedor: proveedorId, periodo })
+      .select("fecha importe metodo comprobante periodo observacion creadoPor")
+      .sort({ fecha: 1, _id: 1 })
+      .populate("creadoPor", "nombre apellido email")
+      .lean();
 
     const totales = { cargo: 0, notaDebito: 0, notaCredito: 0, pagos: 0, saldo: 0 };
-    const movimientos = movs.map((m) => {
+    const movimientos = [];
+
+    for (const m of movs) {
       const tipo = String(m.tipo || "").toLowerCase();
       const importe = Number(m.importe || 0);
       let signo = 0;
@@ -397,23 +431,27 @@ export async function verPeriodoProveedorController(req, res) {
       if (tipo === "cargo") { totales.cargo += importe; signo = +1; }
       else if (tipo === "debito") { totales.notaDebito += importe; signo = +1; }
       else if (tipo === "credito") { totales.notaCredito += importe; signo = -1; }
-      else if (tipo === "pago") { totales.pagos += importe; signo = -1; }
+      else if (tipo === "pago") { totales.pagos += importe; signo = -1; } // por si hubiera registros tipo pago aquí
 
-      return {
-        _id: m._id, tipo, concepto: m.concepto || "", periodo: m.periodo, fecha: m.fecha,
-        importe, signo, metodo: m.metodo, comprobante: m.comprobante,
-        creadorNombre: (m.creadoPor && (m.creadoPor.nombreApellido || m.creadoPor.email)) || "—",
-      };
-    });
-
-    const pagos = await Pago.find({ proveedor: proveedorId, periodo })
-      .select("fecha importe metodo comprobante periodo")
-      .sort({ fecha: 1, _id: 1 })
-      .lean();
+      movimientos.push({
+        _id: m._id,
+        tipo,
+        concepto: m.concepto || "",
+        periodo: m.periodo,
+        fecha: m.fecha,
+        importe,
+        signo,
+        metodo: m.metodo,
+        comprobante: m.comprobante,
+        observacion: "", // en movimientos no hay observacion
+        creadorNombre: nombreApellido(m.creadoPor),
+      });
+    }
 
     for (const p of pagos) {
       totales.pagos += Number(p.importe || 0);
       movimientos.push({
+        _id: p._id,
         tipo: "pago",
         concepto: `Pago ${p.metodo || ""}`.trim(),
         periodo: p.periodo,
@@ -422,7 +460,8 @@ export async function verPeriodoProveedorController(req, res) {
         signo: -1,
         metodo: p.metodo,
         comprobante: p.comprobante,
-        creadorNombre: "—",
+        observacion: p.observacion || "",
+        creadorNombre: nombreApellido(p.creadoPor),
       });
     }
 
@@ -453,7 +492,6 @@ export async function descargarEstadoCuentaPdfController(req, res) {
 
     const logoDataUri = leerLogoDataUriDesdeHtml();
 
-    // Pendientes vencidos
     const now = clock.date();
     const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
@@ -463,7 +501,6 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)));
     const totalPendiente = pendientes.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
 
-    // Último pago (período anterior al primer deudor)
     function prevPeriodo(yyyyMm) {
       if (!yyyyMm) return null;
       const [y, m] = String(yyyyMm).split("-").map(Number);
@@ -487,7 +524,6 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       }
     }
 
-    // Tipo de cambio de ayer (con fallback)
     let usdAyer = res.locals.usdAyer || null;
     if (!usdAyer) {
       try {
@@ -499,7 +535,6 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       }
     }
 
-    // Render EJS a HTML
     const html = await new Promise((resolve, reject) => {
       res.render(
         "proveedoresViews/estadoCuenta/estadoCuentaImprimir",
@@ -517,7 +552,6 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       );
     });
 
-    // PDF
     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
     try {
       const page = await browser.newPage();

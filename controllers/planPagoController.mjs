@@ -1,4 +1,3 @@
-// controllers/planPagoController.mjs
 import mongoose from "mongoose";
 import Proveedor from "../models/proveedor.mjs";
 import MovimientoProveedor from "../models/movimientoProveedor.mjs";
@@ -193,7 +192,7 @@ export async function crearPlanPagoController(req, res) {
       totalPlan: fromCents(totalCents), // sin interés
       importeCuota: fromCents(cuotaBaseCents),
       seleccion: seleccion.map((m) => ({ movimientoId: m._id, importe: Number(m.importe) })),
-      creadoPor: req.usuario?._id || null,
+      creadoPor: req.usuario?._id || null,   // 👈 usa req.usuario
     });
 
     // Marcar originales como parte del plan y NO pagables
@@ -212,7 +211,7 @@ export async function crearPlanPagoController(req, res) {
       importe: Number(m.importe),
       planPagoId: plan._id,
       aplicaA: m._id,
-      creadoPor: req.usuario?._id || null,
+      creadoPor: req.usuario?._id || null,   // 👈 usa req.usuario
     }));
     await MovimientoProveedor.insertMany(creditos);
 
@@ -229,7 +228,7 @@ export async function crearPlanPagoController(req, res) {
         importe: fromCents(importeCents),
         planPagoId: plan._id,
         cuotaN: i,
-        creadoPor: req.usuario?._id || null,
+        creadoPor: req.usuario?._id || null, // 👈 usa req.usuario
       });
     }
     await MovimientoProveedor.insertMany(cargos);

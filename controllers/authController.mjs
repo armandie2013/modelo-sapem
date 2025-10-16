@@ -1,5 +1,3 @@
-// controllers/authController.mjs
-
 import {
   verificarEmailExistente,
   verificarDniExistente,
@@ -8,7 +6,6 @@ import {
   validarPassword,
 } from "../services/authService.mjs";
 import { buscarPersonaPorDni } from "../services/personasService.mjs";
-
 
 // Mostrar formulario de registro
 export const mostrarFormularioRegistro = (req, res) => {
@@ -23,25 +20,17 @@ export const mostrarFormularioRegistro = (req, res) => {
 // Controlador para registrar un nuevo usuario
 export const registrarUsuarioController = async (req, res) => {
   try {
-    const { nombre, apellido, dni, email, password, confirmarPassword } =
-      req.body;
+    const { nombre, apellido, dni, email, password, confirmarPassword } = req.body;
     const errores = [];
 
-    // Validación de campos duplicados
     if (await verificarEmailExistente(email)) {
       errores.push({ campo: "email", mensaje: "Correo ya registrado" });
     }
-
     if (await verificarDniExistente(dni)) {
       errores.push({ campo: "dni", mensaje: "DNI ya registrado" });
     }
-
-    // Validar coincidencia de contraseñas
     if (password !== confirmarPassword) {
-      errores.push({
-        campo: "password",
-        mensaje: "Las contraseñas no coinciden",
-      });
+      errores.push({ campo: "password", mensaje: "Las contraseñas no coinciden" });
     }
 
     if (errores.length > 0) {
@@ -54,7 +43,6 @@ export const registrarUsuarioController = async (req, res) => {
     }
 
     await crearUsuarioConHash({ nombre, apellido, dni, email, password });
-
     res.redirect("/login");
   } catch (error) {
     console.error("Error al registrar usuario:", error);
@@ -78,14 +66,12 @@ export const mostrarFormularioLogin = (req, res) => {
   });
 };
 
-// // Procesar inicio de sesión
+// Procesar inicio de sesión
 export const procesarLogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const usuario = await buscarUsuarioPorEmail(email);
-
-    // Validar existencia y contraseña en un solo bloque
     const passwordValido = usuario ? await validarPassword(password, usuario.password) : false;
 
     if (!usuario || !passwordValido) {
@@ -99,18 +85,19 @@ export const procesarLogin = async (req, res) => {
 
     console.log("✅ Sesión iniciada para:", usuario.email);
 
-    // Buscar permisos en PersonaDisponible por dni
+    // Permisos por DNI
     const persona = await buscarPersonaPorDni(usuario.dni);
     const modulosPermitidos = persona?.modulosPermitidos || {};
 
+    // 👇 guardar _id (NO 'id') para que req.usuario._id exista
     req.session.usuario = {
-      id: usuario._id,
+      _id: String(usuario._id),
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       email: usuario.email,
       rol: usuario.rol,
       dni: String(usuario.dni),
-      modulosPermitidos: modulosPermitidos
+      modulosPermitidos,
     };
 
     console.log("📦 Datos de sesión guardados:", req.session.usuario);
@@ -130,6 +117,7 @@ export const procesarLogin = async (req, res) => {
     });
   }
 };
+
 // // Procesar inicio de sesión
 // export const procesarLogin = async (req, res) => {
 //   const { email, password } = req.body;
