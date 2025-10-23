@@ -37,18 +37,18 @@
 <!-- ===================== /TOAST ===================== -->
 
 
-<!-- Header de color con borde redondeado superior -->
+<!-- Header de color con borde redondeado superior (sin cambios de altura) -->
 <header class="relative">
   <div class="h-44 bg-indigo-600 rounded-t-3xl"></div>
   <div class="pointer-events-none absolute inset-0 h-44 rounded-t-3xl
               bg-[radial-gradient(24rem_12rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
 </header>
 
-<!-- Contenido -->
+<!-- Contenido: mantenemos -mt-24 y SIN min-h para evitar scroll extra -->
 <main class="relative -mt-24 px-4 pb-12">
   <div class="mx-auto w-full max-w-md">
-    <!-- Tarjeta -->
-    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8">
+    <!-- Tarjeta con atenuación/entrada suave sin tocar layout global -->
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 animate-fade-in-up">
       <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
         <p class="text-sm text-gray-500">Accedé a tu cuenta</p>
@@ -106,7 +106,6 @@
       </form>
     </div>
 
-    <!-- Nota -->
     <p class="mt-6 text-center text-xs text-gray-500">
       Al continuar aceptás nuestros términos y política de privacidad.
     </p>
@@ -137,14 +136,15 @@
 
 <!-- Estilos -->
 <style>
-  /* Entrada desde arriba, sutil */
-  @keyframes toast-drop {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  /* Entrada del toast */
+  @keyframes toast-drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
   .animate-toast-drop { animation: toast-drop .25s ease-out both; }
 
   /* Progreso 4s */
   @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
   .animate-toast-progress { transform-origin: left center; animation: toast-progress 4s linear forwards; }
+
+  /* Atenuación del card principal: no afecta el layout global */
+  @keyframes fade-in-up { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: translateY(0);} }
+  .animate-fade-in-up { animation: fade-in-up .45s ease-out both; }
 </style>

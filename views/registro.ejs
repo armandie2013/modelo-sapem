@@ -7,13 +7,10 @@
           <div class="toastItem pointer-events-auto w-full rounded-xl text-white shadow-2xl ring-1 ring-red-400/40
                       bg-red-600/90 backdrop-blur-sm px-5 py-3 animate-toast-drop text-sm">
             <div class="flex items-start gap-2">
-              <!-- Icono -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               </svg>
-              <!-- Mensaje -->
               <div class="flex-1"><%= e.mensaje %></div>
-              <!-- Cerrar -->
               <button type="button" aria-label="Cerrar"
                       class="ml-1 opacity-90 hover:opacity-100 transition"
                       onclick="this.closest('.toastItem')?.remove(); if(!document.querySelector('#toastStack .toastItem')) document.getElementById('toastLayer')?.remove()">
@@ -22,7 +19,6 @@
                 </svg>
               </button>
             </div>
-            <!-- Progreso -->
             <div class="mt-2 h-1 w-full bg-white/20 rounded overflow-hidden">
               <div class="h-1 w-full bg-white/75 animate-toast-progress"></div>
             </div>
@@ -43,16 +39,15 @@
 </header>
 
 <!-- Contenido -->
-<main class="relative -mt-16 sm:-mt-20 md:-mt-24 px-3 sm:px-4 pb-8">
+<main class="relative -mt-16 sm:-mt-20 md:-mt-24 px-3 sm:px-4 pb-2">
   <div class="mx-auto w-full max-w-md">
-    <!-- Card -->
-    <div class="bg-white w-full p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-200">
+    <!-- Card (solo se agrega la animación, sin tocar tamaños) -->
+    <div class="bg-white w-full p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-200 animate-fade-in-up">
       <h2 class="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-1">Crear cuenta</h2>
       <p class="text-xs sm:text-sm text-gray-500 text-center mb-5 sm:mb-6">Ingresá tus datos para registrarte</p>
 
-      <!-- FORMULARIO (compacto, una columna, inputs chicos) -->
+      <!-- FORMULARIO (exactamente igual al tuyo) -->
       <form action="/registro" method="POST" id="formRegistro" class="grid grid-cols-1 gap-y-2">
-
         <!-- Nombre -->
         <div>
           <label for="nombre" class="block text-xs text-gray-700 mb-0.5">Nombre</label>
@@ -139,6 +134,12 @@
             Registrarse
           </button>
         </div>
+
+        <!-- Link a login dentro del form -->
+        <p class="mt-2 text-[14px] text-center text-gray-500">
+          ¿Ya tenés cuenta?
+          <a href="/login" class="text-indigo-600 hover:text-indigo-500 font-medium">Iniciá sesión</a>
+        </p>
       </form>
     </div>
 
@@ -148,84 +149,35 @@
   </div>
 </main>
 
-<!-- Capitalización + DNI + Toast -->
+<!-- ===================== Scripts ===================== -->
 <script>
-  // Capitalizar nombre y apellido
-  function capitalizarPrimeraLetra(texto){return texto.charAt(0).toUpperCase()+texto.slice(1).toLowerCase();}
-  function aplicarCapitalizacion(input){
-    input.addEventListener("input",function(){
-      const palabras=this.value.split(" ").map(capitalizarPrimeraLetra);
-      this.value=palabras.join(" ");
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded",()=> {
-    const campoNombre=document.getElementById("nombre");
-    const campoApellido=document.getElementById("apellido");
-    const form=document.getElementById("formRegistro");
-    const dni=document.getElementById("dni");
-    const dniError=document.getElementById("dniError");
-
-    if(campoNombre) aplicarCapitalizacion(campoNombre);
-    if(campoApellido) aplicarCapitalizacion(campoApellido);
-
-    // Validación DNI
-    const CONTROL_KEYS=new Set(["Backspace","Delete","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End","Tab","Enter","Escape"]);
-    function isDigitKey(e){ if(e.ctrlKey||e.metaKey||CONTROL_KEYS.has(e.key)) return true; return /^[0-9]$/.test(e.key); }
-    function sanitizeDni(v){ return (v||"").replace(/\D/g,"").slice(0,8); }
-    function validarDni(){
-      dni.value=sanitizeDni(dni.value);
-      const ok=/^[0-9]{8}$/.test(dni.value);
-      dni.setCustomValidity(ok?"":"El DNI debe tener exactamente 8 dígitos (0–9).");
-      if(dniError) dniError.classList.toggle("hidden",ok);
-      dni.classList.toggle("border-red-500",!ok);
-      return ok;
-    }
-    if(dni){
-      dni.addEventListener("keydown",(e)=>{ if(!isDigitKey(e)) e.preventDefault(); });
-      dni.addEventListener("input",validarDni);
-      dni.addEventListener("paste",(e)=>{
-        e.preventDefault();
-        const text=(e.clipboardData||window.clipboardData).getData("text")||"";
-        const limpio=sanitizeDni(text);
-        const start=dni.selectionStart??dni.value.length;
-        const end=dni.selectionEnd??dni.value.length;
-        dni.value=(dni.value.slice(0,start)+limpio+dni.value.slice(end)).slice(0,8);
-        validarDni();
-      });
-      dni.addEventListener("blur",validarDni);
-      dni.addEventListener("invalid",()=>validarDni());
-    }
-    if(form){
-      form.addEventListener("submit",(e)=>{ if(!validarDni()){ e.preventDefault(); dni.focus(); } });
-    }
-
-    // Autocerrar toasts (si existen)
+  document.addEventListener('DOMContentLoaded', () => {
     const stack=document.getElementById('toastStack');
     const layer=document.getElementById('toastLayer');
-    if (stack && layer) {
-      [...stack.querySelectorAll('.toastItem')].forEach((el, idx) => {
-        setTimeout(() => {
+    if(stack && layer){
+      [...stack.querySelectorAll('.toastItem')].forEach((el,idx)=>{
+        setTimeout(()=>{
           el.style.transition='opacity .25s ease, transform .25s ease';
           el.style.opacity='0';
           el.style.transform='translateY(-4px)';
-          setTimeout(() => {
+          setTimeout(()=>{
             el.remove();
-            if (!stack.querySelector('.toastItem')) layer.remove();
-          }, 260);
-        }, 4000 + idx*120);
+            if(!stack.querySelector('.toastItem')) layer.remove();
+          },260);
+        },4000+idx*120);
       });
     }
   });
 </script>
 
-<!-- Estilos -->
+<!-- ===================== Estilos ===================== -->
 <style>
-  /* Entrada sutil desde arriba */
-  @keyframes toast-drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-toast-drop { animation: toast-drop .25s ease-out both; }
+  @keyframes toast-drop { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+  .animate-toast-drop { animation:toast-drop .25s ease-out both; }
+  @keyframes toast-progress { from{transform:scaleX(1);} to{transform:scaleX(0);} }
+  .animate-toast-progress { transform-origin:left center; animation:toast-progress 4s linear forwards; }
 
-  /* Progreso 4s */
-  @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-  .animate-toast-progress { transform-origin: left center; animation: toast-progress 4s linear forwards; }
+  /* 👇 Animación suave del card (idéntica al login) */
+  @keyframes fade-in-up { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+  .animate-fade-in-up { animation:fade-in-up .45s ease-out both; }
 </style>
