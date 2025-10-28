@@ -1,28 +1,94 @@
-<div class="flex justify-center items-center min-h-[calc(100vh-216px)] w-full bg-gray-100 px-4">
-  <div class="relative bg-white p-6 sm:p-8 rounded-xl shadow-xl max-w-md w-full text-center border border-red-300">
+<!-- Header con borde superior redondeado (idéntico al login) -->
+<header class="relative">
+  <div class="h-44 bg-indigo-600 rounded-t-3xl"></div>
+  <div class="pointer-events-none absolute inset-0 h-44 rounded-t-3xl
+              bg-[radial-gradient(24rem_12rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
+</header>
 
-    <!-- Cinta de advertencia -->
-    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-semibold px-4 py-1 rounded-full shadow-md">
-      Acceso Restringido
-    </div>
+<!-- Contenido: mismas separaciones que el login (-mt-24 / pb-12) -->
+<main class="relative -mt-24 px-4 pb-12">
+  <div class="mx-auto w-full max-w-md">
+    <!-- Tarjeta -->
+    <section class="relative bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 animate-fade-in-up">
+      <!-- Cinta -->
+      <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white text-xs font-semibold px-4 py-1 rounded-full shadow">
+        Acceso restringido
+      </div>
 
-    <!-- Icono -->
-    <div class="flex justify-center mb-4 mt-2">
-      <svg class="w-14 h-14 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-      </svg>
-    </div>
+      <!-- Ícono -->
+      <div class="flex justify-center mb-4 mt-2">
+        <svg class="w-14 h-14 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+        </svg>
+      </div>
 
-    <!-- Mensaje -->
-    <h1 class="text-2xl font-bold text-gray-800 mb-2">No autorizado</h1>
-    <p class="text-gray-600 text-normal mb-6">
-      Tu cuenta no tiene acceso a este módulo.<br>
-      Si creés que es un error, contactá al administrador.
+      <!-- Mensaje -->
+      <h1 class="text-2xl font-bold text-gray-900 mb-1 text-center">
+        Permiso Denegado
+        <!-- No autorizado para <%= (typeof moduloActual !== 'undefined' && moduloActual) ? moduloActual : 'este módulo' %> -->
+      </h1>
+      <p class="text-gray-600 text-sm mb-5 text-center">
+        Tu cuenta no tiene acceso a este módulo.<br>
+        Si creés que es un error, contactá al administrador.
+      </p>
+
+      <!-- Chips de info (compactos) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5 text-xs">
+        <div class="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
+          <span class="inline-flex h-5 w-5 items-center justify-center rounded bg-indigo-50 text-indigo-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </span>
+          Rol: <strong><%= (usuario && usuario.rol) || '—' %></strong>
+        </div>
+        <div class="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
+          <span class="inline-flex h-5 w-5 items-center justify-center rounded bg-indigo-50 text-indigo-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </span>
+          Módulo: <strong><%= (typeof moduloActual !== 'undefined' && moduloActual) ? moduloActual : '—' %></strong>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-3 text-center">
+        <a href="/"
+           class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow transition active:scale-[.99]">
+          Volver al inicio
+        </a>
+
+        <form action="/logout" method="POST" class="w-full sm:w-auto">
+          <button type="submit"
+            class="w-full sm:w-auto border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2.5 px-6 rounded-lg shadow transition active:scale-[.99]">
+            Cambiar de cuenta
+          </button>
+        </form>
+      </div>
+
+      <!-- Detalle técnico -->
+      <details class="mt-4 text-left">
+        <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800">Ver detalle técnico</summary>
+        <div class="mt-2 text-xs text-gray-600 grid grid-cols-1 gap-1">
+          <div><span class="text-gray-500">Usuario:</span> <%= ((usuario?.nombre || '') + ' ' + (usuario?.apellido || '')).trim() || '—' %></div>
+          <div><span class="text-gray-500">DNI:</span> <%= usuario?.dni || '—' %></div>
+          <div><span class="text-gray-500">Rol:</span> <%= usuario?.rol || '—' %></div>
+          <div><span class="text-gray-500">Ruta:</span> <%= (typeof rutaActual !== 'undefined' && rutaActual) ? rutaActual : '—' %></div>
+          <div><span class="text-gray-500">Fecha:</span> <%= new Date().toLocaleString('es-AR') %></div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Nota al pie (igual al login) -->
+    <p class="mt-6 text-center text-xs text-gray-500">
+      © <%= new Date().getFullYear() %> Sistema de Gestión. Todos los derechos reservados.
     </p>
-
-    <!-- Botón -->
-    <a href="/" class="inline-block bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-shadow shadow-sm">
-      Volver al inicio
-    </a>
   </div>
-</div>
+</main>
+
+<!-- Animación sutil (mismo patrón que login) -->
+<style>
+  @keyframes fade-in-up { from { opacity:0; transform: translateY(12px);} to { opacity:1; transform: translateY(0);} }
+  .animate-fade-in-up { animation: fade-in-up .45s ease-out both; }
+</style>
