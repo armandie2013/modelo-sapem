@@ -1,105 +1,124 @@
 <main class="bg-gray-100 min-h-screen py-8 px-4">
   <%
-    // Helpers
+    // ===== Helpers y métricas =====
     const fmtUSD = (v) => {
       const n = Number(v || 0);
       return `US$ ${n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
-    const totalProveedores = (proveedores || []).length;
+    const total = (proveedores || []).length;
     const activos = (proveedores || []).filter(p => (p.activo ?? true)).length;
-    const deudaAcumulada = (proveedores || []).reduce((acc, p) => acc + Number(p.saldoTotal || 0), 0);
+    const inactivos = total - activos;
+    const deudaTotal = (proveedores || []).reduce((acc, p) => acc + Number(p.saldoTotal || 0), 0);
   %>
 
-  <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-
-    <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Proveedores</h1>
-        <p class="text-sm text-gray-500">Gestión y seguimiento de cuentas</p>
-      </div>
-      <a
-        href="/proveedores/registrar"
-        class="inline-flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition text-sm shadow-sm"
-      >
-        + Registrar proveedor
-      </a>
-    </div>
-
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-        <p class="text-xs text-gray-500">Total de proveedores</p>
-        <p class="text-xl font-semibold text-gray-900"><%= totalProveedores %></p>
-      </div>
-      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-        <p class="text-xs text-gray-500">Activos</p>
-        <p class="text-xl font-semibold text-gray-900"><%= activos %></p>
-      </div>
-      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-        <p class="text-xs text-gray-500">Deuda acumulada</p>
-        <p class="text-xl font-semibold <%= deudaAcumulada > 0 ? 'text-red-600' : (deudaAcumulada < 0 ? 'text-green-700' : 'text-gray-900') %>">
-          <%= fmtUSD(deudaAcumulada) %>
-        </p>
-      </div>
-    </div>
-
-    <!-- Controles -->
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-      <div class="relative w-full sm:w-80">
-        <input id="filtro"
-               type="text"
-               placeholder="Buscar por nombre, fantasía o plan…"
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.5 3.5a5 5 0 013.995 8.037l3.734 3.734a1 1 0 11-1.414 1.414l-3.734-3.734A5 5 0 118.5 3.5zm0 2a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd"/></svg>
+  <div class="mx-auto max-w-7xl bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+    <!-- ===== Encabezado ===== -->
+    <div class="px-6 py-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-white">
+      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Proveedores</h1>
+          <p class="text-sm text-gray-600">Estado de cuentas y acciones rápidas</p>
+        </div>
+        <a href="/proveedores/registrar"
+           class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm shadow-sm">
+          + Registrar proveedor
+        </a>
       </div>
 
-      <!-- Botones de orden -->
-      <div class="inline-flex rounded-md border border-gray-200 overflow-hidden" id="sortBar">
-        <button type="button" data-sort="numero" class="px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-1">
-          # <span class="arrow text-gray-400"></span>
-        </button>
-        <button type="button" data-sort="plan" class="px-3 py-2 text-sm hover:bg-gray-50 border-l border-gray-200 flex items-center gap-1">
-          Plan <span class="arrow text-gray-400"></span>
-        </button>
-        <button type="button" data-sort="importe" class="px-3 py-2 text-sm hover:bg-gray-50 border-l border-gray-200 flex items-center gap-1">
-          Importe <span class="arrow text-gray-400"></span>
-        </button>
-        <button type="button" data-sort="deuda" class="px-3 py-2 text-sm hover:bg-gray-50 border-l border-gray-200 flex items-center gap-1">
-          Deuda <span class="arrow text-gray-400"></span>
-        </button>
+      <!-- KPIs -->
+      <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <p class="text-[11px] text-gray-500">Total</p>
+          <p class="text-xl font-semibold text-gray-900"><%= total %></p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <p class="text-[11px] text-gray-500">Activos</p>
+          <p class="text-xl font-semibold text-emerald-700"><%= activos %></p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <p class="text-[11px] text-gray-500">Inactivos</p>
+          <p class="text-xl font-semibold text-gray-700"><%= inactivos %></p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <p class="text-[11px] text-gray-500">Deuda acumulada</p>
+          <p class="text-xl font-semibold <%= deudaTotal > 0 ? 'text-red-600' : (deudaTotal < 0 ? 'text-green-700' : 'text-gray-900') %>">
+            <%= fmtUSD(deudaTotal) %>
+          </p>
+        </div>
       </div>
     </div>
 
-    <!-- Tabla (desktop) -->
-    <div class="hidden md:block rounded-xl border border-gray-200 overflow-x-auto" id="tablaWrap">
-      <table class="w-full table-auto text-sm" id="tabla">
-        <colgroup>
-          <col style="width:4.5rem;" />
-          <col />
-          <col />
-          <col style="width:18rem;" />
-          <col style="width:10rem;" />
-          <col style="width:10rem;" />
-          <col style="width:8rem;" />
-          <col style="width:12rem;" />
-        </colgroup>
+    <!-- ===== Controles de vista ===== -->
+    <div class="px-6 py-4 bg-white">
+      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <!-- Segmentos de estado -->
+        <div class="inline-flex rounded-lg border border-gray-200 overflow-hidden" role="tablist" aria-label="Filtro de estado">
+          <button type="button" data-seg="todos" class="seg px-3 py-2 text-sm bg-gray-50">Todos</button>
+          <button type="button" data-seg="activos" class="seg px-3 py-2 text-sm border-l border-gray-200">Activos</button>
+          <button type="button" data-seg="inactivos" class="seg px-3 py-2 text-sm border-l border-gray-200">Inactivos</button>
+        </div>
 
-        <thead class="bg-gray-50 text-gray-700 font-medium">
-          <tr>
-            <th class="px-3 py-2 text-left">#</th>
-            <th class="px-3 py-2 text-left">Nombre Real</th>
-            <th class="px-3 py-2 text-left">Nombre Fantasía</th>
-            <th class="px-3 py-2 text-left">Plan</th>
-            <th class="px-3 py-2 text-right">Importe</th>
-            <th class="px-3 py-2 text-right">Deuda</th>
-            <th class="px-3 py-2 text-left">Estado</th>
-            <th class="px-3 py-2 text-right">Acciones</th>
-          </tr>
-        </thead>
+        <!-- Buscador + Orden -->
+        <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div class="relative w-full sm:w-80">
+            <input id="buscar" type="text" placeholder="Buscar por nombre, fantasía o plan…"
+                   class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                   aria-label="Buscar proveedores">
+            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8.5 3.5a5 5 0 013.995 8.037l3.734 3.734a1 1 0 11-1.414 1.414l-3.734-3.734A5 5 0 118.5 3.5zm0 2a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd"/>
+            </svg>
+          </div>
 
-        <tbody class="divide-y divide-gray-200" id="tbody">
+          <div class="flex items-center gap-2">
+            <label for="orden" class="text-sm text-gray-600">Orden</label>
+            <select id="orden" class="rounded-lg border border-gray-300 px-2 py-2 text-sm focus:ring-indigo-500">
+              <option value="numero-asc"># (asc)</option>
+              <option value="numero-desc"># (desc)</option>
+              <option value="plan-asc">Plan (A-Z)</option>
+              <option value="plan-desc">Plan (Z-A)</option>
+              <option value="importe-asc">Importe (↑)</option>
+              <option value="importe-desc">Importe (↓)</option>
+              <option value="deuda-asc">Deuda (↑)</option>
+              <option value="deuda-desc">Deuda (↓)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen de la vista -->
+      <!-- <p id="resumen" class="mt-3 text-xs text-gray-600">Mostrando — / <%= total %></p> -->
+    </div>
+
+    <!-- ===== Tabla (desktop) ===== -->
+    <div class="hidden md:block px-6 pb-6">
+      <div class="rounded-xl border border-gray-200 overflow-x-auto">
+        <table class="w-full table-auto text-sm" id="tabla">
+          <colgroup>
+            <col style="width:5rem" />
+            <col />
+            <col />
+            <col style="width:18rem" />
+            <col style="width:10rem" />
+            <col style="width:10rem" />
+            <col style="width:8.5rem" />
+            <col style="width:12rem" />
+          </colgroup>
+
+          <thead class="bg-gray-50 text-gray-700 font-medium">
+            <tr>
+              <th class="px-3 py-2 text-left">#</th>
+              <th class="px-3 py-2 text-left">Nombre Real</th>
+              <th class="px-3 py-2 text-left">Nombre Fantasía</th>
+              <th class="px-3 py-2 text-left">Plan</th>
+              <th class="px-3 py-2 text-right">Importe</th>
+              <th class="px-3 py-2 text-right">Deuda</th>
+              <th class="px-3 py-2 text-left">Estado</th>
+              <th class="px-3 py-2 text-right">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody id="tbody" class="divide-y divide-gray-200">
           <% if ((proveedores||[]).length === 0) { %>
             <tr>
               <td colspan="8" class="px-3 py-6 text-center text-gray-500">Sin proveedores cargados.</td>
@@ -108,200 +127,200 @@
             <% proveedores.forEach(p => {
                  const activo = (p.activo ?? true);
                  const tieneOverride = (typeof p.precioPlan === 'number' && !Number.isNaN(p.precioPlan));
-                 const importeMostrado = (typeof p.plan?.importe !== 'undefined')
-                                          ? (tieneOverride ? p.precioPlan : p.plan.importe)
-                                          : (tieneOverride ? p.precioPlan : undefined);
+                 const importe = (typeof p.plan?.importe !== 'undefined')
+                                  ? (tieneOverride ? p.precioPlan : p.plan.importe)
+                                  : (tieneOverride ? p.precioPlan : undefined);
                  const deuda = Number(p.saldoTotal || 0);
-                 const claveFiltro = `${(p.nombreReal||'').toLowerCase()} ${(p.nombreFantasia||'').toLowerCase()} ${(p.plan?.nombre||'').toLowerCase()}`;
+                 const filtroTxt = `${(p.nombreReal||'').toLowerCase()} ${(p.nombreFantasia||'').toLowerCase()} ${(p.plan?.nombre||'').toLowerCase()}`;
             %>
-              <tr class="hover:bg-gray-50 fila"
-                  data-numero="<%= p.numeroProveedor || 0 %>"
-                  data-plan="<%= p.plan?.nombre || '' %>"
-                  data-importe="<%= typeof importeMostrado !== 'undefined' ? Number(importeMostrado) : -1 %>"
-                  data-deuda="<%= deuda %>"
-                  data-filtro="<%= claveFiltro %>">
-                <!-- # -->
-                <td class="px-3 py-2 align-middle text-gray-700">
-                  <%= p.numeroProveedor || '-' %>
-                </td>
-
-                <!-- Nombre real (truncate + tooltip) -->
-                <td class="px-3 py-2 align-middle text-gray-900">
-                  <div class="max-w-[22rem] truncate" title="<%= p.nombreReal %>">
-                    <%= p.nombreReal %>
-                  </div>
-                </td>
-
-                <!-- Nombre fantasía (truncate + tooltip) -->
-                <td class="px-3 py-2 align-middle text-gray-700">
-                  <div class="max-w-[20rem] truncate"
-                       title="<%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>">
-                    <%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>
-                  </div>
-                </td>
-
-                <!-- Plan (truncate + tooltip) -->
-                <td class="px-3 py-2 align-middle text-gray-700">
-                  <div class="max-w-[16rem] truncate" title="<%= p.plan?.nombre || '—' %>">
-                    <%= p.plan?.nombre || '—' %>
-                  </div>
-                </td>
-
-                <!-- Importe -->
-                <td class="px-3 py-2 align-middle text-right">
-                  <% if (typeof importeMostrado !== 'undefined') { %>
-                    <span class="whitespace-nowrap tabular-nums font-medium">
-                      <%= fmtUSD(importeMostrado) %>
-                    </span>
-                    <% if (tieneOverride) { %>
-                      <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">
-                        Override
-                      </span>
-                    <% } %>
-                  <% } else { %>—<% } %>
-                </td>
-
-                <!-- Deuda -->
-                <td class="px-3 py-2 align-middle text-right">
-                  <span class="whitespace-nowrap tabular-nums font-semibold <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
-                    <%= fmtUSD(deuda) %>
-                  </span>
-                </td>
-
-                <!-- Estado (ancho fijo, sin punto) -->
-                <td class="px-3 py-2 align-middle">
-                  <span class="inline-flex items-center justify-center w-20 px-2 py-0.5 rounded-full text-[11px] font-medium
-                    <%= (p.activo ?? true) ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' %>">
-                    <%= (p.activo ?? true) ? 'Activo' : 'Inactivo' %>
-                  </span>
-                </td>
-
-                <!-- Acciones -->
-                <td class="px-3 py-2 align-middle">
-                  <div class="flex justify-end items-center gap-2 min-w-[10rem]">
-                    <a href="/proveedores/<%= p._id %>/ver"
-                       class="px-2.5 py-1.5 rounded bg-gray-100 hover:bg-gray-200 text-slate-700 text-xs border border-gray-200"
-                       title="Ver proveedor">Ver</a>
-                    <a href="/proveedores/<%= p._id %>/editar"
-                       class="px-2.5 py-1.5 rounded bg-amber-500 text-white hover:bg-amber-600 text-xs"
-                       title="Editar proveedor">Editar</a>
-                    <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
-                      <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
-                            onsubmit="return confirm('¿Eliminar proveedor?')">
-                        <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs"
-                                title="Eliminar proveedor">Eliminar</button>
-                      </form>
-                    <% } %>
-                  </div>
-                </td>
-              </tr>
+            <tr class="fila hover:bg-gray-50"
+                data-estado="<%= activo ? 'activos' : 'inactivos' %>"
+                data-filtro="<%= filtroTxt %>"
+                data-numero="<%= p.numeroProveedor || 0 %>"
+                data-plan="<%= p.plan?.nombre || '' %>"
+                data-importe="<%= typeof importe !== 'undefined' ? Number(importe) : -1 %>"
+                data-deuda="<%= deuda %>">
+              <td class="px-3 py-2 align-middle text-gray-700"><%= p.numeroProveedor || '-' %></td>
+              <td class="px-3 py-2 align-middle text-gray-900">
+                <div class="max-w-[22rem] truncate" title="<%= p.nombreReal %>"><%= p.nombreReal %></div>
+              </td>
+              <td class="px-3 py-2 align-middle text-gray-700">
+                <div class="max-w-[20rem] truncate" title="<%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>">
+                  <%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>
+                </div>
+              </td>
+              <td class="px-3 py-2 align-middle text-gray-700">
+                <div class="max-w-[16rem] truncate" title="<%= p.plan?.nombre || '—' %>"><%= p.plan?.nombre || '—' %></div>
+              </td>
+              <td class="px-3 py-2 align-middle text-right">
+                <% if (typeof importe !== 'undefined') { %>
+                  <span class="whitespace-nowrap tabular-nums font-medium"><%= fmtUSD(importe) %></span>
+                  <% if (tieneOverride) { %>
+                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">Override</span>
+                  <% } %>
+                <% } else { %>—<% } %>
+              </td>
+              <td class="px-3 py-2 align-middle text-right">
+                <span class="whitespace-nowrap tabular-nums font-semibold <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
+                  <%= fmtUSD(deuda) %>
+                </span>
+              </td>
+              <td class="px-3 py-2 align-middle">
+                <span class="inline-flex items-center justify-center w-20 px-2 py-0.5 rounded-full text-[11px] font-medium
+                  <%= activo ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' %>">
+                  <%= activo ? 'Activo' : 'Inactivo' %>
+                </span>
+              </td>
+              <td class="px-3 py-2 align-middle">
+                <div class="flex justify-end items-center gap-2 min-w-[10rem]">
+                  <a href="/proveedores/<%= p._id %>/ver"
+                     class="px-2.5 py-1.5 rounded bg-gray-100 hover:bg-gray-200 text-slate-700 text-xs border border-gray-200">Ver</a>
+                  <a href="/proveedores/<%= p._id %>/editar"
+                     class="px-2.5 py-1.5 rounded bg-amber-500 text-white hover:bg-amber-600 text-xs">Editar</a>
+                  <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
+                    <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
+                          onsubmit="return confirm('¿Eliminar proveedor?')">
+                      <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
+                    </form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
             <% }) %>
           <% } %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Cards (mobile) -->
-    <div class="md:hidden space-y-3" id="cards">
+    <!-- ===== Cards (mobile) ===== -->
+    <div class="md:hidden px-6 pb-6" id="cards">
       <% if ((proveedores||[]).length === 0) { %>
         <div class="text-center text-gray-500 py-6">Sin proveedores cargados.</div>
       <% } else { %>
         <% proveedores.forEach(p => {
              const activo = (p.activo ?? true);
              const tieneOverride = (typeof p.precioPlan === 'number' && !Number.isNaN(p.precioPlan));
-             const importeMostrado = (typeof p.plan?.importe !== 'undefined')
-                                      ? (tieneOverride ? p.precioPlan : p.plan.importe)
-                                      : (tieneOverride ? p.precioPlan : undefined);
+             const importe = (typeof p.plan?.importe !== 'undefined')
+                              ? (tieneOverride ? p.precioPlan : p.plan.importe)
+                              : (tieneOverride ? p.precioPlan : undefined);
              const deuda = Number(p.saldoTotal || 0);
-             const claveFiltro = `${(p.nombreReal||'').toLowerCase()} ${(p.nombreFantasia||'').toLowerCase()} ${(p.plan?.nombre||'').toLowerCase()}`;
+             const filtroTxt = `${(p.nombreReal||'').toLowerCase()} ${(p.nombreFantasia||'').toLowerCase()} ${(p.plan?.nombre||'').toLowerCase()}`;
         %>
-          <div class="card border border-gray-200 rounded-xl p-4 fila"
-               data-numero="<%= p.numeroProveedor || 0 %>"
-               data-plan="<%= p.plan?.nombre || '' %>"
-               data-importe="<%= typeof importeMostrado !== 'undefined' ? Number(importeMostrado) : -1 %>"
-               data-deuda="<%= deuda %>"
-               data-filtro="<%= claveFiltro %>">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="text-xs text-gray-500"># <%= p.numeroProveedor || '-' %></div>
-                <div class="text-base font-semibold text-gray-900 truncate" title="<%= p.nombreReal %>"><%= p.nombreReal %></div>
-                <div class="text-xs text-gray-500 truncate" title="<%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>">
-                  <%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>
-                </div>
-                <div class="text-xs text-gray-500 mt-1 truncate" title="<%= p.plan?.nombre || '—' %>">
-                  Plan: <span class="font-medium"><%= p.plan?.nombre || '—' %></span>
-                </div>
+        <div class="card border border-gray-200 rounded-xl p-4 mb-3 fila"
+             data-estado="<%= activo ? 'activos' : 'inactivos' %>"
+             data-filtro="<%= filtroTxt %>"
+             data-numero="<%= p.numeroProveedor || 0 %>"
+             data-plan="<%= p.plan?.nombre || '' %>"
+             data-importe="<%= typeof importe !== 'undefined' ? Number(importe) : -1 %>"
+             data-deuda="<%= deuda %>">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-xs text-gray-500"># <%= p.numeroProveedor || '-' %></div>
+              <div class="text-base font-semibold text-gray-900 truncate" title="<%= p.nombreReal %>"><%= p.nombreReal %></div>
+              <div class="text-xs text-gray-500 truncate" title="<%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>">
+                <%= p.nombreFantasia || p.nombreReal || '(Sin nombre)' %>
               </div>
-              <span class="inline-flex items-center justify-center w-20 px-2 py-0.5 rounded-full text-[11px] font-medium
-                <%= activo ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' %>">
-                <%= activo ? 'Activo' : 'Inactivo' %>
-              </span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 mt-3">
-              <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
-                <div class="text-[11px] text-gray-500">Importe</div>
-                <div class="text-sm font-medium">
-                  <% if (typeof importeMostrado !== 'undefined') { %>
-                    <%= fmtUSD(importeMostrado) %>
-                    <% if (tieneOverride) { %>
-                      <span class="ml-1 inline-block px-1 py-0.5 text-[10px] rounded bg-amber-100 text-amber-800">Ov.</span>
-                    <% } %>
-                  <% } else { %>—<% } %>
-                </div>
-              </div>
-              <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
-                <div class="text-[11px] text-gray-500">Deuda</div>
-                <div class="text-sm font-semibold <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
-                  <%= fmtUSD(deuda) %>
-                </div>
+              <div class="text-xs text-gray-500 mt-1 truncate" title="<%= p.plan?.nombre || '—' %>">
+                Plan: <span class="font-medium"><%= p.plan?.nombre || '—' %></span>
               </div>
             </div>
+            <span class="inline-flex items-center justify-center w-20 px-2 py-0.5 rounded-full text-[11px] font-medium
+              <%= activo ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' %>">
+              <%= activo ? 'Activo' : 'Inactivo' %>
+            </span>
+          </div>
 
-            <div class="flex justify-end gap-2 mt-3">
-              <a href="/proveedores/<%= p._id %>/ver"
-                 class="px-2.5 py-1.5 rounded bg-gray-100 hover:bg-gray-200 text-slate-700 text-xs border border-gray-200">Ver</a>
-              <a href="/proveedores/<%= p._id %>/editar"
-                 class="px-2.5 py-1.5 rounded bg-amber-500 text-white hover:bg-amber-600 text-xs">Editar</a>
-              <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
-                <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
-                      onsubmit="return confirm('¿Eliminar proveedor?')">
-                  <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
-                </form>
-              <% } %>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
+              <div class="text-[11px] text-gray-500">Importe</div>
+              <div class="text-sm font-medium">
+                <% if (typeof importe !== 'undefined') { %>
+                  <%= fmtUSD(importe) %>
+                  <% if (tieneOverride) { %>
+                    <span class="ml-1 inline-block px-1 py-0.5 text-[10px] rounded bg-amber-100 text-amber-800">Ov.</span>
+                  <% } %>
+                <% } else { %>—<% } %>
+              </div>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
+              <div class="text-[11px] text-gray-500">Deuda</div>
+              <div class="text-sm font-semibold <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
+                <%= fmtUSD(deuda) %>
+              </div>
             </div>
           </div>
+
+          <div class="flex justify-end gap-2 mt-3">
+            <a href="/proveedores/<%= p._id %>/ver"
+               class="px-2.5 py-1.5 rounded bg-gray-100 hover:bg-gray-200 text-slate-700 text-xs border border-gray-200">Ver</a>
+            <a href="/proveedores/<%= p._id %>/editar"
+               class="px-2.5 py-1.5 rounded bg-amber-500 text-white hover:bg-amber-600 text-xs">Editar</a>
+            <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
+              <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
+                    onsubmit="return confirm('¿Eliminar proveedor?')">
+                <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
         <% }) %>
       <% } %>
     </div>
   </div>
 
+  <!-- ===== Script de interacción ===== -->
   <script>
-    (function () {
-      const $ = (sel, ctx=document) => ctx.querySelector(sel);
-      const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+    (function(){
+      const $  = (s, c=document)=>c.querySelector(s);
+      const $$ = (s, c=document)=>Array.from(c.querySelectorAll(s));
 
-      const filtro = $('#filtro');
-      const filas = $$('.fila'); // filas de tabla + cards móvil
-      const sortBtns = $$('[data-sort]');
-      let ordenActual = { campo: null, asc: true };
+      const buscar  = $('#buscar');
+      const orden   = $('#orden');
+      const resumen = $('#resumen');
+      const segBtns = $$('.seg');
 
-      function filtrar() {
-        const q = (filtro.value || '').trim().toLowerCase();
-        filas.forEach(el => {
-          const hay = (el.dataset.filtro || '').includes(q);
-          el.classList.toggle('hidden', !hay);
+      const filasTabla = $$('#tbody .fila');
+      const cardsMovil = $$('#cards .fila');
+      const FILAS = [...filasTabla, ...cardsMovil];
+
+      // Estado de UI
+      let seg = 'todos';
+
+      function aplicaTexto(el, q){
+        if (!q) return true;
+        return (el.dataset.filtro || '').includes(q);
+      }
+      function aplicaEstado(el){
+        if (seg === 'todos') return true;
+        return el.dataset.estado === seg;
+      }
+      function filtrar(){
+        const q = (buscar.value || '').trim().toLowerCase();
+        let visibles = 0;
+
+        FILAS.forEach(el=>{
+          const ok = aplicaTexto(el, q) && aplicaEstado(el);
+          el.classList.toggle('hidden', !ok);
+          if (ok) visibles++;
+        });
+
+        resumen.textContent = `Mostrando ${visibles} / <%= total %>`;
+
+        // Zebra en tabla sólo visibles
+        const visiblesTabla = $$('#tbody .fila:not(.hidden)');
+        visiblesTabla.forEach((tr, i)=>{
+          tr.style.backgroundColor = i % 2 === 1 ? 'rgba(249,250,251,.6)' : 'transparent';
         });
       }
-      filtro?.addEventListener('input', filtrar);
 
-      function sortCompare(a, b, campo) {
-        if (campo === 'numero' || campo === 'importe' || campo === 'deuda') {
+      function sortCompare(a, b, campo){
+        if (campo === 'numero' || campo === 'importe' || campo === 'deuda'){
           const va = parseFloat(a.dataset[campo] || '0');
           const vb = parseFloat(b.dataset[campo] || '0');
           return va - vb;
         }
-        if (campo === 'plan') {
+        if (campo === 'plan'){
           const sa = String(a.dataset.plan || '').toLowerCase();
           const sb = String(b.dataset.plan || '').toLowerCase();
           return sa.localeCompare(sb, 'es', { sensitivity: 'base' });
@@ -309,59 +328,55 @@
         return 0;
       }
 
-      function pintarEstadoBotones() {
-        sortBtns.forEach(btn => {
-          btn.classList.remove('bg-gray-100');
-          const arrow = btn.querySelector('.arrow');
-          if (arrow) arrow.textContent = '';
-        });
-        const active = sortBtns.find(b => b.dataset.sort === ordenActual.campo);
-        if (active) {
-          active.classList.add('bg-gray-100');
-          const arrow = active.querySelector('.arrow');
-          if (arrow) arrow.textContent = ordenActual.asc ? '↑' : '↓';
-        }
-      }
-
-      function ordenar(campo) {
-        const asc = (ordenActual.campo === campo) ? !ordenActual.asc : true;
-        ordenActual = { campo, asc };
+      function ordenar(){
+        const v = (orden.value || 'numero-asc');
+        const [campo, dir] = v.split('-'); // ej: 'deuda-desc'
+        const asc = dir !== 'desc';
 
         // Tabla
         const tbody = $('#tbody');
-        if (tbody) {
-          const filasTabla = Array.from(tbody.querySelectorAll('.fila'));
-          const ordenadas = filasTabla.slice().sort((ra, rb) => {
+        if (tbody){
+          const arr = $$('#tbody .fila').slice();
+          arr.sort((ra, rb)=>{
             const r = sortCompare(ra, rb, campo);
             return asc ? r : -r;
           });
-          ordenadas.forEach(tr => tbody.appendChild(tr));
+          arr.forEach(tr=>tbody.appendChild(tr));
         }
 
         // Cards
-        const cardsWrap = $('#cards');
-        if (cardsWrap) {
-          const cards = Array.from(cardsWrap.querySelectorAll('.fila'));
-          const ord = cards.slice().sort((ra, rb) => {
+        const wrap = $('#cards');
+        if (wrap){
+          const arr = $$('#cards .fila').slice();
+          arr.sort((ra, rb)=>{
             const r = sortCompare(ra, rb, campo);
             return asc ? r : -r;
           });
-          ord.forEach(c => cardsWrap.appendChild(c));
+          arr.forEach(c=>wrap.appendChild(c));
         }
 
-        pintarEstadoBotones();
+        filtrar(); // mantener consistencia
       }
 
-      // Clicks en botones
-      sortBtns.forEach(btn => {
-        btn.addEventListener('click', () => ordenar(btn.dataset.sort));
+      // Segmentos
+      segBtns.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          segBtns.forEach(b=>b.classList.remove('bg-gray-50'));
+          btn.classList.add('bg-gray-50');
+          seg = btn.dataset.seg || 'todos';
+          filtrar();
+        });
       });
+      // Por defecto activo "Todos"
+      const def = segBtns.find(b=>b.dataset.seg==='todos');
+      if (def) def.classList.add('bg-gray-50');
 
-      // ✅ Orden inicial por número ASC
-      ordenar('numero');
+      // Eventos
+      buscar.addEventListener('input', filtrar);
+      orden.addEventListener('change', ordenar);
 
-      // Filtro inicial
-      filtrar();
+      // Orden inicial
+      ordenar();
     })();
   </script>
 </main>
