@@ -20,7 +20,8 @@ export const mostrarFormularioRegistro = (req, res) => {
 // Controlador para registrar un nuevo usuario
 export const registrarUsuarioController = async (req, res) => {
   try {
-    const { nombre, apellido, dni, email, password, confirmarPassword } = req.body;
+    const { nombre, apellido, dni, email, password, confirmarPassword } =
+      req.body;
     const errores = [];
 
     if (await verificarEmailExistente(email)) {
@@ -72,7 +73,9 @@ export const procesarLogin = async (req, res) => {
 
   try {
     const usuario = await buscarUsuarioPorEmail(email);
-    const passwordValido = usuario ? await validarPassword(password, usuario.password) : false;
+    const passwordValido = usuario
+      ? await validarPassword(password, usuario.password)
+      : false;
 
     if (!usuario || !passwordValido) {
       return res.status(401).render("login", {
@@ -117,65 +120,6 @@ export const procesarLogin = async (req, res) => {
     });
   }
 };
-
-// // Procesar inicio de sesión
-// export const procesarLogin = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const usuario = await buscarUsuarioPorEmail(email);
-//     if (!usuario) {
-//       return res.status(401).render("login", {
-//         title: "Iniciar sesión",
-//         errores: [{ campo: "email", mensaje: "Correo no registrado" }],
-//         datos: req.body,
-//         path: req.path,
-//       });
-//     }
-
-//     const passwordValido = await validarPassword(password, usuario.password);
-//     if (!passwordValido) {
-//       return res.status(401).render("login", {
-//         title: "Iniciar sesión",
-//         errores: [{ campo: "password", mensaje: "Contraseña incorrecta" }],
-//         datos: req.body,
-//         path: req.path,
-//       });
-//     }
-
-//     console.log("✅ Sesión iniciada para:", usuario.email);
-
-//     // ✅ Buscar permisos en PersonaDisponible por dni
-//     const persona = await buscarPersonaPorDni(usuario.dni);
-//     const modulosPermitidos = persona?.modulosPermitidos || {};
-
-//     req.session.usuario = {
-//       id: usuario._id,
-//       nombre: usuario.nombre,
-//       apellido: usuario.apellido,
-//       email: usuario.email,
-//       rol: usuario.rol,
-//       dni: String(usuario.dni),
-//       modulosPermitidos: modulosPermitidos
-//     };
-
-//     console.log("📦 Datos de sesión guardados:", req.session.usuario);
-
-//     req.session.save(() => {
-//       const redirigirA = req.session.redirigirA || "/viaticos/dashboard";
-//       delete req.session.redirigirA;
-//       res.redirect(redirigirA);
-//     });
-//   } catch (error) {
-//     console.error("Error en login:", error);
-//     res.status(500).render("login", {
-//       title: "Iniciar sesión",
-//       errores: [{ mensaje: "Error del servidor" }],
-//       datos: req.body,
-//       path: req.path,
-//     });
-//   }
-// };
 
 // Cerrar sesión
 export const cerrarSesion = (req, res) => {
