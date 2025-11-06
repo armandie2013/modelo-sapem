@@ -1,195 +1,214 @@
-<main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
-    <% const modoProveedor = !!proveedor; %>
-    <% const _mostrarTodos = (typeof mostrarTodos !== 'undefined') ? !!mostrarTodos : false; %>
+<!-- Header con borde superior redondeado (igual patrón que landing) -->
+<header class="relative">
+  <div class="h-36 sm:h-40 bg-gray-100 rounded-t-3xl"></div>
+  <div class="pointer-events-none absolute inset-0 h-36 sm:h-40 rounded-t-3xl
+              bg-[radial-gradient(22rem_10rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
+</header>
 
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">Registrar Pago</h1>
-        <% if (modoProveedor) { %>
-          <p class="text-gray-600 text-sm">
-            Proveedor: <span class="font-medium"><%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %></span>
-          </p>
-          <p class="text-[11px] text-gray-500 mt-1">
-            Mostrando <%= _mostrarTodos ? 'todos los períodos con saldo' : 'períodos vencidos y mes en curso' %>.
-          </p>
-        <% } else { %>
-          <p class="text-[11px] text-gray-500 mt-1">
-            Por defecto se listan períodos vencidos y el mes en curso. Podés ver todos con el conmutador.
-          </p>
-        <% } %>
-      </div>
+<!-- Contenido sin scroll extra: levantamos la tarjeta con -mt y sin min-h-screen -->
+<main class="relative -mt-20 sm:-mt-24 px-4 pb-6">
+  <div class="mx-auto max-w-3xl">
+    <section class="bg-white p-8 rounded-2xl shadow-2xl border border-gray-300 space-y-6 animate-fade-in-up">
+      <% const modoProveedor = !!proveedor; %>
+      <% const _mostrarTodos = (typeof mostrarTodos !== 'undefined') ? !!mostrarTodos : false; %>
 
-      <div class="flex items-center gap-2">
-        <% if (modoProveedor) { %>
-          <a
-            href="/pagos/proveedores/<%= proveedor._id %>/registrar<%= _mostrarTodos ? '' : '?all=1' %>"
-            class="text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 transition"
-            title="<%= _mostrarTodos ? 'Ver solo vencidos + mes actual' : 'Ver todos los períodos' %>"
-          >
-            <%= _mostrarTodos ? 'Ver solo vencidos + mes actual' : 'Ver todos los períodos' %>
-          </a>
-          <a href="/proveedores/<%= proveedor._id %>/ver"
-             class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
-        <% } else { %>
-          <a href="/pagos" class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
-        <% } %>
-      </div>
-    </div>
-
-    <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
-      <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg shadow-sm">
-        <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
-        <ul class="list-disc pl-6 text-sm space-y-1">
-          <% errores.forEach(error => { %><li><%= error.msg %></li><% }) %>
-        </ul>
-      </div>
-    <% } %>
-
-    <form
-      action="<%= modoProveedor ? ('/pagos/proveedores/' + proveedor._id + '/registrar' + (_mostrarTodos ? '?all=1' : '')) : '/pagos/registrar' %>"
-      method="POST" class="space-y-6"
-    >
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-
-        <% if (!modoProveedor) { %>
-          <!-- Selector de proveedor (modo genérico) -->
-          <div class="sm:col-span-2">
-            <div class="flex items-center justify-between">
-              <label class="block font-medium text-gray-700">Proveedor</label>
-            </div>
-            <select id="proveedorSelect" name="proveedor" required
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
-              <option value="">Seleccione…</option>
-              <% (proveedores || []).forEach(pr => { %>
-                <option value="<%= pr._id %>" <%= (String(datos?.proveedor||'') === String(pr._id)) ? 'selected' : '' %>>
-                  #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal || pr._id %>
-                </option>
-              <% }) %>
-            </select>
-          </div>
-        <% } %>
-
-        <!-- Período / Cargo -->
-        <div class="sm:col-span-2">
-          <div class="flex items-center justify-between">
-            <label class="block font-medium text-gray-700">Período / Cargo</label>
-
-            <% if (!modoProveedor) { %>
-              <!-- Toggle ver todos (modo genérico) -->
-              <label class="inline-flex items-center gap-2 text-xs text-gray-700 select-none">
-                <input id="toggleAllPeriods" type="checkbox" class="rounded border-gray-300">
-                Ver todos
-              </label>
-            <% } %>
-          </div>
-
+      <!-- Encabezado -->
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Registrar Pago</h1>
           <% if (modoProveedor) { %>
-            <select id="periodoSelect" name="periodo" required
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
-              <% if ((cargosPendientes||[]).length === 0) { %>
-                <option value="">Sin cargos <%= _mostrarTodos ? 'pendientes' : 'elegibles' %></option>
-              <% } else { %>
-                <option value="">Seleccione…</option>
-                <% (cargosPendientes || []).forEach(c => { %>
-                  <option
-                    value="<%= c.periodo %>"
-                    <%= (String(datos?.periodo||'') === String(c.periodo)) ? 'selected' : '' %>>
-                    <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                    (<%= c.concepto %>)
-                  </option>
-                <% }) %>
-              <% } %>
-            </select>
-            <p class="text-xs text-gray-500 mt-1">
-              <%= _mostrarTodos ? 'Se muestran todos los períodos con saldo.' : 'Se muestran vencidos y el mes en curso.' %>
+            <p class="text-gray-600 text-sm">
+              Proveedor: <span class="font-medium"><%= proveedor?.nombreFantasia || proveedor?.nombreReal || '—' %></span>
+            </p>
+            <p class="text-[11px] text-gray-500 mt-1">
+              Mostrando <%= _mostrarTodos ? 'todos los períodos con saldo' : 'períodos vencidos y mes en curso' %>.
             </p>
           <% } else { %>
-            <select id="periodoSelect" name="periodo" required
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
-              <option value="">Seleccione un proveedor…</option>
-            </select>
-            <p class="text-xs text-gray-500 mt-1">
-              Por defecto: vencidos + mes en curso. Activá “Ver todos” para incluir futuros.
+            <p class="text-[11px] text-gray-500 mt-1">
+              Por defecto se listan períodos vencidos y el mes en curso. Podés ver todos con el conmutador.
             </p>
           <% } %>
         </div>
 
-        <!-- Fecha -->
-        <div>
-          <label class="block font-medium text-gray-700">Fecha</label>
-          <input type="date" name="fecha" value="<%= (datos && datos.fecha) || '' %>"
-                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
-          <p class="text-xs text-gray-500 mt-1">Si está vacío, se completa con hoy.</p>
+        <div class="flex items-center gap-2">
+          <% if (modoProveedor) { %>
+            <a
+              href="/pagos/proveedores/<%= proveedor._id %>/registrar<%= _mostrarTodos ? '' : '?all=1' %>"
+              class="text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 transition"
+              title="<%= _mostrarTodos ? 'Ver solo vencidos + mes actual' : 'Ver todos los períodos' %>">
+              <%= _mostrarTodos ? 'Ver solo vencidos + mes actual' : 'Ver todos los períodos' %>
+            </a>
+            <a href="/proveedores/<%= proveedor._id %>/ver"
+               class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+          <% } else { %>
+            <a href="/pagos" class="text-sm bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">← Volver</a>
+          <% } %>
         </div>
+      </div>
 
-        <!-- Importe USD con máscara -->
-        <div>
-          <label class="block font-medium text-gray-700">Importe (USD)</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">US$</span>
-            <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
-                   class="w-full border border-gray-300 pl-12 pr-3 py-2 rounded-lg text-sm"
-                   placeholder="0,00" aria-describedby="importeHelp">
+      <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
+        <div class="bg-red-50 border border-red-300 text-red-800 px-5 py-4 rounded-lg shadow-sm">
+          <h2 class="font-semibold mb-2">Por favor corregí los siguientes errores:</h2>
+          <ul class="list-disc pl-6 text-sm space-y-1">
+            <% errores.forEach(error => { %><li><%= error.msg %></li><% }) %>
+          </ul>
+        </div>
+      <% } %>
+
+      <!-- Formulario -->
+      <form
+        action="<%= modoProveedor ? ('/pagos/proveedores/' + proveedor._id + '/registrar' + (_mostrarTodos ? '?all=1' : '')) : '/pagos/registrar' %>"
+        method="POST" class="space-y-6">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+          <% if (!modoProveedor) { %>
+            <!-- Selector de proveedor (modo genérico) -->
+            <div class="sm:col-span-2">
+              <div class="flex items-center justify-between">
+                <label class="block font-medium text-gray-700">Proveedor</label>
+              </div>
+              <select id="proveedorSelect" name="proveedor" required
+                      class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+                <option value="">Seleccione…</option>
+                <% (proveedores || []).forEach(pr => { %>
+                  <option value="<%= pr._id %>" <%= (String(datos?.proveedor||'') === String(pr._id)) ? 'selected' : '' %>>
+                    #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal || pr._id %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+          <% } %>
+
+          <!-- Período / Cargo -->
+          <div class="sm:col-span-2">
+            <div class="flex items-center justify-between">
+              <label class="block font-medium text-gray-700">Período / Cargo</label>
+
+              <% if (!modoProveedor) { %>
+                <!-- Toggle ver todos (modo genérico) -->
+                <label class="inline-flex items-center gap-2 text-xs text-gray-700 select-none">
+                  <input id="toggleAllPeriods" type="checkbox" class="rounded border-gray-300">
+                  Ver todos
+                </label>
+              <% } %>
+            </div>
+
+            <% if (modoProveedor) { %>
+              <select id="periodoSelect" name="periodo" required
+                      class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+                <% if ((cargosPendientes||[]).length === 0) { %>
+                  <option value="">Sin cargos <%= _mostrarTodos ? 'pendientes' : 'elegibles' %></option>
+                <% } else { %>
+                  <option value="">Seleccione…</option>
+                  <% (cargosPendientes || []).forEach(c => { %>
+                    <option
+                      value="<%= c.periodo %>"
+                      <%= (String(datos?.periodo||'') === String(c.periodo)) ? 'selected' : '' %>>
+                      <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                      (<%= c.concepto %>)
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">
+                <%= _mostrarTodos ? 'Se muestran todos los períodos con saldo.' : 'Se muestran vencidos y el mes en curso.' %>
+              </p>
+            <% } else { %>
+              <select id="periodoSelect" name="periodo" required
+                      class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
+                <option value="">Seleccione un proveedor…</option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">
+                Por defecto: vencidos + mes en curso. Activá “Ver todos” para incluir futuros.
+              </p>
+            <% } %>
           </div>
-          <input type="hidden" name="importe" id="importeHidden"
-                 value="<%= (datos && datos.importe != null && datos.importe !== '') ? Number(datos.importe).toFixed(2) : '' %>">
-          <p id="importeHelp" class="text-xs text-gray-500 mt-1">
-            Escribí el monto. Usá punto o coma para decimales. Ej.: <span class="font-mono">US$ 12.345,67</span>.
-          </p>
+
+          <!-- Fecha -->
+          <div>
+            <label class="block font-medium text-gray-700">Fecha</label>
+            <input type="date" name="fecha" value="<%= (datos && datos.fecha) || '' %>"
+                   class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+            <p class="text-xs text-gray-500 mt-1">Si está vacío, se completa con hoy.</p>
+          </div>
+
+          <!-- Importe USD con máscara -->
+          <div>
+            <label class="block font-medium text-gray-700">Importe (USD)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">US$</span>
+              <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
+                     class="w-full border border-gray-300 pl-12 pr-3 py-2 rounded-lg text-sm"
+                     placeholder="0,00" aria-describedby="importeHelp">
+            </div>
+            <input type="hidden" name="importe" id="importeHidden"
+                   value="<%= (datos && datos.importe != null && datos.importe !== '') ? Number(datos.importe).toFixed(2) : '' %>">
+            <p id="importeHelp" class="text-xs text-gray-500 mt-1">
+              Escribí el monto. Usá punto o coma para decimales. Ej.: <span class="font-mono">US$ 12.345,67</span>.
+            </p>
+          </div>
+
+          <!-- Medio de pago -->
+          <div>
+            <label class="block font-medium text-gray-700">Medio de pago</label>
+            <select name="medioPago" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
+              <% const medios = [
+                {value: "transferencia", label: "Transferencia"},
+                {value: "efectivo",      label: "Efectivo"},
+                {value: "cheque",        label: "Cheque"},
+                {value: "deposito",      label: "Depósito"},
+                {value: "otro",          label: "Otro"}
+              ]; %>
+              <option value="">Seleccione…</option>
+              <% medios.forEach(m => { %>
+                <option value="<%= m.value %>" <%= (String(datos?.medioPago||'').toLowerCase() === m.value) ? 'selected' : '' %>>
+                  <%= m.label %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- N° Comprobante (opcional) -->
+          <div>
+            <label class="block font-medium text-gray-700">N° Comprobante (opcional)</label>
+            <input type="text" name="comprobante" value="<%= datos?.comprobante || '' %>"
+                   class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
+          </div>
+
+          <!-- Detalle -->
+          <div class="sm:col-span-2">
+            <label class="block font-medium text-gray-700">Detalle</label>
+            <textarea name="detalle" rows="3"
+                      class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"><%= datos?.detalle || '' %></textarea>
+            <p class="text-[12px] text-gray-500 mt-1">Información útil para auditoría (referencias, notas, etc.).</p>
+          </div>
         </div>
 
-        <!-- Medio de pago -->
-        <div>
-          <label class="block font-medium text-gray-700">Medio de pago</label>
-          <select name="medioPago" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
-            <% const medios = [
-              {value: "transferencia", label: "Transferencia"},
-              {value: "efectivo",      label: "Efectivo"},
-              {value: "cheque",        label: "Cheque"},
-              {value: "deposito",      label: "Depósito"},
-              {value: "otro",          label: "Otro"}
-            ]; %>
-            <option value="">Seleccione…</option>
-            <% medios.forEach(m => { %>
-              <option value="<%= m.value %>" <%= (String(datos?.medioPago||'').toLowerCase() === m.value) ? 'selected' : '' %>>
-                <%= m.label %>
-              </option>
-            <% }) %>
-          </select>
+        <!-- Acciones -->
+        <div class="flex items-center justify-center gap-2">
+          <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
+            Guardar pago
+          </button>
+
+          <% if (modoProveedor) { %>
+            <a href="/proveedores/<%= proveedor._id %>/ver"
+               class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">Cancelar</a>
+          <% } else { %>
+            <a href="/pagos"
+               class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">Cancelar</a>
+          <% } %>
         </div>
-
-        <!-- N° Comprobante (opcional) -->
-        <div>
-          <label class="block font-medium text-gray-700">N° Comprobante (opcional)</label>
-          <input type="text" name="comprobante" value="<%= datos?.comprobante || '' %>"
-                 class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
-        </div>
-
-        <!-- Detalle -->
-        <div class="sm:col-span-2">
-          <label class="block font-medium text-gray-700">Detalle</label>
-          <textarea name="detalle" rows="3"
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm"><%= datos?.detalle || '' %></textarea>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-center gap-2">
-        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
-          Guardar pago
-        </button>
-
-        <% if (modoProveedor) { %>
-          <a href="/proveedores/<%= proveedor._id %>/ver"
-             class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">Cancelar</a>
-        <% } else { %>
-          <a href="/pagos"
-             class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition">Cancelar</a>
-        <% } %>
-      </div>
-    </form>
+      </form>
+    </section>
   </div>
 </main>
+
+<!-- Animación sutil (igual que landing para consistencia) -->
+<style>
+  @keyframes fade-in-up { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+  .animate-fade-in-up { animation: fade-in-up .45s ease-out both; }
+</style>
 
 <script>
   // fecha por defecto

@@ -1,29 +1,157 @@
-<main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-300">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Pagos</h1>
-      <a href="/pagos/registrar" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+<main class="bg-gray-100 min-h-screen py-8 px-4">
+  <%
+    // ===== Helpers =====
+    const fmtARS = (v) => {
+      const n = Number(v || 0);
+      return `$ ${n.toLocaleString('es-AR',{ minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+    };
+    const pagosArr = (pagos || []);
+    const totalPagos = pagosArr.length;
+    const totalImporte = pagosArr.reduce((acc,p)=> acc + Number(p.importe||0), 0);
+
+    // Rango legible
+    const rango = [];
+    if (filtros?.desde) rango.push(new Date(filtros.desde).toLocaleDateString('es-AR'));
+    if (filtros?.hasta) rango.push(new Date(filtros.hasta).toLocaleDateString('es-AR'));
+    const rangoTxt = rango.length ? rango.join(" → ") : "Todo";
+
+    const medioBadge = (m) => {
+      const t = (m||'').toString().toLowerCase();
+      if (t.includes('trans')) return 'bg-sky-100 text-sky-800 border border-sky-200';
+      if (t.includes('efec'))  return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+      if (t.includes('tarj'))  return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
+      if (t.includes('cheq'))  return 'bg-amber-100 text-amber-800 border border-amber-200';
+      return 'bg-gray-100 text-gray-800 border border-gray-200';
+    };
+  %>
+
+  <style>
+    /* Permite que cadenas largas (sin espacios) se partan en varias líneas */
+    .break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
+
+    /* Toast */
+    .toast-wrap{
+      position: fixed; inset-inline: 0 0; top: 16px;
+      display: flex; justify-content: center; z-index: 60; pointer-events: none;
+    }
+    .toast{
+      pointer-events: auto;
+      min-width: 260px; max-width: 92vw;
+      background: white; border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 20px rgba(0,0,0,.12), 0 6px 6px rgba(0,0,0,.06);
+      border-radius: 12px; padding: 10px 12px; display: flex; gap: 10px; align-items: center;
+      transform: translateY(-10px); opacity: 0; transition: all .2s ease;
+    }
+    .toast.show{ transform: translateY(0); opacity: 1; }
+    .toast .msg{ font-size: .9rem; color: #1f2937; }
+    .toast.success{ border-color: rgba(16,185,129,.25); }
+    .toast.error{   border-color: rgba(239,68,68,.25); }
+    .toast .icon{
+      display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius: 9999px;
+    }
+    .toast.success .icon{ background: rgba(16,185,129,.12); color:#065f46; }
+    .toast.error .icon{   background: rgba(239,68,68,.12);  color:#7f1d1d; }
+    .toast .close{
+      margin-left: 6px; font-size: 14px; color:#6b7280; background: transparent; border: 0; cursor: pointer;
+    }
+  </style>
+
+  <div class="max-w-7xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200">
+    <!-- Header -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Pagos</h1>
+        <p class="text-sm text-gray-500">Gestión y seguimiento de pagos a proveedores</p>
+      </div>
+      <a href="/pagos/registrar"
+         class="inline-flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition text-sm shadow-sm">
         + Registrar pago
       </a>
     </div>
 
-    <!-- Filtros simples -->
-    <form class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
-      <select name="proveedor" class="border px-3 py-2 rounded-lg text-sm">
-        <option value="">Todos los proveedores</option>
-        <% (proveedores||[]).forEach(pr => { %>
-          <option value="<%= pr._id %>" <%= (String(filtros?.proveedor||'')===String(pr._id))?'selected':'' %>>
-            #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia %>
-          </option>
-        <% }) %>
-      </select>
-      <input type="date" name="desde" value="<%= filtros?.desde||'' %>" class="border px-3 py-2 rounded-lg text-sm">
-      <input type="date" name="hasta" value="<%= filtros?.hasta||'' %>" class="border px-3 py-2 rounded-lg text-sm">
-      <button class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm">Filtrar</button>
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <p class="text-xs text-gray-500">Pagos listados</p>
+        <p class="text-xl font-semibold text-gray-900"><%= totalPagos %></p>
+      </div>
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <p class="text-xs text-gray-500">Importe total</p>
+        <p class="text-xl font-semibold text-gray-900"><%= fmtARS(totalImporte) %></p>
+      </div>
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <p class="text-xs text-gray-500">Rango</p>
+        <p class="text-sm font-medium text-gray-800"><%= rangoTxt %></p>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <form class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-4" method="GET" action="/pagos">
+      <div class="sm:col-span-2">
+        <label class="block text-xs text-gray-600 mb-1">Proveedor</label>
+        <select name="proveedor" class="w-full border px-3 py-2 rounded-lg text-sm">
+          <option value="">Todos los proveedores</option>
+          <% (proveedores||[]).forEach(pr => { %>
+            <option value="<%= pr._id %>" <%= (String(filtros?.proveedor||'')===String(pr._id))?'selected':'' %>>
+              #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Desde</label>
+        <input type="date" name="desde" value="<%= filtros?.desde||'' %>" class="w-full border px-3 py-2 rounded-lg text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Hasta</label>
+        <input type="date" name="hasta" value="<%= filtros?.hasta||'' %>" class="w-full border px-3 py-2 rounded-lg text-sm">
+      </div>
+
+      <div class="flex items-end gap-2">
+        <button class="bg-gray-900 text-white px-3 py-2 rounded-lg text-sm w-full">Filtrar</button>
+      </div>
+
+      <!-- Buscador en vivo (cliente) -->
+      <div class="sm:col-span-3">
+        <label class="block text-xs text-gray-600 mb-1">Buscar</label>
+        <div class="relative">
+          <input id="buscar" type="text" placeholder="Por proveedor, medio, comprobante u observación…"
+                 class="w-full border px-3 py-2 pl-9 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+          <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.5 3.5a5 5 0 013.995 8.037l3.734 3.734a1 1 0 11-1.414 1.414l-3.734-3.734A5 5 0 118.5 3.5zm0 2a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd"/></svg>
+        </div>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="block text-xs text-gray-600 mb-1">Orden</label>
+        <select id="orden" class="w-full border px-3 py-2 rounded-lg text-sm">
+          <option value="fecha-desc">Fecha (recientes)</option>
+          <option value="fecha-asc">Fecha (antiguos)</option>
+          <option value="proveedor-asc">Proveedor (A-Z)</option>
+          <option value="proveedor-desc">Proveedor (Z-A)</option>
+          <option value="importe-desc">Importe (↓)</option>
+          <option value="importe-asc">Importe (↑)</option>
+        </select>
+      </div>
     </form>
 
-    <div class="overflow-x-auto rounded-xl border border-gray-200">
-      <table class="min-w-full text-sm">
+    <!-- Resumen de vista -->
+    <p id="resumen" class="text-xs text-gray-600 mb-3">Mostrando <%= totalPagos %> / <%= totalPagos %></p>
+
+    <!-- Tabla desktop -->
+    <div class="hidden md:block rounded-xl border border-gray-200 overflow-x-auto">
+      <table class="min-w-full text-sm table-fixed" id="tabla">
+        <colgroup>
+          <col style="width:8rem" />
+          <col />
+          <col style="width:9rem" />
+          <col style="width:10rem" />
+          <col style="width:11rem" />
+          <col />
+          <col style="width:9rem" />
+        </colgroup>
+
         <thead class="bg-gray-50 text-gray-700">
           <tr>
             <th class="px-4 py-3 text-left">Fecha</th>
@@ -35,28 +163,230 @@
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y">
-          <% if ((pagos||[]).length === 0) { %>
+
+        <tbody class="divide-y" id="tbody">
+          <% if (pagosArr.length === 0) { %>
             <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">Sin pagos.</td></tr>
           <% } else { %>
-            <% pagos.forEach(p => { %>
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3"><%= new Date(p.fecha).toLocaleDateString('es-AR') %></td>
-                <td class="px-4 py-3"><%= p.proveedor?.nombreFantasia || p.proveedor?.nombreReal || '—' %></td>
-                <td class="px-4 py-3"><%= p.metodo || p.medio || '—' %></td>
-                <td class="px-4 py-3 text-right">$ <%= Number(p.importe||0).toLocaleString('es-AR', {minimumFractionDigits:2}) %></td>
-                <td class="px-4 py-3"><%= p.comprobante || '—' %></td>
-                <td class="px-4 py-3"><%= p.observacion || '—' %></td>
-                <td class="px-4 py-3 text-right">
-                  <form action="/pagos/<%= p._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar pago?')">
-                    <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700">Eliminar</button>
-                  </form>
-                </td>
-              </tr>
+            <% pagosArr.forEach(p => {
+                 const proveedorTxt = p.proveedor?.nombreFantasia || p.proveedor?.nombreReal || '—';
+                 const medio = p.metodo || p.medio || '—';
+                 const filtroTxt = `${proveedorTxt} ${medio} ${p.comprobante||''} ${p.observacion||''}`.toLowerCase();
+            %>
+            <tr class="hover:bg-gray-50 fila"
+                data-fecha="<%= new Date(p.fecha).getTime() %>"
+                data-proveedor="<%= proveedorTxt.toLowerCase() %>"
+                data-importe="<%= Number(p.importe||0) %>"
+                data-filtro="<%= filtroTxt %>">
+              <td class="px-4 py-3 whitespace-nowrap"><%= new Date(p.fecha).toLocaleDateString('es-AR') %></td>
+              <td class="px-4 py-3">
+                <div class="max-w-[18rem] break-anywhere whitespace-normal" title="<%= proveedorTxt %>">
+                  <span class="break-anywhere"><%= proveedorTxt %></span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium <%= medioBadge(medio) %>">
+                  <%= medio %>
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right whitespace-nowrap"><%= fmtARS(p.importe) %></td>
+              <td class="px-4 py-3">
+                <div class="break-anywhere whitespace-normal">
+                  <span class="break-anywhere"><%= p.comprobante || '—' %></span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="max-w-[24rem] break-anywhere whitespace-normal" title="<%= p.observacion || '—' %>">
+                  <span class="break-anywhere"><%= p.observacion || '—' %></span>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <form action="/pagos/<%= p._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar pago?')">
+                  <button class="px-3 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
+                </form>
+              </td>
+            </tr>
             <% }) %>
           <% } %>
         </tbody>
       </table>
     </div>
+
+    <!-- Cards mobile -->
+    <div class="md:hidden space-y-3 mt-3" id="cards">
+      <% if (pagosArr.length === 0) { %>
+        <div class="text-center text-gray-500 py-6">Sin pagos.</div>
+      <% } else { %>
+        <% pagosArr.forEach(p => {
+             const proveedorTxt = p.proveedor?.nombreFantasia || p.proveedor?.nombreReal || '—';
+             const medio = p.metodo || p.medio || '—';
+             const filtroTxt = `${proveedorTxt} ${medio} ${p.comprobante||''} ${p.observacion||''}`.toLowerCase();
+        %>
+        <div class="border border-gray-200 rounded-xl p-4 fila"
+             data-fecha="<%= new Date(p.fecha).getTime() %>"
+             data-proveedor="<%= proveedorTxt.toLowerCase() %>"
+             data-importe="<%= Number(p.importe||0) %>"
+             data-filtro="<%= filtroTxt %>">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-xs text-gray-500"><%= new Date(p.fecha).toLocaleDateString('es-AR') %></div>
+              <div class="text-sm font-semibold text-gray-900 break-anywhere whitespace-normal" title="<%= proveedorTxt %>">
+                <%= proveedorTxt %>
+              </div>
+              <div class="text-xs text-gray-500 mt-1 break-anywhere whitespace-normal">
+                Comp.: <span class="font-medium break-anywhere"><%= p.comprobante || '—' %></span>
+              </div>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium <%= medioBadge(medio) %>">
+              <%= medio %>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
+              <div class="text-[11px] text-gray-500">Importe</div>
+              <div class="text-sm font-semibold"><%= fmtARS(p.importe) %></div>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
+              <div class="text-[11px] text-gray-500">Detalle</div>
+              <div class="text-xs break-anywhere whitespace-normal" title="<%= p.observacion || '—' %>">
+                <%= p.observacion || '—' %>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 mt-3">
+            <form action="/pagos/<%= p._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar pago?')" class="m-0">
+              <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
+            </form>
+          </div>
+        </div>
+        <% }) %>
+      <% } %>
+    </div>
   </div>
+
+  <!-- Toast container (queda una sola vez en la página) -->
+  <div
+    id="toastWrap"
+    class="toast-wrap"
+    aria-live="polite"
+    data-ok="<%= (typeof toastOk  !== 'undefined' && toastOk)  ? toastOk  : '' %>"
+    data-err="<%= (typeof toastErr !== 'undefined' && toastErr) ? toastErr : '' %>"
+  ></div>
+
+  <!-- Interacción: buscar/ordenar + toasts -->
+  <script>
+    (function(){
+      const $  = (s, c=document)=>c.querySelector(s);
+      const $$ = (s, c=document)=>Array.from(c.querySelectorAll(s));
+
+      const buscar  = $('#buscar');
+      const orden   = $('#orden');
+      const resumen = $('#resumen');
+
+      const filasTabla = $$('#tbody .fila');
+      const cardsMovil = $$('#cards .fila');
+      const FILAS = [...filasTabla, ...cardsMovil];
+
+      function filtrar(){
+        const q = (buscar.value || '').trim().toLowerCase();
+        let visibles = 0;
+        FILAS.forEach(el=>{
+          const ok = (el.dataset.filtro || '').includes(q);
+          el.classList.toggle('hidden', !ok);
+          if (ok) visibles++;
+        });
+        resumen.textContent = `Mostrando ${visibles} / <%= totalPagos %>`;
+
+        // zebra visible en tabla
+        const visiblesTabla = $$('#tbody .fila:not(.hidden)');
+        visiblesTabla.forEach((tr, i)=>{
+          tr.style.backgroundColor = i % 2 ? 'rgba(249,250,251,.6)' : 'transparent';
+        });
+      }
+
+      function sortCompare(a,b,campo){
+        if (campo === 'fecha' || campo === 'importe'){
+          const va = parseFloat(a.dataset[campo] || '0');
+          const vb = parseFloat(b.dataset[campo] || '0');
+          return va - vb;
+        }
+        if (campo === 'proveedor'){
+          const sa = String(a.dataset.proveedor || '');
+          const sb = String(b.dataset.proveedor || '');
+          return sa.localeCompare(sb, 'es', { sensitivity: 'base' });
+        }
+        return 0;
+      }
+
+      function ordenar(){
+        const v = orden.value || 'fecha-desc';
+        const [campo, dir] = v.split('-');
+        const asc = dir !== 'desc';
+
+        const tbody = $('#tbody');
+        if (tbody){
+          const arr = $$('#tbody .fila').slice();
+          arr.sort((ra, rb)=>{
+            const r = sortCompare(ra, rb, campo);
+            return asc ? r : -r;
+          });
+          arr.forEach(tr=>tbody.appendChild(tr));
+        }
+
+        const wrap = $('#cards');
+        if (wrap){
+          const arr = $$('#cards .fila').slice();
+          arr.sort((ra, rb)=>{
+            const r = sortCompare(ra, rb, campo);
+            return asc ? r : -r;
+          });
+          arr.forEach(c=>wrap.appendChild(c));
+        }
+
+        filtrar();
+      }
+
+      buscar?.addEventListener('input', filtrar);
+      orden?.addEventListener('change', ordenar);
+
+      // Orden inicial: fecha DESC (recientes primero)
+      ordenar();
+
+      // ===== Toasts =====
+      const toastWrap = $('#toastWrap');
+
+      function svgCheck(){ return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'; }
+      function svgAlert(){ return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>'; }
+
+      function showToast(msg, type='success', ms=3000){
+        if(!msg) return;
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.innerHTML = `
+          <div class="icon">${type === 'success' ? svgCheck() : svgAlert()}</div>
+          <div class="msg">${msg}</div>
+          <button class="close" aria-label="Cerrar">&times;</button>
+        `;
+        toastWrap.appendChild(el);
+        requestAnimationFrame(()=>el.classList.add('show'));
+
+        const remove = ()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(), 180); };
+        const timer = setTimeout(remove, ms);
+
+        el.querySelector('.close')?.addEventListener('click', ()=>{
+          clearTimeout(timer);
+          remove();
+        });
+      }
+
+      // 🔔 Disparadores desde servidor leídos desde data-*
+      const ok  = toastWrap?.dataset.ok  || "";
+      const err = toastWrap?.dataset.err || "";
+      if (ok)  showToast(ok,  'success', 3500);
+      if (err) showToast(err, 'error',   6000);
+
+    })();
+  </script>
 </main>
