@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Entorno
+.env
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Archivos locales no necesarios
+iniciar-app.cmd
+modelo-sapem.log
