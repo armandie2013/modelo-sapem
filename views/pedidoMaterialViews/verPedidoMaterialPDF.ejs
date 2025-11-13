@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -168,4 +168,234 @@
 
 </body>
 
+</html> -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pedido de Materiales Nº <%= pedido.numeroPedido %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin: 40px;
+      color: #333;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      max-height: 75px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .titulo-doc {
+      margin: 10px 0 0;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .subtitulo-doc {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #555;
+    }
+
+    /* Bloques */
+    .bloque {
+      border: 1px solid #999;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+    }
+
+    .bloque-titulo {
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
+    }
+
+    .datos {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .dato {
+      width: 50%;
+      margin-bottom: 4px;
+    }
+
+    .dato strong {
+      display: inline-block;
+      margin-right: 4px;
+      white-space: nowrap; /* evita que 'Área solicitante:' se corte */
+    }
+
+    /* Tabla de ítems */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      font-size: 11px;
+      page-break-inside: auto;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tbody {
+      display: table-row-group;
+    }
+
+    tfoot {
+      display: table-footer-group;
+    }
+
+    th, td {
+      border: 1px solid #666;
+      padding: 5px 6px;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    th.center, td.center {
+      text-align: center;
+    }
+
+    td.cantidad {
+      text-align: right;
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #fafafa;
+    }
+
+    tbody tr {
+      page-break-inside: avoid;
+    }
+
+    /* Firmas */
+    .firmas {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 80px;
+      page-break-inside: avoid;
+    }
+
+    .firmas .columna {
+      width: 45%;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .firma-linea {
+      margin-bottom: 4px;
+      margin-top: 30px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 30px;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #ccc;
+      padding-top: 6px;
+      page-break-inside: avoid;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header style="margin-top: -40px;">
+    <img src="<%= logoDataUri %>" alt="Logo" class="logo">
+
+    <h2 class="titulo-doc">Pedido de Materiales</h2>
+
+    <p class="subtitulo-doc">
+      N° Pedido: <strong><%= pedido.numeroPedido %></strong> —
+      Fecha: <strong><%= new Date(pedido.fecha).toLocaleDateString("es-AR") %></strong>
+    </p>
+  </header>
+
+  <!-- Datos generales -->
+  <section class="bloque">
+    <div class="bloque-titulo">Datos del pedido</div>
+    <div class="datos">
+      <div class="dato">
+        <strong>Área solicitante:</strong> <%= pedido.areaSolicitante %>
+      </div>
+      <div class="dato">
+        <strong>Proyecto:</strong> <%= pedido.proyecto %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Detalle de ítems -->
+  <section class="bloque">
+    <div class="bloque-titulo">Detalle de materiales solicitados</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 5%;">#</th>
+          <th style="width: 70%;">Detalle</th>
+          <th style="width: 20%;">Dato técnico</th>
+          <th class="center" style="width: 5%;">Cant.</th>
+          <th class="center" style="width: 5%;">Unidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% pedido.items.forEach((item, i)=> { %>
+          <tr>
+            <td class="center"><%= i + 1 %></td>
+            <td><%= item.detalle %></td>
+            <td><%= item.datoTecnico %></td>
+            <td class="cantidad"><%= item.cantidad %></td>
+            <td class="center"><%= item.unidad %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Firmas -->
+  <div class="firmas">
+    <div class="columna">
+      <div class="firma-linea">......................................................</div>
+      <div>Firma solicitante</div>
+    </div>
+    <div class="columna">
+      <div class="firma-linea">......................................................</div>
+      <div>Firma autorizante</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>
+      <strong>Creado por:</strong> <%= pedido.creadoPor %>
+    </div>
+    <% if (pedido.editadoPor) { %>
+      <div>
+        <strong>Editado por:</strong> <%= pedido.editadoPor %>
+      </div>
+    <% } %>
+  </div>
+
+</body>
 </html>
