@@ -11,19 +11,19 @@
     <div class="overflow-x-auto">
       <table class="min-w-full border text-sm block md:table">
         <!-- Encabezado -->
-        <thead class="bg-gray-200 text-gray-700 hidden md:table-header-group">
+        <thead class="bg-gray-200 text-gray-700 hidden md:table-header-group text-[15px]">
           <tr class="text-center">
-            <th class="border px-2 py-2 w-24">N° Pedido</th>
-            <th class="border px-2 py-2 w-28">Fecha</th>
-            <th class="border px-2 py-2 w-64">Área</th>
-            <th class="border px-2 py-2 w-64">Proyecto</th>
+            <th class="border px-2 py-2 w-12">N° Pedido</th>
+            <th class="border px-2 py-2 w-24">Fecha</th>
+            <th class="border px-2 py-2 w-20">Área</th>
+            <th class="border px-2 py-2 w-[450px]">Proyecto</th>
             <th class="border px-2 py-2 w-40">Creado por</th>
             <th class="border px-2 py-2 w-40">Editado por</th>
-            <th class="border px-2 py-2 w-56">Acciones</th>
+            <th class="border px-2 py-2 w-44">Acciones</th>
           </tr>
         </thead>
 
-        <tbody class="block md:table-row-group">
+        <tbody class="block md:table-row-group text-sm">
           <% if (pedidos.length === 0) { %>
             <tr class="block md:table-row border md:border-0">
               <td colspan="7" class="text-center py-4 text-gray-500 block md:table-cell">
@@ -33,43 +33,54 @@
           <% } else { %>
             <% pedidos.forEach(p => { %>
               <tr class="block md:table-row border md:border-0 mb-4 md:mb-0 hover:bg-gray-50 rounded-lg md:rounded-none">
+
                 <!-- N° Pedido -->
-                <td class="border px-2 py-2 text-center md:table-cell block">
-                  <span class="font-semibold md:hidden">N° Pedido: </span><%= p.numeroPedido %>
+                <td class="border px-2 py-2 text-center md:table-cell block text-sm">
+                  <%= p.numeroPedido %>
                 </td>
 
                 <!-- Fecha -->
-                <td class="border px-2 py-2 text-center md:table-cell block">
-                  <span class="font-semibold md:hidden">Fecha: </span><%= new Date(p.fecha).toLocaleDateString("es-AR") %>
+                <td class="border px-2 py-2 text-center md:table-cell block text-sm">
+                  <span class="font-semibold md:hidden">Fecha: </span>
+                  <%= new Date(p.fecha).toLocaleDateString("es-AR") %>
                 </td>
 
-                <!-- Área -->
-                <td class="border px-2 py-2 text-left md:table-cell block">
-                  <span class="font-semibold md:hidden">Área: </span><%= p.areaSolicitante %>
+                <!-- Área (muy angosta) -->
+                <td class="border px-2 py-2 text-left md:table-cell block text-sm">
+                  <span class="font-semibold md:hidden">Área: </span>
+                  <span class="block truncate max-w-[85px]" title="<%= p.areaSolicitante %>">
+                    <%= p.areaSolicitante %>
+                  </span>
                 </td>
 
-                <!-- Proyecto -->
-                <td class="border px-2 py-2 text-left md:table-cell block">
-                  <span class="font-semibold md:hidden">Proyecto: </span><%= p.proyecto %>
+                <!-- Proyecto (bien ancho) -->
+                <td class="border px-2 py-2 text-left md:table-cell block text-sm">
+                  <span class="font-semibold md:hidden">Proyecto: </span>
+                  <span class="block" title="<%= p.proyecto %>">
+                    <%= p.proyecto %>
+                  </span>
                 </td>
 
                 <!-- Creado por -->
-                <td class="border px-2 py-2 md:table-cell block">
-                  <span class="font-semibold md:hidden">Creado por: </span><%= p.creadoPor || "-" %>
+                <td class="border px-2 py-2 md:table-cell block text-sm">
+                  <span class="font-semibold md:hidden">Creado por: </span>
+                  <%= p.creadoPor || "-" %>
                 </td>
 
                 <!-- Editado por -->
-                <td class="border px-2 py-2 md:table-cell block">
-                  <span class="font-semibold md:hidden">Editado por: </span><%= p.editadoPor || "-" %>
+                <td class="border px-2 py-2 md:table-cell block text-sm">
+                  <span class="font-semibold md:hidden">Editado por: </span>
+                  <%= p.editadoPor || "-" %>
                 </td>
 
                 <!-- Acciones -->
                 <td class="border px-2 py-2 text-center md:table-cell block">
-                  <div class="inline-flex flex-wrap gap-2 justify-center">
+                  <div class="inline-flex flex-wrap gap-2 justify-center text-[13px]">
                     <a href="/pedidos-materiales/<%= p._id %>/ver" class="text-blue-600 hover:underline">Ver</a>
                     <a href="/pedidos-materiales/<%= p._id %>/editar" class="text-yellow-600 hover:underline">Editar</a>
                     <a href="/pedidos-materiales/pdf/<%= p._id %>" target="_blank"
                       class="text-green-600 hover:underline">PDF</a>
+
                     <form action="/pedidos-materiales/<%= p._id %>/eliminar" method="POST" class="inline">
                       <button type="submit" class="text-red-600 hover:underline"
                         onclick="return confirm('¿Seguro que deseas eliminar este pedido?')">
@@ -78,6 +89,7 @@
                     </form>
                   </div>
                 </td>
+
               </tr>
             <% }) %>
           <% } %>
@@ -86,3 +98,5 @@
     </div>
   </div>
 </main>
+
+
