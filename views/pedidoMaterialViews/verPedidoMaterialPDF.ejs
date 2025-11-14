@@ -236,7 +236,7 @@
     .dato strong {
       display: inline-block;
       margin-right: 4px;
-      white-space: nowrap; /* evita que 'Área solicitante:' se corte */
+      white-space: nowrap; /* evita que se corte */
     }
 
     /* Tabla de ítems */
@@ -279,9 +279,8 @@
       text-align: right;
     }
 
-    tbody tr:nth-child(odd) {
-      background-color: #fafafa;
-    }
+    /* Sin zebrado */
+    /* (se eliminó nth-child(odd)) */
 
     tbody tr {
       page-break-inside: avoid;
