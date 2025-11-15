@@ -1,304 +1,495 @@
 <!-- Formulario de Solicitud de Viático -->
-<div class="bg-gray-100 min-h-screen">
-  <div class="bg-white p-0 rounded-2xl shadow-xl max-w-6xl mx-auto border border-gray-300 overflow-hidden">
 
-    <!-- Banda superior decorativa -->
-    <div class="h-2 w-full bg-gradient-to-r from-indigo-600 via-blue-500 to-indigo-600"></div>
+<header class="relative">
+  <!-- Banda superior suave, igual patrón que registrarPago -->
+  <div class="h-36 sm:h-40 bg-gray-100 rounded-t-3xl"></div>
+  <div class="pointer-events-none absolute inset-0 h-36 sm:h-40 rounded-t-3xl
+              bg-[radial-gradient(24rem_12rem_at_80%_-20%,rgba(129,140,248,.22),transparent)]">
+  </div>
+</header>
 
-    <div class="p-8">
-      <form id="formularioViatico" action="/viaticos/crear" method="POST">
-        <!-- Logo y título -->
-        <div class="text-center mb-6">
-          <!-- <img src="/ruta-a-tu-logo.png" alt="Logo" class="mx-auto h-16 mb-2"> -->
-          <h1 class="text-3xl font-bold text-gray-800">Solicitud de Viático</h1>
-          <p class="text-sm text-gray-500 mt-1">Completá los datos para generar el viático</p>
+<main class="relative -mt-20 sm:-mt-24 px-4 pb-8">
+  <div class="mx-auto max-w-5xl">
+    <section class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 sm:p-8 space-y-8 card-viatico">
+
+      <!-- Encabezado -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="mt-3 text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+            Solicitud de Viático
+          </h1>
+          <p class="text-sm text-gray-500 mt-1">
+            Completá los datos para generar el viático.
+            <!-- Usá importes en pesos con formato <span class="font-mono">1.234,56</span>. -->
+          </p>
         </div>
+        <div class="self-start sm:self-center text-xs text-right text-gray-500">
+          <p class="font-medium text-gray-700">N° de Viático</p>
+          <p class="mt-1 inline-flex items-center gap-1 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-1 text-[13px] font-semibold text-gray-700">
+            Automático
+          </p>
+        </div>
+      </div>
 
+      <form id="formularioViatico" action="/viaticos/crear" method="POST" class="space-y-8">
         <!-- ========= Sección: Datos iniciales ========= -->
-        <div class="mb-4 flex items-center gap-2">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- calendar icon -->
-            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V4m8 3V4m-9 8h8m-11 8h12a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2z"/></svg>
-          </span>
-          <h2 class="text-base font-semibold text-gray-800">Datos iniciales</h2>
-        </div>
-
-        <!-- Fecha, Área y N° -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Fecha <span class="text-red-500">*</span></label>
-            <input type="date" name="fechaDeCreacion" required
-              class="w-full border px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+              <!-- calendar icon -->
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V4m8 3V4m-9 8h8m-11 8h12a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2z"/>
+              </svg>
+            </span>
+            <div>
+              <h2 class="text-base font-semibold text-gray-800">Datos iniciales</h2>
+              <p class="text-xs text-gray-500">Fecha de emisión, área solicitante y numeración correlativa.</p>
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Área Solicitante <span class="text-red-500">*</span></label>
-            <input type="text" name="areaSolicitante" required
-              class="w-full border px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">
+                Fecha <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                name="fechaDeCreacion"
+                required
+                class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">
+                Área Solicitante <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="areaSolicitante"
+                required
+                class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ej.: Técnica, Administración, Gerencia…"
+              >
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">N° de Viático</label>
+              <input
+                type="text"
+                name=""
+                value=""
+                disabled
+                readonly
+                placeholder="Automático"
+                class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm border-gray-300 text-gray-500"
+              >
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">N° de Viático</label>
-            <input type="text" name="" value="" disabled readonly placeholder="Automático"
-              class="w-full border px-2 py-1 rounded-lg bg-gray-100 text-sm border border-gray-300">
+
+          <!-- ocultos -->
+          <input type="hidden" name="numeroDeViaje" value="<%= numeroDeViaje %>">
+          <input type="hidden" name="montoTotalViatico" id="montoTotalViaticoHidden">
+          <input type="hidden" name="pendienteDeRendicion" id="pendienteDeRendicionHidden">
+          <input type="hidden" name="devolucionEnEfectivo" value="0">
+
+          <!-- Cantidad de viajantes -->
+          <div class="w-full sm:w-1/3 md:w-1/4">
+            <label class="block text-xs font-medium text-gray-600 mb-1">
+              Cantidad de Viajantes
+            </label>
+            <select
+              id="cantidadDeViajantes"
+              name="cantidadDeViajantes"
+              required
+              class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+            >
+              <% for (let i=1; i <=5; i++) { %>
+                <option value="<%= i %>"><%= i %></option>
+              <% } %>
+            </select>
+            <p class="mt-1 text-[11px] text-gray-500">
+              Sólo se habilitan filas hasta este número.
+            </p>
           </div>
-        </div>
+        </section>
 
-        <!-- ocultos -->
-        <input type="hidden" name="numeroDeViaje" value="<%= numeroDeViaje %>">
-        <input type="hidden" name="montoTotalViatico" id="montoTotalViaticoHidden">
-        <input type="hidden" name="pendienteDeRendicion" id="pendienteDeRendicionHidden">
-        <input type="hidden" name="devolucionEnEfectivo" value="0">
-
-        <!-- Cantidad de viajantes -->
-        <div class="mb-8 w-1/4">
-          <label class="block text-xs font-medium text-gray-600">Cantidad de Viajantes</label>
-          <select id="cantidadDeViajantes" name="cantidadDeViajantes" required
-            class="w-full border px-2 py-1 rounded text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <% for (let i=1; i <=5; i++) { %>
-              <option value="<%= i %>"><%= i %></option>
-            <% } %>
-          </select>
-        </div>
-
-        <!-- Divider -->
-        <div class="my-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
         <!-- ========= Sección: Viajantes ========= -->
-        <div class="mb-4 flex items-center gap-2">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- users icon -->
-            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 0 1 4 4v1H4v-1a4 4 0 0 1 4-4m8-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg>
-          </span>
-          <h2 class="text-base font-semibold text-gray-800">Viajantes e importes</h2>
-        </div>
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+              <!-- users icon -->
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 0 1 4 4v1H4v-1a4 4 0 0 1 4-4m8-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/>
+              </svg>
+            </span>
+            <div>
+              <h2 class="text-base font-semibold text-gray-800">Viajantes e importes</h2>
+              <p class="text-xs text-gray-500">
+                Seleccioná personas únicas. Se calcula el total automáticamente.
+              </p>
+            </div>
+          </div>
 
-        <!-- Tabla -->
-        <div class="rounded-xl border border-gray-200 overflow-hidden">
-          <table class="w-full text-sm table-auto border-collapse">
-            <thead class="bg-gray-50 text-left">
-              <tr>
-                <th class="border px-4 py-2">#</th>
-                <th class="border px-4 py-2">Viajante</th>
-                <th class="border px-4 py-2">Cargo</th>
-                <th class="border px-4 py-2">Importe</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% for (let i=0; i < 5; i++) { %>
-                <tr class="hover:bg-indigo-50/40">
-                  <td class="border px-4 py-2"><%= i + 1 %></td>
-                  <td class="border px-4 py-2">
-                    <select name="nombreSolicitante[<%= i %>]" id="viajante-<%= i %>"
-                      class="w-full border px-2 py-1 rounded bg-gray-100 text-sm viajante-select focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      data-index="<%= i %>">
-                      <option value="">Seleccionar persona</option>
-                      <% listaDePersonasDisponibles.forEach(p=> { %>
-                        <option value="<%= p.nombreApellido %>" data-cargo="<%= p.cargo %>"><%= p.nombreApellido %></option>
-                      <% }) %>
-                    </select>
+          <!-- Tabla con contraste sutil -->
+          <div class="rounded-xl border border-gray-300 overflow-hidden shadow-sm bg-white">
+            <table class="w-full text-sm table-auto border-collapse tabla-viaticos">
+              <thead>
+                <tr>
+                  <th class="border border-gray-300 px-3 py-2 text-center w-10 bg-indigo-50 text-gray-800 font-semibold">
+                    #
+                  </th>
+                  <th class="border border-gray-300 px-3 py-2 bg-indigo-50 text-gray-800 font-semibold">
+                    Viajante
+                  </th>
+                  <th class="border border-gray-300 px-3 py-2 bg-indigo-50 text-gray-800 font-semibold">
+                    Cargo
+                  </th>
+                  <th class="border border-gray-300 px-3 py-2 w-40 bg-indigo-50 text-gray-800 font-semibold text-right">
+                    Importe
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for (let i=0; i < 5; i++) { %>
+                  <tr class="odd:bg-white even:bg-indigo-50/40 hover:bg-indigo-50/80 transition-colors">
+                    <td class="border border-gray-300 px-3 py-2 text-center text-gray-600">
+                      <%= i + 1 %>
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2">
+                      <select
+                        name="nombreSolicitante[<%= i %>]"
+                        id="viajante-<%= i %>"
+                        class="w-full border px-2 py-1.5 rounded-md bg-gray-50 text-sm viajante-select focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        data-index="<%= i %>"
+                      >
+                        <option value="">Seleccionar persona</option>
+                        <% listaDePersonasDisponibles.forEach(p=> { %>
+                          <option value="<%= p.nombreApellido %>" data-cargo="<%= p.cargo %>">
+                            <%= p.nombreApellido %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2">
+                      <input
+                        type="text"
+                        name="cargo[<%= i %>]"
+                        id="cargo-<%= i %>"
+                        class="w-full border px-2 py-1.5 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        readonly
+                      >
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2">
+                      <div class="relative">
+                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                        <input
+                          type="text"
+                          name="importeViatico[<%= i %>]"
+                          id="importeViatico-<%= i %>"
+                          class="w-full border pl-6 pr-2 py-1.5 rounded-md importe text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          inputmode="decimal"
+                          placeholder="0,00"
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+                <tr class="bg-indigo-50/90 font-semibold">
+                  <td colspan="3"
+                      class="px-4 py-2 text-right text-gray-800 border border-gray-300"
+                      name="montoTotalViatico" id="montoTotalViatico">
+                    Total de Viáticos
                   </td>
-                  <td class="border px-4 py-2">
-                    <input type="text" name="cargo[<%= i %>]" id="cargo-<%= i %>"
-                      class="w-full border px-2 py-1 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      readonly>
-                  </td>
-                  <td class="border px-4 py-2">
-                    <div class="relative">
-                      <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                      <input type="text" name="importeViatico[<%= i %>]" id="importeViatico-<%= i %>"
-                        class="w-full border pl-6 pr-2 py-1 rounded importe text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        inputmode="decimal" placeholder="0,00">
-                    </div>
+                  <td class="px-4 py-2 text-right border border-gray-300">
+                    <span class="text-gray-700 mr-1">$</span>
+                    <span id="totalViatico" class="text-gray-900 font-semibold">0,00</span>
                   </td>
                 </tr>
-              <% } %>
-              <tr class="bg-indigo-50/70 font-semibold">
-                <td colspan="3" class="px-4 py-2 text-right" name="montoTotalViatico" id="montoTotalViatico">
-                  Total de Viáticos
-                </td>
-                <td class="px-4 py-2 text-left">
-                  <span>$</span><span id="totalViatico">0,00</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-        <!-- Nota / tip -->
-        <div class="mt-3 rounded-lg border border-indigo-100 bg-indigo-50/50 px-3 py-2 text-[13px] text-gray-700">
-          Sugerencia: podés dejar viajantes sin completar, solo se usarán los que tengan importe.
-        </div>
-
-        <!-- Divider -->
-        <div class="my-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
         <!-- ========= Sección: Datos del viaje ========= -->
-        <div class="mb-4 flex items-center gap-2">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- map pin -->
-            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-10a7 7 0 0 0-14 0c0 5.65 7 10 7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
-          </span>
-          <h2 class="text-base font-semibold text-gray-800">Datos del viaje</h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
-            <input type="date" name="fechaDeSalida" required
-              class="w-full border px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+              <!-- map pin -->
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-10a7 7 0 0 0-14 0c0 5.65 7 10 7 10z"/>
+                <circle cx="12" cy="11" r="2.5"/>
+              </svg>
+            </span>
+            <div>
+              <h2 class="text-base font-semibold text-gray-800">Datos del viaje</h2>
+              <p class="text-xs text-gray-500">Fechas, recorrido y motivo del traslado.</p>
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
-            <input type="date" name="fechaDellegada" required
-              class="w-full border px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Origen</label>
-            <input type="text" name="origen" required
-              class="w-full border px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Destino</label>
-            <input type="text" name="destino" required
-              class="w-full border px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-        </div>
 
-        <div class="mt-4">
-          <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
-          <input type="text" name="motivoDelViaje" required
-            class="w-full border px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-        </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
+              <input
+                type="date"
+                name="fechaDeSalida"
+                required
+                class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
+              <input
+                type="date"
+                name="fechaDellegada"
+                required
+                class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Origen</label>
+              <input
+                type="text"
+                name="origen"
+                required
+                class="w-full border px-3 py-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ej.: San Fernando del Valle de Catamarca"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Destino</label>
+              <input
+                type="text"
+                name="destino"
+                required
+                class="w-full border px-3 py-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ej.: Valle Viejo, El Rodeo…"
+              >
+            </div>
+          </div>
 
-        <div class="mt-4">
-          <label class="block text-sm font-medium text-gray-700">Vehiculo Utilizado</label>
-          <input type="text" name="vehiculoUtilizado" required
-            class="w-full border px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-        </div>
+          <div class="mt-2">
+            <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
+            <input
+              type="text"
+              name="motivoDelViaje"
+              required
+              class="w-full border px-3 py-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Ej.: Relevamiento técnico, instalación de equipos, inspección…"
+            >
+          </div>
 
-        <!-- Divider -->
-        <div class="my-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+          <div class="mt-2">
+            <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
+            <input
+              type="text"
+              name="vehiculoUtilizado"
+              required
+              class="w-full border px-3 py-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Ej.: Móvil interno, vehículo particular…"
+            >
+          </div>
+        </section>
+
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
         <!-- ========= Sección: Resumen y vales ========= -->
-        <div class="mb-4 flex items-center gap-2">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- money -->
-            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 12h10M6 9h.01M18 15h.01"/></svg>
-          </span>
-          <h2 class="text-base font-semibold text-gray-800">Resumen y vales</h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
-            <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-              <input type="text" id="adicionalEnEfectivo" name="adicionalEnEfectivo"
-                class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="0,00">
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+              <!-- money -->
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 12h10M6 9h.01M18 15h.01"/>
+              </svg>
+            </span>
+            <div>
+              <h2 class="text-base font-semibold text-gray-800">Resumen y vales</h2>
+              <p class="text-xs text-gray-500">
+                Adicional en efectivo, rendición y vales de combustible (opcionales).
+              </p>
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">Pendiente de Rendición</label>
-            <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-              <input type="text" id="pendienteDeRendicion" name="pendienteDeRendicion" readonly
-                class="w-full border pl-6 pr-2 py-2 rounded bg-gray-100 text-sm font-semibold text-red-600 border border-gray-300">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-1">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
+              <div class="relative">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                <input
+                  type="text"
+                  id="adicionalEnEfectivo"
+                  name="adicionalEnEfectivo"
+                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="0,00"
+                >
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">
+                Pendiente de Rendición
+              </label>
+              <div class="relative">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                <input
+                  type="text"
+                  id="pendienteDeRendicion"
+                  name="pendienteDeRendicion"
+                  readonly
+                  class="w-full border pl-6 pr-2 py-2 rounded-lg bg-gray-100 text-sm font-semibold text-red-600 border-gray-300"
+                >
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Rendido</label>
+              <div class="relative">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                <input
+                  type="text"
+                  id="devolucionEnEfectivo"
+                  name="devolucionEnEfectivo"
+                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="0,00"
+                >
+              </div>
+            </div>
+
+            <div class="md:col-span-3 lg:col-span-1">
+              <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
+              <div class="relative">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                <input
+                  type="text"
+                  id="totalARecibir"
+                  name="totalARecibir"
+                  readonly
+                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm bg-gray-100 font-semibold text-blue-800 border-gray-300"
+                  placeholder="0,00"
+                >
+              </div>
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Rendido</label>
-            <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-              <input type="text" id="devolucionEnEfectivo" name="devolucionEnEfectivo"
-                class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="0,00">
-            </div>
+          <!-- Checkbox y vales -->
+          <div class="mt-2">
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                id="valesCombustible"
+                name="valesCombustible"
+                class="form-checkbox text-indigo-600 rounded border-gray-300"
+              >
+              <span class="ml-2 text-sm text-gray-700">
+                Incluir Vales de Combustible
+              </span>
+            </label>
+            <p class="text-[11px] text-gray-500 mt-1">
+              Al activarlo se habilitan campos para cantidad, importe por vale y total.
+            </p>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
-            <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-              <input type="text" id="totalARecibir" name="totalARecibir" readonly
-                class="w-full border pl-6 pr-2 py-2 rounded text-sm bg-gray-100 font-semibold text-blue-800 border border-gray-300"
-                placeholder="0,00 border border-gray-300">
+          <div
+            class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-3"
+            id="camposVales"
+            style="display: none;"
+          >
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
+              <input
+                type="number"
+                name="cantidadVale"
+                id="cantidadVale"
+                min="0"
+                class="w-full border px-3 py-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Importe Vales</label>
+              <div class="relative">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                <input
+                  type="text"
+                  id="valorVale"
+                  name="valorVale"
+                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="0,00"
+                >
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Total Vales</label>
+              <div class="relative">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+                <input
+                  type="text"
+                  id="totalVale"
+                  name="totalVale"
+                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  readonly
+                  placeholder="0,00"
+                >
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Checkbox y vales -->
-        <div class="mt-6">
-          <label class="inline-flex items-center">
-            <input type="checkbox" id="valesCombustible" name="valesCombustible" class="form-checkbox text-blue-600">
-            <span class="ml-2 text-sm text-gray-700">Incluir Vales de Combustible</span>
-          </label>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4" id="camposVales" style="display: none;">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
-            <input type="number" name="cantidadVale" id="cantidadVale" min="0"
-              class="w-full border px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Importe Vales</label>
-            <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-              <input type="text" id="valorVale" name="valorVale"
-                class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="0,00">
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Total Vales</label>
-            <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-              <input type="text" id="totalVale" name="totalVale"
-                class="w-full border pl-6 pr-2 py-2 rounded text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                readonly placeholder="0,00">
-            </div>
-          </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="my-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
         <!-- Botón -->
-        <div class="text-center pt-2">
-          <button type="submit"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg shadow-lg transition active:scale-[.99]">
+        <div class="pt-2 flex flex-col items-center gap-2">
+          <button
+            type="submit"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-10 py-2.5 rounded-lg shadow-lg shadow-indigo-200 transition active:scale-[.98]"
+          >
             Generar Viático
           </button>
-          <p class="mt-2 text-[12px] text-gray-500">Revisá los datos antes de generar el viático.</p>
+          <p class="text-[11px] text-gray-500">
+            Revisá los datos antes de generar el viático. Luego no se podrá editar.
+          </p>
         </div>
       </form>
-    </div>
+    </section>
   </div>
+</main>
 
-  <script src="/scripts/scriptViaticos.js"></script>
-  <script>
-    document.getElementById("formularioViatico").addEventListener("submit", function (e) {
-      const confirmacion = confirm("📝 Por favor, revisa todos los datos ingresados.\nUna vez generado el viático no podrás editarlo.\n¿Deseas continuar?");
-      if (!confirmacion) {
-        e.preventDefault();
-      }
-    });
-  </script>
-</div>
+<script src="/scripts/scriptViaticos.js"></script>
+<script>
+  document.getElementById("formularioViatico").addEventListener("submit", function (e) {
+    const confirmacion = confirm(
+      "📝 Por favor, revisá todos los datos ingresados.\n" +
+      "Una vez generado el viático no podrás editarlo.\n\n" +
+      "¿Deseás continuar?"
+    );
+    if (!confirmacion) {
+      e.preventDefault();
+    }
+  });
+</script>
 
 <!-- ====== Estilos extra (solo visual, no cambian tamaños) ====== -->
 <style>
-  /* Fade-in suave del contenedor */
-  #formularioViatico { --ring-w: 2px; --ring-c: rgba(79,70,229,.35); }
-  .max-w-6xl > .p-8 { animation: fadeIn .25s ease-out both; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+  /* Fade-in suave de la tarjeta */
+  .card-viatico {
+    animation: fadeInViatico .25s ease-out both;
+  }
+  @keyframes fadeInViatico {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-  /* Tabla: bordes y zebra */
-  #formularioViatico table thead th { background:#F9FAFB; color:#111827; font-weight:600; border-color:#E5E7EB; }
-  #formularioViatico table tbody td { border-color:#E5E7EB; }
-  #formularioViatico table tbody tr:nth-child(odd) td { background:#FBFBFD; }
+  /* Si querés, podés dejar esto para otras tablas también */
+  #formularioViatico table thead th {
+    border-color:#D1D5DB;
+  }
+  #formularioViatico table tbody td {
+    border-color:#D1D5DB;
+  }
 
   /* Foco consistente en inputs/selects */
   #formularioViatico input,
@@ -310,9 +501,13 @@
   #formularioViatico input:focus,
   #formularioViatico select:focus,
   #formularioViatico textarea:focus {
-    outline: none; border-color: #6366F1; box-shadow: 0 0 0 var(--ring-w) var(--ring-c);
+    outline: none;
+    border-color: #6366F1;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.35);
   }
 
   /* Checkbox acorde a paleta */
-  #formularioViatico input[type="checkbox"] { accent-color:#4F46E5; }
+  #formularioViatico input[type="checkbox"] {
+    accent-color:#4F46E5;
+  }
 </style>
