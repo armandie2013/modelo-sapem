@@ -334,25 +334,35 @@ function calcularTotales() {
 
 // === DOMContentLoaded ===
 document.addEventListener("DOMContentLoaded", function () {
-  // Capitalización de textos
-  ["areaSolicitante", "origen", "destino", "vehiculoUtilizado"].forEach(
-    function (name) {
-      var el = document.querySelector('[name="' + name + '"]');
-      if (el) {
-        el.addEventListener("blur", function () {
-          el.value = capitalizarCadaPalabra(el.value);
-        });
-      }
-    }
-  );
+  // ===== Capitalización de textos =====
 
-  var motivoEl = document.querySelector('[name="motivoDelViaje"]');
-  if (motivoEl) {
-    motivoEl.addEventListener("blur", function () {
-      motivoEl.value = capitalizarOracion(motivoEl.value);
+  // Área solicitante: cada palabra con mayúscula
+  var areaEl = document.querySelector('[name="areaSolicitante"]');
+  if (areaEl) {
+    areaEl.addEventListener("blur", function () {
+      areaEl.value = capitalizarCadaPalabra(areaEl.value);
     });
   }
 
+  // Origen, Destino y Motivo del viaje: solo primera letra en mayúscula
+  ["origen", "destino", "motivoDelViaje"].forEach(function (name) {
+    var el = document.querySelector('[name="' + name + '"]');
+    if (el) {
+      el.addEventListener("blur", function () {
+        el.value = capitalizarOracion(el.value);
+      });
+    }
+  });
+
+  // Vehículo utilizado: todo mayúsculas
+  var vehiculoEl = document.querySelector('[name="vehiculoUtilizado"]');
+  if (vehiculoEl) {
+    vehiculoEl.addEventListener("blur", function () {
+      vehiculoEl.value = (vehiculoEl.value || "").toUpperCase();
+    });
+  }
+
+  // ===== Campos monetarios y lógicas de cálculo =====
   var adicionalEl = document.getElementById("adicionalEnEfectivo");
   var devueltoEl = document.getElementById("devolucionEnEfectivo");
   var valorValeEl = document.getElementById("valorVale");
@@ -491,17 +501,17 @@ document.addEventListener("DOMContentLoaded", function () {
         sel.value = prevValor;
 
         // Actualizar cargo según valor anterior
-        var cargoInput = document.getElementById("cargo-" + idx);
-        if (cargoInput) {
+        var cargoInput2 = document.getElementById("cargo-" + idx);
+        if (cargoInput2) {
           if (prevValor) {
             var optPrev = Array.from(sel.options).find(function (o) {
               return o.value === prevValor;
             });
-            cargoInput.value = optPrev
+            cargoInput2.value = optPrev
               ? optPrev.getAttribute("data-cargo") || ""
               : "";
           } else {
-            cargoInput.value = "";
+            cargoInput2.value = "";
           }
         }
 

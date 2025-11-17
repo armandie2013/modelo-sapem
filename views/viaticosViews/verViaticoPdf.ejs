@@ -4,228 +4,334 @@
   <meta charset="UTF-8" />
   <title>Viático Nº <%= viatico.numeroDeViaje %></title>
   <style>
-    /* ========= Base y tipografía (sobrio / legible) ========= */
     @page { size: A4; margin: 2cm; }
     * { box-sizing: border-box; }
+
     html, body {
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      font-size: 10.5pt;
-      line-height: 1.45;
-      color: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9pt;
+      line-height: 1.33;
+      color: #000;
       background: #fff;
     }
-    @media print {
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .sheet { box-shadow: none !important; border: none !important; }
-    }
 
-    /* ========= Lienzo (opcional en pantalla) ========= */
-    .sheet {
-      margin: 0 auto;
-      padding: 0;
-      border: 1px solid #e5e7eb;        /* gris claro */
-      border-radius: 12px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.06);
-      overflow: hidden;
-    }
+    .sheet { max-width: 19cm; margin: 0 auto; }
 
-    /* ========= Encabezado sobrio ========= */
     header {
-      padding: 12px 0 16px;
-      border-bottom: 2px solid #111;    /* línea fuerte como en el original */
       text-align: center;
+      border-bottom: 1px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
     }
+
     header h1 {
-      margin: 0 0 6px 0;
-      font-size: 16pt;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .meta {
-      margin: 0 auto;
-      display: inline-grid;
-      grid-template-columns: auto auto;
-      gap: 4px 14px;
-      font-variant-numeric: tabular-nums;
-      color: #374151; /* gris medio */
-      font-size: 10pt;
-    }
-    .meta b { color: #111; font-weight: 700; }
-
-    /* ========= Secciones ========= */
-    .wrap { padding: 14px 0 0; }
-    .section { margin-top: 18px; }
-    .section-title {
-      margin: 0 0 8px 0;
-      font-weight: 800;
-      font-size: 12pt;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-title::before {
-      content: "";
-      width: 6px; height: 16px;
-      border-radius: 2px;
-      background: #0f172a; /* gris azulado oscuro, sobrio */
-      display: inline-block;
+      margin: 0 0 3px 0;
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
     }
 
-    /* ========= Bloque de datos clave (fácil de escanear) ========= */
-    .kv {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 20px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .kv p { margin: 0; }
-    .kv small {
-      display: block;
-      color: #6b7280;        /* etiqueta */
-      font-weight: 700;
-      font-size: 9.5pt;
-      margin-bottom: 2px;
-    }
-    .kv span { font-weight: 700; color: #111; }
+    .meta { margin: 0 auto; display: inline-table; font-size: 8.3pt; }
+    .meta-row td { padding: 1px 6px; }
+    .meta-row .label { font-weight: bold; white-space: nowrap; }
 
-    /* ========= Tabla ========= */
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .section { margin-top: 10px; }
+    .section-title { margin: 0 0 3px; font-weight: bold; font-size: 10pt; text-transform: uppercase; }
+    .underline { border-top: 1px solid #000; margin-bottom: 4px; }
+
+    .kv { display: table; width: 100%; font-size: 8.5pt; }
+    .kv-row { display: table-row; }
+    .kv-cell { display: table-cell; padding: 2px 3px; vertical-align: top; }
+    .kv-label { font-weight: bold; white-space: nowrap; width: 1%; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
     thead th {
+      border: 1px solid #000;
+      padding: 3px 5px;
       text-align: left;
-      padding: 8px 10px;
-      border: 1px solid #d1d5db;       /* borde sutil */
-      background: #f3f4f6;             /* encabezado claro */
-      color: #111;
-      font-weight: 800;
+      background: #f0f0f0;
+      font-weight: bold;
     }
     tbody td {
-      padding: 8px 10px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #000;
+      padding: 3px 5px;
       vertical-align: top;
     }
-    tbody tr:nth-child(odd) td { background: #fbfdff; } /* cebra suave */
-    .num {
-      text-align: right;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-    .currency::before { content: "$ "; color: #374151; }
+    .num { text-align: right; }
+    .currency::before { content:"$ "; }
 
-    /* ========= Resúmenes / cuadros ========= */
     .summary {
-      margin-top: 8px;
-      padding: 10px 12px;
-      border: 1px dashed #9ca3af;
-      border-radius: 8px;
-      background: #fcfcfc;
+      border: 1px solid #000;
+      padding: 5px 7px;
+      margin-top: 3px;
+      font-size: 8.5pt;
     }
-    .summary p { margin: 6px 0; }
-    .summary b { font-weight: 800; }
+    .summary p { margin: 2px 0; }
 
-    /* ========= Pie / firmas ========= */
-    .foot {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 24px; margin-top: 20px;
+    /* ► CUADRO DE TOTAL A RECIBIR */
+    .total-recibir-box {
+      margin-top: 6px;
+      display: flex;
+      justify-content: flex-end;
     }
-    .sig { text-align: center; }
-    .sig .line {
-      border-top: 1px solid #111;
-      height: 0; margin-top: 34px;
+    .total-recibir-inner {
+      border: 1px solid #000;
+      padding: 5px 8px;
+      font-size: 8.5pt;
+      text-align: right;
+      min-width: 8cm;
+      font-weight: bold;
+      background: #f7f7f7;
     }
-    .sig small { display: block; margin-top: 6px; color: #6b7280; }
+
+    /* Cuadro de vales de combustible */
+    .vales-box {
+      border: 1px solid #000;
+      padding: 5px 7px;
+      margin-top: 8px;
+      font-size: 8.5pt;
+    }
+    .vales-box-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-size: 9pt;
+    }
+    .vales-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.3pt;
+    }
+    .vales-table th,
+    .vales-table td {
+      border: 1px solid #000;
+      padding: 3px 5px;
+      text-align: left;
+    }
+    .vales-table th {
+      background: #f0f0f0;
+      font-weight: bold;
+    }
+    .vales-table .num {
+      text-align: right;
+    }
+
+    .sign-box {
+      border: 1px solid #000;
+      margin-top: 14px;
+      height: 4cm;
+      padding: 4px 6px;
+    }
+    .sign-title {
+      font-weight: bold;
+      font-size: 8pt;
+      text-transform: uppercase;
+    }
+
+    .firma-aprobacion {
+      margin-top: 2.5cm;
+      font-size: 8pt;
+      width: 6cm;
+      text-align: center;
+    }
+    .firma-line {
+      width: 6cm;
+      border-top: 1px solid #000;
+      margin-bottom: 2px;
+      margin-left: 0;
+    }
+
+    .meta-small {
+      font-size: 7.5pt;
+      margin-top: 3px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
-  <div class="sheet">
-    <header>
-      <h1>Solicitud de Viático Nº <%= viatico.numeroDeViaje %></h1>
-      <div class="meta">
-        <div><b>Fecha:</b></div>
-        <div><%= new Date(viatico.fechaDeCreacion).toLocaleDateString("es-AR") %></div>
-        <div><b>Área Solicitante:</b></div>
-        <div><%= viatico.areaSolicitante %></div>
+
+<%
+  var viajantesArr = viatico.viajantes || [];
+  var totalViajantes = viajantesArr.reduce((a,v)=>a+(v.importe||0),0);
+  var adicionalEf = viatico.adicionalEnEfectivo || 0;
+  var totalARecibir = totalViajantes + adicionalEf;
+%>
+
+<div class="sheet">
+
+  <header>
+    <% if (typeof logoDataUri !== 'undefined' && logoDataUri) { %>
+      <div style="text-align:center; margin-bottom:14px;">
+        <img src="<%= logoDataUri %>" alt="Logo" style="max-height:75px; display:inline-block;" />
       </div>
-    </header>
+    <% } %>
 
-    <div class="wrap">
-      <!-- Datos generales (compacto, fácil de leer) -->
-      <section class="section">
-        <h2 class="section-title">Datos del viaje</h2>
-        <div class="kv">
-          <p><small>Motivo del viaje</small><span><%= viatico.motivoDelViaje %></span></p>
-          <p><small>Vehículo utilizado</small><span><%= viatico.vehiculoUtilizado %></span></p>
-          <p><small>Origen</small><span><%= viatico.origen %></span></p>
-          <p><small>Destino</small><span><%= viatico.destino %></span></p>
+    <h1>Solicitud de Viático Nº <%= viatico.numeroDeViaje %></h1>
+
+    <table class="meta">
+      <tr class="meta-row">
+        <td class="label">Fecha:</td>
+        <td><%= new Date(viatico.fechaDeCreacion).toLocaleDateString("es-AR") %></td>
+      </tr>
+      <tr class="meta-row">
+        <td class="label">Área solicitante:</td>
+        <td><%= viatico.areaSolicitante %></td>
+      </tr>
+    </table>
+  </header>
+
+  <div class="wrap">
+
+    <!-- Datos del viaje -->
+    <section class="section">
+      <h2 class="section-title">Datos del viaje</h2>
+      <div class="underline"></div>
+
+      <div class="kv">
+        <div class="kv-row">
+          <div class="kv-cell kv-label">Fecha salida:</div>
+          <div class="kv-cell">
+            <%= viatico.fechaDeSalida ? new Date(viatico.fechaDeSalida).toLocaleDateString("es-AR") : "" %>
+          </div>
+          <div class="kv-cell kv-label">Fecha llegada:</div>
+          <div class="kv-cell">
+            <%= viatico.fechaDeLlegada ? new Date(viatico.fechaDeLlegada).toLocaleDateString("es-AR") : "" %>
+          </div>
         </div>
-      </section>
 
-      <!-- Viajantes -->
-      <section class="section">
-        <h2 class="section-title">Viajantes</h2>
-        <table>
+        <div class="kv-row">
+          <div class="kv-cell kv-label">Origen:</div>
+          <div class="kv-cell"><%= viatico.origen %></div>
+          <div class="kv-cell kv-label">Destino:</div>
+          <div class="kv-cell"><%= viatico.destino %></div>
+        </div>
+
+        <div class="kv-row">
+          <div class="kv-cell kv-label">Motivo:</div>
+          <div class="kv-cell"><%= viatico.motivoDelViaje %></div>
+          <div class="kv-cell kv-label">Vehículo:</div>
+          <div class="kv-cell"><%= viatico.vehiculoUtilizado %></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Viajantes -->
+    <section class="section">
+      <h2 class="section-title">Viajantes</h2>
+      <div class="underline"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cargo</th>
+            <th class="num">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% viajantesArr.forEach(v=>{ %>
+          <tr>
+            <td><%= v.nombre %></td>
+            <td><%= v.cargo %></td>
+            <td class="num">
+              <span class="currency"></span>
+              <%= (v.importe||0).toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+            </td>
+          </tr>
+        <% }) %>
+          <tr>
+            <td colspan="2" class="num"><strong>Total de viáticos</strong></td>
+            <td class="num">
+              <strong>
+                <span class="currency"></span>
+                <%= totalViajantes.toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+              </strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Resumen económico -->
+    <section class="section">
+      <h2 class="section-title">Resumen</h2>
+      <div class="underline"></div>
+
+      <div class="summary">
+        <p><b>Adicional en efectivo:</b>
+          <span class="currency"></span>
+          <%= adicionalEf.toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+        </p>
+        <p><b>Devolución:</b>
+          <span class="currency"></span>
+          <%= (viatico.devolucionEnEfectivo||0).toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+        </p>
+        <p><b>Pendiente de rendición:</b>
+          <span class="currency"></span>
+          <%= (viatico.pendienteDeRendicion||0).toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+        </p>
+      </div>
+
+      <!-- TOTAL A RECIBIR (una línea, resaltado) -->
+      <div class="total-recibir-box">
+        <div class="total-recibir-inner">
+          <strong>Total a recibir (viáticos + adicional):
+            <span class="currency"></span>
+            <%= totalARecibir.toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+          </strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vales de combustible (CUADRO ARRIBA DE FIRMAS) -->
+    <% if (viatico.valesCombustible) { %>
+    <section class="section">
+      <div class="vales-box">
+        <div class="vales-box-title">Vales de combustible</div>
+        <table class="vales-table">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Cargo</th>
-              <th class="num">Importe</th>
+              <th>Cantidad</th>
+              <th>Valor por vale</th>
+              <th class="num">Total vales</th>
             </tr>
           </thead>
           <tbody>
-            <% viatico.viajantes.forEach(v => { %>
-              <tr>
-                <td><%= v.nombre %></td>
-                <td><%= v.cargo %></td>
-                <td class="num"><span class="currency"></span><%= v.importe.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></td>
-              </tr>
-            <% }) %>
+            <tr>
+              <td><%= viatico.cantidadVale || 0 %></td>
+              <td class="num">
+                <span class="currency"></span>
+                <%= (viatico.valorVale || 0).toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+              </td>
+              <td class="num">
+                <span class="currency"></span>
+                <%= (viatico.totalVale || 0).toLocaleString("es-AR",{minimumFractionDigits:2}) %>
+              </td>
+            </tr>
           </tbody>
         </table>
-      </section>
+      </div>
+    </section>
+    <% } %>
 
-      <!-- Resumen económico -->
-      <section class="section">
-        <h2 class="section-title">Resumen económico</h2>
-        <div class="summary">
-          <p><b>Adicional en efectivo:</b> <span class="currency"></span><%= viatico.adicionalEnEfectivo.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></p>
-          <p><b>Devolución:</b> <span class="currency"></span><%= viatico.devolucionEnEfectivo.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></p>
-          <p><b>Pendiente de rendición:</b> <span class="currency"></span><%= viatico.pendienteDeRendicion.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></p>
-        </div>
-      </section>
+    <!-- Firmas -->
+    <section class="section">
+      <div class="sign-box">
+        <div class="sign-title">Firma de los viajantes</div>
+      </div>
 
-      <!-- Vales de combustible -->
-      <% if (viatico.valesCombustible) { %>
-      <section class="section">
-        <h2 class="section-title">Vales de combustible</h2>
-        <div class="kv" style="grid-template-columns: 1fr 1fr 1fr;">
-          <p><small>Cantidad</small><span><%= viatico.cantidadVale %></span></p>
-          <p><small>Valor por vale</small><span><span class="currency"></span><%= viatico.valorVale.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></span></p>
-          <p><small>Total vales</small><span><span class="currency"></span><%= viatico.totalVale.toLocaleString("es-AR", {minimumFractionDigits: 2}) %></span></p>
-        </div>
-      </section>
-      <% } %>
+      <div class="firma-aprobacion">
+        <div class="firma-line"></div>
+        Firma de aprobación
+      </div>
 
-      <!-- Pie -->
-      <section class="section">
-        <div class="kv" style="grid-template-columns: 1fr 1fr;">
-          <p><small>Creado por</small><span><%= viatico.creadoPor %></span></p>
-          <p><small>Documento</small><span>Uso interno</span></p>
-        </div>
+      <p class="meta-small">
+        Creado por: <%= viatico.creadoPor %> · Documento: Uso interno
+      </p>
+    </section>
 
-        <div class="foot">
-          <div class="sig">
-            <div class="line"></div>
-            <small>Firma del solicitante</small>
-          </div>
-          <div class="sig">
-            <div class="line"></div>
-            <small>Firma de aprobación</small>
-          </div>
-        </div>
-      </section>
-    </div>
   </div>
+</div>
+
 </body>
 </html>
