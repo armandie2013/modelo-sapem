@@ -1,4 +1,6 @@
 // controllers/viaticosController.mjs
+import fs from "fs";
+import path from "path";
 
 import {
   obtenerDatosFormularioViatico,
@@ -12,11 +14,27 @@ import {
   generarPDFViatico
 } from "../services/viaticosService.mjs";
 
+// ────────────────────────────────────────────────
+// Helper para leer el logo en base64 (MISMO que en proveedores)
+// ────────────────────────────────────────────────
+function leerLogoDataUriDesdeHtml() {
+  try {
+    const p = path.resolve(process.cwd(), "utils", "logoBase64.html");
+    if (!fs.existsSync(p)) return null;
+    const txt = fs.readFileSync(p, "utf8").trim();
+    const m = txt.match(/<img[^>]*src=["']([^"']+)["']/i);
+    return m && m[1] ? m[1] : txt.startsWith("data:") ? txt : null;
+  } catch (e) {
+    console.warn("No se pudo leer utils/logoBase64.html:", e?.message || e);
+    return null;
+  }
+}
 
 // Mostrar el formulario de creación de viáticos
 export const mostrarFormularioViatico = async (req, res) => {
   try {
-    const { numeroDeViaje, listaDePersonasDisponibles } = await obtenerDatosFormularioViatico();
+    const { numeroDeViaje, listaDePersonasDisponibles } =
+      await obtenerDatosFormularioViatico();
     res.render("viaticosViews/crearViatico", {
       title: "Crear Viatico",
       numeroDeViaje,
@@ -28,7 +46,6 @@ export const mostrarFormularioViatico = async (req, res) => {
   }
 };
 
-
 // Crear nuevo viático
 export const crearViaticoController = async (req, res) => {
   try {
@@ -37,7 +54,9 @@ export const crearViaticoController = async (req, res) => {
     res.redirect("/viaticos/dashboard");
   } catch (error) {
     console.error("❌ Error al crear el viático:", error);
-    res.status(500).send({ mensaje: "Error al crear el viático", error: error.message });
+    res
+      .status(500)
+      .send({ mensaje: "Error al crear el viático", error: error.message });
   }
 };
 
@@ -56,7 +75,6 @@ export const mostrarDashboardViaticos = async (req, res) => {
   }
 };
 
-
 // Mostrar todos los viáticos
 export const mostrarTodosLosViaticos = async (req, res) => {
   try {
@@ -72,7 +90,6 @@ export const mostrarTodosLosViaticos = async (req, res) => {
   }
 };
 
-
 // Eliminar viatico por id
 export const eliminarViaticoController = async (req, res) => {
   try {
@@ -85,7 +102,6 @@ export const eliminarViaticoController = async (req, res) => {
     res.status(500).send("Error al eliminar viático");
   }
 };
-
 
 // Ver Viatico
 export const verViaticoController = async (req, res) => {
@@ -106,7 +122,6 @@ export const verViaticoController = async (req, res) => {
   }
 };
 
-
 // Controlador para mostrar un viático en modo edición
 export async function mostrarFormularioEditarViatico(req, res) {
   try {
@@ -115,7 +130,7 @@ export async function mostrarFormularioEditarViatico(req, res) {
 
     res.render("viaticosViews/editarViatico", {
       viatico,
-      listaDePersonasDisponibles
+      listaDePersonasDisponibles,
     });
   } catch (error) {
     console.error("Error al mostrar formulario de edición:", error);
@@ -123,20 +138,18 @@ export async function mostrarFormularioEditarViatico(req, res) {
   }
 }
 
-
 // Controlador para actualizar un viático existente
 export async function actualizarViaticoController(req, res) {
   try {
-    await actualizarViaticoPorId(req.params.id, req.body);
+    await actualizarViatico(req.params.id, req.body);
     res.redirect("/viaticos/dashboard");
   } catch (error) {
     console.error("Error al actualizar viático:", error);
     res.status(500).send("Error al actualizar viático");
   }
-};
+}
 
-
-// Editar viatico
+// Editar viatico (si todavía lo usás, apunta igual al service)
 export async function editarViaticoController(req, res) {
   try {
     const { id } = req.params;
@@ -145,14 +158,14 @@ export async function editarViaticoController(req, res) {
   } catch (error) {
     console.error("Error al editar viático:", error);
     res.status(500).send("Error al editar viático");
-  };
-};
+  }
+}
 
-
-// Generar PDF desde verviatico
+// Generar PDF desde verViatico (Puppeteer, service)
 export const generarPDFViaticoController = async (req, res) => {
   try {
     const { id } = req.params;
+    // Si tu service soporta recibir logoDataUri, podrías pasarlo acá también
     const pdfBuffer = await generarPDFViatico(id, req);
 
     res.set({
@@ -167,15 +180,23 @@ export const generarPDFViaticoController = async (req, res) => {
   }
 };
 
-
-// Renderisar y mostrar verViaticoPdf
+// Renderizar y mostrar verViaticoPdf (preview HTML)
 export async function mostrarVistaPDF(req, res) {
   const { id } = req.params;
   try {
     const viatico = await obtenerViaticoPorId(id);
-    res.render("viaticosViews/verViaticoPdf", { viatico, layout: false });
-  } catch (error) {
-    res.status(500).send("Error al cargar PDF");
-  };
-};
+    if (!viatico) return res.status(404).send("Viático no encontrado");
 
+    // ✅ MISMO MECANISMO QUE EN PROVEEDOR: logoDataUri desde utils/logoBase64.html
+    const logoDataUri = leerLogoDataUriDesdeHtml();
+
+    res.render("viaticosViews/verViaticoPdf", {
+      viatico,
+      logoDataUri,
+      layout: false,
+    });
+  } catch (error) {
+    console.error("Error al cargar vista PDF de viático:", error);
+    res.status(500).send("Error al cargar PDF");
+  }
+}
