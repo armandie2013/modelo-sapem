@@ -68,32 +68,31 @@
 
           <!-- Filtros Fecha DESDE / HASTA -->
           <div>
-  <div class="flex gap-1">
-    <div class="w-1/2">
-      <label class="block text-[11px] font-medium text-gray-600 mb-1">
-        Desde
-      </label>
-      <input
-        id="filtroFechaDesde"
-        type="date"
-        class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs
-               focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-      />
-    </div>
-    <div class="w-1/2">
-      <label class="block text-[11px] font-medium text-gray-600 mb-1">
-        Hasta
-      </label>
-      <input
-        id="filtroFechaHasta"
-        type="date"
-        class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs
-               focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-      />
-    </div>
-  </div>
-</div>
-
+            <div class="flex gap-1">
+              <div class="w-1/2">
+                <label class="block text-[11px] font-medium text-gray-600 mb-1">
+                  Desde
+                </label>
+                <input
+                  id="filtroFechaDesde"
+                  type="date"
+                  class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs
+                         focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div class="w-1/2">
+                <label class="block text-[11px] font-medium text-gray-600 mb-1">
+                  Hasta
+                </label>
+                <input
+                  id="filtroFechaHasta"
+                  type="date"
+                  class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs
+                         focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+          </div>
 
           <!-- Filtro Destino -->
           <div>
@@ -125,22 +124,28 @@
 
       <!-- Tabla con scroll horizontal en pantallas chicas -->
       <div class="overflow-x-auto rounded-xl border border-gray-200">
-        <table class="w-full table-auto text-xs sm:text-sm border-collapse min-w-[1100px]">
+        <table class="w-full table-auto text-xs sm:text-sm border-collapse min-w-[1200px]">
           <thead class="bg-gray-200 text-gray-700 font-semibold">
             <tr>
-              <th class="px-3 py-2 text-left">N°</th>
-              <th class="px-3 py-2 text-left">Fecha</th>
-              <th class="px-3 py-2 text-left">Viajantes</th>
-              <th class="px-3 py-2 text-right">Importes</th>
-              <th class="px-3 py-2 text-left">Origen</th>
-              <th class="px-3 py-2 text-left">Destino</th>
-              <th class="px-3 py-2 text-left">Motivo</th>
-              <th class="px-3 py-2 text-left">Total Viático</th>
-              <th class="px-3 py-2 text-left">Adicional</th>
-              <th class="px-3 py-2 text-left">Creado por</th>
-              <th class="px-3 py-2 text-left">Acciones</th>
+              <th class="px-3 py-2 text-left w-16">N°</th>
+              <th class="px-3 py-2 text-left w-28">Fecha</th>
+
+              <!-- Viajantes (ancho grande pero no exagerado) -->
+              <th class="px-3 py-2 text-left w-[17rem]">Viajantes</th>
+
+              <!-- Importes con más espacio -->
+              <th class="px-3 py-2 text-right w-40">Importes</th>
+
+              <th class="px-3 py-2 text-left w-28">Origen</th>
+              <th class="px-3 py-2 text-left w-28">Destino</th>
+              <th class="px-3 py-2 text-left w-48">Motivo</th>
+              <th class="px-3 py-2 text-right w-32">Total Viático</th>
+              <th class="px-3 py-2 text-right w-28">Adicional</th>
+              <th class="px-3 py-2 text-left w-32">Creado por</th>
+              <th class="px-3 py-2 text-center w-32">Acciones</th>
             </tr>
           </thead>
+
           <tbody id="tablaViaticos">
             <% viaticos.forEach(v => { 
                  let fechaCreISO = '';
@@ -150,51 +155,48 @@
                    if (typeof v.fechaDeCreacion === 'string') {
                      const s = String(v.fechaDeCreacion).slice(0, 10);
                      fechaCreISO = s;
-                     const partes = s.split('-'); // [YYYY, MM, DD]
-                     if (partes.length === 3) {
-                       fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
-                     } else {
-                       fechaCreStr = s;
-                     }
+                     const partes = s.split('-');
+                     fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
                    } else {
                      const d = new Date(v.fechaDeCreacion);
-                     const iso = d.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+                     const iso = d.toISOString().slice(0, 10);
                      fechaCreISO = iso;
                      const partes = iso.split('-');
-                     if (partes.length === 3) {
-                       fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
-                     } else {
-                       fechaCreStr = iso;
-                     }
+                     fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
                    }
                  }
             %>
+
               <tr class="border-b hover:bg-gray-50 transition" data-row-viatico>
-                <td class="px-3 py-2 font-bold text-blue-800"><%= v.numeroDeViaje %></td>
+
+                <!-- N° -->
+                <td class="px-3 py-2 font-bold text-blue-800">
+                  <%= v.numeroDeViaje %>
+                </td>
 
                 <!-- Fecha -->
                 <td
-                  class="px-3 py-2"
+                  class="px-3 py-2 whitespace-nowrap"
                   data-col="fecha"
                   data-fecha="<%= fechaCreISO %>"
                 >
                   <%= fechaCreStr %>
                 </td>
 
-                <!-- Viajantes (nombres) -->
-                <td class="px-3 py-2" data-col="viajantes">
+                <!-- VIAJANTES -->
+                <td class="px-3 py-2 align-top" data-col="viajantes">
                   <ul class="list-disc ml-4 space-y-0.5">
                     <% v.viajantes.forEach(vj => { %>
-                      <li><%= vj.nombre %></li>
+                      <li class="whitespace-nowrap"><%= vj.nombre %></li>
                     <% }) %>
                   </ul>
                 </td>
 
-                <!-- Importes individuales -->
+                <!-- IMPORTES (más ancho) -->
                 <td class="px-3 py-2 text-right align-top" data-col="importes">
                   <ul class="list-none space-y-0.5">
                     <% v.viajantes.forEach(vj => { %>
-                      <li>
+                      <li class="whitespace-nowrap">
                         $ <%= Number(vj.importe || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 }) %>
                       </li>
                     <% }) %>
@@ -202,10 +204,10 @@
                 </td>
 
                 <!-- Origen -->
-                <td class="px-3 py-2"><%= v.origen %></td>
+                <td class="px-3 py-2 whitespace-nowrap"><%= v.origen %></td>
 
                 <!-- Destino -->
-                <td class="px-3 py-2" data-col="destino">
+                <td class="px-3 py-2 whitespace-nowrap" data-col="destino">
                   <%= v.destino %>
                 </td>
 
@@ -217,60 +219,94 @@
                   <%= v.motivoDelViaje %>
                 </td>
 
-                <!-- Total Viático -->
-                <td class="px-3 py-2 whitespace-nowrap">
+                <!-- Total -->
+                <td class="px-3 py-2 whitespace-nowrap text-right">
                   $ <%= v.montoTotalViatico.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
                 </td>
 
-                <!-- Adicional en efectivo -->
-                <td class="px-3 py-2 whitespace-nowrap">
+                <!-- Adicional -->
+                <td class="px-3 py-2 whitespace-nowrap text-right">
                   $ <%= v.adicionalEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
                 </td>
 
                 <!-- Creado por -->
-                <td class="px-3 py-2" data-col="creadoPor">
+                <td class="px-3 py-2 whitespace-nowrap" data-col="creadoPor">
                   <%= v.creadoPor %>
                 </td>
 
-                <!-- Acciones -->
-                <td class="px-3 py-2 space-x-2 whitespace-nowrap text-xs sm:text-sm">
-                  <% if (usuario?.modulosPermitidos?.viaticos?.ver) { %>
-                    <a href="/viaticos/<%= v._id %>" class="text-blue-600 hover:underline">
-                      Ver
-                    </a>
-                    <a
-                      href="/viaticos/<%= v._id %>/pdf"
-                      target="_blank"
-                      class="text-green-600 hover:underline"
-                    >
-                      PDF
-                    </a>
-                  <% } %>
+                <!-- ACCIONES (iconos compactos) -->
+                <td class="px-3 py-2 whitespace-nowrap text-center">
+                  <div class="inline-flex items-center gap-1">
 
-                  <% if (usuario?.modulosPermitidos?.viaticos?.editar) { %>
-                    <a
-                      href="/viaticos/<%= v._id %>/editar"
-                      class="text-yellow-600 hover:underline"
-                    >
-                      Editar
-                    </a>
-                  <% } %>
+                    <% if (usuario?.modulosPermitidos?.viaticos?.ver) { %>
+                      <!-- Ver -->
+                      <a
+                        href="/viaticos/<%= v._id %>"
+                        class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-slate-300
+                               bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                        title="Ver detalle"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-width="2" d="M7 7h10M7 11h6m-2 4h8M5 3h10l4 4v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                        </svg>
+                      </a>
 
-                  <% if (usuario?.modulosPermitidos?.viaticos?.eliminar) { %>
-                    <form
-                      action="/viaticos/<%= v._id %>?_method=DELETE"
-                      method="POST"
-                      class="inline"
-                      onsubmit="return confirm('¿Eliminar este viático?')"
-                    >
-                      <button type="submit" class="text-red-600 hover:underline">
-                        Eliminar
-                      </button>
-                    </form>
-                  <% } %>
+                      <!-- PDF -->
+                      <a
+                        href="/viaticos/<%= v._id %>/pdf"
+                        target="_blank"
+                        class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-emerald-300
+                               bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition"
+                        title="PDF"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-width="2" d="M7 3h8l4 4v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                          <path stroke-width="2" d="M12 11v6m0 0l-2-2m2 2l2-2"/>
+                        </svg>
+                      </a>
+                    <% } %>
+
+                    <% if (usuario?.modulosPermitidos?.viaticos?.editar) { %>
+                      <!-- Editar -->
+                      <a
+                        href="/viaticos/<%= v._id %>/editar"
+                        class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-amber-300
+                               bg-amber-50 hover:bg-amber-100 text-amber-700 transition"
+                        title="Editar"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-width="2" d="M15.232 5.232l3.536 3.536M16.5 3.5l-9 9V17h4.5l9-9L16.5 3.5z"/>
+                        </svg>
+                      </a>
+                    <% } %>
+
+                    <% if (usuario?.modulosPermitidos?.viaticos?.eliminar) { %>
+                      <!-- Eliminar -->
+                      <form
+                        action="/viaticos/<%= v._id %>?_method=DELETE"
+                        method="POST"
+                        class="inline"
+                        onsubmit="return confirm('¿Eliminar este viático?')"
+                      >
+                        <button
+                          type="submit"
+                          class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-red-300
+                                 bg-red-50 hover:bg-red-100 text-red-700 transition"
+                          title="Eliminar"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" d="M6 7h12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2m1 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7h10z"/>
+                          </svg>
+                        </button>
+                      </form>
+                    <% } %>
+
+                  </div>
                 </td>
+
               </tr>
             <% }) %>
+
           </tbody>
         </table>
       </div>
@@ -300,8 +336,8 @@
       const valViajante   = normalizar(filtroViajante?.value || '');
       const valDestino    = normalizar(filtroDestino?.value || '');
       const valCreador    = normalizar(filtroCreador?.value || '');
-      const valDesde      = (filtroFechaDesde?.value || '').trim(); // YYYY-MM-DD
-      const valHasta      = (filtroFechaHasta?.value || '').trim(); // YYYY-MM-DD
+      const valDesde      = (filtroFechaDesde?.value || '').trim();
+      const valHasta      = (filtroFechaHasta?.value || '').trim();
 
       filas.forEach(tr => {
         const celViajantes = tr.querySelector('[data-col="viajantes"]');
@@ -312,18 +348,16 @@
         if (!celFecha) return;
 
         const txtViajantes = normalizar(celViajantes ? celViajantes.textContent : '');
-        const dataFecha    = celFecha.dataset.fecha || ''; // YYYY-MM-DD
+        const dataFecha    = celFecha.dataset.fecha || '';
         const txtDestino   = normalizar(celDestino ? celDestino.textContent : '');
         const txtCreador   = normalizar(celCreador ? celCreador.textContent : '');
 
         let ok = true;
 
-        // Texto
         if (valViajante && !txtViajantes.includes(valViajante)) ok = false;
         if (valDestino && !txtDestino.includes(valDestino)) ok = false;
         if (valCreador && !txtCreador.includes(valCreador)) ok = false;
 
-        // Rango de fechas
         if (valDesde && dataFecha < valDesde) ok = false;
         if (valHasta && dataFecha > valHasta) ok = false;
 
@@ -336,12 +370,8 @@
       input.addEventListener('input', aplicarFiltros);
     });
 
-    if (filtroFechaDesde) {
-      filtroFechaDesde.addEventListener('change', aplicarFiltros);
-    }
-    if (filtroFechaHasta) {
-      filtroFechaHasta.addEventListener('change', aplicarFiltros);
-    }
+    if (filtroFechaDesde) filtroFechaDesde.addEventListener('change', aplicarFiltros);
+    if (filtroFechaHasta) filtroFechaHasta.addEventListener('change', aplicarFiltros);
 
     if (btnLimpiar) {
       btnLimpiar.addEventListener('click', () => {
@@ -355,3 +385,4 @@
     }
   });
 </script>
+
