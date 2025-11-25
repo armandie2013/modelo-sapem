@@ -124,25 +124,20 @@
 
       <!-- Tabla con scroll horizontal en pantallas chicas -->
       <div class="overflow-x-auto rounded-xl border border-gray-200">
-        <table class="w-full table-auto text-xs sm:text-sm border-collapse min-w-[1200px]">
+        <table class="w-full table-auto text-xs sm:text-sm border-collapse min-w-[1100px]">
           <thead class="bg-gray-200 text-gray-700 font-semibold">
             <tr>
-              <th class="px-3 py-2 text-left w-16">N°</th>
-              <th class="px-3 py-2 text-left w-28">Fecha</th>
-
-              <!-- Viajantes (ancho grande pero no exagerado) -->
-              <th class="px-3 py-2 text-left w-[17rem]">Viajantes</th>
-
-              <!-- Importes con más espacio -->
-              <th class="px-3 py-2 text-right w-40">Importes</th>
-
-              <th class="px-3 py-2 text-left w-28">Origen</th>
-              <th class="px-3 py-2 text-left w-28">Destino</th>
-              <th class="px-3 py-2 text-left w-48">Motivo</th>
-              <th class="px-3 py-2 text-right w-32">Total Viático</th>
-              <th class="px-3 py-2 text-right w-28">Adicional</th>
-              <th class="px-3 py-2 text-left w-32">Creado por</th>
-              <th class="px-3 py-2 text-center w-32">Acciones</th>
+              <th class="px-2 py-2 text-left w-16">N°</th>
+              <th class="px-2 py-2 text-left w-24">Fecha</th>
+              <th class="px-2 py-2 text-left w-[16rem]">Viajantes</th>
+              <th class="px-2 py-2 text-right w-28">Importes</th>
+              <th class="px-2 py-2 text-left w-32">Origen</th>
+              <th class="px-2 py-2 text-left w-32">Destino</th>
+              <th class="px-2 py-2 text-left w-48">Motivo</th>
+              <th class="px-2 py-2 text-right w-32">Total Viático</th>
+              <th class="px-2 py-2 text-right w-24">Adicional</th>
+              <th class="px-2 py-2 text-left w-32">Creado por</th>
+              <th class="px-2 py-2 text-center w-28">Acciones</th>
             </tr>
           </thead>
 
@@ -170,21 +165,21 @@
               <tr class="border-b hover:bg-gray-50 transition" data-row-viatico>
 
                 <!-- N° -->
-                <td class="px-3 py-2 font-bold text-blue-800">
+                <td class="px-2 py-2 font-bold text-blue-800">
                   <%= v.numeroDeViaje %>
                 </td>
 
                 <!-- Fecha -->
                 <td
-                  class="px-3 py-2 whitespace-nowrap"
+                  class="px-2 py-2 whitespace-nowrap"
                   data-col="fecha"
                   data-fecha="<%= fechaCreISO %>"
                 >
                   <%= fechaCreStr %>
                 </td>
 
-                <!-- VIAJANTES -->
-                <td class="px-3 py-2 align-top" data-col="viajantes">
+                <!-- Viajantes (nombres) -->
+                <td class="px-2 py-2 align-top" data-col="viajantes">
                   <ul class="list-disc ml-4 space-y-0.5">
                     <% v.viajantes.forEach(vj => { %>
                       <li class="whitespace-nowrap"><%= vj.nombre %></li>
@@ -192,8 +187,8 @@
                   </ul>
                 </td>
 
-                <!-- IMPORTES (más ancho) -->
-                <td class="px-3 py-2 text-right align-top" data-col="importes">
+                <!-- Importes individuales -->
+                <td class="px-2 py-2 text-right align-top" data-col="importes">
                   <ul class="list-none space-y-0.5">
                     <% v.viajantes.forEach(vj => { %>
                       <li class="whitespace-nowrap">
@@ -203,39 +198,48 @@
                   </ul>
                 </td>
 
-                <!-- Origen -->
-                <td class="px-3 py-2 whitespace-nowrap"><%= v.origen %></td>
+                <!-- Origen (truncado) -->
+                <td
+                  class="px-2 py-2 max-w-[140px] truncate whitespace-nowrap overflow-hidden"
+                  title="<%= v.origen %>"
+                >
+                  <%= v.origen %>
+                </td>
 
-                <!-- Destino -->
-                <td class="px-3 py-2 whitespace-nowrap" data-col="destino">
+                <!-- Destino (truncado) -->
+                <td
+                  class="px-2 py-2 max-w-[140px] truncate whitespace-nowrap overflow-hidden"
+                  data-col="destino"
+                  title="<%= v.destino %>"
+                >
                   <%= v.destino %>
                 </td>
 
-                <!-- Motivo -->
+                <!-- Motivo (truncado) -->
                 <td
-                  class="px-3 py-2 max-w-[220px] truncate whitespace-nowrap overflow-hidden"
+                  class="px-2 py-2 max-w-[220px] truncate whitespace-nowrap overflow-hidden"
                   title="<%= v.motivoDelViaje %>"
                 >
                   <%= v.motivoDelViaje %>
                 </td>
 
-                <!-- Total -->
-                <td class="px-3 py-2 whitespace-nowrap text-right">
+                <!-- Total Viático -->
+                <td class="px-2 py-2 whitespace-nowrap text-right">
                   $ <%= v.montoTotalViatico.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
                 </td>
 
-                <!-- Adicional -->
-                <td class="px-3 py-2 whitespace-nowrap text-right">
+                <!-- Adicional en efectivo -->
+                <td class="px-2 py-2 whitespace-nowrap text-right">
                   $ <%= v.adicionalEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
                 </td>
 
                 <!-- Creado por -->
-                <td class="px-3 py-2 whitespace-nowrap" data-col="creadoPor">
+                <td class="px-2 py-2 whitespace-nowrap" data-col="creadoPor">
                   <%= v.creadoPor %>
                 </td>
 
-                <!-- ACCIONES (iconos compactos) -->
-                <td class="px-3 py-2 whitespace-nowrap text-center">
+                <!-- Acciones con iconos compactos -->
+                <td class="px-2 py-2 whitespace-nowrap text-center">
                   <div class="inline-flex items-center gap-1">
 
                     <% if (usuario?.modulosPermitidos?.viaticos?.ver) { %>
@@ -306,7 +310,6 @@
 
               </tr>
             <% }) %>
-
           </tbody>
         </table>
       </div>
@@ -385,4 +388,3 @@
     }
   });
 </script>
-
