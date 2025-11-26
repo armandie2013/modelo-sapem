@@ -151,6 +151,20 @@
 <body>
 
 <%
+  // Helper de fecha sin problemas de huso horario
+  function fmtFecha(d) {
+    if (!d) return "";
+    let iso;
+    if (typeof d === "string") {
+      iso = d.slice(0, 10);          // "YYYY-MM-DD..."
+    } else {
+      iso = new Date(d).toISOString().slice(0, 10);
+    }
+    const partes = iso.split("-");   // [YYYY, MM, DD]
+    if (partes.length !== 3) return iso;
+    return partes[2] + "/" + partes[1] + "/" + partes[0];
+  }
+
   var viajantesArr = viatico.viajantes || [];
   var totalViajantes = viajantesArr.reduce((a,v)=>a+(v.importe||0),0);
   var adicionalEf = viatico.adicionalEnEfectivo || 0;
@@ -171,7 +185,7 @@
     <table class="meta">
       <tr class="meta-row">
         <td class="label">Fecha:</td>
-        <td><%= new Date(viatico.fechaDeCreacion).toLocaleDateString("es-AR") %></td>
+        <td><%= fmtFecha(viatico.fechaDeCreacion) %></td>
       </tr>
       <tr class="meta-row">
         <td class="label">Área solicitante:</td>
@@ -191,11 +205,11 @@
         <div class="kv-row">
           <div class="kv-cell kv-label">Fecha salida:</div>
           <div class="kv-cell">
-            <%= viatico.fechaDeSalida ? new Date(viatico.fechaDeSalida).toLocaleDateString("es-AR") : "" %>
+            <%= fmtFecha(viatico.fechaDeSalida) %>
           </div>
           <div class="kv-cell kv-label">Fecha llegada:</div>
           <div class="kv-cell">
-            <%= viatico.fechaDeLlegada ? new Date(viatico.fechaDeLlegada).toLocaleDateString("es-AR") : "" %>
+            <%= fmtFecha(viatico.fechaDeLlegada) %>
           </div>
         </div>
 
