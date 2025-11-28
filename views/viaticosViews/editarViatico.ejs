@@ -1,557 +1,495 @@
 <!-- editarViatico.ejs -->
+<main class="bg-gray-100 min-h-screen py-8 px-4">
+  <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg max-w-5xl mx-auto border border-gray-200">
 
-<header class="relative">
-  <!-- Banda superior suave, igual patrón que crear/registrar -->
-  <div class="h-36 sm:h-40 bg-gray-100 rounded-t-3xl"></div>
-  <div
-    class="pointer-events-none absolute inset-0 h-36 sm:h-40 rounded-t-3xl
-           bg-[radial-gradient(24rem_12rem_at_80%_-20%,rgba(129,140,248,.22),transparent)]">
-  </div>
-</header>
+    <%
+      const fmtARS = (v) => {
+        const n = Number(v || 0);
+        return new Intl.NumberFormat('es-AR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(n);
+      };
+    %>
 
-<main class="relative -mt-20 sm:-mt-24 px-4 pb-8">
-  <div class="mx-auto max-w-5xl">
-    <section class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 sm:p-8 space-y-8 card-viatico">
-      <% 
-        const fmtARS = (v) => {
-          const n = Number(v || 0);
-          return new Intl.NumberFormat('es-AR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }).format(n);
-        };
-      %>
+    <!-- ENCABEZADO (alineado a verViatico/crearViatico) -->
+    <div class="mb-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 text-left flex-1">
+          Editar Viático
+        </h1>
 
-      <!-- Encabezado -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-            Editar Viático
-          </h1>
-          <p class="text-sm text-gray-500 mt-1">
-            Actualizá los datos del viático.
-            <!-- Los importes usan formato 
-            <span class="font-mono">1.234,56</span>. -->
-          </p>
-        </div>
-        <div class="self-start sm:self-center text-xs text-right text-gray-500">
-          <p class="font-medium text-gray-700">N° de Viaje</p>
-          <p
-            class="mt-1 inline-flex items-center gap-1 rounded-lg border border-dashed border-gray-300
-                   bg-gray-50 px-3 py-1 text-[13px] font-semibold text-gray-700"
-          >
-            <%= viatico.numeroDeViaje %>
-          </p>
-        </div>
+        <a
+          href="/viaticos/dashboard"
+          class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
+        >
+          <!-- Icono flecha -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver al listado
+        </a>
       </div>
 
-      <form
-        id="formularioViatico"
-        action="/viaticos/<%= viatico._id %>?_method=PUT"
-        method="POST"
-        class="space-y-8"
-      >
-        <!-- ========= Sección: Datos iniciales ========= -->
-        <section class="space-y-4">
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
-              <!-- calendar icon -->
-              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M8 7V4m8 3V4m-9 8h8m-11 8h12a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2z"/>
-              </svg>
-            </span>
-            <div>
-              <h2 class="text-base font-semibold text-gray-800">Datos iniciales</h2>
-              <p class="text-xs text-gray-500">Fecha de emisión, área solicitante y numeración correlativa.</p>
-            </div>
+      <p class="mt-1 text-sm text-gray-500">
+        Actualizá los datos del viático.
+      </p>
+    </div>
+    <!-- FIN ENCABEZADO -->
+
+    <form
+      id="formularioViatico"
+      action="/viaticos/<%= viatico._id %>?_method=PUT"
+      method="POST"
+      class="space-y-8"
+    >
+
+      <!-- ========= Sección: Datos iniciales ========= -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 7V4m8 3V4m-9 8h8m-11 8h12a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2z"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="text-base font-semibold text-gray-800">Datos iniciales</h2>
+            <p class="text-xs text-gray-500">Fecha, área solicitante y numeración.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Fecha *</label>
+            <input
+              type="date"
+              name="fechaDeCreacion"
+              value="<%= viatico.fechaDeCreacion.toISOString().substring(0, 10) %>"
+              required
+              class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300
+                     focus:ring-indigo-500 focus:border-indigo-500"
+            >
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">
-                Fecha <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                name="fechaDeCreacion"
-                value="<%= viatico.fechaDeCreacion.toISOString().substring(0, 10) %>"
-                required
-                class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">
-                Área Solicitante <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="areaSolicitante"
-                value="<%= viatico.areaSolicitante %>"
-                required
-                class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">N° de Viaje</label>
-              <input
-                type="text"
-                name="numeroDeViaje"
-                value="<%= viatico.numeroDeViaje %>"
-                readonly
-                class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm border-gray-300 text-gray-600"
-              >
-            </div>
-          </div>
-
-          <!-- Campos ocultos para cálculo -->
-          <input type="hidden" name="montoTotalViatico" id="montoTotalViaticoHidden">
-          <input type="hidden" name="pendienteDeRendicion" id="pendienteDeRendicionHidden">
-
-          <!-- Cantidad de viajantes -->
-          <div class="w-full sm:w-1/3 md:w-1/4">
-            <label class="block text-xs font-medium text-gray-600 mb-1">
-              Cantidad de Viajantes
-            </label>
-            <select
-              id="cantidadDeViajantes"
-              name="cantidadDeViajantes"
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Área Solicitante *</label>
+            <input
+              type="text"
+              name="areaSolicitante"
+              value="<%= viatico.areaSolicitante %>"
               required
               class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                     focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <% for (let i = 1; i <= 5; i++) { %>
-                <option
-                  value="<%= i %>"
-                  <%= viatico.viajantes.length === i ? 'selected' : '' %>>
-                  <%= i %>
-                </option>
-              <% } %>
-            </select>
-            <p class="mt-1 text-[11px] text-gray-500">
-              Sólo se habilitan filas hasta este número.
-            </p>
-          </div>
-        </section>
-
-        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-
-        <!-- ========= Sección: Viajantes ========= -->
-        <section class="space-y-4">
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
-              <!-- users icon -->
-              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M16 14a4 4 0 0 1 4 4v1H4v-1a4 4 0 0 1 4-4m8-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/>
-              </svg>
-            </span>
-            <div>
-              <h2 class="text-base font-semibold text-gray-800">Viajantes e importes</h2>
-              <p class="text-xs text-gray-500">
-                Podés ajustar personas e importes. No se permiten nombres duplicados.
-              </p>
-            </div>
           </div>
 
-          <div class="rounded-xl border border-slate-300 overflow-hidden shadow-sm bg-slate-50/40">
-            <table class="w-full text-sm table-auto border-collapse">
-              <thead class="bg-slate-100 text-left">
-                <tr>
-                  <th class="border border-slate-300 px-3 py-2 text-center w-10">#</th>
-                  <th class="border border-slate-300 px-3 py-2">Viajante</th>
-                  <th class="border border-slate-300 px-3 py-2">Cargo</th>
-                  <th class="border border-slate-300 px-3 py-2 w-40">Importe</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% for (let i = 0; i < 5; i++) {
-                     const viajante = viatico.viajantes[i];
-                   %>
-                  <tr class="bg-white even:bg-slate-50 hover:bg-indigo-50/40 transition-colors">
-                    <td class="border border-slate-300 px-3 py-2 text-center text-gray-600">
-                      <%= i + 1 %>
-                    </td>
-                    <td class="border border-slate-300 px-3 py-2">
-                      <select
-                        name="nombreSolicitante[<%= i %>]"
-                        id="viajante-<%= i %>"
-                        class="w-full border px-2 py-1.5 rounded-md bg-gray-100 text-sm viajante-select
-                               focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        data-index="<%= i %>"
-                      >
-                        <option value="">Seleccionar persona</option>
-                        <% listaDePersonasDisponibles.forEach(p => { %>
-                          <option
-                            value="<%= p.nombreApellido %>"
-                            data-cargo="<%= p.cargo %>"
-                            <%= p.nombreApellido === (viajante && viajante.nombre) ? 'selected' : '' %>>
-                            <%= p.nombreApellido %>
-                          </option>
-                        <% }) %>
-                      </select>
-                    </td>
-                    <td class="border border-slate-300 px-3 py-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">N° de Viaje</label>
+            <input
+              type="text"
+              name="numeroDeViaje"
+              value="<%= viatico.numeroDeViaje %>"
+              readonly
+              class="w-full border px-3 py-2 rounded-lg bg-gray-100 text-sm border-gray-300 text-gray-600"
+            >
+          </div>
+        </div>
+
+        <input type="hidden" name="montoTotalViatico" id="montoTotalViaticoHidden">
+        <input type="hidden" name="pendienteDeRendicion" id="pendienteDeRendicionHidden">
+
+        <div class="w-full sm:w-1/3 md:w-1/4">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Cantidad de Viajantes</label>
+          <select
+            id="cantidadDeViajantes"
+            name="cantidadDeViajantes"
+            required
+            class="w-full border px-3 py-2 rounded-lg text-sm border-gray-300 bg-white
+                   focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <% for (let i = 1; i <= 5; i++) { %>
+              <option value="<%= i %>" <%= viatico.viajantes.length === i ? 'selected' : '' %>>
+                <%= i %>
+              </option>
+            <% } %>
+          </select>
+        </div>
+      </section>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+
+      <!-- ========= Sección: Viajantes ========= -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16 14a4 4 0 0 1 4 4v1H4v-1a4 4 0 0 1 4-4m8-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="text-base font-semibold text-gray-800">Viajantes e importes</h2>
+            <p class="text-xs text-gray-500">Seleccioná viajantes y ajustá importes.</p>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-gray-300 overflow-hidden shadow-sm bg-white">
+          <table class="w-full text-sm table-auto border-collapse">
+            <thead class="bg-indigo-50 text-left">
+              <tr>
+                <th class="border border-gray-300 px-3 py-2 text-center w-10">#</th>
+                <th class="border border-gray-300 px-3 py-2">Viajante</th>
+                <th class="border border-gray-300 px-3 py-2">Cargo</th>
+                <th class="border border-gray-300 px-3 py-2 w-40">Importe</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% for (let i = 0; i < 5; i++) { const v = viatico.viajantes[i]; %>
+                <tr class="bg-white even:bg-indigo-50/40 hover:bg-indigo-50/80 transition-colors">
+                  <td class="border border-gray-300 px-3 py-2 text-center text-gray-600"><%= i + 1 %></td>
+
+                  <td class="border border-gray-300 px-3 py-2">
+                    <select
+                      name="nombreSolicitante[<%= i %>]"
+                      class="w-full border px-2 py-1.5 rounded-md bg-gray-50 text-sm viajante-select
+                             focus:ring-indigo-500 focus:border-indigo-500"
+                      data-index="<%= i %>"
+                    >
+                      <option value="">Seleccionar persona</option>
+
+                      <% listaDePersonasDisponibles.forEach(p => { %>
+                        <option
+                          value="<%= p.nombreApellido %>"
+                          data-cargo="<%= p.cargo %>"
+                          <%= p.nombreApellido === (v && v.nombre) ? 'selected' : '' %>>
+                          <%= p.nombreApellido %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </td>
+
+                  <td class="border border-gray-300 px-3 py-2">
+                    <input
+                      type="text"
+                      name="cargo[<%= i %>]"
+                      value="<%= v?.cargo || '' %>"
+                      class="w-full border px-2 py-1.5 rounded-md text-sm bg-white
+                             focus:ring-indigo-500 focus:border-indigo-500"
+                      readonly
+                    >
+                  </td>
+
+                  <td class="border border-gray-300 px-3 py-2">
+                    <div class="relative">
+                      <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
                       <input
                         type="text"
-                        name="cargo[<%= i %>]"
-                        id="cargo-<%= i %>"
-                        value="<%= viajante?.cargo || '' %>"
-                        class="w-full border px-2 py-1.5 rounded-md text-sm bg-white
-                               focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        readonly
+                        name="importeViatico[<%= i %>]"
+                        value="<%= v ? v.importe : '' %>"
+                        class="w-full border pl-6 pr-2 py-1.5 rounded-md text-sm importe
+                               focus:ring-indigo-500 focus:border-indigo-500"
+                        inputmode="decimal"
+                        placeholder="0,00"
                       >
-                    </td>
-                    <td class="border border-slate-300 px-3 py-2">
-                      <div class="relative">
-                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                        <input
-                          type="text"
-                          name="importeViatico[<%= i %>]"
-                          id="importeViatico-<%= i %>"
-                          value="<%= viajante ? viajante.importe : '' %>"
-                          class="w-full border pl-6 pr-2 py-1.5 rounded-md importe text-sm
-                                 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          inputmode="decimal"
-                          placeholder="0,00"
-                        >
-                      </div>
-                    </td>
-                  </tr>
-                <% } %>
-                <tr class="bg-indigo-50/80 font-semibold">
-                  <td colspan="3"
-                      class="px-4 py-2 text-right border-t border-slate-300"
-                      name="montoTotalViatico"
-                      id="montoTotalViatico">
-                    Total de Viáticos
-                  </td>
-                  <td class="px-4 py-2 text-left border-t border-slate-300">
-                    <span class="text-gray-700">$</span>
-                    <span id="totalViatico" class="text-gray-900">
-                      <%= fmtARS(viatico.montoTotalViatico) %>
-                    </span>
+                    </div>
                   </td>
                 </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+              <% } %>
 
-        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-
-        <!-- ========= Sección: Datos del viaje ========= -->
-        <section class="space-y-4">
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
-              <!-- map pin -->
-              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M12 21s7-4.35 7-10a7 7 0 0 0-14 0c0 5.65 7 10 7 10z"/>
-                <circle cx="12" cy="11" r="2.5"/>
-              </svg>
-            </span>
-            <div>
-              <h2 class="text-base font-semibold text-gray-800">Datos del viaje</h2>
-              <p class="text-xs text-gray-500">Fechas, recorrido y motivo del traslado.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
-              <input
-                type="date"
-                name="fechaDeSalida"
-                value="<%= viatico.fechaDeSalida.toISOString().substring(0, 10) %>"
-                required
-                class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
-              <input
-                type="date"
-                name="fechaDellegada"
-                value="<%= viatico.fechaDeLlegada.toISOString().substring(0, 10) %>"
-                required
-                class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Origen</label>
-              <input
-                type="text"
-                name="origen"
-                value="<%= viatico.origen %>"
-                required
-                class="w-full border px-3 py-2 rounded-lg border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Destino</label>
-              <input
-                type="text"
-                name="destino"
-                value="<%= viatico.destino %>"
-                required
-                class="w-full border px-3 py-2 rounded-lg border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-          </div>
-
-          <div class="mt-2">
-            <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
-            <input
-              type="text"
-              name="motivoDelViaje"
-              value="<%= viatico.motivoDelViaje %>"
-              required
-              class="w-full border px-3 py-2 rounded-lg border-gray-300
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-          </div>
-
-          <div class="mt-2">
-            <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
-            <input
-              type="text"
-              name="vehiculoUtilizado"
-              value="<%= viatico.vehiculoUtilizado %>"
-              required
-              class="w-full border px-3 py-2 rounded-lg border-gray-300
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-          </div>
-        </section>
-
-        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-
-        <!-- ========= Sección: Resumen y vales ========= -->
-        <section class="space-y-4">
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
-              <!-- money -->
-              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 12h10M6 9h.01M18 15h.01"/>
-              </svg>
-            </span>
-            <div>
-              <h2 class="text-base font-semibold text-gray-800">Resumen y vales</h2>
-              <p class="text-xs text-gray-500">
-                Adicional en efectivo, rendición y vales de combustible (opcionales).
-              </p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-1">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
-              <div class="relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                <input
-                  type="text"
-                  id="adicionalEnEfectivo"
-                  name="adicionalEnEfectivo"
-                  value="<%= viatico.adicionalEnEfectivo %>"
-                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="0,00"
-                >
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">
-                Pendiente de Rendición
-              </label>
-              <div class="relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                <input
-                  type="text"
-                  id="pendienteDeRendicion"
-                  name="pendienteDeRendicion"
-                  value="<%= viatico.pendienteDeRendicion %>"
-                  readonly
-                  class="w-full border pl-6 pr-2 py-2 rounded-lg bg-gray-100 text-sm font-semibold text-red-600 border-gray-300"
-                >
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Rendido</label>
-              <div class="relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                <input
-                  type="text"
-                  id="devolucionEnEfectivo"
-                  name="devolucionEnEfectivo"
-                  value="<%= viatico.devolucionEnEfectivo %>"
-                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="0,00"
-                >
-              </div>
-            </div>
-
-            <div class="md:col-span-3 lg:col-span-1">
-              <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
-              <div class="relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                <input
-                  type="text"
-                  id="totalARecibir"
-                  name="totalARecibir"
-                  value="<%= fmtARS(viatico.totalARecibir) %>"
-                  readonly
-                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm bg-gray-100 font-semibold text-blue-800 border-gray-300"
-                  placeholder="0,00"
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- Checkbox y vales -->
-          <div class="mt-2">
-            <label class="inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id="valesCombustible"
-                name="valesCombustible"
-                class="form-checkbox text-indigo-600 rounded border-gray-300"
-                <%= viatico.valesCombustible ? 'checked' : '' %>
-              >
-              <span class="ml-2 text-sm text-gray-700">
-                Incluir Vales de Combustible
-              </span>
-            </label>
-            <p class="text-[11px] text-gray-500 mt-1">
-              Al activarlo se habilitan campos para cantidad, importe por vale y total.
-            </p>
-          </div>
-
-          <div
-            class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 rounded-xl border border-dashed border-indigo-200
-                   bg-indigo-50/60 px-4 py-3"
-            id="camposVales"
-            style="display: none;"
-          >
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
-              <input
-                type="number"
-                name="cantidadVale"
-                id="cantidadVale"
-                min="0"
-                value="<%= viatico.cantidadVale %>"
-                class="w-full border px-3 py-2 rounded-lg border-gray-300
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Importe Vales</label>
-              <div class="relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                <input
-                  type="text"
-                  id="valorVale"
-                  name="valorVale"
-                  value="<%= viatico.valorVale %>"
-                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="0,00"
-                >
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Total Vales</label>
-              <div class="relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
-                <input
-                  type="text"
-                  id="totalVale"
-                  name="totalVale"
-                  value="<%= viatico.totalVale %>"
-                  class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="0,00"
-                >
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
-
-        <!-- Botón -->
-        <div class="pt-2 flex flex-col items-center gap-2">
-          <button
-            type="submit"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-10 py-2.5 rounded-lg
-                   shadow-lg shadow-indigo-200 transition active:scale-[.98]"
-          >
-            Guardar cambios
-          </button>
+              <tr class="bg-indigo-50/90 font-semibold">
+                <td colspan="3" class="px-4 py-2 text-right border border-gray-300">Total de Viáticos</td>
+                <td class="px-4 py-2 border border-gray-300">
+                  <span class="text-gray-700 mr-1">$</span>
+                  <span id="totalViatico"><%= fmtARS(viatico.montoTotalViatico) %></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </form>
-    </section>
+      </section>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+
+      <!-- ========= SECCIÓN: Datos del viaje ========= -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 21s7-4.35 7-10a7 7 0 0 0-14 0c0 5.65 7 10 7 10z"/>
+              <circle cx="12" cy="11" r="2.5"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="text-base font-semibold text-gray-800">Datos del viaje</h2>
+            <p class="text-xs text-gray-500">Fechas, recorrido y motivo.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
+            <input
+              type="date"
+              name="fechaDeSalida"
+              value="<%= viatico.fechaDeSalida.toISOString().substring(0, 10) %>"
+              required
+              class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300
+                     focus:ring-indigo-500 focus:border-indigo-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
+            <input
+              type="date"
+              name="fechaDellegada"
+              value="<%= viatico.fechaDeLlegada.toISOString().substring(0, 10) %>"
+              required
+              class="w-full border px-2 py-2 rounded-lg text-sm border-gray-300
+                     focus:ring-indigo-500 focus:border-indigo-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Origen</label>
+            <input
+              type="text"
+              name="origen"
+              value="<%= viatico.origen %>"
+              required
+              class="w-full border px-3 py-2 rounded-lg border-gray-300
+                     focus:ring-indigo-500 focus:border-indigo-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Destino</label>
+            <input
+              type="text"
+              name="destino"
+              value="<%= viatico.destino %>"
+              required
+              class="w-full border px-3 py-2 rounded-lg border-gray-300
+                     focus:ring-indigo-500 focus:border-indigo-500"
+            >
+          </div>
+        </div>
+
+        <div class="mt-2">
+          <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
+          <input
+            type="text"
+            name="motivoDelViaje"
+            value="<%= viatico.motivoDelViaje %>"
+            required
+            class="w-full border px-3 py-2 rounded-lg border-gray-300
+                   focus:ring-indigo-500 focus:border-indigo-500"
+          >
+        </div>
+
+        <div class="mt-2">
+          <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
+          <input
+            type="text"
+            name="vehiculoUtilizado"
+            value="<%= viatico.vehiculoUtilizado %>"
+            required
+            class="w-full border px-3 py-2 rounded-lg border-gray-300
+                   focus:ring-indigo-500 focus:border-indigo-500"
+          >
+        </div>
+      </section>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+
+      <!-- ========= RESUMEN ========= -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shadow-sm">
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 12h10M6 9h.01M18 15h.01"/>
+            </svg>
+          </span>
+          <div>
+            <h2 class="text-base font-semibold text-gray-800">Resumen y vales</h2>
+            <p class="text-xs text-gray-500">Efectivo, vales, rendición.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-1">
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+              <input
+                type="text"
+                name="adicionalEnEfectivo"
+                id="adicionalEnEfectivo"
+                value="<%= viatico.adicionalEnEfectivo %>"
+                class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
+                       focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">
+              Pendiente de Rendición
+            </label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+              <input
+                type="text"
+                id="pendienteDeRendicion"
+                name="pendienteDeRendicion"
+                value="<%= viatico.pendienteDeRendicion %>"
+                readonly
+                class="w-full border pl-6 pr-2 py-2 rounded-lg bg-gray-100 text-sm font-semibold text-red-600 border-gray-300"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Rendido</label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+              <input
+                type="text"
+                id="devolucionEnEfectivo"
+                name="devolucionEnEfectivo"
+                value="<%= viatico.devolucionEnEfectivo %>"
+                class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
+                       focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+          </div>
+
+          <div class="md:col-span-3 lg:col-span-1">
+            <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+              <input
+                type="text"
+                id="totalARecibir"
+                name="totalARecibir"
+                value="<%= fmtARS(viatico.totalARecibir) %>"
+                readonly
+                class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm bg-gray-100 font-semibold text-blue-800 border-gray-300"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkbox vales -->
+        <div class="mt-2">
+          <label class="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              id="valesCombustible"
+              name="valesCombustible"
+              class="form-checkbox text-indigo-600 rounded border-gray-300"
+              <%= viatico.valesCombustible ? 'checked' : '' %>
+            >
+            <span class="ml-2 text-sm text-gray-700">Incluir Vales de Combustible</span>
+          </label>
+        </div>
+
+        <div
+          id="camposVales"
+          class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 rounded-xl border border-dashed border-indigo-200
+                 bg-indigo-50/60 px-4 py-3"
+          style="display:none"
+        >
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
+            <input
+              type="number"
+              name="cantidadVale"
+              id="cantidadVale"
+              min="0"
+              value="<%= viatico.cantidadVale %>"
+              class="w-full border px-3 py-2 rounded-lg border-gray-300
+                     focus:ring-indigo-500 focus:border-indigo-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Importe Vales</label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+              <input
+                type="text"
+                id="valorVale"
+                name="valorVale"
+                value="<%= viatico.valorVale %>"
+                class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
+                       focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Total Vales</label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">$</span>
+              <input
+                type="text"
+                id="totalVale"
+                name="totalVale"
+                value="<%= viatico.totalVale %>"
+                class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm border-gray-300
+                       focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+
+      <!-- BOTÓN GUARDAR -->
+      <div class="pt-2 flex flex-col items-center gap-2">
+        <button
+          type="submit"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-10 py-2.5 rounded-lg
+                 shadow-lg shadow-indigo-200 transition active:scale-[.98]"
+        >
+          Guardar cambios
+        </button>
+      </div>
+
+    </form>
   </div>
 </main>
 
 <script src="/scripts/scriptViaticos.js"></script>
 
-<!-- ====== Estilos extra (solo visual, no cambian tamaños) ====== -->
 <style>
-  /* Fade-in suave de la tarjeta */
-  .card-viatico {
-    animation: fadeInViatico .25s ease-out both;
-  }
-  @keyframes fadeInViatico {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Tabla: bordes y zebra (como crearViatico) */
   #formularioViatico table thead th {
     background:#F9FAFB;
     color:#111827;
-    font-weight:600;
-    border-color:#CBD5E1; /* slate-300 */
   }
+
   #formularioViatico table tbody td {
     border-color:#CBD5E1;
   }
 
-  /* Foco consistente en inputs/selects */
   #formularioViatico input,
-  #formularioViatico select,
-  #formularioViatico textarea {
-    transition: box-shadow .15s ease, border-color .15s ease, filter .15s ease;
+  #formularioViatico select {
+    transition: box-shadow .15s ease, border-color .15s ease;
     background-color: #fff;
   }
+
   #formularioViatico input:focus,
-  #formularioViatico select:focus,
-  #formularioViatico textarea:focus {
+  #formularioViatico select:focus {
     outline: none;
     border-color: #6366F1;
-    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.35);
-  }
-
-  /* Checkbox acorde a paleta */
-  #formularioViatico input[type="checkbox"] {
-    accent-color:#4F46E5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,.35);
   }
 </style>

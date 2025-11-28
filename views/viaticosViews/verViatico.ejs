@@ -1,126 +1,195 @@
 <!-- Vista de Viático en modo solo lectura -->
-<div class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="bg-white p-8 rounded-2xl shadow-xl max-w-6xl mx-auto border border-gray-300">
-    <div class="text-center mb-6">
-      <!-- <img src="/ruta-a-tu-logo.png" alt="Logo" class="mx-auto h-16 mb-2"> -->
-      <h1 class="text-3xl font-bold text-gray-800">Detalle de Viático</h1>
+<main class="bg-gray-100 min-h-screen py-8 px-4">
+  <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg max-w-5xl mx-auto border border-gray-200">
+
+    <!-- Encabezado: título izquierda, botón derecha -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-left flex-1">
+        Detalle de Viático
+      </h1>
+
+      <a
+        href="/viaticos/dashboard"
+        class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
+      >
+        <!-- Icono flecha -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver al listado
+      </a>
     </div>
 
     <!-- Fecha, Número de viaje y Área Solicitante -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div>
         <label class="block text-sm font-medium text-gray-700">Fecha</label>
-        <input type="date" value="<%= viatico.fechaDeCreacion.toISOString().split('T')[0] %>" disabled
-          class="w-full border px-2 py-1 rounded-lg text-sm bg-gray-100">
+        <input
+          type="date"
+          value="<%= viatico.fechaDeCreacion.toISOString().split('T')[0] %>"
+          disabled
+          class="w-full border px-2 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Área Solicitante</label>
-        <input type="text" value="<%= viatico.areaSolicitante %>" disabled
-          class="w-full border px-2 py-1 rounded-lg text-sm bg-gray-100">
+        <input
+          type="text"
+          value="<%= viatico.areaSolicitante %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Nº de Viaje</label>
-        <input type="text" value="<%= viatico.numeroDeViaje %>" disabled
-          class="w-full border px-2 py-1 rounded-lg text-sm bg-gray-100">
+        <input
+          type="text"
+          value="<%= viatico.numeroDeViaje %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
     </div>
 
     <!-- Tabla de Viajantes -->
-    <table class="w-full text-sm table-auto border-collapse mb-6">
-      <thead class="bg-gray-100 text-left">
-        <tr>
-          <th class="border px-4 py-2">#</th>
-          <th class="border px-4 py-2">Viajante</th>
-          <th class="border px-4 py-2">Cargo</th>
-          <th class="border px-4 py-2">Importe</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% viatico.viajantes.forEach((v, i)=> { %>
+    <div class="rounded-xl border border-gray-200 overflow-hidden mb-6">
+      <table class="w-full text-sm table-auto border-collapse">
+        <thead class="bg-gray-50 text-left">
           <tr>
-            <td class="border px-4 py-2">
-              <%= i + 1 %>
-            </td>
-            <td class="border px-4 py-2">
-              <%= v.nombre %>
-            </td>
-            <td class="border px-4 py-2">
-              <%= v.cargo %>
-            </td>
-            <td class="border px-4 py-2">$<%= v.importe.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
-            </td>
+            <th class="border border-gray-200 px-4 py-2">#</th>
+            <th class="border border-gray-200 px-4 py-2">Viajante</th>
+            <th class="border border-gray-200 px-4 py-2">Cargo</th>
+            <th class="border border-gray-200 px-4 py-2 text-right">Importe</th>
           </tr>
-          <% }) %>
-            <tr class="bg-gray-100 font-semibold">
-              <td colspan="3" class="px-4 py-2 text-right">Total de Viáticos</td>
-              <td class="px-4 py-2 text-left">$<%= viatico.montoTotalViatico.toLocaleString('es-AR',
-                  {minimumFractionDigits: 2}) %>
+        </thead>
+        <tbody>
+          <% viatico.viajantes.forEach((v, i)=> { %>
+            <tr class="odd:bg-white even:bg-gray-50">
+              <td class="border border-gray-200 px-4 py-2">
+                <%= i + 1 %>
+              </td>
+              <td class="border border-gray-200 px-4 py-2">
+                <%= v.nombre %>
+              </td>
+              <td class="border border-gray-200 px-4 py-2">
+                <%= v.cargo %>
+              </td>
+              <td class="border border-gray-200 px-4 py-2 text-right">
+                $<%= v.importe.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
               </td>
             </tr>
-      </tbody>
-    </table>
+          <% }) %>
+          <tr class="bg-gray-50 font-semibold">
+            <td colspan="3" class="border border-gray-200 px-4 py-2 text-right">Total de Viáticos</td>
+            <td class="border border-gray-200 px-4 py-2 text-right">
+              $<%= viatico.montoTotalViatico.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Origen, Destino, Motivo -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">Fecha Salida</label>
-        <input type="date" value="<%= viatico.fechaDeSalida.toISOString().split('T')[0] %>" disabled
-          class="w-full border px-2 py-1 rounded-lg text-sm bg-gray-100">
+        <input
+          type="date"
+          value="<%= viatico.fechaDeSalida.toISOString().split('T')[0] %>"
+          disabled
+          class="w-full border px-2 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Fecha Llegada</label>
-        <input type="date" value="<%= viatico.fechaDeLlegada.toISOString().split('T')[0] %>" disabled
-          class="w-full border px-2 py-1 rounded-lg text-sm bg-gray-100">
+        <input
+          type="date"
+          value="<%= viatico.fechaDeLlegada.toISOString().split('T')[0] %>"
+          disabled
+          class="w-full border px-2 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Origen</label>
-        <input type="text" value="<%= viatico.origen %>" disabled
-          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+        <input
+          type="text"
+          value="<%= viatico.origen %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Destino</label>
-        <input type="text" value="<%= viatico.destino %>" disabled
-          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+        <input
+          type="text"
+          value="<%= viatico.destino %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
     </div>
+
     <div class="mt-4">
       <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
-      <input type="text" value="<%= viatico.motivoDelViaje %>" disabled
-        class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+      <input
+        type="text"
+        value="<%= viatico.motivoDelViaje %>"
+        disabled
+        class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+      >
     </div>
     <div class="mt-4">
       <label class="block text-sm font-medium text-gray-700">Vehículo Utilizado</label>
-      <input type="text" value="<%= viatico.vehiculoUtilizado %>" disabled
-        class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+      <input
+        type="text"
+        value="<%= viatico.vehiculoUtilizado %>"
+        disabled
+        class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+      >
     </div>
 
     <!-- Datos financieros -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
       <div>
         <label class="block text-sm font-medium text-gray-700">Adicional en Efectivo</label>
-        <input type="text"
-          value="$<%= viatico.adicionalEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>" disabled
-          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+        <input
+          type="text"
+          value="$<%= viatico.adicionalEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">Pendiente de Rendición</label>
-        <input type="text"
-          value="$<%= viatico.pendienteDeRendicion.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>" disabled
-          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-red-600 font-semibold">
+        <label class="block text-sm font-medium text-gray-700 text-red-600 font-semibold">
+          Pendiente de Rendición
+        </label>
+        <input
+          type="text"
+          value="$<%= viatico.pendienteDeRendicion.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-red-600 font-semibold border-gray-300"
+        >
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Rendido</label>
-        <input type="text"
-          value="$<%= viatico.devolucionEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>" disabled
-          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100">
+        <input
+          type="text"
+          value="$<%= viatico.devolucionEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
+          disabled
+          class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 border-gray-300"
+        >
       </div>
     </div>
 
     <!-- Total a Recibir -->
     <div class="mt-6">
       <label class="block text-sm font-medium text-gray-700">Total a Recibir</label>
-      <input type="text" value="$<%= viatico.totalARecibir?.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %>"
-        disabled class="w-full border pl-6 pr-2 py-2 rounded text-sm bg-gray-100 font-semibold text-blue-800 border border-gray-300">
+      <input
+        type="text"
+        value="$<%= viatico.totalARecibir?.toLocaleString('es-AR', { minimumFractionDigits: 2 }) %>"
+        disabled
+        class="w-full border pl-6 pr-2 py-2 rounded-lg text-sm bg-gray-100 font-semibold text-blue-800 border-gray-300"
+      >
     </div>
 
     <!-- Vales de Combustible -->
@@ -128,20 +197,33 @@
       <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">Cantidad de Vales</label>
-          <input type="number" value="<%= viatico.cantidadVale %>" disabled
-            class="w-full border px-3 py-2 rounded bg-gray-100">
+          <input
+            type="number"
+            value="<%= viatico.cantidadVale %>"
+            disabled
+            class="w-full border px-3 py-2 rounded-lg bg-gray-100 border-gray-300"
+          >
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Valor por Vale</label>
-          <input type="text" value="$<%= viatico.valorVale.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
-            disabled class="w-full border px-3 py-2 rounded bg-gray-100">
+          <input
+            type="text"
+            value="$<%= viatico.valorVale.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
+            disabled
+            class="w-full border px-3 py-2 rounded-lg bg-gray-100 border-gray-300"
+          >
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Total de Vales</label>
-          <input type="text" value="$<%= viatico.totalVale.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
-            disabled class="w-full border px-3 py-2 rounded bg-gray-100">
+          <input
+            type="text"
+            value="$<%= viatico.totalVale.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>"
+            disabled
+            class="w-full border px-3 py-2 rounded-lg bg-gray-100 border-gray-300"
+          >
         </div>
       </div>
-      <% } %>
+    <% } %>
   </div>
-</div>
+</main>
+
