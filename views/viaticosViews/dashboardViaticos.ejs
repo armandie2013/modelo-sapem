@@ -142,24 +142,34 @@
           </thead>
 
           <tbody id="tablaViaticos">
-            <% viaticos.forEach(v => { 
-                 let fechaCreISO = '';
-                 let fechaCreStr = '';
+            <%
+              // 👉 Helper para abreviar nombre: "Diego Armando Cardenes" -> "Diego C."
+              const abreviarNombre = (nombre) => {
+                if (!nombre) return '';
+                const partes = String(nombre).trim().split(/\s+/);
+                if (partes.length === 1) return partes[0]; // por si sólo hay un nombre
+                const inicialApellido = partes[partes.length - 1].charAt(0).toUpperCase();
+                return `${partes[0]} ${inicialApellido}.`;
+              };
 
-                 if (v.fechaDeCreacion) {
-                   if (typeof v.fechaDeCreacion === 'string') {
-                     const s = String(v.fechaDeCreacion).slice(0, 10);
-                     fechaCreISO = s;
-                     const partes = s.split('-');
-                     fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
-                   } else {
-                     const d = new Date(v.fechaDeCreacion);
-                     const iso = d.toISOString().slice(0, 10);
-                     fechaCreISO = iso;
-                     const partes = iso.split('-');
-                     fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
-                   }
-                 }
+              viaticos.forEach(v => { 
+                let fechaCreISO = '';
+                let fechaCreStr = '';
+
+                if (v.fechaDeCreacion) {
+                  if (typeof v.fechaDeCreacion === 'string') {
+                    const s = String(v.fechaDeCreacion).slice(0, 10);
+                    fechaCreISO = s;
+                    const partes = s.split('-');
+                    fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
+                  } else {
+                    const d = new Date(v.fechaDeCreacion);
+                    const iso = d.toISOString().slice(0, 10);
+                    fechaCreISO = iso;
+                    const partes = iso.split('-');
+                    fechaCreStr = partes[2] + '/' + partes[1] + '/' + partes[0];
+                  }
+                }
             %>
 
               <tr class="border-b hover:bg-gray-100 transition" data-row-viatico>
@@ -233,9 +243,9 @@
                   $ <%= v.adicionalEnEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
                 </td>
 
-                <!-- Creado por -->
+                <!-- Creado por (abreviado) -->
                 <td class="px-2 py-2 whitespace-nowrap" data-col="creadoPor">
-                  <%= v.creadoPor %>
+                  <%= abreviarNombre(v.creadoPor) %>
                 </td>
 
                 <!-- Acciones con iconos compactos -->
