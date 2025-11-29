@@ -1,178 +1,323 @@
-<main class="bg-gray-100 min-h-screen py-8 px-4">
-  <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-    <header class="mb-6">
-      <h1 class="text-xl font-bold text-gray-900 text-center">Registrar proveedor</h1>
-      <p class="text-center text-xs text-gray-500 mt-1">Todos los campos son obligatorios, excepto “Plan” y “Activo”.</p>
-    </header>
+<!-- Header estilo landing (reducido) -->
+<header class="relative">
+  <div class="h-20 sm:h-24 bg-gray-100 rounded-t-3xl"></div>
 
-    <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
-      <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-6">
-        <h2 class="font-semibold text-sm mb-2">Por favor corregí los siguientes errores:</h2>
-        <ul class="list-disc pl-5 text-sm space-y-1">
-          <% errores.forEach(error => { %>
-            <li><%= error.msg %></li>
-          <% }) %>
-        </ul>
-      </div>
-    <% } %>
+  <div
+    class="pointer-events-none absolute inset-0 h-20 sm:h-24 rounded-t-3xl
+           bg-[radial-gradient(18rem_8rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]">
+  </div>
+</header>
 
-    <%
-      const activoChecked = (typeof datos !== 'undefined')
-        ? (datos.activo === 'true' || datos.activo === 'on' || datos.activo === true || datos.activo === 1 || datos.activo === '1')
-        : true;
+<!-- Main levantado -->
+<main class="relative -mt-12 sm:-mt-16 px-4 pb-6">
+  <div class="mx-auto max-w-3xl">
+    <section class="bg-white p-6 rounded-2xl shadow-2xl border border-gray-300 space-y-4 animate-fade-in-up">
 
-      const ctl = "w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
-      const lbl = "block text-xs font-medium text-gray-700";
-      const req = '<span class="text-red-600 ml-0.5">*</span>';
-    %>
+      <!-- ENCABEZADO + VOLVER -->
+      <header class="mb-2">
+        <div class="flex items-start justify-between gap-3">
 
-    <form action="/proveedores/registrar" method="POST" class="space-y-5">
+          <!-- separador invisible para balancear -->
+          <div class="hidden sm:flex w-[90px]"></div>
 
-      <!-- Fila 1: Número + Plan (plan opcional) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">Número de proveedor</label>
-          <input type="text" value="" disabled readonly placeholder="Automático"
-                 class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600" />
+          <div class="flex-1 text-center">
+            <h1 class="text-xl font-bold text-gray-900">Registrar proveedor</h1>
+            <p class="text-xs text-gray-500 mt-1">
+              Todos los campos son obligatorios, excepto “Plan” y “Activo”.
+            </p>
+          </div>
+
+          <!-- Botón VOLVER (derecha) -->
+          <a
+            href="/proveedores"
+            class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-3 py-1.5
+                   rounded-lg hover:bg-gray-200 transition whitespace-nowrap"
+          >
+            ← Volver
+          </a>
+
         </div>
+      </header>
 
-        <div>
-          <label class="<%= lbl %>">Plan (opcional)</label>
-          <select name="plan" class="<%= ctl %>">
-            <option value="">— Sin plan —</option>
-            <% (planes || []).forEach(p => { %>
-              <option value="<%= p._id %>"
-                <%= (String(datos?.plan || '') === String(p._id)) ? "selected" : "" %>>
-                <%= p.nombre %> — US$ <%= Number(p.importe || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-              </option>
+      <!-- ERRORES -->
+      <% if (typeof errores !== 'undefined' && errores.length > 0) { %>
+        <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl">
+          <h2 class="font-semibold text-sm mb-2">Por favor corregí los siguientes errores:</h2>
+          <ul class="list-disc pl-5 text-sm space-y-1">
+            <% errores.forEach(error => { %>
+              <li><%= error.msg %></li>
             <% }) %>
-          </select>
-          <p class="text-xs text-gray-500 mt-1">Si no elegís plan, el proveedor queda sin plan asignado.</p>
+          </ul>
         </div>
-      </div>
+      <% } %>
 
-      <!-- Fila 2: Nombres -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">Nombre de fantasía <%- req %></label>
-          <input type="text" name="nombreFantasia" value="<%= datos?.nombreFantasia || '' %>" required
-                 autocomplete="organization" class="<%= ctl %>" placeholder="Ej: Eléctricos Norte" />
-        </div>
-        <div>
-          <label class="<%= lbl %>">Nombre real (razón social) <%- req %></label>
-          <input type="text" name="nombreReal" value="<%= datos?.nombreReal || '' %>" required
-                 autocomplete="organization" class="<%= ctl %>" placeholder="Ej: Eléctricos Norte S.R.L." />
-        </div>
-      </div>
+      <%
+        const activoChecked = (typeof datos !== 'undefined')
+          ? (datos.activo === 'true' || datos.activo === 'on' || datos.activo === true || datos.activo === 1 || datos.activo === '1')
+          : true;
 
-      <!-- Fila 3: CUIT + Categoría -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">CUIT <%- req %></label>
-          <input type="text" name="cuit" value="<%= datos?.cuit || '' %>" required
-                 inputmode="numeric" pattern="[0-9]{11}" maxlength="11"
-                 title="11 dígitos sin guiones" class="<%= ctl %>" placeholder="Ej: 20300123456" />
-        </div>
-        <div>
-          <label class="<%= lbl %>">Categoría <%- req %></label>
-          <input type="text" name="categoria" value="<%= datos?.categoria || '' %>" required
-                 class="<%= ctl %>" placeholder="Ej: Electricista" />
-        </div>
-      </div>
+        const ctl = "w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
+        const lbl = "block text-xs font-medium text-gray-700";
+        const req = '<span class=\"text-red-600 ml-0.5\">*</span>';
+      %>
 
-      <!-- Fila 4: IVA + Email -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">Condición IVA <%- req %></label>
-          <select name="condicionIva" required class="<%= ctl %>">
-            <option value="" disabled <%= datos?.condicionIva ? '' : 'selected' %>>Seleccione una opción</option>
-            <option value="Responsable Inscripto" <%= datos?.condicionIva==="Responsable Inscripto" ? "selected" : "" %>>Responsable Inscripto</option>
-            <option value="Monotributo"          <%= datos?.condicionIva==="Monotributo" ? "selected" : "" %>>Monotributo</option>
-            <option value="Exento"               <%= datos?.condicionIva==="Exento" ? "selected" : "" %>>Exento</option>
-            <option value="Consumidor Final"     <%= datos?.condicionIva==="Consumidor Final" ? "selected" : "" %>>Consumidor Final</option>
-            <option value="Otro"                 <%= datos?.condicionIva==="Otro" ? "selected" : "" %>>Otro</option>
-          </select>
-        </div>
-        <div>
-          <label class="<%= lbl %>">E-mail <%- req %></label>
-          <input type="email" name="email" value="<%= datos?.email || '' %>" required
-                 autocomplete="email" class="<%= ctl %>" placeholder="ejemplo@dominio.com" />
-        </div>
-      </div>
+      <!-- FORMULARIO -->
+      <form action="/proveedores/registrar" method="POST" class="space-y-4">
 
-      <!-- Fila 5: Domicilios -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">Domicilio <%- req %></label>
-          <input type="text" name="domicilio" value="<%= datos?.domicilio || '' %>" required
-                 autocomplete="street-address" class="<%= ctl %>" placeholder="Calle, número, localidad" />
-        </div>
-        <div>
-          <label class="<%= lbl %>">Domicilio fiscal <%- req %></label>
-          <input type="text" name="domicilioFiscal" value="<%= datos?.domicilioFiscal || '' %>" required
-                 class="<%= ctl %>" placeholder="Calle, número, localidad" />
-        </div>
-      </div>
+        <!-- Fila 1: Número + Plan (plan opcional) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">Número de proveedor</label>
+            <input
+              type="text"
+              value=""
+              disabled
+              readonly
+              placeholder="Automático"
+              class="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-600"
+            />
+          </div>
 
-      <!-- Fila 6: Teléfonos -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">Teléfono celular <%- req %></label>
-          <input type="text" name="telefonoCelular" value="<%= datos?.telefonoCelular || '' %>" required
-                 inputmode="tel" pattern="[0-9]{10}" maxlength="10"
-                 title="10 dígitos (sin espacios ni guiones)" class="<%= ctl %>" placeholder="Ej: 3834000000" />
-        </div>
-        <div>
-          <label class="<%= lbl %>">Teléfono fijo <%- req %></label>
-          <input type="text" name="telefonoFijo" value="<%= datos?.telefonoFijo || '' %>" required
-                 inputmode="tel" pattern="[0-9]{10}" maxlength="10"
-                 title="10 dígitos (sin espacios ni guiones)" class="<%= ctl %>" placeholder="Ej: 3834400000" />
-        </div>
-      </div>
-
-      <!-- Fila 7: CBU + Activo (opcional) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="<%= lbl %>">CBU <%- req %></label>
-          <input type="text" name="cbu" value="<%= datos?.cbu || '' %>" required
-                 inputmode="numeric" pattern="[0-9]{22}" maxlength="22"
-                 title="22 dígitos" class="<%= ctl %>" placeholder="22 dígitos" />
+          <div>
+            <label class="<%= lbl %>">Plan (opcional)</label>
+            <select name="plan" class="<%= ctl %>">
+              <option value="">— Sin plan —</option>
+              <% (planes || []).forEach(p => { %>
+                <option
+                  value="<%= p._id %>"
+                  <%= (String(datos?.plan || '') === String(p._id)) ? "selected" : "" %>>
+                  <%= p.nombre %> — US$ <%= Number(p.importe || 0).toLocaleString("es-AR", { minimumFractionDigits: 2 }) %>
+                </option>
+              <% }) %>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              Si no elegís plan, el proveedor queda sin plan asignado.
+            </p>
+          </div>
         </div>
 
-        <div class="flex items-center gap-2 mt-6 md:mt-0">
-          <input id="chk-activo" type="checkbox" name="activo" value="true" <%= activoChecked ? 'checked' : '' %> >
-          <label for="chk-activo" class="text-sm text-gray-700">Activo (opcional)</label>
+        <!-- Fila 2: Nombres -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">Nombre de fantasía <%- req %></label>
+            <input
+              type="text"
+              name="nombreFantasia"
+              value="<%= datos?.nombreFantasia || '' %>"
+              required
+              autocomplete="organization"
+              class="<%= ctl %>"
+              placeholder="Ej: Eléctricos Norte"
+            />
+          </div>
+          <div>
+            <label class="<%= lbl %>">Nombre real (razón social) <%- req %></label>
+            <input
+              type="text"
+              name="nombreReal"
+              value="<%= datos?.nombreReal || '' %>"
+              required
+              autocomplete="organization"
+              class="<%= ctl %>"
+              placeholder="Ej: Eléctricos Norte S.R.L."
+            />
+          </div>
         </div>
-      </div>
 
-      <!-- Acciones -->
-      <div class="flex items-center justify-center pt-2">
-        <button type="submit"
-                class="inline-flex items-center bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition text-sm">
-          Guardar proveedor
-        </button>
-      </div>
-    </form>
+        <!-- Fila 3: CUIT + Categoría -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">CUIT <%- req %></label>
+            <input
+              type="text"
+              name="cuit"
+              value="<%= datos?.cuit || '' %>"
+              required
+              inputmode="numeric"
+              pattern="[0-9]{11}"
+              maxlength="11"
+              title="11 dígitos sin guiones"
+              class="<%= ctl %>"
+              placeholder="Ej: 20300123456"
+            />
+          </div>
+          <div>
+            <label class="<%= lbl %>">Categoría <%- req %></label>
+            <input
+              type="text"
+              name="categoria"
+              value="<%= datos?.categoria || '' %>"
+              required
+              class="<%= ctl %>"
+              placeholder="Ej: Electricista"
+            />
+          </div>
+        </div>
+
+        <!-- Fila 4: IVA + Email -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">Condición IVA <%- req %></label>
+            <select name="condicionIva" required class="<%= ctl %>">
+              <option value="" disabled <%= datos?.condicionIva ? '' : 'selected' %>>Seleccione una opción</option>
+              <option value="Responsable Inscripto" <%= datos?.condicionIva==="Responsable Inscripto" ? "selected" : "" %>>Responsable Inscripto</option>
+              <option value="Monotributo" <%= datos?.condicionIva==="Monotributo" ? "selected" : "" %>>Monotributo</option>
+              <option value="Exento" <%= datos?.condicionIva==="Exento" ? "selected" : "" %>>Exento</option>
+              <option value="Consumidor Final" <%= datos?.condicionIva==="Consumidor Final" ? "selected" : "" %>>Consumidor Final</option>
+              <option value="Otro" <%= datos?.condicionIva==="Otro" ? "selected" : "" %>>Otro</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="<%= lbl %>">E-mail <%- req %></label>
+            <input
+              type="email"
+              name="email"
+              value="<%= datos?.email || '' %>"
+              required
+              autocomplete="email"
+              class="<%= ctl %>"
+              placeholder="ejemplo@dominio.com"
+            />
+          </div>
+        </div>
+
+        <!-- Fila 5: Domicilios -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">Domicilio <%- req %></label>
+            <input
+              type="text"
+              name="domicilio"
+              value="<%= datos?.domicilio || '' %>"
+              required
+              autocomplete="street-address"
+              class="<%= ctl %>"
+              placeholder="Calle, número, localidad"
+            />
+          </div>
+          <div>
+            <label class="<%= lbl %>">Domicilio fiscal <%- req %></label>
+            <input
+              type="text"
+              name="domicilioFiscal"
+              value="<%= datos?.domicilioFiscal || '' %>"
+              required
+              class="<%= ctl %>"
+              placeholder="Calle, número, localidad"
+            />
+          </div>
+        </div>
+
+        <!-- Fila 6: Teléfonos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">Teléfono celular <%- req %></label>
+            <input
+              type="text"
+              name="telefonoCelular"
+              value="<%= datos?.telefonoCelular || '' %>"
+              required
+              inputmode="tel"
+              pattern="[0-9]{10}"
+              maxlength="10"
+              title="10 dígitos (sin espacios)"
+              class="<%= ctl %>"
+              placeholder="Ej: 3834000000"
+            />
+          </div>
+
+          <div>
+            <label class="<%= lbl %>">Teléfono fijo <%- req %></label>
+            <input
+              type="text"
+              name="telefonoFijo"
+              value="<%= datos?.telefonoFijo || '' %>"
+              required
+              inputmode="tel"
+              pattern="[0-9]{10}"
+              maxlength="10"
+              title="10 dígitos (sin espacios)"
+              class="<%= ctl %>"
+              placeholder="Ej: 3834400000"
+            />
+          </div>
+        </div>
+
+        <!-- Fila 7: CBU + Activo -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="<%= lbl %>">CBU <%- req %></label>
+            <input
+              type="text"
+              name="cbu"
+              value="<%= datos?.cbu || '' %>"
+              required
+              inputmode="numeric"
+              pattern="[0-9]{22}"
+              maxlength="22"
+              title="22 dígitos"
+              class="<%= ctl %>"
+              placeholder="22 dígitos"
+            />
+          </div>
+
+          <div class="flex items-center gap-2 mt-6 md:mt-0">
+            <input
+              id="chk-activo"
+              type="checkbox"
+              name="activo"
+              value="true"
+              <%= activoChecked ? 'checked' : '' %>>
+            <label for="chk-activo" class="text-sm text-gray-700">
+              Activo (opcional)
+            </label>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex items-center justify-center pt-2">
+          <button
+            type="submit"
+            class="inline-flex items-center bg-indigo-600 text-white px-5 py-2 rounded-lg
+                   hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
+                   focus:ring-offset-2 transition text-sm"
+          >
+            Guardar proveedor
+          </button>
+        </div>
+
+      </form>
+
+    </section>
   </div>
 </main>
 
+<!-- Animación -->
+<style>
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up .45s ease-out both;
+  }
+</style>
+
 <script>
-  // Capitaliza la primera letra de cada palabra
   function capitalizarPalabras(texto) {
-    return (texto || '').toLowerCase().replace(/(^\w|\s\w)/g, letra => letra.toUpperCase());
+    return (texto || '').toLowerCase().replace(/(^\w|\s\w)/g, l => l.toUpperCase());
   }
 
-  const camposTexto = ["nombreFantasia","nombreReal","domicilio","domicilioFiscal","categoria"];
-  camposTexto.forEach(name => {
+  ["nombreFantasia","nombreReal","domicilio","domicilioFiscal","categoria"].forEach(name => {
     const input = document.querySelector(`input[name="${name}"]`);
     if (input) input.addEventListener("blur", () => {
       input.value = capitalizarPalabras(input.value);
     });
   });
 
-  // Restricciones numéricas con mensajes inline
-  const restriccionesNumericas = { cuit:11, telefonoCelular:10, telefonoFijo:10, cbu:22 };
-  Object.entries(restriccionesNumericas).forEach(([campo, max]) => {
+  const restricciones = { cuit:11, telefonoCelular:10, telefonoFijo:10, cbu:22 };
+  Object.entries(restricciones).forEach(([campo, max]) => {
     const input = document.querySelector(`input[name="${campo}"]`);
     if (!input) return;
     input.addEventListener("input", () => {
@@ -182,5 +327,4 @@
       );
     });
   });
-  // “Activo” es opcional: sin validaciones adicionales
 </script>
