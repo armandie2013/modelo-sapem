@@ -422,6 +422,10 @@
 //   }
 // }
 
+
+
+// LO DE ARRIBA NO BORRAR HASTA ESTAR SEGURO DE QUE LO DE ABAJO FUNCIONA BIEN //
+
 // controllers/viaticosController.mjs
 import fs from "fs";
 import path from "path";
