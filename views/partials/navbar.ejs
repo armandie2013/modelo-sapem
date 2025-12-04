@@ -1,156 +1,227 @@
-<nav class="nav-hover bg-blue-800 text-white py-4 px-6 z-50 relative">
+<nav class="nav-hover bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800 text-white py-3 sm:py-3.5 px-4 sm:px-6 shadow-lg z-50 relative">
   <style>
     .nav-hover a.navlink {
-      padding:.25rem .5rem;border-radius:.5rem;transition:background-color .15s ease
+      padding: .25rem .5rem;
+      border-radius: .5rem;
+      transition: background-color .15s ease, color .15s ease;
     }
-    .nav-hover a.navlink:hover { background: rgba(255,255,255,0.12) }
+    .nav-hover a.navlink:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
   </style>
 
-  <div class="container mx-auto flex justify-between items-center relative">
+  <div class="container mx-auto flex justify-between items-center gap-3 relative">
     <!-- Marca -->
-    <a href="/" class="text-lg font-semibold navlink">Catamarca Telecomunicaciones SAPEM</a>
+    <a href="/" class="flex items-center gap-2 navlink">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-semibold tracking-tight">
+        CT
+      </span>
+      <span class="flex flex-col leading-tight">
+        <span class="text-sm sm:text-base font-semibold tracking-tight">
+          Catamarca Telecomunicaciones SAPEM
+        </span>
+        <span class="hidden sm:block text-[11px] font-normal text-blue-100/80">
+          Sistema de Gestión Interna
+        </span>
+      </span>
+    </a>
 
     <!-- Botón hamburguesa (visible sólo en mobile) -->
-    <button id="menu-toggle" class="md:hidden inline-flex items-center justify-center p-2 rounded hover:bg-white/10 focus:outline-none">
+    <button
+      id="menu-toggle"
+      class="md:hidden inline-flex items-center justify-center p-2 rounded-lg hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+    >
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
       </svg>
       <span class="sr-only">Abrir menú</span>
     </button>
 
-    <!-- Zona derecha (DESKTOP): USD SIEMPRE visible + menús sólo si hay usuario -->
+    <!-- Zona derecha (DESKTOP): USD + menús sólo si hay usuario -->
     <div class="hidden md:flex items-center gap-6">
-      <!-- USD (ayer) + histórico) -->
-      <div class="relative flex items-center gap-3 border border-white/20 p-2 rounded-md">
+      <!-- USD (ayer + histórico) -->
+      <div class="relative inline-flex items-center gap-3 border border-white/20 bg-white/5 backdrop-blur-sm px-3 py-2 rounded-xl shadow-sm">
         <% if (usdAyer && usdAyer.tipoCotizacion) { %>
-          <div class="text-xs text-white/90">
+          <div class="text-[11px] leading-tight text-white/90">
             <span class="opacity-80">
               Fecha
               <%= new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
                     .format(new Date(String(usdAyer.fecha)+'T00:00:00')) %>
             </span>
             <span class="font-semibold ml-1">USD:</span>
-            <span class="font-mono">
+            <span class="font-mono text-[12px]">
               <%= new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})
                     .format(usdAyer.tipoCotizacion) %>
             </span>
           </div>
         <% } else { %>
-          <div class="text-xs text-white/90">
+          <div class="text-[11px] text-white/90">
             <span class="font-semibold">USD</span>
-            <span class="opacity-80">(ayer)</span>: <span class="font-mono">n/d</span>
+            <span class="opacity-80">(ayer)</span>:
+            <span class="font-mono text-[12px]">n/d</span>
           </div>
         <% } %>
 
-        <button id="usdToggle" type="button"
-                class="text-xs bg-white/10 hover:bg-white/20 rounded-md px-2 py-1 transition-colors">
+        <button
+          id="usdToggle"
+          type="button"
+          class="text-[11px] bg-white/10 hover:bg-white/20 rounded-md px-2 py-1 transition-colors whitespace-nowrap"
+        >
           Histórico
         </button>
 
-        <div id="usdPanel"
-             class="hidden absolute right-0 top-full mt-2 w-72 bg-white text-gray-800 rounded-lg shadow-lg p-3 z-[60]">
-          <div class="flex items-start justify-between">
-            <p class="text-sm font-medium">Cotización histórica</p>
-            <button id="usdClose" class="text-gray-500 hover:text-gray-700">&times;</button>
+        <div
+          id="usdPanel"
+          class="hidden absolute left-0 right-0 top-full mt-2 bg-white text-gray-800 rounded-xl shadow-2xl p-3 z-[60] border border-gray-200/80"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-sm font-medium text-gray-800">Cotización histórica</p>
+            <button id="usdClose" class="text-gray-500 hover:text-gray-700 text-lg leading-none">&times;</button>
           </div>
-          <label class="block text-xs text-gray-600 mt-2 mb-1">Buscar por fecha</label>
-          <input id="usdDate" type="date" class="w-full border rounded px-2 py-1 text-sm" />
-          <button id="usdFetch"
-                  class="mt-2 w-full text-xs bg-indigo-600 text-white rounded px-2 py-1 hover:bg-indigo-700 transition-colors">
+          <label class="block text-xs text-gray-600 mt-3 mb-1">Buscar por fecha</label>
+          <input
+            id="usdDate"
+            type="date"
+            class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <button
+            id="usdFetch"
+            class="mt-3 w-full text-xs bg-indigo-600 text-white rounded-lg px-2 py-1.5 hover:bg-indigo-700 transition-colors"
+          >
             Consultar
           </button>
-          <div id="usdResult" class="mt-2 text-center text-xs text-gray-700"></div>
+          <div id="usdResult" class="mt-2 text-center text-xs text-gray-700 min-h-[1.25rem]"></div>
         </div>
       </div>
 
       <!-- Menú principal (desktop) SOLO si hay usuario -->
       <% if (usuario && usuario.rol) { %>
-        <div class="flex items-center space-x-8">
+        <div class="flex items-center gap-5 text-sm">
           <div class="relative">
-            <button onclick="toggleDropdown('adminDropdown')"
-                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
-              Administración ▾
+            <button
+              onclick="toggleDropdown('adminDropdown')"
+              class="inline-flex items-center gap-1 hover:bg-white/10 rounded-md px-2.5 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <span>Administración</span>
+              <span class="text-[10px] opacity-80">▾</span>
             </button>
-            <ul id="adminDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
-              <li><a href="/proveedores" class="block px-4 py-2 hover:bg-gray-200">Listado de Proveedores</a></li>
-              <li><a href="/proveedores/registrar" class="block px-4 py-2 hover:bg-gray-200">Registrar Proveedor</a></li>
+            <ul
+              id="adminDropdown"
+              class="hidden absolute right-0 bg-white text-gray-800 rounded-xl shadow-2xl mt-2 w-56 z-[70] border border-gray-200/90 overflow-hidden"
+            >
+              <li><a href="/proveedores" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Listado de Proveedores</a></li>
+              <li><a href="/proveedores/registrar" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Registrar Proveedor</a></li>
               <li><hr class="my-1 border-gray-200"></li>
-              <li><a href="/planes" class="block px-4 py-2 hover:bg-gray-200">Planes</a></li>
-              <li><a href="/planes/crear" class="block px-4 py-2 hover:bg-gray-200">Crear Plan</a></li>
+              <li><a href="/planes" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Planes</a></li>
+              <li><a href="/planes/crear" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Crear Plan</a></li>
               <li><hr class="my-1 border-gray-200"></li>
-              <li><a href="/pagos" class="block px-4 py-2 hover:bg-gray-200">Listado de Pagos</a></li>
-              <li><a href="/pagos/registrar" class="block px-4 py-2 hover:bg-gray-200">Registrar Pago</a></li>
-              <li><a href="/notas/credito/registrar" class="block px-4 py-2 hover:bg-gray-200">Nota de Crédito</a></li>
-              <li><a href="/notas/debito/registrar" class="block px-4 py-2 hover:bg-gray-200">Nota de Débito</a></li>
+              <li><a href="/pagos" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Listado de Pagos</a></li>
+              <li><a href="/pagos/registrar" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Registrar Pago</a></li>
+              <li><a href="/notas/credito/registrar" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Nota de Crédito</a></li>
+              <li><a href="/notas/debito/registrar" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Nota de Débito</a></li>
               <li><hr class="my-1 border-gray-200"></li>
-              <li><a href="/tareas/cargos" class="block px-4 py-2 hover:bg-gray-200">Cargos mensuales</a></li>
+              <li><a href="/tareas/cargos" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Cargos mensuales</a></li>
             </ul>
           </div>
 
           <div class="relative">
-            <button onclick="toggleDropdown('gerenciaDropdown')"
-                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
-              Gerencia ▾
+            <button
+              onclick="toggleDropdown('gerenciaDropdown')"
+              class="inline-flex items-center gap-1 hover:bg-white/10 rounded-md px-2.5 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <span>Gerencia</span>
+              <span class="text-[10px] opacity-80">▾</span>
             </button>
-            <ul id="gerenciaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
-              <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Indicadores</a></li>
+            <ul
+              id="gerenciaDropdown"
+              class="hidden absolute right-0 bg-white text-gray-800 rounded-xl shadow-2xl mt-2 w-48 z-[70] border border-gray-200/90 overflow-hidden"
+            >
+              <li><a href="#" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Indicadores</a></li>
             </ul>
           </div>
 
           <div class="relative">
-            <button onclick="toggleDropdown('proyectosDropdown')"
-                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
-              Proyectos ▾
+            <button
+              onclick="toggleDropdown('proyectosDropdown')"
+              class="inline-flex items-center gap-1 hover:bg-white/10 rounded-md px-2.5 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <span>Proyectos</span>
+              <span class="text-[10px] opacity-80">▾</span>
             </button>
-            <ul id="proyectosDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
-              <li><a href="/escuelas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Escuelas</a></li>
-              <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Nuevo Proyecto</a></li>
+            <ul
+              id="proyectosDropdown"
+              class="hidden absolute right-0 bg-white text-gray-800 rounded-xl shadow-2xl mt-2 w-52 z-[70] border border-gray-200/90 overflow-hidden"
+            >
+              <li><a href="/escuelas/dashboard" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Escuelas</a></li>
+              <li><a href="#" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Nuevo Proyecto</a></li>
             </ul>
           </div>
 
           <div class="relative">
-            <button onclick="toggleDropdown('tecnicaDropdown')"
-                    class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
-              Técnica ▾
+            <button
+              onclick="toggleDropdown('tecnicaDropdown')"
+              class="inline-flex items-center gap-1 hover:bg-white/10 rounded-md px-2.5 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <span>Técnica</span>
+              <span class="text-[10px] opacity-80">▾</span>
             </button>
-            <ul id="tecnicaDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
-              <li><a href="/viaticos/dashboard" class="block px-4 py-2 hover:bg-gray-200">Viáticos</a></li>
-              <li><a href="/pedidos-materiales/dashboard" class="block px-4 py-2 hover:bg-gray-200">Pedido de Materiales</a></li>
-              <li><a href="#" class="block px-4 py-2 hover:bg-gray-200">Control de Stock</a></li>
+            <ul
+              id="tecnicaDropdown"
+              class="hidden absolute right-0 bg-white text-gray-800 rounded-xl shadow-2xl mt-2 w-60 z-[70] border border-gray-200/90 overflow-hidden"
+            >
+              <li><a href="/viaticos/dashboard" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Viáticos</a></li>
+              <li><a href="/pedidos-materiales/dashboard" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Pedido de Materiales</a></li>
+              <li><a href="#" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Control de Stock</a></li>
             </ul>
           </div>
 
-          <% if (usuario.rol==='admin' ) { %>
+          <% if (usuario.rol === 'admin') { %>
             <div class="relative">
-              <button onclick="toggleDropdown('adminAccessDropdown')"
-                      class="hover:underline hover:bg-white/10 rounded-md px-2 py-1 transition-colors focus:outline-none">
-                Acceso Admin ▾
+              <button
+                onclick="toggleDropdown('adminAccessDropdown')"
+                class="inline-flex items-center gap-1 hover:bg-white/10 rounded-md px-2.5 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+              >
+                <span>Acceso Admin</span>
+                <span class="text-[10px] opacity-80">▾</span>
               </button>
-              <ul id="adminAccessDropdown" class="hidden absolute bg-white text-black rounded-lg shadow-lg mt-2 w-52 z-[70]">
-                <li><a href="/personas/dashboard" class="block px-4 py-2 hover:bg-gray-200">Personal SAPEM</a></li>
-                <li><a href="/usuarios/dashboard" class="block px-4 py-2 hover:bg-gray-200">Usuarios Registrados</a></li>
+              <ul
+                id="adminAccessDropdown"
+                class="hidden absolute right-0 bg-white text-gray-800 rounded-xl shadow-2xl mt-2 w-60 z-[70] border border-gray-200/90 overflow-hidden"
+              >
+                <li><a href="/personas/dashboard" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Personal SAPEM</a></li>
+                <li><a href="/usuarios/dashboard" class="block px-4 py-2.5 hover:bg-gray-200 text-sm">Usuarios Registrados</a></li>
               </ul>
             </div>
           <% } %>
 
-          <form action="/logout" method="POST" class="ml-2">
-            <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-800 transition-colors">Cerrar sesión</button>
+          <form action="/logout" method="POST" class="ml-1">
+            <button
+              class="bg-red-500/90 hover:bg-red-600 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-red-300"
+            >
+              Cerrar sesión
+            </button>
           </form>
         </div>
       <% } %>
     </div>
   </div>
 
-  <!-- Menú móvil: SIEMPRE existe para mostrar USD; si hay usuario, además muestra menús -->
-  <div id="menu" class="hidden md:hidden flex-col absolute top-full left-0 w-full bg-blue-800 z-[65] px-4 py-4 space-y-4">
+  <!-- Menú móvil -->
+  <div
+    id="menu"
+    class="hidden md:hidden flex-col absolute top-full left-0 w-full
+           bg-slate-950 text-white border-t border-white/10 shadow-xl z-[65]
+           px-4 py-4 space-y-4 min-h-[calc(100vh-3.5rem)]"
+  >
     <!-- USD -->
     <div class="text-sm">
       <% if (usdAyer && usdAyer.tipoCotizacion) { %>
-        <div>
+        <div class="text-[12px]">
           <span class="font-semibold">USD</span>
           <span class="opacity-80">
-            (ayer <%= new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
-                        .format(new Date(String(usdAyer.fecha)+'T00:00:00')) %>)
+            (ayer
+            <%= new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
+                  .format(new Date(String(usdAyer.fecha)+'T00:00:00')) %>)
           </span>:
           <span class="font-mono">
             <%= new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})
@@ -158,76 +229,112 @@
           </span>
         </div>
       <% } else { %>
-        <div>USD: n/d</div>
+        <div class="text-[12px]">USD: n/d</div>
       <% } %>
-      <div class="mt-2">
+      <div class="mt-3">
         <label class="block text-xs text-white/80 mb-1">Histórico</label>
         <div class="flex gap-2">
-          <input id="usdDateM" type="date" class="flex-1 rounded px-2 py-1 text-xs text-black" />
-          <button id="usdFetchM" class="bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs transition-colors">Consultar</button>
+          <input
+            id="usdDateM"
+            type="date"
+            class="flex-1 rounded-lg px-2 py-1.5 text-xs text-black border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          />
+          <button
+            id="usdFetchM"
+            class="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 text-xs transition-colors"
+          >
+            Consultar
+          </button>
         </div>
-        <div id="usdResultM" class="mt-2 text-xs"></div>
+        <div id="usdResultM" class="mt-2 text-xs min-h-[1.25rem]"></div>
       </div>
     </div>
 
     <!-- Menús móviles SOLO si hay usuario -->
     <% if (usuario && usuario.rol) { %>
-      <div class="grid gap-2 text-sm">
-        <details class="bg-white/10 rounded-md">
-          <summary class="cursor-pointer px-3 py-2">Administración</summary>
-          <ul class="px-3 pb-2">
-            <li><a href="/proveedores" class="block py-1">Listado de Proveedores</a></li>
-            <li><a href="/proveedores/registrar" class="block py-1">Registrar Proveedor</a></li>
-            <li><hr class="my-1 border-white/20"></li>
-            <li><a href="/planes" class="block py-1">Planes</a></li>
-            <li><a href="/planes/crear" class="block py-1">Crear Plan</a></li>
-            <li><hr class="my-1 border-white/20"></li>
-            <li><a href="/pagos" class="block py-1">Listado de Pagos</a></li>
-            <li><a href="/pagos/registrar" class="block py-1">Registrar Pago</a></li>
-            <li><a href="/notas/credito/registrar" class="block py-1">Nota de Crédito</a></li>
-            <li><a href="/notas/debito/registrar" class="block py-1">Nota de Débito</a></li>
-            <li><hr class="my-1 border-white/20"></li>
-            <li><a href="/tareas/cargos" class="block py-1">Cargos mensuales</a></li>
+      <div class="grid gap-1 text-sm divide-y divide-white/10 border-t border-white/10 pt-3">
+        <!-- Administración -->
+        <details class="py-1">
+          <summary class="cursor-pointer px-1 py-2 text-sm font-medium flex items-center justify-between select-none">
+            <span>Administración</span>
+            <span class="text-[11px] opacity-70">▾</span>
+          </summary>
+          <ul class="pl-3 pr-1 pb-2 text-[13px] space-y-1">
+            <li><a href="/proveedores" class="block py-0.5">Listado de Proveedores</a></li>
+            <li><a href="/proveedores/registrar" class="block py-0.5">Registrar Proveedor</a></li>
+            <li><hr class="my-1 border-white/10"></li>
+            <li><a href="/planes" class="block py-0.5">Planes</a></li>
+            <li><a href="/planes/crear" class="block py-0.5">Crear Plan</a></li>
+            <li><hr class="my-1 border-white/10"></li>
+            <li><a href="/pagos" class="block py-0.5">Listado de Pagos</a></li>
+            <li><a href="/pagos/registrar" class="block py-0.5">Registrar Pago</a></li>
+            <li><a href="/notas/credito/registrar" class="block py-0.5">Nota de Crédito</a></li>
+            <li><a href="/notas/debito/registrar" class="block py-0.5">Nota de Débito</a></li>
+            <li><hr class="my-1 border-white/10"></li>
+            <li><a href="/tareas/cargos" class="block py-0.5">Cargos mensuales</a></li>
           </ul>
         </details>
 
-        <details class="bg-white/10 rounded-md">
-          <summary class="cursor-pointer px-3 py-2">Gerencia</summary>
-          <ul class="px-3 pb-2">
-            <li><a href="#" class="block py-1">Indicadores</a></li>
+        <!-- Gerencia -->
+        <details class="py-1">
+          <summary class="cursor-pointer px-1 py-2 text-sm font-medium flex items-center justify-between select-none">
+            <span>Gerencia</span>
+            <span class="text-[11px] opacity-70">▾</span>
+          </summary>
+          <ul class="pl-3 pr-1 pb-2 text-[13px] space-y-1">
+            <li><a href="#" class="block py-0.5">Indicadores</a></li>
           </ul>
         </details>
 
-        <details class="bg-white/10 rounded-md">
-          <summary class="cursor-pointer px-3 py-2">Proyectos</summary>
-          <ul class="px-3 pb-2">
-            <li><a href="/escuelas/dashboard" class="block py-1">Escuelas</a></li>
-            <li><a href="#" class="block py-1">Nuevo Proyecto</a></li>
+        <!-- Proyectos -->
+        <details class="py-1">
+          <summary class="cursor-pointer px-1 py-2 text-sm font-medium flex items-center justify-between select-none">
+            <span>Proyectos</span>
+            <span class="text-[11px] opacity-70">▾</span>
+          </summary>
+          <ul class="pl-3 pr-1 pb-2 text-[13px] space-y-1">
+            <li><a href="/escuelas/dashboard" class="block py-0.5">Escuelas</a></li>
+            <li><a href="#" class="block py-0.5">Nuevo Proyecto</a></li>
           </ul>
         </details>
 
-        <details class="bg-white/10 rounded-md">
-          <summary class="cursor-pointer px-3 py-2">Técnica</summary>
-          <ul class="px-3 pb-2">
-            <li><a href="/viaticos/dashboard" class="block py-1">Viáticos</a></li>
-            <li><a href="/pedidos-materiales/dashboard" class="block py-1">Pedido de Materiales</a></li>
-            <li><a href="#" class="block py-1">Control de Stock</a></li>
+        <!-- Técnica -->
+        <details class="py-1">
+          <summary class="cursor-pointer px-1 py-2 text-sm font-medium flex items-center justify-between select-none">
+            <span>Técnica</span>
+            <span class="text-[11px] opacity-70">▾</span>
+          </summary>
+          <ul class="pl-3 pr-1 pb-2 text-[13px] space-y-1">
+            <li><a href="/viaticos/dashboard" class="block py-0.5">Viáticos</a></li>
+            <li><a href="/pedidos-materiales/dashboard" class="block py-0.5">Pedido de Materiales</a></li>
+            <li><a href="#" class="block py-0.5">Control de Stock</a></li>
           </ul>
         </details>
 
-        <% if (usuario.rol==='admin') { %>
-          <details class="bg-white/10 rounded-md">
-            <summary class="cursor-pointer px-3 py-2">Acceso Admin</summary>
-            <ul class="px-3 pb-2">
-              <li><a href="/personas/dashboard" class="block py-1">Personal SAPEM</a></li>
-              <li><a href="/usuarios/dashboard" class="block py-1">Usuarios Registrados</a></li>
+        <!-- Acceso Admin -->
+        <% if (usuario.rol === 'admin') { %>
+          <details class="py-1">
+            <summary class="cursor-pointer px-1 py-2 text-sm font-medium flex items-center justify-between select-none">
+              <span>Acceso Admin</span>
+              <span class="text-[11px] opacity-70">▾</span>
+            </summary>
+            <ul class="pl-3 pr-1 pb-2 text-[13px] space-y-1">
+              <li><a href="/personas/dashboard" class="block py-0.5">Personal SAPEM</a></li>
+              <li><a href="/usuarios/dashboard" class="block py-0.5">Usuarios Registrados</a></li>
             </ul>
           </details>
         <% } %>
 
-        <form action="/logout" method="POST" class="pt-1">
-          <button class="w-full bg-red-600 px-3 py-2 rounded hover:bg-red-700 transition-colors">Cerrar sesión</button>
-        </form>
+        <!-- Logout -->
+        <div class="pt-3">
+          <form action="/logout" method="POST">
+            <button
+              class="w-full bg-red-500/95 px-3 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm font-medium shadow-sm"
+            >
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
       </div>
     <% } %>
   </div>

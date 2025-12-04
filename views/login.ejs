@@ -1,29 +1,27 @@
 <!-- ===================== TOAST (ARRIBA Y CENTRADO) ===================== -->
 <% if (errores && errores.length > 0) { %>
-  <!-- Capa fija a ancho completo; centrado con container -->
   <div id="toastLayer" class="fixed inset-x-0 top-4 z-50 pointer-events-none">
     <div class="mx-auto w-full max-w-sm px-4">
-      <!-- Stack centrado si hay varios -->
       <div id="toastStack" class="flex flex-col items-center gap-2">
         <% errores.forEach(function(e){ %>
           <div class="toastItem pointer-events-auto w-full rounded-xl text-white shadow-2xl ring-1 ring-red-400/40
                       bg-red-600/90 backdrop-blur-sm px-5 py-3 animate-toast-drop text-sm text-center">
             <div class="flex items-start sm:items-center gap-2 justify-center">
-              <!-- Icono -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               </svg>
-              <!-- Mensaje -->
               <div class="text-left"><%= e.mensaje %></div>
+
               <!-- Cerrar -->
               <button type="button" aria-label="Cerrar"
                       class="ml-1 opacity-90 hover:opacity-100 transition"
                       onclick="this.closest('.toastItem')?.remove(); if(!document.querySelector('#toastStack .toastItem')) document.getElementById('toastLayer')?.remove()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
             </div>
+
             <!-- Progreso -->
             <div class="mt-2 h-1 w-full bg-white/20 rounded overflow-hidden">
               <div class="h-1 w-full bg-white/75 animate-toast-progress"></div>
@@ -37,49 +35,57 @@
 <!-- ===================== /TOAST ===================== -->
 
 
-<!-- Header de color con borde redondeado superior (sin cambios de altura) -->
+<!-- Header con colores del navbar/footer -->
 <header class="relative">
-  <div class="h-44 bg-indigo-600 rounded-t-3xl"></div>
+  <div class="h-44 rounded-t-3xl 
+              bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800"></div>
+
   <div class="pointer-events-none absolute inset-0 h-44 rounded-t-3xl
               bg-[radial-gradient(24rem_12rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
 </header>
 
-<!-- Contenido: mantenemos -mt-24 y SIN min-h para evitar scroll extra -->
+<!-- Contenido -->
 <main class="relative -mt-24 px-4 pb-12">
   <div class="mx-auto w-full max-w-md">
-    <!-- Tarjeta con atenuación/entrada suave sin tocar layout global -->
+
+    <!-- Card -->
     <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 animate-fade-in-up">
+
       <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
         <p class="text-sm text-gray-500">Accedé a tu cuenta</p>
       </div>
 
       <form action="/login" method="POST" class="space-y-5">
+
         <!-- Email -->
         <div>
           <label for="email" class="block text-sm text-gray-700 mb-1">Correo electrónico</label>
           <input type="email" id="email" name="email" required
                  value="<%= datos?.email || '' %>"
                  class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
-                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
                  placeholder="correo@ejemplo.com" autocomplete="username">
         </div>
 
-        <!-- Password + toggle -->
+        <!-- Password -->
         <div>
           <div class="flex items-center justify-between mb-1">
             <label for="password" class="block text-sm text-gray-700">Contraseña</label>
-            <a href="/recuperar" class="text-sm text-indigo-600 hover:text-indigo-500">¿Olvidaste tu contraseña?</a>
+            <a href="/recuperar" class="text-sm text-blue-800 hover:text-blue-700">¿Olvidaste tu contraseña?</a>
           </div>
+
           <div class="relative">
             <input type="password" id="password" name="password" required
                    class="w-full px-3 py-2 pr-12 rounded-lg border border-gray-300 bg-white
-                          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
                    placeholder="********" autocomplete="current-password">
-            <button type="button" aria-label="Mostrar u ocultar contraseña"
+
+            <!-- Toggle -->
+            <button type="button" aria-label="Mostrar/ocultar"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    onclick="(()=>{ const i=document.getElementById('password'); i.type = i.type==='password' ? 'text' : 'password'; })()">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    onclick="(() => { const i=document.getElementById('password'); i.type = i.type==='password' ? 'text' : 'password'; })()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                       d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z"/>
                 <circle cx="12" cy="12" r="3" stroke-width="1.5"/>
@@ -91,19 +97,22 @@
         <!-- Recordarme -->
         <div class="flex items-center justify-between text-sm">
           <label class="inline-flex items-center gap-2 text-gray-700">
-            <input type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+            <input type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 text-blue-800 focus:ring-blue-800">
             Recordarme
           </label>
-          <a href="/registro" class="text-indigo-600 hover:text-indigo-500">Crear cuenta</a>
+          <a href="/registro" class="text-blue-800 hover:text-blue-700">Crear cuenta</a>
         </div>
 
-        <!-- CTA -->
+        <!-- Botón (ahora con los colores nuevos) -->
         <button type="submit"
-                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow
-                       transition active:scale-[.99]">
+                class="w-full text-white font-semibold py-3 rounded-lg shadow-md
+                       bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800
+                       hover:from-slate-800 hover:via-blue-800 hover:to-blue-700
+                       transition active:scale-[.98]">
           Iniciar Sesión
         </button>
       </form>
+
     </div>
 
     <p class="mt-6 text-center text-xs text-gray-500">
@@ -114,7 +123,6 @@
 
 <!-- Scripts -->
 <script>
-  // Autocerrar cada toast a los 4s (con leve desvanecido)
   document.addEventListener('DOMContentLoaded', () => {
     const stack = document.getElementById('toastStack');
     const layer = document.getElementById('toastLayer');
@@ -129,22 +137,19 @@
           el.remove();
           if (!stack.querySelector('.toastItem')) layer.remove();
         }, 260);
-      }, 4000 + idx * 120); // pequeño escalonado si hay varios
+      }, 4000 + idx * 120);
     });
   });
 </script>
 
 <!-- Estilos -->
 <style>
-  /* Entrada del toast */
-  @keyframes toast-drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toast-drop { from { opacity:0; transform:translateY(-6px);} to { opacity:1; transform:translateY(0);} }
   .animate-toast-drop { animation: toast-drop .25s ease-out both; }
 
-  /* Progreso 4s */
-  @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-  .animate-toast-progress { transform-origin: left center; animation: toast-progress 4s linear forwards; }
+  @keyframes toast-progress { from { transform:scaleX(1);} to { transform:scaleX(0);} }
+  .animate-toast-progress { transform-origin:left center; animation: toast-progress 4s linear forwards; }
 
-  /* Atenuación del card principal: no afecta el layout global */
-  @keyframes fade-in-up { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: translateY(0);} }
+  @keyframes fade-in-up { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
   .animate-fade-in-up { animation: fade-in-up .45s ease-out both; }
 </style>

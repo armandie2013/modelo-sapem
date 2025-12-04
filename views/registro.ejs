@@ -31,77 +31,126 @@
 <!-- ===================== /TOAST ===================== -->
 
 
-<!-- Header (mismo estilo que login) -->
+<!-- Header (mismo estilo que login / landing) -->
 <header class="relative">
-  <div class="h-32 sm:h-40 md:h-44 bg-indigo-600 rounded-t-3xl"></div>
+  <div class="h-32 sm:h-40 md:h-44 rounded-t-3xl
+              bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800"></div>
   <div class="pointer-events-none absolute inset-0 h-32 sm:h-40 md:h-44 rounded-t-3xl
               bg-[radial-gradient(24rem_12rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
 </header>
 
 <!-- Contenido -->
-<main class="relative -mt-16 sm:-mt-20 md:-mt-24 px-3 sm:px-4 pb-2">
+<main class="relative -mt-16 sm:-mt-20 md:-mt-24 px-3 sm:px-4 pb-0">
   <div class="mx-auto w-full max-w-md">
-    <!-- Card (solo se agrega la animación, sin tocar tamaños) -->
+    <!-- Card -->
     <div class="bg-white w-full p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-200 animate-fade-in-up">
       <h2 class="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-1">Crear cuenta</h2>
       <p class="text-xs sm:text-sm text-gray-500 text-center mb-5 sm:mb-6">Ingresá tus datos para registrarte</p>
 
-      <!-- FORMULARIO (exactamente igual al tuyo) -->
       <form action="/registro" method="POST" id="formRegistro" class="grid grid-cols-1 gap-y-2">
         <!-- Nombre -->
         <div>
           <label for="nombre" class="block text-xs text-gray-700 mb-0.5">Nombre</label>
-          <input type="text" id="nombre" name="nombre" required
-                 class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
-                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                 placeholder="Ej: Juan" value="<%= usuario?.nombre || '' %>">
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            required
+            class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
+                   focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
+            placeholder="Ej: Juan"
+            value="<%= usuario?.nombre || '' %>"
+          >
         </div>
 
         <!-- Apellido -->
         <div>
           <label for="apellido" class="block text-xs text-gray-700 mb-0.5">Apellido</label>
-          <input type="text" id="apellido" name="apellido" required
-                 class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
-                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                 placeholder="Ej: Pérez" value="<%= usuario?.apellido || '' %>">
+          <input
+            type="text"
+            id="apellido"
+            name="apellido"
+            required
+            class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
+                   focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
+            placeholder="Ej: Pérez"
+            value="<%= usuario?.apellido || '' %>"
+          >
         </div>
 
         <!-- DNI -->
         <div>
           <label for="dni" class="block text-xs text-gray-700 mb-0.5">DNI</label>
-          <input type="text" id="dni" name="dni" required inputmode="numeric" autocomplete="off"
-                 pattern="[0-9]{8}" maxlength="8" title="Ingrese exactamente 8 dígitos (0–9)"
-                 aria-describedby="dniError"
-                 class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
-                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                 placeholder="Ej: 30123456" value="<%= usuario?.dni || '' %>">
-          <p id="dniError" class="mt-0.5 text-[11px] text-red-600 hidden">El DNI debe tener exactamente 8 dígitos.</p>
+          <input
+            type="text"
+            id="dni"
+            name="dni"
+            required
+            inputmode="numeric"
+            autocomplete="off"
+            pattern="[0-9]{8}"
+            maxlength="8"
+            title="Ingrese exactamente 8 dígitos (0–9)"
+            aria-describedby="dniError"
+            class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
+                   focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
+            placeholder="Ej: 30123456"
+            value="<%= usuario?.dni || '' %>"
+          >
+          <p id="dniError" class="mt-0.5 text-[11px] text-red-600 hidden">
+            El DNI debe tener exactamente 8 dígitos.
+          </p>
         </div>
 
         <!-- Email -->
         <div>
           <label for="email" class="block text-xs text-gray-700 mb-0.5">Correo electrónico</label>
-          <input type="email" id="email" name="email" required
-                 class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
-                        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                 placeholder="correo@ejemplo.com" value="<%= usuario?.email || '' %>">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            class="h-9 w-full px-2.5 rounded-md border border-gray-300 text-sm leading-tight
+                   focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
+            placeholder="correo@ejemplo.com"
+            value="<%= usuario?.email || '' %>"
+          >
         </div>
 
         <!-- Contraseña -->
         <div>
           <label for="password" class="block text-xs text-gray-700 mb-0.5">Contraseña</label>
           <div class="relative">
-            <input type="password" id="password" name="password" required autocomplete="new-password"
-                   class="h-9 w-full px-2.5 pr-9 rounded-md border border-gray-300 text-sm leading-tight
-                          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                   placeholder="********">
-            <button type="button" aria-label="Mostrar u ocultar contraseña"
-                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-              <svg onclick="(()=>{const i=document.getElementById('password');i.type=i.type==='password'?'text':'password';})()"
-                   xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z"/>
-                <circle cx="12" cy="12" r="3" stroke-width="1.5"/>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="new-password"
+              class="h-9 w-full px-2.5 pr-9 rounded-md border border-gray-300 text-sm leading-tight
+                     focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
+              placeholder="********"
+            >
+            <button
+              type="button"
+              aria-label="Mostrar u ocultar contraseña"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onclick="(() => { const i = document.getElementById('password'); i.type = i.type === 'password' ? 'text' : 'password'; })()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 pointer-events-none"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z"
+                />
+                <circle cx="12" cy="12" r="3" stroke-width="1.5" />
               </svg>
             </button>
           </div>
@@ -111,17 +160,36 @@
         <div>
           <label for="confirmarPassword" class="block text-xs text-gray-700 mb-0.5">Repetir Contraseña</label>
           <div class="relative">
-            <input type="password" id="confirmarPassword" name="confirmarPassword" required autocomplete="new-password"
-                   class="h-9 w-full px-2.5 pr-9 rounded-md border border-gray-300 text-sm leading-tight
-                          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                   placeholder="********">
-            <button type="button" aria-label="Mostrar u ocultar contraseña"
-                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-              <svg onclick="(()=>{const i=document.getElementById('confirmarPassword');i.type=i.type==='password'?'text':'password';})()"
-                   xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z"/>
-                <circle cx="12" cy="12" r="3" stroke-width="1.5"/>
+            <input
+              type="password"
+              id="confirmarPassword"
+              name="confirmarPassword"
+              required
+              autocomplete="new-password"
+              class="h-9 w-full px-2.5 pr-9 rounded-md border border-gray-300 text-sm leading-tight
+                     focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800"
+              placeholder="********"
+            >
+            <button
+              type="button"
+              aria-label="Mostrar u ocultar contraseña"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onclick="(() => { const i = document.getElementById('confirmarPassword'); i.type = i.type === 'password' ? 'text' : 'password'; })()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 pointer-events-none"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z"
+                />
+                <circle cx="12" cy="12" r="3" stroke-width="1.5" />
               </svg>
             </button>
           </div>
@@ -129,16 +197,21 @@
 
         <!-- CTA -->
         <div class="pt-0.5">
-          <button type="submit"
-                  class="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow transition active:scale-[.99]">
+          <button
+            type="submit"
+            class="w-full h-9 text-white text-sm font-semibold rounded-md shadow-md
+                   bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800
+                   hover:from-slate-800 hover:via-blue-800 hover:to-blue-700
+                   transition active:scale-[.98]"
+          >
             Registrarse
           </button>
         </div>
 
-        <!-- Link a login dentro del form -->
+        <!-- Link a login -->
         <p class="mt-2 text-[14px] text-center text-gray-500">
           ¿Ya tenés cuenta?
-          <a href="/login" class="text-indigo-600 hover:text-indigo-500 font-medium">Iniciá sesión</a>
+          <a href="/login" class="text-blue-800 hover:text-blue-700 font-medium">Iniciá sesión</a>
         </p>
       </form>
     </div>
@@ -152,19 +225,19 @@
 <!-- ===================== Scripts ===================== -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const stack=document.getElementById('toastStack');
-    const layer=document.getElementById('toastLayer');
-    if(stack && layer){
-      [...stack.querySelectorAll('.toastItem')].forEach((el,idx)=>{
-        setTimeout(()=>{
-          el.style.transition='opacity .25s ease, transform .25s ease';
-          el.style.opacity='0';
-          el.style.transform='translateY(-4px)';
-          setTimeout(()=>{
+    const stack = document.getElementById('toastStack');
+    const layer = document.getElementById('toastLayer');
+    if (stack && layer) {
+      [...stack.querySelectorAll('.toastItem')].forEach((el, idx) => {
+        setTimeout(() => {
+          el.style.transition = 'opacity .25s ease, transform .25s ease';
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(-4px)';
+          setTimeout(() => {
             el.remove();
-            if(!stack.querySelector('.toastItem')) layer.remove();
-          },260);
-        },4000+idx*120);
+            if (!stack.querySelector('.toastItem')) layer.remove();
+          }, 260);
+        }, 4000 + idx * 120);
       });
     }
   });
@@ -172,12 +245,28 @@
 
 <!-- ===================== Estilos ===================== -->
 <style>
-  @keyframes toast-drop { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
-  .animate-toast-drop { animation:toast-drop .25s ease-out both; }
-  @keyframes toast-progress { from{transform:scaleX(1);} to{transform:scaleX(0);} }
-  .animate-toast-progress { transform-origin:left center; animation:toast-progress 4s linear forwards; }
+  @keyframes toast-drop {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-toast-drop {
+    animation: toast-drop .25s ease-out both;
+  }
 
-  /* 👇 Animación suave del card (idéntica al login) */
-  @keyframes fade-in-up { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
-  .animate-fade-in-up { animation:fade-in-up .45s ease-out both; }
+  @keyframes toast-progress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+  }
+  .animate-toast-progress {
+    transform-origin: left center;
+    animation: toast-progress 4s linear forwards;
+  }
+
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up .45s ease-out both;
+  }
 </style>

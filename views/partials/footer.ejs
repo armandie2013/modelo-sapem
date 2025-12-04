@@ -1,3 +1,27 @@
-<footer class="bg-blue-800 text-white text-center py-4 mt-8">
-  <p>&copy; <%= new Date().getFullYear() %> Sistema de Gestión v1.0 Todos los derechos reservados.</p>
+<footer class="mt-10">
+  <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800 text-white">
+    <div class="container mx-auto px-4 py-4 sm:py-5">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-center sm:text-left">
+        
+        <!-- Texto principal -->
+        <p class="text-xs sm:text-sm text-white/90 leading-snug">
+          &copy; <%= new Date().getFullYear() %> 
+          <span class="font-medium">Sistema de Gestión</span>.
+          Todos los derechos reservados.
+        </p>
+
+        <!-- Versión + “marca” -->
+        <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 text-[11px] sm:text-xs text-blue-100/90">
+          <span class="px-2 py-0.5 rounded-full border border-white/20 bg-white/5 tracking-tight">
+            Versión v1.2
+          </span>
+          <span class="hidden sm:inline-block h-3 w-px bg-white/20"></span>
+          <span class="tracking-tight">
+            Catamarca Telecomunicaciones SAPEM
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </footer>

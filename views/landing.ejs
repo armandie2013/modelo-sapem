@@ -1,19 +1,23 @@
-<!-- Header con borde superior redondeado (coherente con login/registro) -->
+<!-- Header con borde superior redondeado, colores del navbar/footer -->
 <header class="relative">
-  <div class="h-36 sm:h-40 bg-indigo-600 rounded-t-3xl"></div>
+  <div class="h-36 sm:h-40 rounded-t-3xl 
+              bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800">
+  </div>
   <div class="pointer-events-none absolute inset-0 h-36 sm:h-40 rounded-t-3xl
-              bg-[radial-gradient(22rem_10rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
+              bg-[radial-gradient(22rem_10rem_at_80%_-20%,rgba(255,255,255,.15),transparent)]">
+  </div>
 </header>
 
 <!-- Landing compacta sin scroll extra -->
 <main class="relative -mt-20 sm:-mt-24 px-4">
   <div class="mx-auto max-w-3xl">
+
     <!-- Tarjeta principal -->
     <section class="bg-white rounded-2xl shadow-2xl border border-gray-200 px-6 sm:px-10 py-8">
+
       <!-- Badge/icono -->
       <div
         class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow">
-        <!-- Ícono simple -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
             d="M3 7h18M5 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M9 7V5a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v2" />
@@ -28,24 +32,32 @@
         Iniciá sesión o creá tu cuenta para continuar.
       </p>
 
-      <!-- Botones centrados (responsive) -->
+      <!-- Botones con colores coherentes al navbar/footer -->
       <div class="mt-6 flex flex-col sm:flex-row justify-center items-center text-center gap-3 w-full">
+
+        <!-- Botón Login -->
         <a href="/login"
-          class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow transition active:scale-[.99]">
+          class="w-full sm:w-auto text-white font-semibold py-2.5 px-8 rounded-lg shadow-md
+                 bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800
+                 hover:from-slate-800 hover:via-blue-800 hover:to-blue-700
+                 transition duration-200 active:scale-[.98]">
           Iniciar sesión
         </a>
+
+        <!-- Botón Registro -->
         <a href="/registro"
-          class="w-full sm:w-auto border border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold py-2.5 px-6 rounded-lg shadow transition active:scale-[.99]">
+          class="w-full sm:w-auto font-semibold py-2.5 px-8 rounded-lg shadow-md
+                 border border-blue-800 text-blue-800
+                 hover:bg-blue-50 transition duration-200 active:scale-[.98]">
           Crear cuenta
         </a>
+
       </div>
 
-
-      <!-- Chips de features (muy compactos) -->
+      <!-- Chips de features -->
       <ul class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
         <li class="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-gray-700">
           <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- check -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -55,7 +67,6 @@
         </li>
         <li class="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-gray-700">
           <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- shield -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -65,7 +76,6 @@
         </li>
         <li class="flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-gray-700">
           <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
-            <!-- zap -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
@@ -76,28 +86,19 @@
       </ul>
     </section>
 
-    <!-- Footer muy liviano -->
+    <!-- Footer liviano -->
     <p class="text-center text-[11px] sm:text-xs text-gray-500 mt-4 mb-6">
       © <%= new Date().getFullYear() %> Sistema de Gestión. Todos los derechos reservados.
     </p>
+
   </div>
 </main>
 
-<!-- Animación sutil (coherente con el resto) -->
+<!-- Animación -->
 <style>
   @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-
-  section {
-    animation: fade-in-up .45s ease-out both;
-  }
+  section { animation: fade-in-up .45s ease-out both; }
 </style>
