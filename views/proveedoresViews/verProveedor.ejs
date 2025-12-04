@@ -161,7 +161,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
         <p class="text-[11px] tracking-wide uppercase text-gray-500">Saldo de la cuenta</p>
-        <p class="mt-1 text-xl font-semibold <%= saldoVencido > 0 ? 'text-rose-600' : 'text-gray-900' %>">
+        <p class="mt-1 text-xl <%= saldoVencido > 0 ? 'text-red-600' : 'text-gray-900' %>">
           <%= fmtUSD(saldoVencido) %>
         </p>
         <p class="mt-1 text-[11px] text-gray-500">Incluye períodos hasta este mes (vencen el 10).</p>
@@ -169,23 +169,23 @@
 
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
         <p class="text-[11px] tracking-wide uppercase text-gray-500">Total cargos</p>
-        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.cargo) %></p>
+        <p class="mt-1 text-xl"><%= fmtUSD(totales.cargo) %></p>
       </div>
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
         <p class="text-[11px] tracking-wide uppercase text-gray-500">Notas de débito</p>
-        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.notaDebito) %></p>
+        <p class="mt-1 text-xl"><%= fmtUSD(totales.notaDebito) %></p>
       </div>
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
         <p class="text-[11px] tracking-wide uppercase text-gray-500">Notas de crédito</p>
-        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.notaCredito) %></p>
+        <p class="mt-1 text-xl"><%= fmtUSD(totales.notaCredito) %></p>
       </div>
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
         <p class="text-[11px] tracking-wide uppercase text-gray-500">Pagos</p>
-        <p class="mt-1 text-xl font-semibold"><%= fmtUSD(totales.pagos) %></p>
+        <p class="mt-1 text-xl"><%= fmtUSD(totales.pagos) %></p>
       </div>
       <div class="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
         <p class="text-[11px] tracking-wide uppercase text-gray-500">Deuda total</p>
-        <p class="mt-1 text-xl font-semibold <%= totales.saldo > 0 ? 'text-rose-600' : (totales.saldo < 0 ? 'text-emerald-700' : 'text-gray-900') %>">
+        <p class="mt-1 text-xl <%= totales.saldo > 0 ? 'text-red-600' : (totales.saldo < 0 ? 'text-emerald-700' : 'text-gray-900') %>">
           <%= fmtUSD(totales.saldo) %>
         </p>
       </div>
@@ -197,7 +197,7 @@
         <h2 class="text-lg font-semibold text-gray-800">Comprobantes vencidos</h2>
         <div class="text-sm text-gray-600">
           <span class="mr-3">Períodos ≤ <span class="font-medium"><%= MES_ACTUAL %></span></span>
-          <span>Total: <span class="font-semibold <%= totalVencidos > 0 ? 'text-rose-600' : 'text-gray-800' %>"><%= fmtUSD(totalVencidos) %></span></span>
+          <span>Total: <span class="font-semibold <%= totalVencidos > 0 ? 'text-red-600' : 'text-gray-800' %>"><%= fmtUSD(totalVencidos) %></span></span>
         </div>
       </div>
 
@@ -223,9 +223,9 @@
                     title="Ver detalle del período <%= r.periodo %>"
                   >
                     <td class="px-4 py-3 font-medium"><%= r.periodo %></td>
-                    <td class="px-4 py-3 text-right text-rose-600 font-semibold"><%= fmtUSD(r.saldo) %></td>
+                    <td class="px-4 py-3 text-right text-red-600"><%= fmtUSD(r.saldo) %></td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-700 ring-1 ring-red-200">
                         Vencido
                       </span>
                     </td>
@@ -294,7 +294,7 @@
                       <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaDebito) %></td>
                       <td class="px-4 py-3 text-right"><%= fmtUSD(r.notaCredito) %></td>
                       <td class="px-4 py-3 text-right text-emerald-800"><%= fmtUSD(r.pagos) %></td>
-                      <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-rose-600' : (r.saldo < 0 ? 'text-emerald-700' : '') %>">
+                      <td class="px-4 py-3 text-right <%= r.saldo > 0 ? 'text-red-600' : (r.saldo < 0 ? 'text-emerald-700' : '') %>">
                         <%= fmtUSD(r.saldo) %>
                       </td>
                     </tr>
@@ -364,7 +364,7 @@
                     <% } %>
                   </div>
                 </div>
-                <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-rose-600' : 'text-emerald-700' %>">
+                <div class="text-right text-sm font-semibold <%= m.signo > 0 ? 'text-red-600' : 'text-emerald-700' %>">
                   <%= m.signo > 0 ? '+ ' : '- ' %><%= fmtUSD(m.importe) %>
                 </div>
               </li>

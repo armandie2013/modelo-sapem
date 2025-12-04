@@ -30,19 +30,19 @@
       <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-white border border-gray-200 rounded-xl p-4">
           <p class="text-[11px] text-gray-500">Total</p>
-          <p class="text-xl font-semibold text-gray-900"><%= total %></p>
+          <p class="text-xl font-medium text-gray-900"><%= total %></p>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl p-4">
           <p class="text-[11px] text-gray-500">Activos</p>
-          <p class="text-xl font-semibold text-emerald-700"><%= activos %></p>
+          <p class="text-xl font-medium text-emerald-700"><%= activos %></p>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl p-4">
           <p class="text-[11px] text-gray-500">Inactivos</p>
-          <p class="text-xl font-semibold text-gray-700"><%= inactivos %></p>
+          <p class="text-xl font-medium text-gray-700"><%= inactivos %></p>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl p-4">
           <p class="text-[11px] text-gray-500">Deuda acumulada</p>
-          <p class="text-xl font-semibold <%= deudaTotal > 0 ? 'text-red-600' : (deudaTotal < 0 ? 'text-green-700' : 'text-gray-900') %>">
+          <p class="text-xl font-medium <%= deudaTotal > 0 ? 'text-red-600' : (deudaTotal < 0 ? 'text-green-700' : 'text-gray-900') %>">
             <%= fmtUSD(deudaTotal) %>
           </p>
         </div>
@@ -54,7 +54,7 @@
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <!-- Segmentos de estado -->
         <div class="inline-flex rounded-lg border border-gray-200 overflow-hidden" role="tablist" aria-label="Filtro de estado">
-          <button type="button" data-seg="todos" class="seg px-3 py-2 text-sm bg-gray-50">Todos</button>
+          <button type="button" data-seg="todos" class="seg px-3 py-2 text-sm bg-gray-100">Todos</button>
           <button type="button" data-seg="activos" class="seg px-3 py-2 text-sm border-l border-gray-200">Activos</button>
           <button type="button" data-seg="inactivos" class="seg px-3 py-2 text-sm border-l border-gray-200">Inactivos</button>
         </div>
@@ -133,7 +133,7 @@
                  const deuda = Number(p.saldoTotal || 0);
                  const filtroTxt = `${(p.nombreReal||'').toLowerCase()} ${(p.nombreFantasia||'').toLowerCase()} ${(p.plan?.nombre||'').toLowerCase()}`;
             %>
-            <tr class="fila hover:bg-gray-50"
+            <tr class="fila hover:bg-gray-100"
                 data-estado="<%= activo ? 'activos' : 'inactivos' %>"
                 data-filtro="<%= filtroTxt %>"
                 data-numero="<%= p.numeroProveedor || 0 %>"
@@ -154,14 +154,14 @@
               </td>
               <td class="px-3 py-2 align-middle text-right">
                 <% if (typeof importe !== 'undefined') { %>
-                  <span class="whitespace-nowrap tabular-nums font-medium"><%= fmtUSD(importe) %></span>
+                  <span class="whitespace-nowrap tabular-nums"><%= fmtUSD(importe) %></span>
                   <% if (tieneOverride) { %>
                     <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">Override</span>
                   <% } %>
                 <% } else { %>—<% } %>
               </td>
               <td class="px-3 py-2 align-middle text-right">
-                <span class="whitespace-nowrap tabular-nums font-semibold <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
+                <span class="whitespace-nowrap tabular-nums <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
                   <%= fmtUSD(deuda) %>
                 </span>
               </td>
@@ -180,7 +180,7 @@
                   <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
                     <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
                           onsubmit="return confirm('¿Eliminar proveedor?')">
-                      <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
+                      <button class="px-2.5 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 text-xs">Eliminar</button>
                     </form>
                   <% } %>
                 </div>
@@ -245,7 +245,7 @@
             </div>
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-2">
               <div class="text-[11px] text-gray-500">Deuda</div>
-              <div class="text-sm font-semibold <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
+              <div class="text-sm font-medium <%= deuda > 0 ? 'text-red-600' : (deuda < 0 ? 'text-green-700' : 'text-gray-800') %>">
                 <%= fmtUSD(deuda) %>
               </div>
             </div>
@@ -259,7 +259,7 @@
             <% if (usuario?.modulosPermitidos?.proveedores?.eliminar) { %>
               <form action="/proveedores/<%= p._id %>?_method=DELETE" method="POST" class="inline-block m-0"
                     onsubmit="return confirm('¿Eliminar proveedor?')">
-                <button class="px-2.5 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 text-xs">Eliminar</button>
+                <button class="px-2.5 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 text-xs">Eliminar</button>
               </form>
             <% } %>
           </div>
@@ -361,15 +361,15 @@
       // Segmentos
       segBtns.forEach(btn=>{
         btn.addEventListener('click', ()=>{
-          segBtns.forEach(b=>b.classList.remove('bg-gray-50'));
-          btn.classList.add('bg-gray-50');
+          segBtns.forEach(b=>b.classList.remove('bg-gray-100'));
+          btn.classList.add('bg-gray-100');
           seg = btn.dataset.seg || 'todos';
           filtrar();
         });
       });
       // Por defecto activo "Todos"
       const def = segBtns.find(b=>b.dataset.seg==='todos');
-      if (def) def.classList.add('bg-gray-50');
+      if (def) def.classList.add('bg-gray-100');
 
       // Eventos
       buscar.addEventListener('input', filtrar);
