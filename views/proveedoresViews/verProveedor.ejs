@@ -50,111 +50,113 @@
 
   <div class="max-w-6xl mx-auto space-y-6">
 
-    <!-- Header + acciones (estilo mejorado) -->
+    <!-- Header + acciones (misma estructura que detallePeriodo) -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 relative overflow-hidden">
       <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/70 via-sky-500/70 to-emerald-500/70"></div>
 
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex items-start gap-3">
-          <!-- Avatar con inicial -->
-          <div class="h-12 w-12 shrink-0 rounded-xl bg-indigo-100 text-indigo-700 grid place-items-center font-bold">
-            <%= (proveedor.nombreReal||'?').slice(0,1).toUpperCase() %>
-          </div>
+      <div class="flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <!-- Avatar con inicial (igual detallePeriodo) -->
+            <div class="h-10 w-10 shrink-0 rounded-lg bg-indigo-100 text-indigo-700 grid place-items-center font-semibold">
+              <%= (proveedor.nombreReal||'?').slice(0,1).toUpperCase() %>
+            </div>
 
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
-              Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
-            </h1>
-            <p class="text-sm text-gray-700 font-medium mt-0.5">
-              Nombre: <span class="text-gray-900"><%= proveedor.nombreReal %></span>
-            </p>
-            <p class="text-sm text-gray-600 mt-0.5">
-              CUIT <span><%= proveedor.cuit || '—' %></span> ·
-              IVA <%= proveedor.condicionIva || '—' %> ·
-              Tel <%= proveedor.telefonoCelular || '—' %>
-              <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1
-                <%= (proveedor.activo ?? true)
-                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                  : 'bg-gray-100 text-gray-600 ring-gray-300' %>">
-                <span class="h-1.5 w-1.5 rounded-full <%= (proveedor.activo ?? true) ? 'bg-emerald-500' : 'bg-gray-400' %>"></span>
-                <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
-              </span>
-            </p>
-            <p class="text-sm text-gray-600 mt-1">
-              Plan:
-              <% if (proveedor.plan) { %>
-                <span class="font-medium"><%= proveedor.plan.nombre %></span>
-                — <span><%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %></span>
-                <% if (typeof proveedor.precioPlan === 'number') { %>
-                  <span class="text-xs text-gray-500 ml-1">(override)</span>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
+                Proveedor #<%= proveedor.numeroProveedor %> — <%= proveedor.nombreFantasia || proveedor.nombreReal %>
+              </h1>
+              <h1 class="text-xl font-bold text-gray-900">
+                Nombre: <%= proveedor.nombreReal %>
+              </h1>
+              <p class="text-sm text-gray-600">
+                CUIT: <span class="font-mono"><%= proveedor.cuit || '—' %></span> ·
+                IVA: <%= proveedor.condicionIva || '—' %> ·
+                Tel: <%= proveedor.telefonoCelular || '—' %> ·
+                Estado:
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ring-1
+                             <%= (proveedor.activo ?? true) ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-gray-100 text-gray-700 ring-gray-300' %>">
+                  <span class="h-1.5 w-1.5 rounded-full <%= (proveedor.activo ?? true) ? 'bg-emerald-500' : 'bg-gray-400' %>"></span>
+                  <%= (proveedor.activo ?? true) ? 'Activo' : 'Inactivo' %>
+                </span>
+              </p>
+
+              <p class="text-sm text-gray-600 mt-1">
+                Plan:
+                <% if (proveedor.plan) { %>
+                  <span class="font-medium"><%= proveedor.plan.nombre %></span>
+                  — <span><%= fmtUSD(proveedor.plan.importe || proveedor.precioPlan || 0) %></span>
+                  <% if (typeof proveedor.precioPlan === 'number') { %>
+                    <span class="text-xs text-gray-500 ml-1">(override)</span>
+                  <% } %>
+                <% } else { %>
+                  <span class="text-gray-500">Sin plan</span>
                 <% } %>
-              <% } else { %>
-                <span class="text-gray-500">Sin plan</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Acciones rápidas: Estado de cuenta + Volver -->
+          <div class="shrink-0 flex items-center gap-2">
+            <a href="/proveedores/<%= proveedor._id %>/estado-cuenta/pdf" target="_blank"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-indigo-700 hover:text-white ring-1 ring-indigo-200 hover:ring-indigo-500 hover:bg-indigo-600 bg-indigo-50">
+              <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M12.5 3H17v4.5a1 1 0 11-2 0V6.41l-7.3 7.29a1 1 0 11-1.4-1.42L13.59 5H12.5a1 1 0 110-2z"></path>
+                <path d="M5 5h4a1 1 0 010 2H6.41l-.7.7V15h7.3l.7-.7V11a1 1 0 112 0v4a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
+              </svg>
+              Estado de cuenta
+            </a>
+            <a href="/proveedores"
+               class="inline-flex items-center gap-1.5 bg-gray-50 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm ring-1 ring-gray-200">
+              ← Volver
+            </a>
+          </div>
+        </div>
+
+        <!-- Acciones rápidas (según permisos) -->
+        <%
+          const perms = (usuario && usuario.modulosPermitidos) || {};
+          const puedeRegistrarPago = !!(perms.pagos?.crear || perms.pagos?.registrar);
+          const puedeNotaCredito   = !!(perms.notas?.credito?.crear || perms.notasCredito?.crear);
+          const puedeNotaDebito    = !!(perms.notas?.debito?.crear  || perms.notasDebito?.crear);
+          const puedePlanPago      = !!(perms.planesPago?.crear);
+          const hayAcciones = puedeRegistrarPago || puedeNotaCredito || puedeNotaDebito || puedePlanPago;
+        %>
+
+        <% if (hayAcciones) { %>
+          <div class="pt-3 mt-1 border-top border-gray-200 border-t">
+            <div class="flex flex-row flex-wrap items-center justify-start gap-2">
+              <% if (puedeRegistrarPago) { %>
+                <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
+                   class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm ring-1 ring-blue-500/10">
+                  + Registrar pago
+                </a>
               <% } %>
-            </p>
-          </div>
-        </div>
 
-        <!-- Acciones rápidas -->
-        <div class="shrink-0 flex items-center gap-2">
-          <a href="/proveedores/<%= proveedor._id %>/estado-cuenta/pdf" target="_blank"
-             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-indigo-700 hover:text-white ring-1 ring-indigo-200 hover:ring-indigo-500 hover:bg-indigo-600 bg-indigo-50">
-            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path d="M12.5 3H17v4.5a1 1 0 11-2 0V6.41l-7.3 7.29a1 1 0 11-1.4-1.42L13.59 5H12.5a1 1 0 110-2z"></path>
-              <path d="M5 5h4a1 1 0 010 2H6.41l-.7.7V15h7.3l.7-.7V11a1 1 0 112 0v4a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
-            </svg>
-            Estado de cuenta
-          </a>
-          <a href="/proveedores"
-             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:text-gray-900 ring-1 ring-gray-200 hover:ring-gray-300 bg-white">
-            ← Volver
-          </a>
-        </div>
+              <% if (puedeNotaCredito) { %>
+                <a href="/notas/proveedores/<%= proveedor._id %>/credito"
+                   class="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm shadow-sm ring-1 ring-emerald-500/10">
+                  + Nota de crédito
+                </a>
+              <% } %>
+
+              <% if (puedeNotaDebito) { %>
+                <a href="/notas/proveedores/<%= proveedor._id %>/debito"
+                   class="inline-flex items-center gap-1.5 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm shadow-sm ring-1 ring-amber-500/10">
+                  + Nota de débito
+                </a>
+              <% } %>
+
+              <% if (puedePlanPago) { %>
+                <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
+                   class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10">
+                  + Plan de pago
+                </a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
       </div>
-
-      <!-- Fila de acciones (solo si hay permisos) -->
-      <%
-        const perms = (usuario && usuario.modulosPermitidos) || {};
-        const puedeRegistrarPago = !!(perms.pagos?.crear || perms.pagos?.registrar);
-        const puedeNotaCredito   = !!(perms.notas?.credito?.crear || perms.notasCredito?.crear);
-        const puedeNotaDebito    = !!(perms.notas?.debito?.crear  || perms.notasDebito?.crear);
-        const puedePlanPago      = !!(perms.planesPago?.crear);
-        const hayAcciones = puedeRegistrarPago || puedeNotaCredito || puedeNotaDebito || puedePlanPago;
-      %>
-
-      <% if (hayAcciones) { %>
-        <div class="pt-3 mt-4 border-t border-gray-200">
-          <div class="flex flex-row flex-wrap items-center justify-start gap-2">
-            <% if (puedeRegistrarPago) { %>
-              <a href="/pagos/proveedores/<%= proveedor._id %>/registrar"
-                 class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm ring-1 ring-blue-500/10">
-                + Registrar pago
-              </a>
-            <% } %>
-
-            <% if (puedeNotaCredito) { %>
-              <a href="/notas/proveedores/<%= proveedor._id %>/credito"
-                 class="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-sm shadow-sm ring-1 ring-emerald-500/10">
-                + Nota de crédito
-              </a>
-            <% } %>
-
-            <% if (puedeNotaDebito) { %>
-              <a href="/notas/proveedores/<%= proveedor._id %>/debito"
-                 class="inline-flex items-center gap-1.5 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition text-sm shadow-sm ring-1 ring-amber-500/10">
-                + Nota de débito
-              </a>
-            <% } %>
-
-            <% if (puedePlanPago) { %>
-              <a href="/planes-pago/proveedores/<%= proveedor._id %>/crear"
-                 class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10">
-                + Plan de pago
-              </a>
-            <% } %>
-          </div>
-        </div>
-      <% } %>
     </div>
 
     <!-- Resumen (tarjetas KPI) -->
@@ -379,52 +381,52 @@
 <script>
   // --- Posiciona el anchor del toast según navbar y contenedor ---
   (function () {
-  const root = document.getElementById('toast-root');
-  const container = document.querySelector('.max-w-6xl');
-  const navbar = document.querySelector('nav');
+    const root = document.getElementById('toast-root');
+    const container = document.querySelector('.max-w-6xl');
+    const navbar = document.querySelector('nav');
 
-  // Cambiá a 'viewport' si preferís centrarlo en toda la pantalla
-  const CENTER_MODE = 'container'; // 'container' | 'viewport'
+    // Cambiá a 'viewport' si preferís centrarlo en toda la pantalla
+    const CENTER_MODE = 'container'; // 'container' | 'viewport'
 
-  function positionToastRoot() {
-    if (!root) return;
-    const navH = navbar ? navbar.getBoundingClientRect().height : 64;
-    const topPx = Math.max(12, Math.round(navH + 12));
+    function positionToastRoot() {
+      if (!root) return;
+      const navH = navbar ? navbar.getBoundingClientRect().height : 64;
+      const topPx = Math.max(12, Math.round(navH + 12));
 
-    // Mobile: abajo-centro
-    if (window.matchMedia('(max-width: 640px)').matches) {
-      root.style.top = '';
-      root.style.bottom = '16px';
-      root.style.left = '50%';
-      root.style.right = '';
-      root.style.transform = 'translateX(-50%)';
-      return;
-    }
-
-    // Desktop
-    root.style.bottom = '';
-    root.style.top = topPx + 'px';
-    if (CENTER_MODE === 'container') {
-      const rect = container?.getBoundingClientRect();
-      if (rect) {
-        root.style.left = (rect.left + rect.width / 2) + 'px';
+      // Mobile: abajo-centro
+      if (window.matchMedia('(max-width: 640px)').matches) {
+        root.style.top = '';
+        root.style.bottom = '16px';
+        root.style.left = '50%';
         root.style.right = '';
         root.style.transform = 'translateX(-50%)';
-      } else {
+        return;
+      }
+
+      // Desktop
+      root.style.bottom = '';
+      root.style.top = topPx + 'px';
+      if (CENTER_MODE === 'container') {
+        const rect = container?.getBoundingClientRect();
+        if (rect) {
+          root.style.left = (rect.left + rect.width / 2) + 'px';
+          root.style.right = '';
+          root.style.transform = 'translateX(-50%)';
+        } else {
+          root.style.left = '50%';
+          root.style.right = '';
+          root.style.transform = 'translateX(-50%)';
+        }
+      } else { // viewport
         root.style.left = '50%';
         root.style.right = '';
         root.style.transform = 'translateX(-50%)';
       }
-    } else { // viewport
-      root.style.left = '50%';
-      root.style.right = '';
-      root.style.transform = 'translateX(-50%)';
     }
-  }
 
-  positionToastRoot();
-  window.addEventListener('resize', positionToastRoot);
-})();
+    positionToastRoot();
+    window.addEventListener('resize', positionToastRoot);
+  })();
 
 
   // --- Toast helper (usa el anchor ya posicionado) ---
