@@ -16,7 +16,13 @@
         Listado de Viáticos
       </h1>
 
-      <% if (!mostrarTodos) { %>
+      <%
+        const hayFiltrosView =
+          query &&
+          (query.viajante || query.destino || query.creador || query.desde || query.hasta);
+      %>
+
+      <% if (!mostrarTodos && !hayFiltrosView) { %>
         <a
           href="/viaticos/dashboard/todos"
           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-[12px]"
@@ -33,94 +39,123 @@
       <% } %>
     </div>
 
-    <% if (viaticos.length === 0) { %>
-      <p class="text-gray-600 text-center text-sm">No hay viáticos disponibles.</p>
-    <% } else { %>
+    <!-- Filtros (FORM GET hacia el backend, SIEMPRE visible) -->
+    <form
+      id="formFiltrosViaticos"
+      method="GET"
+      action="/viaticos/dashboard/todos"
+      class="mb-4 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200"
+    >
+      <div class="flex items-center justify-between mb-2 gap-2">
+        <h2 class="text-[12px] font-semibold text-gray-700">
+          Filtros
+        </h2>
+        <button
+          type="button"
+          id="btnLimpiarFiltrosViaticos"
+          class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          Limpiar filtros
+        </button>
+      </div>
 
-      <!-- Filtros -->
-      <div class="mb-4 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <div class="flex items-center justify-between mb-2 gap-2">
-          <h2 class="text-[12px] font-semibold text-gray-700">
-            Filtros
-          </h2>
-          <button
-            type="button"
-            id="btnLimpiarFiltrosViaticos"
-            class="text-[11px] px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
-            Limpiar filtros
-          </button>
+      <div class="grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Filtro Viajante -->
+        <div>
+          <label class="block text-[11px] font-medium text-gray-600 mb-1">
+            Viajante
+          </label>
+          <input
+            id="filtroViajante"
+            name="viajante"
+            type="text"
+            placeholder="Buscar por nombre"
+            value="<%= query?.viajante || '' %>"
+            class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
 
-        <div class="grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <!-- Filtro Viajante -->
-          <div>
-            <label class="block text-[11px] font-medium text-gray-600 mb-1">
-              Viajante
-            </label>
-            <input
-              id="filtroViajante"
-              type="text"
-              placeholder="Buscar por nombre"
-              class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <!-- Filtros Fecha DESDE / HASTA -->
-          <div>
-            <div class="flex gap-1">
-              <div class="w-1/2">
-                <label class="block text-[11px] font-medium text-gray-600 mb-1">
-                  Desde
-                </label>
-                <input
-                  id="filtroFechaDesde"
-                  type="date"
-                  class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px]
-                         focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div class="w-1/2">
-                <label class="block text-[11px] font-medium text-gray-600 mb-1">
-                  Hasta
-                </label>
-                <input
-                  id="filtroFechaHasta"
-                  type="date"
-                  class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px]
-                         focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+        <!-- Filtros Fecha DESDE / HASTA -->
+        <div>
+          <div class="flex gap-1">
+            <div class="w-1/2">
+              <label class="block text-[11px] font-medium text-gray-600 mb-1">
+                Desde
+              </label>
+              <input
+                id="filtroFechaDesde"
+                name="desde"
+                type="date"
+                value="<%= query?.desde || '' %>"
+                class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px]
+                       focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div class="w-1/2">
+              <label class="block text-[11px] font-medium text-gray-600 mb-1">
+                Hasta
+              </label>
+              <input
+                id="filtroFechaHasta"
+                name="hasta"
+                type="date"
+                value="<%= query?.hasta || '' %>"
+                class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px]
+                       focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
           </div>
+        </div>
 
-          <!-- Filtro Destino -->
-          <div>
-            <label class="block text-[11px] font-medium text-gray-600 mb-1">
-              Destino
-            </label>
-            <input
-              id="filtroDestino"
-              type="text"
-              placeholder="Buscar por destino"
-              class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+        <!-- Filtro Destino -->
+        <div>
+          <label class="block text-[11px] font-medium text-gray-600 mb-1">
+            Destino
+          </label>
+          <input
+            id="filtroDestino"
+            name="destino"
+            type="text"
+            placeholder="Buscar por destino"
+            value="<%= query?.destino || '' %>"
+            class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-          <!-- Filtro Creado por -->
-          <div>
-            <label class="block text-[11px] font-medium text-gray-600 mb-1">
-              Creado por
-            </label>
-            <input
-              id="filtroCreador"
-              type="text"
-              placeholder="Buscar por usuario"
-              class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+        <!-- Filtro Creado por -->
+        <div>
+          <label class="block text-[11px] font-medium text-gray-600 mb-1">
+            Creado por
+          </label>
+          <input
+            id="filtroCreador"
+            name="creador"
+            type="text"
+            placeholder="Buscar por usuario"
+            value="<%= query?.creador || '' %>"
+            class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
       </div>
+    </form>
+
+    <!-- Contenido según resultados -->
+    <% if (viaticos.length === 0) { %>
+      <div class="py-6">
+        <% if (hayFiltrosView) { %>
+          <p class="text-gray-600 text-center text-sm">
+            No se encontraron resultados para la búsqueda ingresada.
+          </p>
+          <p class="text-gray-500 text-center text-xs mt-1">
+            Probá ajustar los filtros o presioná <strong>“Limpiar filtros”</strong>.
+          </p>
+        <% } else { %>
+          <p class="text-gray-600 text-center text-sm">
+            No hay viáticos disponibles.
+          </p>
+        <% } %>
+      </div>
+    <% } else { %>
 
       <!-- Tabla -->
       <div class="border border-gray-200 overflow-x-auto md:overflow-x-visible">
@@ -143,11 +178,10 @@
 
           <tbody id="tablaViaticos">
             <%
-              // 👉 Helper para abreviar nombre: "Diego Armando Cardenes" -> "Diego C."
               const abreviarNombre = (nombre) => {
                 if (!nombre) return '';
                 const partes = String(nombre).trim().split(/\s+/);
-                if (partes.length === 1) return partes[0]; // por si sólo hay un nombre
+                if (partes.length === 1) return partes[0];
                 const inicialApellido = partes[partes.length - 1].charAt(0).toUpperCase();
                 return `${partes[0]} ${inicialApellido}.`;
               };
@@ -173,7 +207,6 @@
             %>
 
               <tr class="border-b hover:bg-gray-100 transition" data-row-viatico>
-
                 <!-- N° -->
                 <td class="px-2 py-2 font-bold text-blue-800 whitespace-nowrap">
                   <%= v.numeroDeViaje %>
@@ -231,7 +264,7 @@
                   title="<%= v.motivoDelViaje %>"
                 >
                   <%= v.motivoDelViaje %>
-                </td -->
+                </td>
 
                 <!-- Total Viático -->
                 <td class="px-2 py-2 whitespace-nowrap text-right">
@@ -327,71 +360,29 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const filtroViajante   = document.getElementById('filtroViajante');
-      const filtroFechaDesde = document.getElementById('filtroFechaDesde');
-      const filtroFechaHasta = document.getElementById('filtroFechaHasta');
-      const filtroDestino    = document.getElementById('filtroDestino');
-      const filtroCreador    = document.getElementById('filtroCreador');
-      const btnLimpiar       = document.getElementById('btnLimpiarFiltrosViaticos');
-      const filas            = document.querySelectorAll('#tablaViaticos tr[data-row-viatico]');
+      const form = document.getElementById('formFiltrosViaticos');
+      const btnLimpiar = document.getElementById('btnLimpiarFiltrosViaticos');
 
-      function normalizar(txt) {
-        return (txt || '')
-          .toString()
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
-      }
-
-      function aplicarFiltros() {
-        const valViajante   = normalizar(filtroViajante?.value || '');
-        const valDestino    = normalizar(filtroDestino?.value || '');
-        const valCreador    = normalizar(filtroCreador?.value || '');
-        const valDesde      = (filtroFechaDesde?.value || '').trim();
-        const valHasta      = (filtroFechaHasta?.value || '').trim();
-
-        filas.forEach(tr => {
-          const celViajantes = tr.querySelector('[data-col="viajantes"]');
-          const celFecha     = tr.querySelector('[data-col="fecha"]');
-          const celDestino   = tr.querySelector('[data-col="destino"]');
-          const celCreador   = tr.querySelector('[data-col="creadoPor"]');
-
-          if (!celFecha) return;
-
-          const txtViajantes = normalizar(celViajantes ? celViajantes.textContent : '');
-          const dataFecha    = celFecha.dataset.fecha || '';
-          const txtDestino   = normalizar(celDestino ? celDestino.textContent : '');
-          const txtCreador   = normalizar(celCreador ? celCreador.textContent : '');
-
-          let ok = true;
-
-          if (valViajante && !txtViajantes.includes(valViajante)) ok = false;
-          if (valDestino && !txtDestino.includes(valDestino)) ok = false;
-          if (valCreador && !txtCreador.includes(valCreador)) ok = false;
-
-          if (valDesde && dataFecha < valDesde) ok = false;
-          if (valHasta && dataFecha > valHasta) ok = false;
-
-          tr.style.display = ok ? '' : 'none';
+      // Cuando cambia cualquier filtro, enviamos el form (GET) al backend
+      ['filtroViajante','filtroDestino','filtroCreador','filtroFechaDesde','filtroFechaHasta']
+        .map(id => document.getElementById(id))
+        .forEach(input => {
+          if (!input) return;
+          input.addEventListener('change', () => form.submit());
+          if (input.type === 'text') {
+            input.addEventListener('keypress', e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                form.submit();
+              }
+            });
+          }
         });
-      }
 
-      [filtroViajante, filtroDestino, filtroCreador].forEach(input => {
-        if (!input) return;
-        input.addEventListener('input', aplicarFiltros);
-      });
-
-      if (filtroFechaDesde) filtroFechaDesde.addEventListener('change', aplicarFiltros);
-      if (filtroFechaHasta) filtroFechaHasta.addEventListener('change', aplicarFiltros);
-
+      // Limpiar filtros = volver al dashboard base (últimos X)
       if (btnLimpiar) {
         btnLimpiar.addEventListener('click', () => {
-          if (filtroViajante)   filtroViajante.value   = '';
-          if (filtroFechaDesde) filtroFechaDesde.value = '';
-          if (filtroFechaHasta) filtroFechaHasta.value = '';
-          if (filtroDestino)    filtroDestino.value    = '';
-          if (filtroCreador)    filtroCreador.value    = '';
-          aplicarFiltros();
+          window.location.href = '/viaticos/dashboard';
         });
       }
     });

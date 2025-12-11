@@ -5,7 +5,7 @@
     <!-- Encabezado con botón Volver -->
     <div class="mb-6">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-gray-900 leading-tight flex-1">
+        <h1 class="mt-1 text-2xl sm:3xl font-bold text-gray-900 leading-tight flex-1">
           Solicitud de Viático
         </h1>
 
@@ -448,6 +448,7 @@
       <div class="pt-2 flex flex-col items-center gap-2">
         <button
           type="submit"
+          id="btnGenerarViatico"
           class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-10 py-2.5 rounded-lg shadow-lg shadow-indigo-200 transition active:scale-[.98]"
         >
           Generar Viático
@@ -461,18 +462,6 @@
 </main>
 
 <script src="/scripts/scriptViaticos.js"></script>
-<script>
-  document.getElementById("formularioViatico").addEventListener("submit", function (e) {
-    const confirmacion = confirm(
-      "📝 Por favor, revisá todos los datos ingresados.\n" +
-      "Una vez generado el viático no podrás editarlo.\n\n" +
-      "¿Deseás continuar?"
-    );
-    if (!confirmacion) {
-      e.preventDefault();
-    }
-  });
-</script>
 
 <!-- ====== Estilos extra (sin animaciones de entrada) ====== -->
 <style>
@@ -499,5 +488,11 @@
 
   #formularioViatico input[type="checkbox"] {
     accent-color:#4F46E5;
+  }
+
+  /* Estado del botón deshabilitado por validación de viajantes */
+  #btnGenerarViatico:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 </style>
