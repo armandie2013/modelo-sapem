@@ -154,6 +154,7 @@
                   <td class="border border-gray-300 px-3 py-2">
                     <select
                       name="nombreSolicitante[<%= i %>]"
+                      id="viajante-<%= i %>"
                       class="w-full border px-2 py-1.5 rounded-md bg-gray-50 text-sm viajante-select
                              focus:ring-indigo-500 focus:border-indigo-500"
                       data-index="<%= i %>"
@@ -175,6 +176,7 @@
                     <input
                       type="text"
                       name="cargo[<%= i %>]"
+                      id="cargo-<%= i %>"
                       value="<%= v?.cargo || '' %>"
                       class="w-full border px-2 py-1.5 rounded-md text-sm bg-white
                              focus:ring-indigo-500 focus:border-indigo-500"
@@ -188,7 +190,8 @@
                       <input
                         type="text"
                         name="importeViatico[<%= i %>]"
-                        value="<%= v ? v.importe : '' %>"
+                        id="importeViatico-<%= i %>"
+                        value="<%= v ? fmtARS(v.importe) : '' %>"
                         class="w-full border pl-6 pr-2 py-1.5 rounded-md text-sm importe
                                focus:ring-indigo-500 focus:border-indigo-500"
                         inputmode="decimal"
@@ -299,7 +302,7 @@
             value="<%= viatico.vehiculoUtilizado %>"
             required
             class="w-full border px-3 py-2 rounded-lg border-gray-300
-                   focus:ring-indigo-500 focus:border-indigo-500"
+                   focus:ring-indigo-500 focus-border-indigo-500"
           >
         </div>
       </section>

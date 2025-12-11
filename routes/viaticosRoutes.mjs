@@ -1,3 +1,123 @@
+// import express from "express";
+// import {
+//   crearViaticoController,
+//   mostrarDashboardViaticos,
+//   mostrarTodosLosViaticos,
+//   mostrarFormularioViatico,
+//   eliminarViaticoController,
+//   verViaticoController,
+//   editarViaticoController,
+//   mostrarFormularioEditarViatico,
+//   generarPDFViaticoController,
+//   mostrarVistaPDF
+// } from "../controllers/viaticosController.mjs";
+// import { verificarSesion } from "../middlewares/authMiddleware.mjs";
+// import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
+// import { obtenerUltimosViaticos } from "../services/viaticosService.mjs";
+
+// const router = express.Router();
+
+// // Dashboard principal de viáticos (últimos 5)
+// router.get(
+//   "/dashboard",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "ver"),
+//   mostrarDashboardViaticos
+// );
+
+// // Ver todos los viáticos
+// router.get(
+//   "/dashboard/todos",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "ver"),
+//   mostrarTodosLosViaticos
+// );
+
+// // Formulario para crear viático
+// router.get(
+//   "/crear",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "crear"),
+//   mostrarFormularioViatico
+// );
+
+// // Crear viático
+// router.post(
+//   "/crear",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "crear"),
+//   crearViaticoController
+// );
+
+// // Ver viático
+// router.get(
+//   "/:id",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "ver"),
+//   verViaticoController
+// );
+
+// // Formulario para editar
+// router.get(
+//   "/:id/editar",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "editar"),
+//   mostrarFormularioEditarViatico
+// );
+
+// // Actualizar viático
+// router.put(
+//   "/:id",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "editar"),
+//   editarViaticoController
+// );
+
+// // Eliminar viático
+// router.delete(
+//   "/:id",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "eliminar"),
+//   eliminarViaticoController
+// );
+
+// // // 🆕 Endpoint para listar viáticos en formato JSON
+// // router.get(
+// //   "/api/listar",
+// //   verificarSesion,
+// //   verificarPermiso("viaticos", "ver"),
+// //   async (req, res) => {
+// //     try {
+// //       const viaticos = await obtenerUltimosViaticos(); // o todos, depende de lo que quieras mostrar
+// //       res.json(viaticos);
+// //     } catch (error) {
+// //       console.error("Error al obtener viáticos para API:", error);
+// //       res.status(500).json({ mensaje: "Error interno" });
+// //     }
+// //   }
+// // );
+
+// router.get(
+//   "/:id/pdf",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "ver"),
+//   generarPDFViaticoController
+// );
+
+// router.get(
+//   "/:id/pdfview",
+//   verificarSesion,
+//   verificarPermiso("viaticos", "ver"),
+//   mostrarVistaPDF // Este renderiza `verViaticoPdf.ejs`
+// );
+
+// // Vista del viático para PDF (sin sesión, solo uso interno)
+// router.get("/:id/pdfview-nologin", mostrarVistaPDF);
+
+// export default router;
+
+
+// routes/viaticosRoutes.mjs
 import express from "express";
 import {
   crearViaticoController,
@@ -13,11 +133,10 @@ import {
 } from "../controllers/viaticosController.mjs";
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
 import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
-import { obtenerUltimosViaticos } from "../services/viaticosService.mjs";
 
 const router = express.Router();
 
-// Dashboard principal de viáticos (últimos 5)
+// Dashboard principal de viáticos (últimos X / filtrados)
 router.get(
   "/dashboard",
   verificarSesion,
@@ -25,7 +144,7 @@ router.get(
   mostrarDashboardViaticos
 );
 
-// Ver todos los viáticos
+// Ver todos los viáticos (lista completa + filtros)
 router.get(
   "/dashboard/todos",
   verificarSesion,
@@ -81,22 +200,7 @@ router.delete(
   eliminarViaticoController
 );
 
-// // 🆕 Endpoint para listar viáticos en formato JSON
-// router.get(
-//   "/api/listar",
-//   verificarSesion,
-//   verificarPermiso("viaticos", "ver"),
-//   async (req, res) => {
-//     try {
-//       const viaticos = await obtenerUltimosViaticos(); // o todos, depende de lo que quieras mostrar
-//       res.json(viaticos);
-//     } catch (error) {
-//       console.error("Error al obtener viáticos para API:", error);
-//       res.status(500).json({ mensaje: "Error interno" });
-//     }
-//   }
-// );
-
+// PDF en línea
 router.get(
   "/:id/pdf",
   verificarSesion,
@@ -104,11 +208,12 @@ router.get(
   generarPDFViaticoController
 );
 
+// Vista HTML usada por Puppeteer
 router.get(
   "/:id/pdfview",
   verificarSesion,
   verificarPermiso("viaticos", "ver"),
-  mostrarVistaPDF // Este renderiza `verViaticoPdf.ejs`
+  mostrarVistaPDF
 );
 
 // Vista del viático para PDF (sin sesión, solo uso interno)
