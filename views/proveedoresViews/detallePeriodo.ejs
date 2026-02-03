@@ -163,7 +163,9 @@
                             ? 'bg-emerald-100 text-emerald-800 ring-emerald-200'
                             : (m.tipo === 'credito'
                                 ? 'bg-emerald-100 text-emerald-800 ring-emerald-200'
-                                : 'bg-amber-100 text-amber-800 ring-amber-200')) %>">
+                                : 'bg-amber-100 text-amber-800 ring-amber-200')) %>
+                    <!-- ✅ CAMBIO: ancho fijo + centrado para que no “baile” -->
+                    w-16 justify-center text-center shrink-0">
                     <%= m.tipo %>
                   </span>
                   <span class="ml-2 font-medium"><%= m.concepto || '(Sin detalle)' %></span>
