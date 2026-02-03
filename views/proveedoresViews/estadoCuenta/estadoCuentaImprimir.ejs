@@ -127,8 +127,8 @@
             </div>
             <div class="small muted">#<%= proveedor?.numeroProveedor || '—' %> · CUIT: <%= proveedor?.cuit || '—' %>
             </div>
-            <div class="small muted">IVA: <%= proveedor?.condicionIva || '—' %> · Tel: <%= proveedor?.telefonoCelular
-                  || '—' %>
+            <div class="small muted">IVA: <%= proveedor?.condicionIva || '—' %> · Tel:
+              <%= proveedor?.telefonoCelular || '—' %>
             </div>
           </div>
           <div>
@@ -148,20 +148,18 @@
                   <% } %>
             </div>
             <div class="small muted" style="margin-top:6px;">
-              <strong>Total pendiente (USD):</strong> <span class="totals">
-                <%= fmtUSD(totalPendiente || 0) %>
-              </span>
+              <strong>Total pendiente (USD):</strong>
+              <span class="totals"><%= fmtUSD(totalPendiente || 0) %></span>
               <% if (tc> 0) { %><br />
-                <strong>Total pendiente (ARS):</strong> <span class="totals">
-                  <%= fmtARS((totalPendiente||0) * tc) %>
-                </span>
+                <strong>Total pendiente (ARS):</strong>
+                <span class="totals"><%= fmtARS((totalPendiente||0) * tc) %></span>
                 <% } %>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Último pago (como lo tenías) -->
+      <!-- Último pago -->
       <div class="card">
         <h2>Último pago registrado</h2>
         <% if (!ultimoPago) { %>
@@ -179,28 +177,19 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>
-                    <%= ultimoPago.periodo || '—' %>
-                  </td>
-                  <td>
-                    <%= _f ? new Date(_f).toLocaleDateString('es-AR') : '—' %>
-                  </td>
-                  <td>
-                    <%= ultimoPago.metodo || '—' %>
-                  </td>
-                  <td>
-                    <%= ultimoPago.comprobante || '—' %>
-                  </td>
-                  <td class="right">
-                    <%= fmtUSD(ultimoPago.importe || 0) %>
-                  </td>
+                  <!-- ✅ CAMBIO: período en negrita -->
+                  <td><strong><%= ultimoPago.periodo || '—' %></strong></td>
+                  <td><%= _f ? new Date(_f).toLocaleDateString('es-AR') : '—' %></td>
+                  <td><%= ultimoPago.metodo || '—' %></td>
+                  <td><%= ultimoPago.comprobante || '—' %></td>
+                  <td class="right"><%= fmtUSD(ultimoPago.importe || 0) %></td>
                 </tr>
               </tbody>
             </table>
             <% } %>
       </div>
 
-      <!-- Períodos adeudados (exactamente como estaba antes) -->
+      <!-- Períodos adeudados -->
       <div class="card">
         <h2>Períodos adeudados</h2>
         <table>
@@ -219,23 +208,23 @@
                 <td colspan="5" class="small muted">Sin períodos vencidos con saldo pendiente.</td>
               </tr>
               <% } else { %>
-                <% pendientes.forEach(p=> { %>
+
+                <% 
+                  const pendientesOrdenados = [...pendientes].sort((a, b) =>
+                    String(b.periodo || '').localeCompare(String(a.periodo || ''))
+                  );
+                %>
+
+                <% pendientesOrdenados.forEach(p=> { %>
                   <tr>
-                    <td>
-                      <%= p.periodo %>
-                    </td>
+                    <!-- ✅ CAMBIO: período en negrita -->
+                    <td><strong><%= p.periodo %></strong></td>
                     <td>
                       <%= p.concepto || (p.cuotaN ? `Cuota ${p.cuotaN}/${p.cuotasTotal||''}` : '—' ) %>
                     </td>
-                    <td class="right">
-                      <%= fmtUSD(p.importe || 0) %>
-                    </td>
-                    <td class="right">
-                      <%= fmtUSD(p.pagado || 0) %>
-                    </td>
-                    <td class="right">
-                      <%= fmtUSD(p.saldo || 0) %>
-                    </td>
+                    <td class="right"><%= fmtUSD(p.importe || 0) %></td>
+                    <td class="right"><%= fmtUSD(p.pagado || 0) %></td>
+                    <td class="right"><%= fmtUSD(p.saldo || 0) %></td>
                   </tr>
                   <% }) %>
                     <% } %>
@@ -248,18 +237,18 @@
         <div class="grid">
           <div></div>
           <div class="right">
-            <div class="totals">Total pendiente (USD): <%= fmtUSD(totalPendiente || 0) %>
-            </div>
+            <div class="totals">Total pendiente (USD): <%= fmtUSD(totalPendiente || 0) %></div>
             <% if (tc> 0) { %>
-              <div class="totals">Total pendiente (ARS): <%= fmtARS((totalPendiente || 0) * tc) %>
-              </div>
+              <div class="totals">Total pendiente (ARS): <%= fmtARS((totalPendiente || 0) * tc) %></div>
               <% } %>
           </div>
         </div>
       </div>
 
-      <div class="small muted">* Cotización valida solo por el día de la fecha, para solicitarla nuevamente comunicarse
-        al teléfono 03834-017741.</div>
+      <div class="small muted">
+        * Cotización valida solo por el día de la fecha, para solicitarla nuevamente comunicarse
+        al teléfono 03834-017741.
+      </div>
   </div>
 </body>
 
