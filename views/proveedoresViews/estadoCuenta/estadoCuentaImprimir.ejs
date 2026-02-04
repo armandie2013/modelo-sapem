@@ -3,17 +3,17 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Estado de cuenta — <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '' ) %>
-  </title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+  <title>Estado de cuenta — <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '' ) %></title>
 
+  <style>
+    * { box-sizing: border-box; }
+
+    /* ✅ Fuente común Win10/Win11 (sin descargar nada) */
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       font-size: 12px;
       color: #111;
+      margin: 0;
     }
 
     .wrap {
@@ -22,30 +22,23 @@
       padding: 16px;
     }
 
-    h1 {
-      font-size: 18px;
-      margin: 0 0 6px;
-    }
+    h1 { font-size: 18px; margin: 0; }
+    h2 { font-size: 14px; margin: 16px 0 8px; }
 
-    h2 {
-      font-size: 14px;
-      margin: 16px 0 8px;
-    }
-
-    .muted {
-      color: #666;
-    }
+    .muted { color: #666; }
 
     .card {
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       margin-bottom: 12px;
+      background: #fff;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
     }
 
     th,
@@ -53,15 +46,12 @@
       padding: 6px 8px;
       border-bottom: 1px solid #eee;
       text-align: left;
+      vertical-align: top;
     }
 
-    th {
-      background: #f7f7f7;
-    }
+    th { background: #f7f7f7; }
 
-    .right {
-      text-align: right;
-    }
+    .right { text-align: right; }
 
     .grid {
       display: grid;
@@ -69,13 +59,8 @@
       gap: 12px;
     }
 
-    .totals {
-      font-weight: 600;
-    }
-
-    .small {
-      font-size: 11px;
-    }
+    .totals { font-weight: 700; }
+    .small { font-size: 11px; }
 
     .badge {
       display: inline-block;
@@ -85,170 +70,350 @@
       background: #eef4ff;
       color: #143f7a;
       border: 1px solid #d7e3ff;
+      white-space: nowrap;
+    }
+
+    /* ✅ Columnas */
+    .col-periodo {
+      width: 60px;
+      min-width: 60px;
+      white-space: nowrap;
+    }
+
+    .col-concepto {
+      width: 320px;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
+
+    .col-importe,
+    .col-pagado,
+    .col-saldo {
+      width: 80px;
+      min-width: 80px;
+      white-space: nowrap;
+    }
+
+    td.right { white-space: nowrap; }
+
+    /* ===========================
+       ✅ CABECERA MÁS LINDA
+       =========================== */
+    .headerCard {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .headerTopBar {
+      height: 6px;
+      background: linear-gradient(90deg, #2563eb, #06b6d4, #10b981);
+    }
+
+    .headerInner {
+      padding: 12px;
+    }
+
+    .headerRow {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .headerTitleBlock {
+      min-width: 0;
+    }
+
+    .headerTitle {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    .headerSub {
+      margin-top: 4px;
+      color: #444;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 11px;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .metaGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      text-align: right;
+      min-width: 220px;
+    }
+
+    .metaLine {
+      font-size: 11px;
+      color: #374151;
+    }
+
+    .metaLine strong {
+      color: #111;
+    }
+
+    .totalsBox {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fafafa;
+      display: grid;
+      gap: 4px;
+    }
+
+    .totLine {
+      font-size: 11px;
+      color: #374151;
+    }
+
+    .totLine b {
+      font-size: 12px;
+      color: #111;
+    }
+
+    /* ✅ NUEVO: agrandar fecha y USD */
+    .metaBig {
+      font-size: 13px;      /* antes 11px */
+      color: #111;
+      font-weight: 700;
+    }
+
+    .badgeBig {
+      font-size: 13px;      /* antes 11px */
+      padding: 4px 10px;    /* más aire */
+      border-radius: 8px;
     }
   </style>
 </head>
 
 <body>
 
-  <header style="margin-top: -8px; margin-bottom: 20px;">
-    <% if (typeof logoDataUri !=='undefined' && logoDataUri) { %>
+  <header style="margin-top: 0px; margin-bottom: 20px;">
+    <% if (typeof logoDataUri !== 'undefined' && logoDataUri) { %>
       <div style="text-align:center; margin-bottom:8px;">
         <img src="<%= logoDataUri %>" alt="Logo" style="max-height:75px; display:inline-block;" />
       </div>
-      <% } %>
+    <% } %>
   </header>
 
   <div class="wrap">
-    <% const fmtUSD=v=> new
-      Intl.NumberFormat('es-AR',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
-      const fmtARS = v => new
-      Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0));
-      const tc = Number(usdAyer?.tipoCotizacion || 0);
-      function fmtFechaISOaDMY(iso) {
-      try {
-      return new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
-      .format(new Date(String(iso)+'T00:00:00'));
-      } catch { return iso || ''; }
-      }
-      const fechaTC = usdAyer?.fecha ? fmtFechaISOaDMY(usdAyer.fecha) : null;
-      %>
+    <%
+      const fmtUSD = v =>
+        new Intl.NumberFormat('es-AR', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(Number(v || 0));
 
-      <!-- Header -->
-      <div class="card">
-        <h1>Estado de cuenta</h1>
-        <div class="grid">
-          <div>
-            <div><strong>Proveedor:</strong>
-              <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '—' ) %>
-            </div>
-            <div><strong>Nombre legal:</strong>
-              <%= proveedor?.nombreReal || '—' %>
-            </div>
-            <div class="small muted">#<%= proveedor?.numeroProveedor || '—' %> · CUIT: <%= proveedor?.cuit || '—' %>
-            </div>
-            <div class="small muted">IVA: <%= proveedor?.condicionIva || '—' %> · Tel:
-              <%= proveedor?.telefonoCelular || '—' %>
+      const fmtARS = v =>
+        new Intl.NumberFormat('es-AR', {
+          style: 'currency',
+          currency: 'ARS',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(Number(v || 0));
+
+      const tc = Number(usdAyer?.tipoCotizacion || 0);
+
+      function fmtFechaISOaDMY(iso) {
+        try {
+          return new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            .format(new Date(String(iso) + 'T00:00:00'));
+        } catch { return iso || ''; }
+      }
+
+      const fechaTC = usdAyer?.fecha ? fmtFechaISOaDMY(usdAyer.fecha) : null;
+
+      function sanearConcepto(txt) {
+        const s = String(txt || '');
+        return s
+          .replace(/\bmensual\b/gi, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+      }
+
+      const proveedorDisplay = (proveedor?.nombreFantasia || proveedor?.nombreReal || '—');
+      const proveedorLegal   = (proveedor?.nombreReal || '—');
+      const provCuit         = (proveedor?.cuit || '—');
+      const provIva          = (proveedor?.condicionIva || '—');
+      const provTel          = (proveedor?.telefonoCelular || '—');
+      const fechaReporte     = (hoy ? new Date(hoy).toLocaleDateString('es-AR') : '');
+    %>
+
+    <!-- ✅ Header mejorado -->
+    <div class="card headerCard">
+      <div class="headerTopBar"></div>
+
+      <div class="headerInner">
+        <div class="headerRow">
+          <div class="headerTitleBlock">
+            <h1 class="headerTitle">Estado de cuenta</h1>
+
+            <div class="headerSub">
+              <div style="margin-bottom:4px;">
+                <strong><%= proveedorDisplay %></strong>
+              </div>
+
+              <div class="small muted">
+                Nombre legal: <strong><%= proveedorLegal %></strong>
+              </div>
+
+              <div class="small muted" style="margin-top:4px;">
+                CUIT:
+                <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"><%= provCuit %></span>
+                · IVA: <%= provIva %>
+                · Tel: <%= provTel %>
+              </div>
             </div>
           </div>
-          <div>
-            <div><strong>Fecha reporte:</strong>
-              <%= (hoy ? new Date(hoy).toLocaleDateString('es-AR') : '' ) %>
+
+          <div class="metaGrid">
+            <!-- ✅ Fecha más grande -->
+            <div class="metaLine metaBig">
+              Fecha reporte: <%= fechaReporte %>
             </div>
-            <div style="margin-top:4px;">
-              <% if (tc> 0) { %>
-                <span class="badge">
+
+            <!-- ✅ Badge USD más grande -->
+            <div class="metaLine">
+              <% if (tc > 0) { %>
+                <span class="badge badgeBig">
                   USD: <strong>
-                    <%= new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(tc) %>
+                    <%= new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(tc) %>
                   </strong>
                   <%= fechaTC ? ` · ${fechaTC}` : '' %>
                 </span>
-                <% } else { %>
-                  <span class="small muted">TC de ayer no disponible</span>
-                  <% } %>
+              <% } else { %>
+                <span class="small muted">TC de ayer no disponible</span>
+              <% } %>
             </div>
-            <div class="small muted" style="margin-top:6px;">
-              <strong>Total pendiente (USD):</strong>
-              <span class="totals"><%= fmtUSD(totalPendiente || 0) %></span>
-              <% if (tc> 0) { %><br />
-                <strong>Total pendiente (ARS):</strong>
-                <span class="totals"><%= fmtARS((totalPendiente||0) * tc) %></span>
-                <% } %>
+
+            <div class="totalsBox">
+              <div class="totLine">
+                Total pendiente (USD): <b><%= fmtUSD(totalPendiente || 0) %></b>
+              </div>
+              <% if (tc > 0) { %>
+                <div class="totLine">
+                  Total pendiente (ARS): <b><%= fmtARS((totalPendiente || 0) * tc) %></b>
+                </div>
+              <% } %>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Último pago -->
-      <div class="card">
-        <h2>Último pago registrado</h2>
-        <% if (!ultimoPago) { %>
-          <div class="small muted">No hay pagos registrados para el período.</div>
-          <% } else { const _f=ultimoPago.fecha || ultimoPago.createdAt; %>
-            <table>
-              <thead>
-                <tr>
-                  <th>Período</th>
-                  <th>Fecha</th>
-                  <th>Método</th>
-                  <th>Comprobante</th>
-                  <th class="right">Importe</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <!-- ✅ CAMBIO: período en negrita -->
-                  <td><strong><%= ultimoPago.periodo || '—' %></strong></td>
-                  <td><%= _f ? new Date(_f).toLocaleDateString('es-AR') : '—' %></td>
-                  <td><%= ultimoPago.metodo || '—' %></td>
-                  <td><%= ultimoPago.comprobante || '—' %></td>
-                  <td class="right"><%= fmtUSD(ultimoPago.importe || 0) %></td>
-                </tr>
-              </tbody>
-            </table>
-            <% } %>
-      </div>
+    <!-- Último pago -->
+    <div class="card">
+      <h2>Último pago registrado</h2>
 
-      <!-- Períodos adeudados -->
-      <div class="card">
-        <h2>Períodos adeudados</h2>
+      <% if (!ultimoPago) { %>
+        <div class="small muted">No hay pagos registrados para el período.</div>
+      <% } else { const _f = ultimoPago.fecha || ultimoPago.createdAt; %>
+
         <table>
           <thead>
             <tr>
-              <th>Período</th>
-              <th>Concepto</th>
-              <th class="right">Importe</th>
-              <th class="right">Pagado</th>
-              <th class="right">Saldo</th>
+              <th class="col-periodo">Período</th>
+              <th>Fecha</th>
+              <th>Método</th>
+              <th>Comprobante</th>
+              <th class="right col-importe">Importe</th>
             </tr>
           </thead>
           <tbody>
-            <% if (!pendientes || pendientes.length===0) { %>
-              <tr>
-                <td colspan="5" class="small muted">Sin períodos vencidos con saldo pendiente.</td>
-              </tr>
-              <% } else { %>
-
-                <% 
-                  const pendientesOrdenados = [...pendientes].sort((a, b) =>
-                    String(b.periodo || '').localeCompare(String(a.periodo || ''))
-                  );
-                %>
-
-                <% pendientesOrdenados.forEach(p=> { %>
-                  <tr>
-                    <!-- ✅ CAMBIO: período en negrita -->
-                    <td><strong><%= p.periodo %></strong></td>
-                    <td>
-                      <%= p.concepto || (p.cuotaN ? `Cuota ${p.cuotaN}/${p.cuotasTotal||''}` : '—' ) %>
-                    </td>
-                    <td class="right"><%= fmtUSD(p.importe || 0) %></td>
-                    <td class="right"><%= fmtUSD(p.pagado || 0) %></td>
-                    <td class="right"><%= fmtUSD(p.saldo || 0) %></td>
-                  </tr>
-                  <% }) %>
-                    <% } %>
+            <tr>
+              <td class="col-periodo"><strong><%= ultimoPago.periodo || '—' %></strong></td>
+              <td><%= _f ? new Date(_f).toLocaleDateString('es-AR') : '—' %></td>
+              <td><%= ultimoPago.metodo || '—' %></td>
+              <td><%= ultimoPago.comprobante || '—' %></td>
+              <td class="right col-importe"><%= fmtUSD(ultimoPago.importe || 0) %></td>
+            </tr>
           </tbody>
         </table>
-      </div>
 
-      <!-- Totales -->
-      <div class="card">
-        <div class="grid">
-          <div></div>
-          <div class="right">
-            <div class="totals">Total pendiente (USD): <%= fmtUSD(totalPendiente || 0) %></div>
-            <% if (tc> 0) { %>
-              <div class="totals">Total pendiente (ARS): <%= fmtARS((totalPendiente || 0) * tc) %></div>
-              <% } %>
-          </div>
+      <% } %>
+    </div>
+
+    <!-- Períodos adeudados -->
+    <div class="card">
+      <h2>Períodos adeudados</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="col-periodo">Período</th>
+            <th class="col-concepto">Concepto</th>
+            <th class="right col-importe">Importe</th>
+            <th class="right col-pagado">Pagado</th>
+            <th class="right col-saldo">Saldo</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if (!pendientes || pendientes.length === 0) { %>
+            <tr>
+              <td colspan="5" class="small muted">Sin períodos vencidos con saldo pendiente.</td>
+            </tr>
+          <% } else { %>
+
+            <%
+              const pendientesOrdenados = [...pendientes].sort((a, b) =>
+                String(b.periodo || '').localeCompare(String(a.periodo || ''))
+              );
+            %>
+
+            <% pendientesOrdenados.forEach(p => { %>
+              <tr>
+                <td class="col-periodo"><strong><%= p.periodo %></strong></td>
+                <td class="col-concepto">
+                  <%= sanearConcepto(p.concepto || (p.cuotaN ? `Cuota ${p.cuotaN}/${p.cuotasTotal||''}` : '—')) %>
+                </td>
+                <td class="right col-importe"><%= fmtUSD(p.importe || 0) %></td>
+                <td class="right col-pagado"><%= fmtUSD(p.pagado || 0) %></td>
+                <td class="right col-saldo"><%= fmtUSD(p.saldo || 0) %></td>
+              </tr>
+            <% }) %>
+
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totales -->
+    <div class="card">
+      <div class="grid">
+        <div></div>
+        <div class="right">
+          <div class="totals">Total pendiente (USD): <%= fmtUSD(totalPendiente || 0) %></div>
+          <% if (tc > 0) { %>
+            <div class="totals">Total pendiente (ARS): <%= fmtARS((totalPendiente || 0) * tc) %></div>
+          <% } %>
         </div>
       </div>
+    </div>
 
-      <div class="small muted">
-        * Cotización valida solo por el día de la fecha, para solicitarla nuevamente comunicarse
-        al teléfono 03834-017741.
-      </div>
+    <div class="small muted">
+      * Cotización valida solo por el día de la fecha, para solicitarla nuevamente comunicarse al teléfono 03834-017741.
+    </div>
+
   </div>
 </body>
 
