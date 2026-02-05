@@ -1,38 +1,197 @@
-<div class="bg-white max-w-6xl mx-auto p-8 rounded-2xl shadow-xl border border-gray-300">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl text-gray-800">Listado de Personal</h1>
-    <a href="/personas/agregar" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
-      Agregar Personal
-    </a>
-  </div>
+<div class="px-2 sm:px-4 py-0 sm:py-5 safe-bottom md:pb-0 md:min-h-[calc(100vh-240px)]">
+  <div class="mx-auto max-w-6xl">
 
-  <table class="w-full text-sm table-auto border-collapse">
-    <thead class="bg-gray-100 text-left">
-      <tr>
-        <th class="border px-4 py-2">#</th>
-        <th class="border px-4 py-2">Legajo</th>
-        <th class="border px-4 py-2">Nombre y Apellido</th>
-        <th class="border px-4 py-2">DNI</th>
-        <th class="border px-4 py-2">Cargo</th>
-        <th class="border px-4 py-2 text-center">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% personas.forEach(p => { %>
-        <tr class="border-t hover:bg-gray-50 transition">
-          <td class="border px-4 py-2"><%= p.numeroOrden %></td>
-          <td class="border px-4 py-2"><%= p.legajo %></td>
-          <td class="border px-4 py-2"><%= p.nombreApellido %></td>
-          <td class="border px-4 py-2"><%= p.dni %></td>
-          <td class="border px-4 py-2"><%= p.cargo %></td>
-          <td class="border px-4 py-2 text-center">
-            <a href="/personas/editar/<%= p._id %>" class="text-blue-600 hover:underline mr-4">Editar</a>
-            <form action="/personas/eliminar/<%= p._id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta persona?')">
-              <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+      <!-- Header -->
+      <div class="px-6 sm:px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-white to-white">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
+              Listado de Personal
+            </h1>
+            <p class="mt-1 text-sm text-gray-600">
+              Total: <span class="font-semibold text-gray-900"><%= (personas || []).length %></span>
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <!-- Buscador -->
+            <div class="relative w-full sm:w-[360px]">
+              <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd" />
+                </svg>
+              </span>
+
+              <input
+                id="q-personas"
+                type="text"
+                placeholder="Buscar por legajo, nombre, DNI o cargo…"
+                class="w-full rounded-xl border border-gray-300 bg-white px-9 py-2 text-sm text-gray-900 placeholder:text-gray-400
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+            </div>
+
+            <a
+              href="/personas/agregar"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white
+                     hover:bg-blue-700 transition shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
+              </svg>
+              Agregar Personal
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts opcionales -->
+      <div class="px-6 sm:px-8 pt-4">
+        <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900">
+            <span class="font-semibold">OK:</span> <%= mensaje %>
+          </div>
+        <% } %>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-900">
+            <span class="font-semibold">Error:</span> <%= error %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Tabla -->
+      <div class="px-6 sm:px-8 pb-6 pt-4">
+        <div class="overflow-hidden rounded-2xl border border-gray-200">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 text-left text-gray-700">
+                <tr>
+                  <th class="px-4 py-3 font-semibold w-[70px]">#</th>
+                  <th class="px-4 py-3 font-semibold w-[140px]">Legajo</th>
+                  <th class="px-4 py-3 font-semibold min-w-[240px]">Nombre y Apellido</th>
+                  <th class="px-4 py-3 font-semibold w-[160px]">DNI</th>
+                  <th class="px-4 py-3 font-semibold min-w-[160px]">Cargo</th>
+                  <th class="px-4 py-3 font-semibold text-right w-[220px]">Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y divide-gray-100 bg-white">
+                <% if (!personas || personas.length === 0) { %>
+                  <tr>
+                    <td colspan="6" class="px-4 py-10 text-center text-gray-600">
+                      No hay personal cargado.
+                      <a href="/personas/agregar" class="text-blue-700 hover:underline font-semibold">
+                        Agregar el primero
+                      </a>
+                    </td>
+                  </tr>
+                <% } else { %>
+
+                  <% personas.forEach((p) => { %>
+                    <tr
+                      class="persona-row hover:bg-gray-50 transition"
+                      data-search="<%= `${p.numeroOrden||''} ${p.legajo||''} ${p.nombreApellido||''} ${p.dni||''} ${p.cargo||''}`.toLowerCase() %>"
+                    >
+                      <td class="px-4 py-3 text-gray-900">
+                        <span class="inline-flex items-center justify-center min-w-[2.2rem] rounded-lg bg-gray-100 border border-gray-200 px-2 py-1 text-xs font-semibold">
+                          <%= p.numeroOrden %>
+                        </span>
+                      </td>
+
+                      <td class="px-4 py-3 text-gray-900">
+                        <span class="font-medium"><%= p.legajo || '—' %></span>
+                      </td>
+
+                      <td class="px-4 py-3 text-gray-900">
+                        <div class="flex items-center gap-3">
+                          <div class="h-9 w-9 rounded-xl bg-blue-50 border border-blue-100 grid place-items-center text-blue-700 font-bold">
+                            <%= (p.nombreApellido || '?').trim().slice(0,1).toUpperCase() %>
+                          </div>
+                          <div class="min-w-0">
+                            <div class="font-semibold truncate"><%= p.nombreApellido || '—' %></div>
+                            <div class="text-xs text-gray-500">
+                              ID: <span class="font-mono"><%= p._id %></span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td class="px-4 py-3 text-gray-900">
+                        <span class="font-mono"><%= p.dni || '—' %></span>
+                      </td>
+
+                      <td class="px-4 py-3 text-gray-900">
+                        <span class="inline-flex items-center rounded-full bg-gray-100 border border-gray-200 px-2.5 py-1 text-xs">
+                          <%= p.cargo || '—' %>
+                        </span>
+                      </td>
+
+                      <td class="px-4 py-3">
+                        <div class="flex justify-end items-center gap-2">
+                          <a
+                            href="/personas/editar/<%= p._id %>"
+                            class="inline-flex items-center gap-2 rounded-xl bg-white border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800
+                                   hover:bg-gray-50 transition"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-700" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                              <path fill-rule="evenodd" d="M2 16a2 2 0 002 2h12a1 1 0 100-2H4V4a1 1 0 10-2 0v12z" clip-rule="evenodd" />
+                            </svg>
+                            Editar
+                          </a>
+
+                          <form
+                            action="/personas/eliminar/<%= p._id %>?_method=DELETE"
+                            method="POST"
+                            class="inline"
+                            onsubmit="return confirm('¿Eliminar esta persona?')"
+                          >
+                            <button
+                              type="submit"
+                              class="inline-flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700
+                                     hover:bg-red-100 transition"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zm-1 6a1 1 0 012 0v7a1 1 0 11-2 0V8zm5 0a1 1 0 10-2 0v7a1 1 0 102 0V8z" clip-rule="evenodd" />
+                              </svg>
+                              Eliminar
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <p class="mt-3 text-xs text-gray-500">
+          Tip: podés buscar por DNI, legajo, cargo o nombre. (Es filtro visual, no toca el backend).
+        </p>
+      </div>
+
+    </div>
+  </div>
 </div>
+
+<script>
+  // Buscador front-only (sin tocar controlador)
+  (function () {
+    const input = document.getElementById('q-personas');
+    if (!input) return;
+
+    const rows = Array.from(document.querySelectorAll('tr.persona-row'));
+    input.addEventListener('input', () => {
+      const q = (input.value || '').toLowerCase().trim();
+      rows.forEach((tr) => {
+        const hay = (tr.dataset.search || '');
+        tr.style.display = (!q || hay.includes(q)) ? '' : 'none';
+      });
+    });
+  })();
+</script>
