@@ -1,191 +1,311 @@
-<div class="bg-gray-100 min-h-screen py-8 px-4">
-  <form action="/personas/editar/<%= persona._id %>?_method=PUT" method="POST"
-    class="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-300 space-y-6">
+<div class="min-h-[calc(100vh-240px)] px-2 sm:px-4 py-0 sm:py-5 safe-bottom">
+  <form
+    action="/personas/editar/<%= persona._id %>?_method=PUT"
+    method="POST"
+    class="mx-auto max-w-6xl bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden"
+  >
 
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Editar Personal</h1>
+    <!-- Header -->
+    <div class="px-5 sm:px-7 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-white to-white">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div class="min-w-0">
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">
+            Editar Personal
+          </h1>
+          <p class="mt-1 text-sm text-gray-600">
+            Modificá los datos y actualizá permisos por módulo.
+          </p>
+        </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-sm">
+        <div class="flex gap-2">
+          <a
+            href="/personas/dashboard"
+            class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+          >
+            Volver
+          </a>
+        </div>
+      </div>
+    </div>
 
-      <!-- Columna 1: Datos personales -->
-      <div class="space-y-3 col-span-1">
-        <div>
-          <label class="block font-medium text-gray-700">N° de Orden</label>
-          <input type="number" name="numeroOrden" value="<%= persona.numeroOrden %>" required
-            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
+    <!-- Contenido -->
+    <div class="px-5 sm:px-7 py-5 space-y-5">
+
+      <!-- ✅ Datos personales -->
+      <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h2 class="text-sm font-extrabold text-gray-900">Datos de la persona</h2>
+          <p class="text-[12px] text-gray-600 mt-1">Información base para identificar al personal.</p>
         </div>
-        <div>
-          <label class="block font-medium text-gray-700">Legajo</label>
-          <input type="text" name="legajo" value="<%= persona.legajo %>" required
-            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
-        </div>
-        <div>
-          <label class="block font-medium text-gray-700">Nombre y Apellido</label>
-          <input type="text" name="nombreApellido" value="<%= persona.nombreApellido %>" required
-            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
-        </div>
-        <div>
-          <label class="block font-medium text-gray-700">DNI</label>
-          <input type="text" name="dni" value="<%= persona.dni %>" required
-            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
-        </div>
-        <div>
-          <label class="block font-medium text-gray-700">Cargo</label>
-          <input type="text" name="cargo" value="<%= persona.cargo %>" required
-            class="w-full border border-gray-300 px-3 py-2 rounded-lg text-xs">
+
+        <div class="p-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+
+            <div class="lg:col-span-1">
+              <label class="block text-[11px] font-semibold text-gray-700 mb-1">N° de Orden</label>
+              <input
+                type="number"
+                name="numeroOrden"
+                value="<%= persona.numeroOrden %>"
+                required
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+            </div>
+
+            <div class="lg:col-span-1">
+              <label class="block text-[11px] font-semibold text-gray-700 mb-1">Legajo</label>
+              <input
+                type="text"
+                name="legajo"
+                value="<%= persona.legajo %>"
+                required
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+            </div>
+
+            <div class="sm:col-span-2 lg:col-span-2">
+              <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nombre y Apellido</label>
+              <input
+                type="text"
+                name="nombreApellido"
+                value="<%= persona.nombreApellido %>"
+                required
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+            </div>
+
+            <div class="lg:col-span-1">
+              <label class="block text-[11px] font-semibold text-gray-700 mb-1">DNI</label>
+              <input
+                type="text"
+                name="dni"
+                value="<%= persona.dni %>"
+                required
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+            </div>
+
+            <div class="sm:col-span-2 lg:col-span-2">
+              <label class="block text-[11px] font-semibold text-gray-700 mb-1">Cargo</label>
+              <input
+                type="text"
+                name="cargo"
+                value="<%= persona.cargo %>"
+                required
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+            </div>
+
+          </div>
         </div>
       </div>
 
-      <!-- Columna 2: Administración -->
-      <div>
-        <h2 class="font-bold text-gray-800 mb-1 text-sm">Administración</h2>
-
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Proveedores</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][ver]" value="true"
-              <%=persona.modulosPermitidos.proveedores?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][crear]" value="true"
-              <%=persona.modulosPermitidos.proveedores?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][editar]" value="true"
-              <%=persona.modulosPermitidos.proveedores?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[proveedores][eliminar]" value="true"
-              <%=persona.modulosPermitidos.proveedores?.eliminar ? "checked" : "" %>> Eliminar</label>
+      <!-- ✅ Permisos -->
+      <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h2 class="text-sm font-extrabold text-gray-900">Permisos por módulo</h2>
+          <p class="text-[12px] text-gray-600 mt-1">
+            Seleccioná qué puede hacer esta persona dentro de cada módulo.
+          </p>
         </div>
 
-        <!-- Planes -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Planes</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[planes][ver]" value="true"
-              <%=persona.modulosPermitidos.planes?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[planes][crear]" value="true"
-              <%=persona.modulosPermitidos.planes?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[planes][editar]" value="true"
-              <%=persona.modulosPermitidos.planes?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[planes][eliminar]" value="true"
-              <%=persona.modulosPermitidos.planes?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
+        <div class="p-4 space-y-5">
 
-        <!-- Pagos -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Pagos</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[pagos][ver]" value="true"
-              <%=persona.modulosPermitidos.pagos?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[pagos][crear]" value="true"
-              <%=persona.modulosPermitidos.pagos?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[pagos][editar]" value="true"
-              <%=persona.modulosPermitidos.pagos?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[pagos][eliminar]" value="true"
-              <%=persona.modulosPermitidos.pagos?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
+          <style>
+            .perm-chip{
+              display:inline-flex;
+              align-items:center;
+              gap:.4rem;
+              padding:.28rem .55rem;
+              border-radius:999px;
+              border:1px solid #e5e7eb;
+              background:#f9fafb;
+              font-size:11px;
+              color:#111827;
+              user-select:none;
+              line-height:1;
+            }
+            .perm-chip input{
+              width:13px;
+              height:13px;
+              transform: translateY(0.5px);
+            }
+          </style>
 
-        <!-- Notas de crédito -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de crédito</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[notasCredito][ver]" value="true"
-              <%=persona.modulosPermitidos.notasCredito?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[notasCredito][crear]" value="true"
-              <%=persona.modulosPermitidos.notasCredito?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[notasCredito][editar]" value="true"
-              <%=persona.modulosPermitidos.notasCredito?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[notasCredito][eliminar]" value="true"
-              <%=persona.modulosPermitidos.notasCredito?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        <!-- Notas de débito -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Notas de débito</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[notasDebito][ver]" value="true"
-              <%=persona.modulosPermitidos.notasDebito?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[notasDebito][crear]" value="true"
-              <%=persona.modulosPermitidos.notasDebito?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[notasDebito][editar]" value="true"
-              <%=persona.modulosPermitidos.notasDebito?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[notasDebito][eliminar]" value="true"
-              <%=persona.modulosPermitidos.notasDebito?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
+            <!-- ADMINISTRACIÓN -->
+            <div class="rounded-2xl border border-gray-200 overflow-hidden">
+              <div class="px-4 py-3 bg-blue-50 border-b border-gray-200">
+                <h3 class="text-sm font-extrabold text-gray-900">Administración</h3>
+                <p class="text-[12px] text-gray-600 mt-1">Gestión administrativa y financiera.</p>
+              </div>
 
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Plan de pago</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[planesPago][ver]" value="true"
-              <%=persona.modulosPermitidos.planesPago?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[planesPago][crear]" value="true"
-              <%=persona.modulosPermitidos.planesPago?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[planesPago][editar]" value="true"
-              <%=persona.modulosPermitidos.planesPago?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[planesPago][eliminar]" value="true"
-              <%=persona.modulosPermitidos.planesPago?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
+              <div class="p-4 space-y-3 text-sm">
 
-        <!-- 🔹 NUEVO: Tareas programadas -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Tareas programadas</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[tareas][ver]" value="true"
-              <%=persona.modulosPermitidos.tareas?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[tareas][ejecutar]" value="true"
-              <%=persona.modulosPermitidos.tareas?.ejecutar ? "checked" : "" %>> Ejecutar</label>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Proveedores</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[proveedores][ver]" value="true" <%= persona.modulosPermitidos.proveedores?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[proveedores][crear]" value="true" <%= persona.modulosPermitidos.proveedores?.crear ? "checked" : "" %>> Crear</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[proveedores][editar]" value="true" <%= persona.modulosPermitidos.proveedores?.editar ? "checked" : "" %>> Editar</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[proveedores][eliminar]" value="true" <%= persona.modulosPermitidos.proveedores?.eliminar ? "checked" : "" %>> Eliminar</label>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Planes</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planes][ver]" value="true" <%= persona.modulosPermitidos.planes?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planes][crear]" value="true" <%= persona.modulosPermitidos.planes?.crear ? "checked" : "" %>> Crear</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planes][editar]" value="true" <%= persona.modulosPermitidos.planes?.editar ? "checked" : "" %>> Editar</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planes][eliminar]" value="true" <%= persona.modulosPermitidos.planes?.eliminar ? "checked" : "" %>> Eliminar</label>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Pagos</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[pagos][ver]" value="true" <%= persona.modulosPermitidos.pagos?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[pagos][crear]" value="true" <%= persona.modulosPermitidos.pagos?.crear ? "checked" : "" %>> Crear</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[pagos][editar]" value="true" <%= persona.modulosPermitidos.pagos?.editar ? "checked" : "" %>> Editar</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[pagos][eliminar]" value="true" <%= persona.modulosPermitidos.pagos?.eliminar ? "checked" : "" %>> Eliminar</label>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Notas de crédito</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasCredito][ver]" value="true" <%= persona.modulosPermitidos.notasCredito?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasCredito][crear]" value="true" <%= persona.modulosPermitidos.notasCredito?.crear ? "checked" : "" %>> Crear</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasCredito][editar]" value="true" <%= persona.modulosPermitidos.notasCredito?.editar ? "checked" : "" %>> Editar</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasCredito][eliminar]" value="true" <%= persona.modulosPermitidos.notasCredito?.eliminar ? "checked" : "" %>> Eliminar</label>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Notas de débito</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasDebito][ver]" value="true" <%= persona.modulosPermitidos.notasDebito?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasDebito][crear]" value="true" <%= persona.modulosPermitidos.notasDebito?.crear ? "checked" : "" %>> Crear</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasDebito][editar]" value="true" <%= persona.modulosPermitidos.notasDebito?.editar ? "checked" : "" %>> Editar</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[notasDebito][eliminar]" value="true" <%= persona.modulosPermitidos.notasDebito?.eliminar ? "checked" : "" %>> Eliminar</label>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Plan de pago</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planesPago][ver]" value="true" <%= persona.modulosPermitidos.planesPago?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planesPago][crear]" value="true" <%= persona.modulosPermitidos.planesPago?.crear ? "checked" : "" %>> Crear</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planesPago][editar]" value="true" <%= persona.modulosPermitidos.planesPago?.editar ? "checked" : "" %>> Editar</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[planesPago][eliminar]" value="true" <%= persona.modulosPermitidos.planesPago?.eliminar ? "checked" : "" %>> Eliminar</label>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p class="font-semibold text-gray-900">Tareas programadas</p>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[tareas][ver]" value="true" <%= persona.modulosPermitidos.tareas?.ver ? "checked" : "" %>> Ver</label>
+                    <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[tareas][ejecutar]" value="true" <%= persona.modulosPermitidos.tareas?.ejecutar ? "checked" : "" %>> Ejecutar</label>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- PROYECTOS + TÉCNICA + GERENCIA -->
+            <div class="space-y-4">
+
+              <div class="rounded-2xl border border-gray-200 overflow-hidden">
+                <div class="px-4 py-3 bg-emerald-50 border-b border-gray-200">
+                  <h3 class="text-sm font-extrabold text-gray-900">Proyectos</h3>
+                  <p class="text-[12px] text-gray-600 mt-1">Casos y seguimiento de proyectos.</p>
+                </div>
+
+                <div class="p-4 space-y-3 text-sm">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p class="font-semibold text-gray-900">Escuelas</p>
+                    <div class="flex flex-wrap gap-2">
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[escuelas][ver]" value="true" <%= persona.modulosPermitidos.escuelas?.ver ? "checked" : "" %>> Ver</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[escuelas][crear]" value="true" <%= persona.modulosPermitidos.escuelas?.crear ? "checked" : "" %>> Crear</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[escuelas][editar]" value="true" <%= persona.modulosPermitidos.escuelas?.editar ? "checked" : "" %>> Editar</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[escuelas][eliminar]" value="true" <%= persona.modulosPermitidos.escuelas?.eliminar ? "checked" : "" %>> Eliminar</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-gray-200 overflow-hidden">
+                <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <h3 class="text-sm font-extrabold text-gray-900">Técnica</h3>
+                  <p class="text-[12px] text-gray-600 mt-1">Operación técnica y soporte.</p>
+                </div>
+
+                <div class="p-4 space-y-3 text-sm">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p class="font-semibold text-gray-900">Viáticos</p>
+                    <div class="flex flex-wrap gap-2">
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true" <%= persona.modulosPermitidos.viaticos?.ver ? "checked" : "" %>> Ver</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true" <%= persona.modulosPermitidos.viaticos?.crear ? "checked" : "" %>> Crear</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true" <%= persona.modulosPermitidos.viaticos?.editar ? "checked" : "" %>> Editar</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true" <%= persona.modulosPermitidos.viaticos?.eliminar ? "checked" : "" %>> Eliminar</label>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p class="font-semibold text-gray-900">Pedido de Materiales</p>
+                    <div class="flex flex-wrap gap-2">
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[materiales][ver]" value="true" <%= persona.modulosPermitidos.materiales?.ver ? "checked" : "" %>> Ver</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[materiales][crear]" value="true" <%= persona.modulosPermitidos.materiales?.crear ? "checked" : "" %>> Crear</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[materiales][editar]" value="true" <%= persona.modulosPermitidos.materiales?.editar ? "checked" : "" %>> Editar</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[materiales][eliminar]" value="true" <%= persona.modulosPermitidos.materiales?.eliminar ? "checked" : "" %>> Eliminar</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-gray-200 overflow-hidden">
+                <div class="px-4 py-3 bg-yellow-50 border-b border-gray-200">
+                  <h3 class="text-sm font-extrabold text-gray-900">Gerencia</h3>
+                  <p class="text-[12px] text-gray-600 mt-1">Módulos estratégicos / reportes.</p>
+                </div>
+
+                <div class="p-4">
+                  <p class="text-gray-500 italic text-sm">Sin módulos asignados</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Columna 3: Gerencia -->
-      <div>
-        <h2 class="font-bold text-gray-800 mb-1 text-sm">Gerencia</h2>
-        <p class="text-gray-500 italic text-xs mt-2 ">Sin módulos asignados</p>
-      </div>
+      <!-- ✅ Footer acciones (desktop + mobile) -->
+      <div class="pt-1">
+        <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
+          <button
+            type="submit"
+            class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition shadow-sm"
+          >
+            Guardar Cambios
+          </button>
 
-      <!-- Columna 4: Proyectos -->
-      <div>
-        <h2 class="font-bold text-gray-800 mb-1 text-sm">Proyectos</h2>
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Escuelas</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][ver]" value="true"
-              <%=persona.modulosPermitidos.escuelas?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][crear]" value="true"
-              <%=persona.modulosPermitidos.escuelas?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][editar]" value="true"
-              <%=persona.modulosPermitidos.escuelas?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[escuelas][eliminar]" value="true"
-              <%=persona.modulosPermitidos.escuelas?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
-      </div>
-
-      <!-- Columna 5: Técnica -->
-      <div>
-        <h2 class="font-bold text-gray-800 mb-1 text-sm">Técnica</h2>
-
-        <!-- Viaticos -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Viáticos</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][ver]" value="true"
-              <%=persona.modulosPermitidos.viaticos?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][crear]" value="true"
-              <%=persona.modulosPermitidos.viaticos?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][editar]" value="true"
-              <%=persona.modulosPermitidos.viaticos?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[viaticos][eliminar]" value="true"
-              <%=persona.modulosPermitidos.viaticos?.eliminar ? "checked" : "" %>> Eliminar</label>
-        </div>
-
-        <!-- Pedido de materiales -->
-        <p class="text-gray-600 font-semibold text-xs mb-1 mt-2">Pedido de Materiales</p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-          <label><input type="checkbox" name="modulosPermitidos[materiales][ver]" value="true"
-              <%=persona.modulosPermitidos.materiales?.ver ? "checked" : "" %>> Ver</label>
-          <label><input type="checkbox" name="modulosPermitidos[materiales][crear]" value="true"
-              <%=persona.modulosPermitidos.materiales?.crear ? "checked" : "" %>> Crear</label>
-          <label><input type="checkbox" name="modulosPermitidos[materiales][editar]" value="true"
-              <%=persona.modulosPermitidos.materiales?.editar ? "checked" : "" %>> Editar</label>
-          <label><input type="checkbox" name="modulosPermitidos[materiales][eliminar]" value="true"
-              <%=persona.modulosPermitidos.materiales?.eliminar ? "checked" : "" %>> Eliminar</label>
+          <!-- <a
+            href="/personas/dashboard"
+            class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+          >
+            Volver
+          </a> -->
         </div>
       </div>
 
     </div>
-
-    <!-- Botón -->
-    <div class="text-center pt-6">
-      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">
-        Guardar Cambios
-      </button>
-    </div>
-
   </form>
 </div>
