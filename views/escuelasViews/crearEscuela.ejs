@@ -15,8 +15,8 @@
             </p>
           </div>
 
-          <!-- Botón Volver -->
-          <div>
+          <!-- Botón Volver (oculto en mobile) -->
+          <div class="hidden sm:block">
             <a
               href="/escuelas/dashboard"
               class="inline-flex items-center justify-center rounded-xl bg-gray-100 border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700
@@ -263,7 +263,6 @@
 
     input.addEventListener("input", () => {
       const max = limites[id];
-      // deja solo dígitos y recorta al máximo permitido
       input.value = input.value.replace(/\D/g, "").slice(0, max);
     });
   });
