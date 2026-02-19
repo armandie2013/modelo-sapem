@@ -1,72 +1,261 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Escuela - Ticket <%= escuela.numeroTicket %></title>
+
   <style>
-    body {
+    @page { margin: 28mm 18mm; }
+    * { box-sizing: border-box; }
+
+    body{
       font-family: Arial, sans-serif;
-      font-size: 12px;
-      margin: 40px;
-      color: #000;
+      font-size: 11.5px;
+      color:#111;
+      margin:0;
     }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
+
+    /* ===== Header ===== */
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      padding-bottom:12px;
+      border-bottom:2px solid #111;
+      margin-bottom:16px;
     }
-    .header h1 {
-      font-size: 20px;
-      margin: 0;
+    .header-left h1{
+      font-size:18px;
+      margin:0 0 4px 0;
+      letter-spacing:.2px;
     }
-    .section {
-      margin-bottom: 20px;
+    .muted{ color:#555; }
+    .header-left .sub{
+      margin:0;
+      font-size:11px;
+      color:#444;
+      line-height:1.35;
     }
-    .section h2 {
-      font-size: 14px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #333;
+
+    .header-right{
+      text-align:right;
+      min-width:200px;
     }
-    .field {
-      margin-bottom: 8px;
+    .ticket{
+      font-size:12px;
+      font-weight:700;
+      margin:0 0 6px 0;
     }
-    .label {
-      font-weight: bold;
-      display: inline-block;
-      width: 160px;
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:10.5px;
+      font-weight:700;
+      border:1px solid #111;
     }
-    .value {
-      display: inline-block;
+    .badge.abierto{ background:#eaffea; border-color:#1e7a1e; color:#1e7a1e; }
+    .badge.cerrado{ background:#ffecec; border-color:#b91c1c; color:#b91c1c; }
+
+    /* ===== Sections ===== */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .card{
+      border:1px solid #cfcfcf;
+      border-radius:10px;
+      padding:10px 12px;
+      background:#fff;
+    }
+
+    .section-title{
+      font-size:12px;
+      margin:0 0 8px 0;
+      padding-bottom:6px;
+      border-bottom:1px solid #cfcfcf;
+      letter-spacing:.2px;
+    }
+
+    /* ===== Key/Value rows ===== */
+    .kv{
+      display:flex;
+      gap:10px;
+      padding:4px 0;
+      border-bottom:1px dashed #e0e0e0;
+    }
+    .kv:last-child{ border-bottom:none; }
+    .k{
+      width:150px;
+      font-weight:700;
+      color:#222;
+      flex:0 0 auto;
+    }
+    .v{ color:#111; flex:1 1 auto; }
+
+    /* ===== Table ===== */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11.2px;
+    }
+    th, td{
+      border:1px solid #d6d6d6;
+      padding:7px 8px;
+      vertical-align:top;
+    }
+    th{
+      background:#f4f7ff;
+      text-align:left;
+      font-weight:700;
+      color:#111;
+    }
+
+    /* ===== Detail box ===== */
+    .detail{
+      border:1px solid #cfcfcf;
+      border-left:4px solid #2563eb;
+      border-radius:10px;
+      padding:12px;
+      background:#f7fbff;
+      margin-top:6px;
+      white-space:pre-wrap; /* respeta saltos de línea */
+      word-wrap:break-word;
+      line-height:1.45;
+    }
+
+    /* ===== Footer ===== */
+    .footer{
+      margin-top:18px;
+      padding-top:10px;
+      border-top:1px solid #cfcfcf;
+      font-size:10px;
+      color:#555;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    /* Si el texto del detalle es MUY largo, evitamos que rompa feo */
+    .avoid-break{
+      break-inside:avoid;
+      page-break-inside:avoid;
     }
   </style>
 </head>
+
 <body>
+  <% 
+    const estado = (escuela.estado || '').toLowerCase();
+    const claseEstado = estado === 'cerrado' ? 'cerrado' : 'abierto';
+    const fechaCreacion = escuela.fechaDeCreacion ? new Date(escuela.fechaDeCreacion) : null;
+    const fechaCreacionTxt = fechaCreacion ? fechaCreacion.toLocaleDateString('es-AR') : '';
+    const ahoraTxt = new Date().toLocaleString('es-AR');
+  %>
+
+  <!-- ===== Header ===== -->
   <div class="header">
-    <h1>Detalle del Caso - Escuela</h1>
-    <p>Ticket N° <%= escuela.numeroTicket %></p>
+    <div class="header-left">
+      <h1>Detalle del Caso - Escuela</h1>
+      <p class="sub muted">
+        Documento técnico para archivo y seguimiento.
+      </p>
+    </div>
+
+    <div class="header-right">
+      <p class="ticket">Ticket N° <%= escuela.numeroTicket %></p>
+      <span class="badge <%= claseEstado %>"><%= escuela.estado %></span>
+      <p class="sub muted" style="margin-top:8px;">
+        Fecha de creación: <strong><%= fechaCreacionTxt %></strong>
+      </p>
+    </div>
   </div>
 
-  <div class="section">
-    <h2>Información General</h2>
-    <div class="field"><span class="label">Fecha de creación:</span> <span class="value"><%= new Date(escuela.fechaDeCreacion).toLocaleDateString('es-AR') %></span></div>
-    <div class="field"><span class="label">Creado por:</span> <span class="value"><%= escuela.creadoPor %></span></div>
-    <div class="field"><span class="label">Estado del caso:</span> <span class="value"><%= escuela.estado %></span></div>
+  <!-- ===== Grid: Información general + Datos rápidos ===== -->
+  <div class="grid">
+    <div class="card">
+      <h2 class="section-title">Información general</h2>
+
+      <div class="kv">
+        <div class="k">Creado por</div>
+        <div class="v"><%= escuela.creadoPor %></div>
+      </div>
+
+      <div class="kv">
+        <div class="k">Editado por</div>
+        <div class="v"><%= escuela.editadoPor || 'Sin editar' %></div>
+      </div>
+
+      <div class="kv">
+        <div class="k">Estado</div>
+        <div class="v"><%= escuela.estado %></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Identificación</h2>
+
+      <div class="kv">
+        <div class="k">Predio</div>
+        <div class="v"><%= escuela.predio %></div>
+      </div>
+
+      <div class="kv">
+        <div class="k">CUE</div>
+        <div class="v"><%= escuela.cue %></div>
+      </div>
+
+      <div class="kv">
+        <div class="k">Proveedor</div>
+        <div class="v"><%= escuela.proveedor %></div>
+      </div>
+    </div>
   </div>
 
-  <div class="section">
-    <h2>Datos de la Escuela</h2>
-    <div class="field"><span class="label">Predio:</span> <span class="value"><%= escuela.predio %></span></div>
-    <div class="field"><span class="label">CUE:</span> <span class="value"><%= escuela.cue %></span></div>
-    <div class="field"><span class="label">Nombre:</span> <span class="value"><%= escuela.nombre %></span></div>    
-    <div class="field"><span class="label">Provincia:</span> <span class="value"><%= escuela.provincia %></span></div>
-    <div class="field"><span class="label">Departamento:</span> <span class="value"><%= escuela.departamento %></span></div>
-    <div class="field"><span class="label">Ciudad:</span> <span class="value"><%= escuela.ciudad %></span></div>
-    <div class="field"><span class="label">Dirección:</span> <span class="value"><%= escuela.direccion %></span></div>
-    <div class="field"><span class="label">Proveedor:</span> <span class="value"><%= escuela.proveedor %></span></div>
+  <!-- ===== Datos de la escuela (tabla) ===== -->
+  <div class="card avoid-break">
+    <h2 class="section-title">Datos de la escuela</h2>
+
+    <table>
+      <tbody>
+        <tr>
+          <th style="width:22%;">Nombre</th>
+          <td><%= escuela.nombre %></td>
+        </tr>
+        <tr>
+          <th>Dirección</th>
+          <td><%= escuela.direccion %></td>
+        </tr>
+        <tr>
+          <th>Provincia</th>
+          <td><%= escuela.provincia %></td>
+        </tr>
+        <tr>
+          <th>Departamento</th>
+          <td><%= escuela.departamento %></td>
+        </tr>
+        <tr>
+          <th>Ciudad</th>
+          <td><%= escuela.ciudad %></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="section">
-    <h2>Detalle del Caso</h2>
-    <p><%= escuela.detalleDelCaso %></p>
+  <!-- ===== Detalle del caso ===== -->
+  <div class="card" style="margin-top:14px;">
+    <h2 class="section-title">Detalle del caso</h2>
+    <div class="detail"><%= escuela.detalleDelCaso %></div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">
+    <div>Impreso: <%= ahoraTxt %></div>
+    <div class="muted">Ticket <%= escuela.numeroTicket %> · <%= escuela.estado %></div>
   </div>
 </body>
 </html>
