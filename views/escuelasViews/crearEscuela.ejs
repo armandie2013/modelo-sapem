@@ -17,11 +17,8 @@
 
           <!-- Botón Volver (oculto en mobile) -->
           <div class="hidden sm:block">
-            <a
-              href="/escuelas/dashboard"
-              class="inline-flex items-center justify-center rounded-xl bg-gray-100 border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700
-                     hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            >
+            <a href="/escuelas/dashboard" class="inline-flex items-center justify-center rounded-xl bg-gray-100 border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700
+                     hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30">
               Volver
             </a>
           </div>
@@ -36,217 +33,157 @@
             <h2 class="font-semibold mb-1 text-sm">Por favor corregí los siguientes errores:</h2>
             <ul class="list-disc pl-5 text-xs sm:text-sm space-y-0.5">
               <% errores.forEach(error=> { %>
-                <li><%= error.msg %></li>
-              <% }) %>
+                <li>
+                  <%= error.msg %>
+                </li>
+                <% }) %>
             </ul>
           </div>
-        <% } %>
+          <% } %>
 
-        <form action="/escuelas/crear" method="POST" class="space-y-4">
+            <form action="/escuelas/crear" method="POST" class="space-y-4">
 
-          <% const inputBase = "w-full rounded-xl border bg-white px-3 py-1.5 text-sm text-gray-900 transition " +
-                               "border-blue-200 hover:border-blue-400 " +
-                               "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"; %>
+              <% const inputBase="w-full rounded-xl border bg-white px-3 py-1.5 text-sm text-gray-900 transition "
+                + "border-blue-200 hover:border-blue-400 "
+                + "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" ; %>
 
-          <% const inputMain = "w-full rounded-xl border bg-white px-3 py-1.5 text-sm text-gray-900 transition " +
-                               "border-blue-300 hover:border-blue-500 " +
-                               "focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600"; %>
+                <% const inputMain="w-full rounded-xl border bg-white px-3 py-1.5 text-sm text-gray-900 transition "
+                  + "border-blue-300 hover:border-blue-500 "
+                  + "focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600" ; %>
 
-          <% const inputReadonly = "w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-1.5 text-sm text-gray-700"; %>
+                  <% const
+                    inputReadonly="w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-1.5 text-sm text-gray-700"
+                    ; %>
 
-          <!-- ===== SECCIÓN 1: Identificación del caso ===== -->
-          <section class="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <h2 class="text-sm font-extrabold text-gray-900">Identificación del caso</h2>
-                <p class="text-xs text-gray-600">Datos base para registrar el reclamo.</p>
-              </div>
-            </div>
+                    <!-- ===== SECCIÓN 1: Identificación del caso ===== -->
+                    <section class="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
+                      <div class="flex items-center justify-between mb-3">
+                        <div>
+                          <h2 class="text-sm font-extrabold text-gray-900">Identificación del caso</h2>
+                          <p class="text-xs text-gray-600">Datos base para registrar el reclamo.</p>
+                        </div>
+                      </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <!-- Ticket -->
-              <div class="md:col-span-2">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Ticket</label>
-                <input
-                  type="text"
-                  value=""
-                  readonly
-                  placeholder="Automático"
-                  class="<%= inputReadonly %>"
-                />
-              </div>
+                      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <!-- Ticket -->
+                        <div class="md:col-span-2">
+                          <label class="block text-xs font-medium text-gray-700 mb-1">Ticket</label>
+                          <input type="text" value="" readonly placeholder="Automático" class="<%= inputReadonly %>" />
+                        </div>
 
-              <!-- Fecha -->
-              <div class="md:col-span-2">
-                <label for="fechaDeCreacion" class="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input
-                  type="date"
-                  id="fechaDeCreacion"
-                  name="fechaDeCreacion"
-                  value="<%= datos?.fechaDeCreacion || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
+                        <!-- Fecha -->
+                        <div class="md:col-span-2">
+                          <label for="fechaDeCreacion"
+                            class="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
+                          <input type="date" id="fechaDeCreacion" name="fechaDeCreacion"
+                            value="<%= datos?.fechaDeCreacion || '' %>" required class="<%= inputMain %>" />
+                        </div>
 
-              <!-- Predio (max 6) -->
-              <div class="md:col-span-4">
-                <label for="predio" class="block text-xs font-medium text-gray-700 mb-1">Predio</label>
-                <input
-                  type="text"
-                  id="predio"
-                  name="predio"
-                  value="<%= datos?.predio || '' %>"
-                  required
-                  inputmode="numeric"
-                  maxlength="6"
-                  class="<%= inputMain %>"
-                />
-                <p class="mt-1 text-[11px] text-gray-500">Máximo 6 dígitos.</p>
-              </div>
+                        <!-- Predio (max 6) -->
+                        <div class="md:col-span-4">
+                          <label for="predio" class="block text-xs font-medium text-gray-700 mb-1">Predio</label>
+                          <input type="text" id="predio" name="predio" value="<%= datos?.predio || '' %>" required
+                            inputmode="numeric" maxlength="6" class="<%= inputMain %>" />
+                          <p class="mt-1 text-[11px] text-gray-500">Máximo 6 dígitos.</p>
+                        </div>
 
-              <!-- CUE (max 9) -->
-              <div class="md:col-span-4">
-                <label for="cue" class="block text-xs font-medium text-gray-700 mb-1">CUE</label>
-                <input
-                  type="text"
-                  id="cue"
-                  name="cue"
-                  value="<%= datos?.cue || '' %>"
-                  required
-                  inputmode="numeric"
-                  maxlength="9"
-                  class="<%= inputMain %>"
-                />
-                <p class="mt-1 text-[11px] text-gray-500">Máximo 9 dígitos.</p>
-              </div>
-            </div>
-          </section>
+                        <!-- CUE (max 9) -->
+                        <div class="md:col-span-4">
+                          <label for="cue" class="block text-xs font-medium text-gray-700 mb-1">CUE</label>
+                          <input type="text" id="cue" name="cue" value="<%= datos?.cue || '' %>" required
+                            inputmode="numeric" maxlength="9" class="<%= inputMain %>" />
+                          <p class="mt-1 text-[11px] text-gray-500">Máximo 9 dígitos.</p>
+                        </div>
+                      </div>
+                    </section>
 
-          <!-- ===== SECCIÓN 2: Ubicación ===== -->
-          <section class="rounded-2xl border border-gray-200 bg-white p-4">
-            <div class="mb-3">
-              <h2 class="text-sm font-extrabold text-gray-900">Ubicación</h2>
-              <p class="text-xs text-gray-600">Provincia, departamento y ciudad.</p>
-            </div>
+                    <!-- ===== SECCIÓN 2: Ubicación ===== -->
+                    <section class="rounded-2xl border border-gray-200 bg-white p-4">
+                      <div class="mb-3">
+                        <h2 class="text-sm font-extrabold text-gray-900">Ubicación</h2>
+                        <p class="text-xs text-gray-600">Provincia, departamento y ciudad.</p>
+                      </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div class="md:col-span-4">
-                <label for="provincia" class="block text-xs font-medium text-gray-700 mb-1">Provincia</label>
-                <input
-                  type="text"
-                  id="provincia"
-                  name="provincia"
-                  value="<%= datos?.provincia || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
+                      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-4">
+                          <label for="provincia" class="block text-xs font-medium text-gray-700 mb-1">Provincia</label>
+                          <input type="text" id="provincia" name="provincia" value="<%= datos?.provincia || '' %>"
+                            required class="<%= inputMain %>" />
+                        </div>
 
-              <div class="md:col-span-4">
-                <label for="departamento" class="block text-xs font-medium text-gray-700 mb-1">Departamento</label>
-                <input
-                  type="text"
-                  id="departamento"
-                  name="departamento"
-                  value="<%= datos?.departamento || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
+                        <div class="md:col-span-4">
+                          <label for="departamento"
+                            class="block text-xs font-medium text-gray-700 mb-1">Departamento</label>
+                          <input type="text" id="departamento" name="departamento"
+                            value="<%= datos?.departamento || '' %>" required class="<%= inputMain %>" />
+                        </div>
 
-              <div class="md:col-span-4">
-                <label for="ciudad" class="block text-xs font-medium text-gray-700 mb-1">Ciudad</label>
-                <input
-                  type="text"
-                  id="ciudad"
-                  name="ciudad"
-                  value="<%= datos?.ciudad || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
-            </div>
-          </section>
+                        <div class="md:col-span-4">
+                          <label for="ciudad" class="block text-xs font-medium text-gray-700 mb-1">Ciudad</label>
+                          <input type="text" id="ciudad" name="ciudad" value="<%= datos?.ciudad || '' %>" required
+                            class="<%= inputMain %>" />
+                        </div>
+                      </div>
+                    </section>
 
-          <!-- ===== SECCIÓN 3: Datos de la escuela ===== -->
-          <section class="rounded-2xl border border-gray-200 bg-white p-4">
-            <div class="mb-3">
-              <h2 class="text-sm font-extrabold text-gray-900">Datos de la escuela</h2>
-              <p class="text-xs text-gray-600">Nombre, dirección y proveedor.</p>
-            </div>
+                    <!-- ===== SECCIÓN 3: Datos de la escuela ===== -->
+                    <section class="rounded-2xl border border-gray-200 bg-white p-4">
+                      <div class="mb-3">
+                        <h2 class="text-sm font-extrabold text-gray-900">Datos de la escuela</h2>
+                        <p class="text-xs text-gray-600">Nombre, dirección y proveedor.</p>
+                      </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div class="md:col-span-6">
-                <label for="nombre" class="block text-xs font-medium text-gray-700 mb-1">Nombre de la escuela</label>
-                <input
-                  type="text"
-                  id="nombre"
-                  name="nombre"
-                  value="<%= datos?.nombre || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
+                      <!-- Los 3 inputs en la misma fila (desktop). En mobile se apilan -->
+                      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <!-- Nombre -->
+                        <div class="md:col-span-5">
+                          <label for="nombre" class="block text-xs font-medium text-gray-700 mb-1">Nombre de la
+                            escuela</label>
+                          <input type="text" id="nombre" name="nombre" value="<%= datos?.nombre || '' %>" required
+                            class="<%= inputMain %>" />
+                        </div>
 
-              <div class="md:col-span-6">
-                <label for="direccion" class="block text-xs font-medium text-gray-700 mb-1">Dirección</label>
-                <input
-                  type="text"
-                  id="direccion"
-                  name="direccion"
-                  value="<%= datos?.direccion || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
+                        <!-- Dirección -->
+                        <div class="md:col-span-4">
+                          <label for="direccion" class="block text-xs font-medium text-gray-700 mb-1">Dirección</label>
+                          <input type="text" id="direccion" name="direccion" value="<%= datos?.direccion || '' %>"
+                            required class="<%= inputMain %>" />
+                        </div>
 
-              <div class="md:col-span-12">
-                <label for="proveedor" class="block text-xs font-medium text-gray-700 mb-1">Proveedor</label>
-                <input
-                  type="text"
-                  id="proveedor"
-                  name="proveedor"
-                  value="<%= datos?.proveedor || '' %>"
-                  required
-                  class="<%= inputMain %>"
-                />
-              </div>
-            </div>
-          </section>
+                        <!-- Proveedor -->
+                        <div class="md:col-span-3">
+                          <label for="proveedor" class="block text-xs font-medium text-gray-700 mb-1">Proveedor</label>
+                          <input type="text" id="proveedor" name="proveedor" value="<%= datos?.proveedor || '' %>"
+                            required class="<%= inputMain %>" />
+                        </div>
+                      </div>
+                    </section>
 
-          <!-- ===== SECCIÓN 4: Descripción ===== -->
-          <section class="rounded-2xl border border-gray-200 bg-white p-4">
-            <div class="mb-3">
-              <h2 class="text-sm font-extrabold text-gray-900">Descripción del caso</h2>
-              <p class="text-xs text-gray-600">Detalle técnico del reclamo.</p>
-            </div>
+                    <!-- ===== SECCIÓN 4: Descripción ===== -->
+                    <section class="rounded-2xl border border-gray-200 bg-white p-4">
+                      <div class="mb-3">
+                        <h2 class="text-sm font-extrabold text-gray-900">Descripción del caso</h2>
+                        <p class="text-xs text-gray-600">Detalle técnico del reclamo.</p>
+                      </div>
 
-            <div>
-              <label for="detalleDelCaso" class="block text-xs font-medium text-gray-700 mb-1">Detalle del caso</label>
-              <textarea
-                id="detalleDelCaso"
-                name="detalleDelCaso"
-                rows="6"
-                required
-                class="w-full rounded-xl border bg-white px-3 py-3 text-sm text-gray-900 transition
+                      <div>
+                        <label for="detalleDelCaso" class="block text-xs font-medium text-gray-700 mb-1">Detalle del
+                          caso</label>
+                        <textarea id="detalleDelCaso" name="detalleDelCaso" rows="6" required
+                          class="w-full rounded-xl border bg-white px-3 py-3 text-sm text-gray-900 transition
                        border-blue-300 hover:border-blue-500
-                       focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600 resize-y"
-              ><%= datos?.detalleDelCaso || '' %></textarea>
-            </div>
-          </section>
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600 resize-y"><%= datos?.detalleDelCaso || '' %></textarea>
+                      </div>
+                    </section>
 
-          <div class="flex justify-end pt-3 border-t border-gray-200">
-            <button
-              type="submit"
-              class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white
-                     hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            >
-              Guardar Reclamo
-            </button>
-          </div>
+                    <div class="flex justify-end pt-3 border-t border-gray-200">
+                      <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white
+                     hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        Guardar Reclamo
+                      </button>
+                    </div>
 
-        </form>
+            </form>
 
       </div>
     </div>
