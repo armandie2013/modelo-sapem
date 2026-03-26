@@ -2,10 +2,13 @@
   <div class="bg-white max-w-7xl mx-auto p-6 md:p-8 rounded-2xl shadow-xl border border-gray-300">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <h1 class="text-2xl font-bold text-gray-800">Pedidos de Materiales</h1>
-      <a href="/pedidos-materiales/crear"
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition whitespace-nowrap">
-        Nuevo pedido
-      </a>
+
+      <% if (usuario?.modulosPermitidos?.materiales?.crear) { %>
+        <a href="/pedidos-materiales/crear"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition whitespace-nowrap">
+          Nuevo pedido
+        </a>
+        <% } %>
     </div>
 
     <div class="overflow-x-auto">
@@ -24,79 +27,97 @@
         </thead>
 
         <tbody class="block md:table-row-group text-sm">
-          <% if (pedidos.length === 0) { %>
+          <% if (pedidos.length===0) { %>
             <tr class="block md:table-row border md:border-0">
               <td colspan="7" class="text-center py-4 text-gray-500 block md:table-cell">
                 No hay pedidos cargados
               </td>
             </tr>
-          <% } else { %>
-            <% pedidos.forEach(p => { %>
-              <tr class="block md:table-row border md:border-0 mb-4 md:mb-0 hover:bg-gray-50 rounded-lg md:rounded-none">
+            <% } else { %>
+              <% pedidos.forEach(p=> { %>
+                <tr
+                  class="block md:table-row border md:border-0 mb-4 md:mb-0 hover:bg-gray-50 rounded-lg md:rounded-none">
 
-                <!-- N° Pedido -->
-                <td class="border px-2 py-2 text-center md:table-cell block text-sm">
-                  <%= p.numeroPedido %>
-                </td>
+                  <!-- N° Pedido -->
+                  <td class="border px-2 py-2 text-center md:table-cell block text-sm">
+                    <%= p.numeroPedido %>
+                  </td>
 
-                <!-- Fecha -->
-                <td class="border px-2 py-2 text-center md:table-cell block text-sm">
-                  <span class="font-semibold md:hidden">Fecha: </span>
-                  <%= new Date(p.fecha).toLocaleDateString("es-AR") %>
-                </td>
+                  <!-- Fecha -->
+                  <td class="border px-2 py-2 text-center md:table-cell block text-sm">
+                    <span class="font-semibold md:hidden">Fecha: </span>
+                    <%= new Date(p.fecha).toLocaleDateString("es-AR") %>
+                  </td>
 
-                <!-- Área (muy angosta) -->
-                <td class="border px-2 py-2 text-left md:table-cell block text-sm">
-                  <span class="font-semibold md:hidden">Área: </span>
-                  <span class="block truncate max-w-[85px]" title="<%= p.areaSolicitante %>">
-                    <%= p.areaSolicitante %>
-                  </span>
-                </td>
+                  <!-- Área -->
+                  <td class="border px-2 py-2 text-left md:table-cell block text-sm">
+                    <span class="font-semibold md:hidden">Área: </span>
+                    <span class="block truncate max-w-[85px]" title="<%= p.areaSolicitante %>">
+                      <%= p.areaSolicitante %>
+                    </span>
+                  </td>
 
-                <!-- Proyecto (bien ancho) -->
-                <td class="border px-2 py-2 text-left md:table-cell block text-sm">
-                  <span class="font-semibold md:hidden">Proyecto: </span>
-                  <span class="block" title="<%= p.proyecto %>">
-                    <%= p.proyecto %>
-                  </span>
-                </td>
+                  <!-- Proyecto -->
+                  <td class="border px-2 py-2 text-left md:table-cell block text-sm">
+                    <span class="font-semibold md:hidden">Proyecto: </span>
+                    <span class="block" title="<%= p.proyecto %>">
+                      <%= p.proyecto %>
+                    </span>
+                  </td>
 
-                <!-- Creado por -->
-                <td class="border px-2 py-2 md:table-cell block text-sm">
-                  <span class="font-semibold md:hidden">Creado por: </span>
-                  <%= p.creadoPor || "-" %>
-                </td>
+                  <!-- Creado por -->
+                  <td class="border px-2 py-2 md:table-cell block text-sm">
+                    <span class="font-semibold md:hidden">Creado por: </span>
+                    <%= p.creadoPor || "-" %>
+                  </td>
 
-                <!-- Editado por -->
-                <td class="border px-2 py-2 md:table-cell block text-sm">
-                  <span class="font-semibold md:hidden">Editado por: </span>
-                  <%= p.editadoPor || "-" %>
-                </td>
+                  <!-- Editado por -->
+                  <td class="border px-2 py-2 md:table-cell block text-sm">
+                    <span class="font-semibold md:hidden">Editado por: </span>
+                    <%= p.editadoPor || "-" %>
+                  </td>
 
-                <!-- Acciones -->
-                <td class="border px-2 py-2 text-center md:table-cell block">
-                  <div class="inline-flex flex-wrap gap-2 justify-center text-[13px]">
-                    <a href="/pedidos-materiales/<%= p._id %>/ver" class="text-blue-600 hover:underline">Ver</a>
-                    <a href="/pedidos-materiales/<%= p._id %>/editar" class="text-yellow-600 hover:underline">Editar</a>
-                    <a href="/pedidos-materiales/pdf/<%= p._id %>" target="_blank"
-                      class="text-green-600 hover:underline">PDF</a>
+                  <!-- Acciones -->
+                  <td class="border px-2 py-2 text-center md:table-cell block">
+                    <div class="inline-flex flex-wrap gap-2 justify-center text-[13px]">
 
-                    <form action="/pedidos-materiales/<%= p._id %>/eliminar" method="POST" class="inline">
-                      <button type="submit" class="text-red-600 hover:underline"
-                        onclick="return confirm('¿Seguro que deseas eliminar este pedido?')">
-                        Eliminar
-                      </button>
-                    </form>
-                  </div>
-                </td>
+                      <% if (usuario?.modulosPermitidos?.materiales?.ver) { %>
+                        <a href="/pedidos-materiales/<%= p._id %>/ver" class="text-blue-600 hover:underline">
+                          Ver
+                        </a>
+                        <% } %>
 
-              </tr>
-            <% }) %>
-          <% } %>
+                          <% if (usuario?.modulosPermitidos?.materiales?.editar) { %>
+                            <a href="/pedidos-materiales/<%= p._id %>/editar" class="text-yellow-600 hover:underline">
+                              Editar
+                            </a>
+                            <% } %>
+
+                              <% if (usuario?.modulosPermitidos?.materiales?.ver) { %>
+                                <a href="/pedidos-materiales/pdf/<%= p._id %>" target="_blank"
+                                  class="text-green-600 hover:underline">
+                                  PDF
+                                </a>
+                                <% } %>
+
+                                  <% if (usuario?.modulosPermitidos?.materiales?.eliminar) { %>
+                                    <form action="/pedidos-materiales/<%= p._id %>/eliminar" method="POST"
+                                      class="inline">
+                                      <button type="submit" class="text-red-600 hover:underline"
+                                        onclick="return confirm('¿Seguro que deseas eliminar este pedido?')">
+                                        Eliminar
+                                      </button>
+                                    </form>
+                                    <% } %>
+
+                    </div>
+                  </td>
+
+                </tr>
+                <% }) %>
+                  <% } %>
         </tbody>
       </table>
     </div>
   </div>
 </main>
-
-
