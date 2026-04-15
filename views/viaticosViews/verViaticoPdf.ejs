@@ -180,7 +180,7 @@
       </div>
     <% } %>
 
-    <h1>Solicitud de Viático Nº <%= viatico.numeroDeViaje %></h1>
+    <h1>Orden De trabajo Nº <%= viatico.numeroDeViaje %></h1>
 
     <table class="meta">
       <tr class="meta-row">
@@ -198,7 +198,7 @@
 
     <!-- Datos del viaje -->
     <section class="section">
-      <h2 class="section-title">Datos del viaje</h2>
+      <h2 class="section-title">Detalle de la tarea</h2>
       <div class="underline"></div>
 
       <div class="kv">
@@ -231,7 +231,7 @@
 
     <!-- Viajantes -->
     <section class="section">
-      <h2 class="section-title">Viajantes</h2>
+      <h2 class="section-title">Personal Tecnico</h2>
       <div class="underline"></div>
 
       <table>
@@ -289,7 +289,7 @@
       <!-- TOTAL A RECIBIR (una línea, resaltado) -->
       <div class="total-recibir-box">
         <div class="total-recibir-inner">
-          <strong>Total a recibir (viáticos + adicional):
+          <strong>Total a recibir:
             <span class="currency"></span>
             <%= totalARecibir.toLocaleString("es-AR",{minimumFractionDigits:2}) %>
           </strong>
