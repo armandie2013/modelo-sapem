@@ -1,12 +1,12 @@
-<!-- Header con borde superior redondeado (igual patrón que landing) -->
+<!-- Header con borde superior redondeado (coherente con landing/pagos) -->
 <header class="relative">
   <div class="h-36 sm:h-40 bg-gray-100 rounded-t-3xl"></div>
   <div class="pointer-events-none absolute inset-0 h-36 sm:h-40 rounded-t-3xl
               bg-[radial-gradient(22rem_10rem_at_80%_-20%,rgba(255,255,255,.25),transparent)]"></div>
 </header>
 
-<!-- Contenido sin scroll extra: levantamos la tarjeta con -mt y sin min-h-screen -->
-<main class="relative -mt-20 sm:-mt-24 px-4 pb-6">
+<!-- Contenido sin scroll extra: levantamos la tarjeta con -mt y quitamos min-h-screen -->
+<main class="relative -mt-20 sm:-mt-24 px-4 pb-2">
   <div class="mx-auto max-w-3xl">
     <section class="bg-white p-8 rounded-2xl shadow-2xl border border-gray-300 space-y-6 animate-fade-in-up">
       <% const modoProveedor = !!proveedor; %>
@@ -58,7 +58,8 @@
       <!-- Formulario -->
       <form
         action="<%= modoProveedor ? ('/pagos/proveedores/' + proveedor._id + '/registrar' + (_mostrarTodos ? '?all=1' : '')) : '/pagos/registrar' %>"
-        method="POST" class="space-y-6">
+        method="POST"
+        class="space-y-6">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
 
@@ -72,7 +73,7 @@
                       class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
                 <option value="">Seleccione…</option>
                 <% (proveedores || []).forEach(pr => { %>
-                  <option value="<%= pr._id %>" <%= (String(datos?.proveedor||'') === String(pr._id)) ? 'selected' : '' %>>
+                  <option value="<%= pr._id %>" <%= (String(datos?.proveedor || '') === String(pr._id)) ? 'selected' : '' %>>
                     #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal || pr._id %>
                   </option>
                 <% }) %>
@@ -86,7 +87,6 @@
               <label class="block font-medium text-gray-700">Período / Cargo</label>
 
               <% if (!modoProveedor) { %>
-                <!-- Toggle ver todos (modo genérico) -->
                 <label class="inline-flex items-center gap-2 text-xs text-gray-700 select-none">
                   <input id="toggleAllPeriods" type="checkbox" class="rounded border-gray-300">
                   Ver todos
@@ -97,15 +97,15 @@
             <% if (modoProveedor) { %>
               <select id="periodoSelect" name="periodo" required
                       class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
-                <% if ((cargosPendientes||[]).length === 0) { %>
+                <% if ((cargosPendientes || []).length === 0) { %>
                   <option value="">Sin cargos <%= _mostrarTodos ? 'pendientes' : 'elegibles' %></option>
                 <% } else { %>
                   <option value="">Seleccione…</option>
                   <% (cargosPendientes || []).forEach(c => { %>
                     <option
                       value="<%= c.periodo %>"
-                      <%= (String(datos?.periodo||'') === String(c.periodo)) ? 'selected' : '' %>>
-                      <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                      <%= (String(datos?.periodo || '') === String(c.periodo)) ? 'selected' : '' %>>
+                      <%= c.periodo %> — Total a pagar: US$ <%= Number(c.saldo ?? c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
                       (<%= c.concepto %>)
                     </option>
                   <% }) %>
@@ -130,7 +130,7 @@
             <label class="block font-medium text-gray-700">Fecha</label>
             <input type="date" name="fecha" value="<%= (datos && datos.fecha) || '' %>"
                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
-            <p class="text-xs text-gray-500 mt-1">Si está vacío, se completa con hoy.</p>
+            <p class="text-xs text-gray-500 mt-1">Si está vacío, se completara con la fecha de hoy.</p>
           </div>
 
           <!-- Importe USD con máscara -->
@@ -138,12 +138,20 @@
             <label class="block font-medium text-gray-700">Importe (USD)</label>
             <div class="relative">
               <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">US$</span>
-              <input type="text" id="importeMask" inputmode="numeric" autocomplete="off"
-                     class="w-full border border-gray-300 pl-12 pr-3 py-2 rounded-lg text-sm"
-                     placeholder="0,00" aria-describedby="importeHelp">
+              <input
+                type="text"
+                id="importeMask"
+                inputmode="numeric"
+                autocomplete="off"
+                class="w-full border border-gray-300 pl-12 pr-3 py-2 rounded-lg text-sm"
+                placeholder="0,00"
+                aria-describedby="importeHelp">
             </div>
-            <input type="hidden" name="importe" id="importeHidden"
-                   value="<%= (datos && datos.importe != null && datos.importe !== '') ? Number(datos.importe).toFixed(2) : '' %>">
+            <input
+              type="hidden"
+              name="importe"
+              id="importeHidden"
+              value="<%= (datos && datos.importe != null && datos.importe !== '') ? Number(datos.importe).toFixed(2) : '' %>">
             <p id="importeHelp" class="text-xs text-gray-500 mt-1">
               Escribí el monto. Usá punto o coma para decimales. Ej.: <span class="font-mono">US$ 12.345,67</span>.
             </p>
@@ -154,15 +162,15 @@
             <label class="block font-medium text-gray-700">Medio de pago</label>
             <select name="medioPago" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" required>
               <% const medios = [
-                {value: "transferencia", label: "Transferencia"},
-                {value: "efectivo",      label: "Efectivo"},
-                {value: "cheque",        label: "Cheque"},
-                {value: "deposito",      label: "Depósito"},
-                {value: "otro",          label: "Otro"}
+                { value: "transferencia", label: "Transferencia" },
+                { value: "efectivo",      label: "Efectivo" },
+                { value: "cheque",        label: "Cheque" },
+                { value: "deposito",      label: "Depósito" },
+                { value: "otro",          label: "Otro" }
               ]; %>
               <option value="">Seleccione…</option>
               <% medios.forEach(m => { %>
-                <option value="<%= m.value %>" <%= (String(datos?.medioPago||'').toLowerCase() === m.value) ? 'selected' : '' %>>
+                <option value="<%= m.value %>" <%= (String(datos?.medioPago || '').toLowerCase() === m.value) ? 'selected' : '' %>>
                   <%= m.label %>
                 </option>
               <% }) %>
@@ -204,14 +212,20 @@
   </div>
 </main>
 
-<!-- Animación sutil (igual que landing para consistencia) -->
+<!-- Animación sutil para consistencia -->
 <style>
-  @keyframes fade-in-up { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
-  .animate-fade-in-up { animation: fade-in-up .45s ease-out both; }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up .45s ease-out both;
+  }
 </style>
 
 <script>
-  // fecha por defecto
+  // Fecha default = hoy
   (function ensureToday() {
     const el = document.querySelector('input[name="fecha"]');
     if (el && !el.value) {
@@ -221,7 +235,7 @@
     }
   })();
 
-  // carga períodos (modo genérico) al elegir proveedor + toggle "ver todos"
+  // Modo genérico: cargar períodos al elegir proveedor + toggle "ver todos"
   (function initCargosCombo() {
     const provSel = document.getElementById('proveedorSelect');
     const perSel  = document.getElementById('periodoSelect');
@@ -229,11 +243,12 @@
     if (!provSel || !perSel) return;
 
     const prePeriodo = "<%= String(datos?.periodo || '') %>";
-    let showAll = false; // por defecto: solo vencidos + mes actual
+    let showAll = false;
 
     async function loadCargos(proveedorId) {
       perSel.innerHTML = '<option value="">Cargando…</option>';
       perSel.disabled = true;
+
       try {
         const url = `/pagos/api/cargos-pendientes?proveedor=${encodeURIComponent(proveedorId)}${showAll ? '&all=1' : ''}`;
         const res = await fetch(url, { credentials: 'same-origin' });
@@ -242,11 +257,13 @@
 
         const cargos = data.cargos || [];
         perSel.innerHTML = '';
+
         if (cargos.length === 0) {
           perSel.innerHTML = '<option value="">Sin cargos ' + (showAll ? 'pendientes' : 'elegibles') + '</option>';
           perSel.disabled = true;
           return;
         }
+
         const opt0 = document.createElement('option');
         opt0.value = '';
         opt0.textContent = 'Seleccione…';
@@ -255,13 +272,17 @@
         cargos.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.periodo;
-          opt.textContent = `${c.periodo} — US$ ${Number(c.importe).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${c.concepto})`;
+          opt.textContent = `${c.periodo} — Total a pagar: US$ ${Number(c.saldo ?? c.importe).toLocaleString('es-AR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })} (${c.concepto})`;
           perSel.appendChild(opt);
         });
 
         perSel.disabled = false;
+
         if (prePeriodo) {
-          perSel.value = prePeriodo; // re-seleccionar si venía de un submit con errores
+          perSel.value = prePeriodo;
         }
       } catch (e) {
         perSel.innerHTML = '<option value="">Error al cargar</option>';
@@ -286,22 +307,22 @@
       });
     }
 
-    // si vino proveedor preseleccionado (post con errores), cargar
     if (provSel.value) loadCargos(provSel.value);
   })();
 
-  // máscara USD (coma decimal, miles con punto, 2 decimales)
+  // Máscara importe
   (() => {
-    const input  = document.getElementById('importeMask');
+    const input = document.getElementById('importeMask');
     const hidden = document.getElementById('importeHidden');
     let intDigits = "";
-    let decDigits = ["0","0"];
+    let decDigits = ["0", "0"];
     let editingDecimals = false;
     let decPos = 0;
 
     (function init() {
       const v = hidden.value;
       if (!v) { render(); return; }
+
       const n = Number(v);
       if (Number.isFinite(n)) {
         const entero = Math.trunc(Math.abs(n)).toString();
@@ -312,86 +333,161 @@
       render();
     })();
 
-    function fmtMiles(s){ s=s||"0"; s=s.replace(/^0+(?=\d)/,""); if(s==="") s="0"; return s.replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
-    function updateHidden(){ const num = Number(intDigits||"0") + (Number(decDigits.join(""))/100); hidden.value = num.toFixed(2); }
-    function render(){
+    function fmtMiles(s) {
+      s = s || "0";
+      s = s.replace(/^0+(?=\d)/, "");
+      if (s === "") s = "0";
+      return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function updateHidden() {
+      const num = Number(intDigits || "0") + (Number(decDigits.join("")) / 100);
+      hidden.value = num.toFixed(2);
+    }
+
+    function render() {
       const visible = `${fmtMiles(intDigits)},${decDigits.join("")}`;
       input.value = visible;
       requestAnimationFrame(() => {
         const commaIndex = visible.indexOf(",");
-        let pos = editingDecimals ? (commaIndex+1+decPos) : commaIndex;
+        let pos = editingDecimals ? (commaIndex + 1 + decPos) : commaIndex;
         pos = Math.max(0, Math.min(visible.length, pos));
         input.setSelectionRange(pos, pos);
       });
       updateHidden();
     }
-    function parseAnyNumberLike(str){
-      let s=(str||"").trim(); if(!s) return null;
-      const lastComma=s.lastIndexOf(','), lastDot=s.lastIndexOf('.'); let decSep=null;
-      if(lastComma>-1 || lastDot>-1) decSep=(lastComma>lastDot)?',':'.';
-      if(decSep===','){ s=s.replace(/\./g,''); s=s.replace(',', '.'); }
-      else if(decSep==='.') { s=s.replace(/,/g,''); }
-      else { s=s.replace(/[.,\s]/g,''); }
-      const n=Number(s); return Number.isFinite(n)&&n>=0?n:null;
+
+    function parseAnyNumberLike(str) {
+      let s = (str || "").trim();
+      if (!s) return null;
+
+      const lastComma = s.lastIndexOf(',');
+      const lastDot = s.lastIndexOf('.');
+      let decSep = null;
+
+      if (lastComma > -1 || lastDot > -1) {
+        decSep = (lastComma > lastDot) ? ',' : '.';
+      }
+
+      if (decSep === ',') {
+        s = s.replace(/\./g, '');
+        s = s.replace(',', '.');
+      } else if (decSep === '.') {
+        s = s.replace(/,/g, '');
+      } else {
+        s = s.replace(/[.,\s]/g, '');
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) && n >= 0 ? n : null;
     }
-    input.addEventListener('beforeinput', (e)=>{
-      const t=e.inputType, d=e.data;
-      if(t==='insertText' && /[0-9]/.test(d||"")){
-        if(editingDecimals){
-          if(decPos<2){ decDigits[decPos]=d; decPos++; }
-          else { decPos=0; decDigits[decPos]=d; decPos=1; }
+
+    input.addEventListener('beforeinput', (e) => {
+      const t = e.inputType;
+      const d = e.data;
+
+      if (t === 'insertText' && /[0-9]/.test(d || "")) {
+        if (editingDecimals) {
+          if (decPos < 2) {
+            decDigits[decPos] = d;
+            decPos++;
+          } else {
+            decPos = 0;
+            decDigits[decPos] = d;
+            decPos = 1;
+          }
         } else {
-          intDigits+=d; intDigits=intDigits.replace(/^0+(?=\d)/,'');
+          intDigits += d;
+          intDigits = intDigits.replace(/^0+(?=\d)/, '');
         }
-        e.preventDefault(); render(); return;
-      }
-      if(t==='insertText' && (d==='.'||d===',')){ editingDecimals=true; decPos=0; e.preventDefault(); render(); return; }
-      if(t==='deleteContentBackward'){
         e.preventDefault();
-        if(editingDecimals){
-          if(decPos>0){ decPos--; decDigits[decPos]="0"; }
-          else { editingDecimals=false; }
-        } else {
-          if(intDigits.length>0) intDigits=intDigits.slice(0,-1);
-        }
-        render(); return;
-      }
-      if(t==='insertFromPaste'){
-        e.preventDefault();
-        navigator.clipboard.readText().then(text=>{
-          const n=parseAnyNumberLike(text); if(n===null) return;
-          const entero=Math.trunc(n).toString();
-          const dec=Math.round((n%1)*100).toString().padStart(2,"0");
-          intDigits=entero.replace(/^0+(?=\d)/,'');
-          decDigits=[dec[0],dec[1]];
-          editingDecimals=false; decPos=0; render();
-        }).catch(()=>{});
+        render();
         return;
       }
+
+      if (t === 'insertText' && (d === '.' || d === ',')) {
+        editingDecimals = true;
+        decPos = 0;
+        e.preventDefault();
+        render();
+        return;
+      }
+
+      if (t === 'deleteContentBackward') {
+        e.preventDefault();
+        if (editingDecimals) {
+          if (decPos > 0) {
+            decPos--;
+            decDigits[decPos] = "0";
+          } else {
+            editingDecimals = false;
+          }
+        } else {
+          if (intDigits.length > 0) intDigits = intDigits.slice(0, -1);
+        }
+        render();
+        return;
+      }
+
+      if (t === 'insertFromPaste') {
+        e.preventDefault();
+        navigator.clipboard.readText().then(text => {
+          const n = parseAnyNumberLike(text);
+          if (n === null) return;
+
+          const entero = Math.trunc(n).toString();
+          const dec = Math.round((n % 1) * 100).toString().padStart(2, "0");
+          intDigits = entero.replace(/^0+(?=\d)/, '');
+          decDigits = [dec[0], dec[1]];
+          editingDecimals = false;
+          decPos = 0;
+          render();
+        }).catch(() => {});
+        return;
+      }
+
       e.preventDefault();
     });
-    input.addEventListener('click', ()=>{
-      const visible=input.value;
-      const commaIndex=visible.indexOf(",");
-      const caret=input.selectionStart||0;
-      const isZero=(fmtMiles(intDigits)==="0" && decDigits.join("")==="00");
-      if(isZero){ editingDecimals=false; decPos=0; render(); return; }
-      if(caret>commaIndex){
-        editingDecimals=true;
-        const after=caret-(commaIndex+1);
-        decPos=Math.max(0, Math.min(2, after));
-        if(decPos>=2) decPos=1;
-      } else {
-        editingDecimals=false; decPos=0;
+
+    input.addEventListener('click', () => {
+      const visible = input.value;
+      const commaIndex = visible.indexOf(",");
+      const caret = input.selectionStart || 0;
+      const isZero = (fmtMiles(intDigits) === "0" && decDigits.join("") === "00");
+
+      if (isZero) {
+        editingDecimals = false;
+        decPos = 0;
+        render();
+        return;
       }
+
+      if (caret > commaIndex) {
+        editingDecimals = true;
+        const after = caret - (commaIndex + 1);
+        decPos = Math.max(0, Math.min(2, after));
+        if (decPos >= 2) decPos = 1;
+      } else {
+        editingDecimals = false;
+        decPos = 0;
+      }
+
       render();
     });
-    input.addEventListener('focus', ()=>{
-      if(!input.value){ editingDecimals=false; decPos=0; render(); }
-      else { input.dispatchEvent(new Event('click')); }
+
+    input.addEventListener('focus', () => {
+      if (!input.value) {
+        editingDecimals = false;
+        decPos = 0;
+        render();
+      } else {
+        input.dispatchEvent(new Event('click'));
+      }
     });
-    input.addEventListener('keypress', (e)=>{
-      const ch=e.key; if(!/[0-9.,]/.test(ch)) e.preventDefault();
+
+    input.addEventListener('keypress', (e) => {
+      const ch = e.key;
+      if (!/[0-9.,]/.test(ch)) e.preventDefault();
     });
   })();
 </script>
