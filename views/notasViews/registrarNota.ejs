@@ -79,10 +79,10 @@
               <select id="cargoSelect" name="cargoId" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
                 <option value="">Seleccione…</option>
                 <% [...(cargosDeProveedor || [])]
-                     .sort((a,b) => String(a.periodo).localeCompare(String(b.periodo)))  // viejo → nuevo
+                     .sort((a,b) => String(a.periodo).localeCompare(String(b.periodo)))
                      .forEach(c => { %>
                   <option value="<%= c._id %>" <%= (datos?.cargoId === String(c._id)) ? 'selected' : '' %>>
-                    <%= c.periodo %> — US$ <%= Number(c.importe).toLocaleString('es-AR',{minimumFractionDigits:2}) %> (<%= c.concepto %>)
+                    <%= c.periodo %> — Total a pagar: US$ <%= Number(c.saldo ?? c.importe).toLocaleString('es-AR',{ minimumFractionDigits: 2, maximumFractionDigits: 2 }) %> (<%= c.concepto %>)
                   </option>
                 <% }) %>
               </select>
@@ -167,7 +167,6 @@
   (function initCargosCombo() {
     const provSel = document.getElementById('proveedorSelect');
     const cargoSel = document.getElementById('cargoSelect');
-    // ← FIX: leemos LIM desde un data-atributo para evitar EJS dentro de la expresión JS
     const LIM = Number(document.querySelector('main')?.dataset.limiteNotas || 18);
     if (!provSel || !cargoSel) return;
 
@@ -188,16 +187,21 @@
           cargoSel.disabled = true;
           return;
         }
-        // Intentar mantener selección previa si existe
+
         const prev = '<%- (datos && datos.cargoId) ? String(datos.cargoId) : "" %>';
         cargoSel.innerHTML = '<option value="">Seleccione…</option>';
+
         cargos.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c._id;
-          opt.textContent = `${c.periodo} — US$ ${Number(c.importe).toLocaleString('es-AR',{minimumFractionDigits:2})} (${c.concepto})`;
+          opt.textContent = `${c.periodo} — Total a pagar: US$ ${Number(c.saldo ?? c.importe).toLocaleString('es-AR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })} (${c.concepto})`;
           if (prev && prev === String(c._id)) opt.selected = true;
           cargoSel.appendChild(opt);
         });
+
         cargoSel.disabled = false;
       } catch(e){
         cargoSel.innerHTML = '<option value="">Error al cargar</option>';

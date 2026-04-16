@@ -3,12 +3,11 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Estado de cuenta — <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '' ) %></title>
+  <title>Estado de cuenta — <%= (proveedor?.nombreFantasia || proveedor?.nombreReal || '') %></title>
 
   <style>
     * { box-sizing: border-box; }
 
-    /* ✅ Fuente común Win10/Win11 (sin descargar nada) */
     body {
       font-family: Arial, Helvetica, sans-serif;
       font-size: 12px;
@@ -26,6 +25,8 @@
     h2 { font-size: 14px; margin: 16px 0 8px; }
 
     .muted { color: #666; }
+    .small { font-size: 11px; }
+    .right { text-align: right; }
 
     .card {
       border: 1px solid #ddd;
@@ -35,24 +36,6 @@
       background: #fff;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    th,
-    td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    th { background: #f7f7f7; }
-
-    .right { text-align: right; }
-
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -60,7 +43,6 @@
     }
 
     .totals { font-weight: 700; }
-    .small { font-size: 11px; }
 
     .badge {
       display: inline-block;
@@ -73,34 +55,29 @@
       white-space: nowrap;
     }
 
-    /* ✅ Columnas */
-    .col-periodo {
-      width: 60px;
-      min-width: 60px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      padding: 5px 6px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f7f7f7;
+      font-size: 10px;
+    }
+
+    td.right {
       white-space: nowrap;
     }
 
-    .col-concepto {
-      width: 320px;
-      white-space: normal;
-      word-break: normal;
-      overflow-wrap: anywhere;
-      line-height: 1.2;
-    }
-
-    .col-importe,
-    .col-pagado,
-    .col-saldo {
-      width: 80px;
-      min-width: 80px;
-      white-space: nowrap;
-    }
-
-    td.right { white-space: nowrap; }
-
-    /* ===========================
-       ✅ CABECERA MÁS LINDA
-       =========================== */
     .headerCard {
       padding: 0;
       overflow: hidden;
@@ -140,17 +117,6 @@
       line-height: 1.25;
     }
 
-    .pill {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      font-size: 11px;
-      color: #374151;
-      white-space: nowrap;
-    }
-
     .metaGrid {
       display: grid;
       grid-template-columns: 1fr;
@@ -166,6 +132,18 @@
 
     .metaLine strong {
       color: #111;
+    }
+
+    .metaBig {
+      font-size: 13px;
+      color: #111;
+      font-weight: 700;
+    }
+
+    .badgeBig {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
     }
 
     .totalsBox {
@@ -188,17 +166,44 @@
       color: #111;
     }
 
-    /* ✅ NUEVO: agrandar fecha y USD */
-    .metaBig {
-      font-size: 13px;      /* antes 11px */
+    .serviceLine {
+      margin-top: 10px;
+      font-size: 13px;
       color: #111;
       font-weight: 700;
     }
 
-    .badgeBig {
-      font-size: 12px;      /* antes 11px */
-      padding: 4px 10px;    /* más aire */
-      border-radius: 8px;
+    .totalesSimple td {
+      border-top: 1px solid #ddd;
+      border-bottom: none;
+      padding-top: 9px;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    .tabla-periodos th,
+    .tabla-periodos td {
+      font-size: 10px;
+      padding: 5px 5px;
+    }
+
+    .col-periodo {
+      width: 58px;
+      min-width: 58px;
+      white-space: nowrap;
+    }
+
+    .col-concepto {
+      width: 140px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.15;
+    }
+
+    .col-money {
+      width: 68px;
+      min-width: 68px;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -242,12 +247,39 @@
 
       const fechaTC = usdAyer?.fecha ? fmtFechaISOaDMY(usdAyer.fecha) : null;
 
-      function sanearConcepto(txt) {
-        const s = String(txt || '');
-        return s
+      function limpiarServicioCompleto(txt) {
+        return String(txt || '')
+          .replace(/\d{4}-\d{2}/g, '')
+          .replace(/\bcargo\b/gi, '')
           .replace(/\bmensual\b/gi, '')
+          .replace(/\bplan\b/gi, '')
           .replace(/\s{2,}/g, ' ')
-          .trim();
+          .trim() || 'Servicio mensual';
+      }
+
+      function truncarConcepto(txt) {
+        const s = String(txt || '').toUpperCase().trim();
+
+        if (!s) return 'Servicio mensual';
+
+        const matchVel = s.match(/(\d+)\s*MBPS/);
+
+        if (s.includes('INTERNET') && s.includes('DEDICADO')) {
+          const velocidad = matchVel ? matchVel[1] : '';
+          return velocidad ? `INT. DED. ${velocidad} MBPS` : 'INT. DED.';
+        }
+
+        if (s.includes('CARGO')) {
+          return 'Cargo mensual';
+        }
+
+        return s
+          .replace(/\d{4}-\d{2}/g, '')
+          .replace(/\bCARGO\b/gi, '')
+          .replace(/\bMENSUAL\b/gi, '')
+          .replace(/\bPLAN\b/gi, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim() || 'Servicio mensual';
       }
 
       const proveedorDisplay = (proveedor?.nombreFantasia || proveedor?.nombreReal || '—');
@@ -256,9 +288,15 @@
       const provIva          = (proveedor?.condicionIva || '—');
       const provTel          = (proveedor?.telefonoCelular || '—');
       const fechaReporte     = (hoy ? new Date(hoy).toLocaleDateString('es-AR') : '');
+
+      const pendientesOrdenados = [...(pendientes || [])].sort((a, b) =>
+        String(b.periodo || '').localeCompare(String(a.periodo || ''))
+      );
+
+      const servicioCompleto = limpiarServicioCompleto(servicioActual || '');
     %>
 
-    <!-- ✅ Header mejorado -->
+    <!-- Header -->
     <div class="card headerCard">
       <div class="headerTopBar"></div>
 
@@ -282,16 +320,18 @@
                 · IVA: <%= provIva %>
                 · Tel: <%= provTel %>
               </div>
+
+              <div class="serviceLine">
+                Servicio: <%= servicioCompleto %>
+              </div>
             </div>
           </div>
 
           <div class="metaGrid">
-            <!-- ✅ Fecha más grande -->
             <div class="metaLine metaBig">
               Fecha reporte: <%= fechaReporte %>
             </div>
 
-            <!-- ✅ Badge USD más grande -->
             <div class="metaLine">
               <% if (tc > 0) { %>
                 <span class="badge badgeBig">
@@ -327,7 +367,6 @@
       <% if (!ultimoPago) { %>
         <div class="small muted">No hay pagos registrados para el período.</div>
       <% } else { const _f = ultimoPago.fecha || ultimoPago.createdAt; %>
-
         <table>
           <thead>
             <tr>
@@ -335,7 +374,7 @@
               <th>Fecha</th>
               <th>Método</th>
               <th>Comprobante</th>
-              <th class="right col-importe">Importe</th>
+              <th class="right col-money">Importe</th>
             </tr>
           </thead>
           <tbody>
@@ -344,11 +383,10 @@
               <td><%= _f ? new Date(_f).toLocaleDateString('es-AR') : '—' %></td>
               <td><%= ultimoPago.metodo || '—' %></td>
               <td><%= ultimoPago.comprobante || '—' %></td>
-              <td class="right col-importe"><%= fmtUSD(ultimoPago.importe || 0) %></td>
+              <td class="right col-money"><%= fmtUSD(ultimoPago.importe || 0) %></td>
             </tr>
           </tbody>
         </table>
-
       <% } %>
     </div>
 
@@ -356,42 +394,41 @@
     <div class="card">
       <h2>Períodos adeudados</h2>
 
-      <table>
+      <table class="tabla-periodos">
         <thead>
           <tr>
             <th class="col-periodo">Período</th>
             <th class="col-concepto">Concepto</th>
-            <th class="right col-importe">Importe</th>
-            <th class="right col-pagado">Pagado</th>
-            <th class="right col-saldo">Saldo</th>
+            <th class="right col-money">Cargo base</th>
+            <th class="right col-money">Débitos</th>
+            <th class="right col-money">Créditos</th>
+            <th class="right col-money">Pagos</th>
+            <th class="right col-money">Saldo</th>
           </tr>
         </thead>
 
         <tbody>
-          <% if (!pendientes || pendientes.length === 0) { %>
+          <% if (!pendientesOrdenados.length) { %>
             <tr>
-              <td colspan="5" class="small muted">Sin períodos vencidos con saldo pendiente.</td>
+              <td colspan="7" class="small muted">Sin períodos vencidos con saldo pendiente.</td>
             </tr>
           <% } else { %>
-
-            <%
-              const pendientesOrdenados = [...pendientes].sort((a, b) =>
-                String(b.periodo || '').localeCompare(String(a.periodo || ''))
-              );
-            %>
-
             <% pendientesOrdenados.forEach(p => { %>
               <tr>
                 <td class="col-periodo"><strong><%= p.periodo %></strong></td>
-                <td class="col-concepto">
-                  <%= sanearConcepto(p.concepto || (p.cuotaN ? `Cuota ${p.cuotaN}/${p.cuotasTotal||''}` : '—')) %>
-                </td>
-                <td class="right col-importe"><%= fmtUSD(p.importe || 0) %></td>
-                <td class="right col-pagado"><%= fmtUSD(p.pagado || 0) %></td>
-                <td class="right col-saldo"><%= fmtUSD(p.saldo || 0) %></td>
+                <td class="col-concepto"><%= truncarConcepto(p.concepto || '') %></td>
+                <td class="right col-money"><%= fmtUSD(p.importe || 0) %></td>
+                <td class="right col-money"><%= fmtUSD(p.debitos || 0) %></td>
+                <td class="right col-money"><%= fmtUSD(p.creditos || 0) %></td>
+                <td class="right col-money"><%= fmtUSD(p.pagado || 0) %></td>
+                <td class="right col-money"><strong><%= fmtUSD(p.saldo || 0) %></strong></td>
               </tr>
             <% }) %>
 
+            <tr class="totalesSimple">
+              <td colspan="6" class="right"><strong>Totales:</strong></td>
+              <td class="right col-money"><strong><%= fmtUSD(totalPendiente || 0) %></strong></td>
+            </tr>
           <% } %>
         </tbody>
       </table>
@@ -413,7 +450,6 @@
     <div class="small muted">
       * La cotización informada corresponde al día del reporte. Para obtener la cotización vigente, comuníquese al 03834-017741.
     </div>
-
   </div>
 </body>
 

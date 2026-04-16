@@ -503,15 +503,117 @@ export async function verPeriodoProveedorController(req, res) {
   }
 }
 
+// export async function descargarEstadoCuentaPdfController(req, res) {
+//   try {
+//     const { proveedorId } = req.params;
+
+//     const proveedor = await Proveedor.findById(proveedorId)
+//       .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular")
+//       .lean();
+
+//     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
+
+//     const logoDataUri = leerLogoDataUriDesdeHtml();
+
+//     const now = clock.date();
+//     const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+//     const pendientesRaw = await cargosPendientesPorProveedor(proveedorId);
+//     const pendientes = (pendientesRaw || [])
+//       .filter((r) => r && Number(r.saldo) > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
+//       .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)));
+//     const totalPendiente = pendientes.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
+
+//     function prevPeriodo(yyyyMm) {
+//       if (!yyyyMm) return null;
+//       const [y, m] = String(yyyyMm).split("-").map(Number);
+//       if (!y || !m) return null;
+//       const d = new Date(y, m - 2, 1);
+//       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+//     }
+//     let ultimoPago = null;
+//     const primerDeudor = pendientes?.[0]?.periodo || null;
+//     if (primerDeudor) {
+//       const periodoAnterior = prevPeriodo(primerDeudor);
+//       if (periodoAnterior) {
+//         ultimoPago = await Pago.findOne({
+//           proveedor: proveedorId,
+//           periodo: periodoAnterior,
+//           estado: { $ne: "anulado" },
+//         })
+//           .select("fecha periodo metodo comprobante importe createdAt")
+//           .sort({ fecha: -1, createdAt: -1 })
+//           .lean();
+//       }
+//     }
+
+//     let usdAyer = res.locals.usdAyer || null;
+//     if (!usdAyer) {
+//       try {
+//         usdAyer = await cambioService.usdDiaAnteriorConFallback(
+//           Number(process.env.USD_MAX_FALLBACK_DAYS || 7)
+//         );
+//       } catch {
+//         usdAyer = null;
+//       }
+//     }
+
+//     const html = await new Promise((resolve, reject) => {
+//       res.render(
+//         "proveedoresViews/estadoCuenta/estadoCuentaImprimir",
+//         {
+//           layout: false,
+//           proveedor,
+//           hoy: new Date(),
+//           ultimoPago,
+//           pendientes,
+//           totalPendiente,
+//           logoDataUri,
+//           usdAyer,
+//         },
+//         (err, str) => (err ? reject(err) : resolve(str))
+//       );
+//     });
+
+//     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+//     try {
+//       const page = await browser.newPage();
+//       await page.setContent(html, { waitUntil: "networkidle0" });
+//       const pdf = await page.pdf({
+//         format: "A4",
+//         printBackground: true,
+//         margin: { top: "18mm", right: "14mm", bottom: "18mm", left: "14mm" },
+//       });
+
+//       res.setHeader("Content-Type", "application/pdf");
+//       res.setHeader(
+//         "Content-Disposition",
+//         `inline; filename="EstadoCuenta-${String(
+//           proveedor?.numeroProveedor || proveedorId
+//         )}.pdf"`
+//       );
+//       return res.send(pdf);
+//     } finally {
+//       await browser.close();
+//     }
+//   } catch (err) {
+//     console.error("descargarEstadoCuentaPdfController error:", err);
+//     return res.status(500).send("Error al generar el Estado de cuenta");
+//   }
+// }
+
 export async function descargarEstadoCuentaPdfController(req, res) {
   try {
     const { proveedorId } = req.params;
 
     const proveedor = await Proveedor.findById(proveedorId)
-      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular")
+      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular plan")
+      .populate("plan", "nombre")
       .lean();
 
     if (!proveedor) return res.status(404).send("Proveedor no encontrado");
+
+    const servicioActual = proveedor?.plan?.nombre || "";
 
     const logoDataUri = leerLogoDataUriDesdeHtml();
 
@@ -522,6 +624,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
     const pendientes = (pendientesRaw || [])
       .filter((r) => r && Number(r.saldo) > 0 && typeof r.periodo === "string" && r.periodo <= mesActual)
       .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)));
+
     const totalPendiente = pendientes.reduce((acc, r) => acc + Number(r.saldo || 0), 0);
 
     function prevPeriodo(yyyyMm) {
@@ -531,6 +634,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       const d = new Date(y, m - 2, 1);
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     }
+
     let ultimoPago = null;
     const primerDeudor = pendientes?.[0]?.periodo || null;
     if (primerDeudor) {
@@ -564,6 +668,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
         {
           layout: false,
           proveedor,
+          servicioActual,
           hoy: new Date(),
           ultimoPago,
           pendientes,
@@ -588,9 +693,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `inline; filename="EstadoCuenta-${String(
-          proveedor?.numeroProveedor || proveedorId
-        )}.pdf"`
+        `inline; filename="estado-cuenta-${proveedor.numeroProveedor || proveedorId}.pdf"`
       );
       return res.send(pdf);
     } finally {
@@ -598,7 +701,7 @@ export async function descargarEstadoCuentaPdfController(req, res) {
     }
   } catch (err) {
     console.error("descargarEstadoCuentaPdfController error:", err);
-    return res.status(500).send("Error al generar el Estado de cuenta");
+    return res.status(500).send("Error al generar PDF");
   }
 }
 
