@@ -99,6 +99,187 @@ export async function buscarCargoPorPeriodo(proveedorId, periodo) {
   }).lean();
 }
 
+// export async function cargosPendientesPorProveedor(proveedorId) {
+//   const oid = new mongoose.Types.ObjectId(proveedorId);
+
+//   // CARGOS normales (no plan)
+//   const pipelineCargos = [
+//     { $match: { proveedor: oid, tipo: "cargo", planPagoId: null } },
+
+//     {
+//       $lookup: {
+//         from: "pagos",
+//         localField: "_id",
+//         foreignField: "cargo",
+//         as: "pagos",
+//       },
+//     },
+
+//     // Notas de CRÉDITO aplicadas a este cargo (restan)
+//     {
+//       $lookup: {
+//         from: "movimientoproveedors",
+//         let: { cargoId: "$_id" },
+//         pipeline: [
+//           { $match: {
+//               $expr: {
+//                 $and: [
+//                   { $eq: ["$aplicaA", "$$cargoId"] },
+//                   { $eq: ["$tipo", "credito"] },
+//                   { $eq: ["$planPagoId", null] }
+//                 ]
+//               }
+//           }},
+//           { $project: { importe: { $ifNull: ["$importe", 0] } } }
+//         ],
+//         as: "ajustesCredito"
+//       }
+//     },
+
+//     // Notas de DÉBITO aplicadas a este cargo (suman)
+//     {
+//       $lookup: {
+//         from: "movimientoproveedors",
+//         let: { cargoId: "$_id" },
+//         pipeline: [
+//           { $match: {
+//               $expr: {
+//                 $and: [
+//                   { $eq: ["$aplicaA", "$$cargoId"] },
+//                   { $eq: ["$tipo", "debito"] },
+//                   { $eq: ["$planPagoId", null] }
+//                 ]
+//               }
+//           }},
+//           { $project: { importe: { $ifNull: ["$importe", 0] } } }
+//         ],
+//         as: "ajustesDebito"
+//       }
+//     },
+
+//     {
+//       $project: {
+//         _id: 1,
+//         periodo: 1,
+//         concepto: 1,
+//         importe: { $ifNull: ["$importe", 0] },
+
+//         pagado: {
+//           $sum: {
+//             $map: {
+//               input: { $ifNull: ["$pagos", []] },
+//               as: "p",
+//               in: { $ifNull: ["$$p.importe", 0] },
+//             },
+//           },
+//         },
+
+//         creditoAplicado: {
+//           $sum: {
+//             $map: {
+//               input: { $ifNull: ["$ajustesCredito", []] },
+//               as: "c",
+//               in: { $ifNull: ["$$c.importe", 0] },
+//             },
+//           },
+//         },
+
+//         debitoAplicado: {
+//           $sum: {
+//             $map: {
+//               input: { $ifNull: ["$ajustesDebito", []] },
+//               as: "d",
+//               in: { $ifNull: ["$$d.importe", 0] },
+//             },
+//           },
+//         },
+//       },
+//     },
+
+//     {
+//       $addFields: {
+//         saldo: {
+//           $subtract: [
+//             { $add: ["$importe", "$debitoAplicado"] },
+//             { $add: ["$pagado", "$creditoAplicado"] }
+//           ]
+//         },
+//         tipo: "cargo",
+//         cuotaN: null,
+//         cuotasTotal: null,
+//       },
+//     },
+
+//     { $match: { saldo: { $gt: 0 } } },
+//   ];
+
+//   // CUOTAS de plan
+//   const pipelineCuotas = [
+//     { $match: { proveedor: oid, tipo: "debito", planPagoId: { $ne: null } } },
+//     {
+//       $lookup: {
+//         from: "pagos",
+//         localField: "_id",
+//         foreignField: "cargo",
+//         as: "pagos",
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "planpagos",
+//         localField: "planPagoId",
+//         foreignField: "_id",
+//         as: "plan",
+//       },
+//     },
+//     { $unwind: "$plan" },
+//     {
+//       $project: {
+//         _id: 1,
+//         periodo: 1,
+//         concepto: 1,
+//         importe: { $ifNull: ["$importe", 0] },
+//         pagado: {
+//           $sum: {
+//             $map: {
+//               input: { $ifNull: ["$pagos", []] },
+//               as: "p",
+//               in: { $ifNull: ["$$p.importe", 0] },
+//             },
+//           },
+//         },
+//         cuotaN: { $ifNull: ["$cuotaN", null] },
+//         cuotasTotal: { $ifNull: ["$plan.cuotasCantidad", null] },
+//       },
+//     },
+//     {
+//       $addFields: {
+//         saldo: { $subtract: ["$importe", "$pagado"] },
+//         tipo: "debito",
+//       },
+//     },
+//     { $match: { saldo: { $gt: 0 } } },
+//   ];
+
+//   const rows = await MovimientoProveedor.aggregate([
+//     ...pipelineCargos,
+//     { $unionWith: { coll: "movimientoproveedors", pipeline: pipelineCuotas } },
+//     { $sort: { periodo: 1, _id: 1 } },
+//   ]);
+
+//   return rows.map((r) => ({
+//     _id: r._id,
+//     periodo: r.periodo,
+//     concepto: r.concepto,
+//     tipo: r.tipo,
+//     cuotaN: r.cuotaN ?? null,
+//     cuotasTotal: r.cuotasTotal ?? null,
+//     importe: Number(r.importe ?? 0),
+//     pagado: Number(r.pagado ?? 0),
+//     saldo: Number(r.saldo ?? 0),
+//   }));
+// }
+
 export async function cargosPendientesPorProveedor(proveedorId) {
   const oid = new mongoose.Types.ObjectId(proveedorId);
 
@@ -121,7 +302,8 @@ export async function cargosPendientesPorProveedor(proveedorId) {
         from: "movimientoproveedors",
         let: { cargoId: "$_id" },
         pipeline: [
-          { $match: {
+          {
+            $match: {
               $expr: {
                 $and: [
                   { $eq: ["$aplicaA", "$$cargoId"] },
@@ -129,7 +311,8 @@ export async function cargosPendientesPorProveedor(proveedorId) {
                   { $eq: ["$planPagoId", null] }
                 ]
               }
-          }},
+            }
+          },
           { $project: { importe: { $ifNull: ["$importe", 0] } } }
         ],
         as: "ajustesCredito"
@@ -142,7 +325,8 @@ export async function cargosPendientesPorProveedor(proveedorId) {
         from: "movimientoproveedors",
         let: { cargoId: "$_id" },
         pipeline: [
-          { $match: {
+          {
+            $match: {
               $expr: {
                 $and: [
                   { $eq: ["$aplicaA", "$$cargoId"] },
@@ -150,7 +334,8 @@ export async function cargosPendientesPorProveedor(proveedorId) {
                   { $eq: ["$planPagoId", null] }
                 ]
               }
-          }},
+            }
+          },
           { $project: { importe: { $ifNull: ["$importe", 0] } } }
         ],
         as: "ajustesDebito"
@@ -256,6 +441,8 @@ export async function cargosPendientesPorProveedor(proveedorId) {
       $addFields: {
         saldo: { $subtract: ["$importe", "$pagado"] },
         tipo: "debito",
+        debitoAplicado: 0,
+        creditoAplicado: 0,
       },
     },
     { $match: { saldo: { $gt: 0 } } },
@@ -275,6 +462,8 @@ export async function cargosPendientesPorProveedor(proveedorId) {
     cuotaN: r.cuotaN ?? null,
     cuotasTotal: r.cuotasTotal ?? null,
     importe: Number(r.importe ?? 0),
+    debitos: Number(r.debitoAplicado ?? 0),
+    creditos: Number(r.creditoAplicado ?? 0),
     pagado: Number(r.pagado ?? 0),
     saldo: Number(r.saldo ?? 0),
   }));

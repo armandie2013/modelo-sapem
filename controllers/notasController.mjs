@@ -37,6 +37,53 @@ function _mesesEntre(a, b) {
  *  - NO fueron revertidos por Plan (existe crédito con planPagoId != null y aplicaA = cargo._id)
  *  - ⚠️ Solo últimos LIMITE_MESES_NOTAS meses
  */
+// async function cargosAjustables(proveedorId, limit = LIMITE_MESES_NOTAS) {
+//   const oid = new mongoose.Types.ObjectId(proveedorId);
+
+//   const cargos = await MovimientoProveedor.find({
+//     proveedor: oid,
+//     tipo: "cargo",
+//     planPagoId: null,
+//   })
+//     .sort({ periodo: -1 }) // YYYY-MM desc
+//     .lean();
+
+//   if (!cargos.length) return [];
+
+//   const ids = cargos.map((c) => c._id);
+
+//   // créditos de reversa de plan que apuntan a esos cargos
+//   const reversas = await MovimientoProveedor.find(
+//     {
+//       proveedor: oid,
+//       tipo: "credito",
+//       planPagoId: { $ne: null },
+//       aplicaA: { $in: ids },
+//     },
+//     { aplicaA: 1, _id: 0 }
+//   ).lean();
+
+//   const noAjustar = new Set(reversas.map((r) => String(r.aplicaA)));
+//   const ahora = clock.date();
+
+//   const filtrados = cargos
+//     .filter((c) => !noAjustar.has(String(c._id)))
+//     .filter((c) => {
+//       const d = _dateFromPeriodo(c.periodo);
+//       if (!d) return false;
+//       return _mesesEntre(d, ahora) <= LIMITE_MESES_NOTAS;
+//     })
+//     .map((c) => ({
+//       _id: c._id,
+//       periodo: c.periodo,
+//       concepto: c.concepto,
+//       importe: Number(c.importe ?? 0),
+//     }));
+
+//   const maxMostrar = Math.min(Number(limit || LIMITE_MESES_NOTAS), LIMITE_MESES_NOTAS);
+//   return filtrados.slice(0, maxMostrar);
+// }
+
 async function cargosAjustables(proveedorId, limit = LIMITE_MESES_NOTAS) {
   const oid = new mongoose.Types.ObjectId(proveedorId);
 
@@ -81,7 +128,148 @@ async function cargosAjustables(proveedorId, limit = LIMITE_MESES_NOTAS) {
     }));
 
   const maxMostrar = Math.min(Number(limit || LIMITE_MESES_NOTAS), LIMITE_MESES_NOTAS);
-  return filtrados.slice(0, maxMostrar);
+  const base = filtrados.slice(0, maxMostrar);
+
+  if (!base.length) return [];
+
+  const baseIds = base.map((c) => c._id);
+
+  // Calculamos saldo real del cargo:
+  // saldo = importe + débitos - créditos - pagos
+  const saldos = await MovimientoProveedor.aggregate([
+    {
+      $match: {
+        _id: { $in: baseIds },
+      },
+    },
+
+    {
+      $lookup: {
+        from: "pagos",
+        localField: "_id",
+        foreignField: "cargo",
+        as: "pagos",
+      },
+    },
+
+    {
+      $lookup: {
+        from: "movimientoproveedors",
+        let: { cargoId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$aplicaA", "$$cargoId"] },
+                  { $eq: ["$tipo", "credito"] },
+                  { $eq: ["$planPagoId", null] },
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              importe: { $ifNull: ["$importe", 0] },
+            },
+          },
+        ],
+        as: "ajustesCredito",
+      },
+    },
+
+    {
+      $lookup: {
+        from: "movimientoproveedors",
+        let: { cargoId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$aplicaA", "$$cargoId"] },
+                  { $eq: ["$tipo", "debito"] },
+                  { $eq: ["$planPagoId", null] },
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              importe: { $ifNull: ["$importe", 0] },
+            },
+          },
+        ],
+        as: "ajustesDebito",
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        importe: { $ifNull: ["$importe", 0] },
+
+        pagado: {
+          $sum: {
+            $map: {
+              input: { $ifNull: ["$pagos", []] },
+              as: "p",
+              in: { $ifNull: ["$$p.importe", 0] },
+            },
+          },
+        },
+
+        creditoAplicado: {
+          $sum: {
+            $map: {
+              input: { $ifNull: ["$ajustesCredito", []] },
+              as: "c",
+              in: { $ifNull: ["$$c.importe", 0] },
+            },
+          },
+        },
+
+        debitoAplicado: {
+          $sum: {
+            $map: {
+              input: { $ifNull: ["$ajustesDebito", []] },
+              as: "d",
+              in: { $ifNull: ["$$d.importe", 0] },
+            },
+          },
+        },
+      },
+    },
+
+    {
+      $addFields: {
+        saldo: {
+          $subtract: [
+            { $add: ["$importe", "$debitoAplicado"] },
+            { $add: ["$pagado", "$creditoAplicado"] },
+          ],
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        saldo: 1,
+      },
+    },
+  ]);
+
+  const saldoPorId = new Map(
+    saldos.map((s) => [String(s._id), Number(s.saldo ?? 0)])
+  );
+
+  return base.map((c) => ({
+    ...c,
+    saldo: saldoPorId.has(String(c._id))
+      ? saldoPorId.get(String(c._id))
+      : Number(c.importe ?? 0),
+  }));
 }
 
 /**
@@ -130,12 +318,20 @@ export async function apiCargosProveedor(req, res) {
 
     const cargos = await cargosAjustables(proveedor, limit);
 
+    // const out = cargos.map((c) => ({
+    //   _id: c._id,
+    //   periodo: c.periodo,
+    //   concepto: c.concepto,
+    //   importe: Number(c.importe ?? 0),
+    // }));
+
     const out = cargos.map((c) => ({
-      _id: c._id,
-      periodo: c.periodo,
-      concepto: c.concepto,
-      importe: Number(c.importe ?? 0),
-    }));
+  _id: c._id,
+  periodo: c.periodo,
+  concepto: c.concepto,
+  importe: Number(c.importe ?? 0),
+  saldo: Number(c.saldo ?? c.importe ?? 0),
+}));
 
     res.json({ ok: true, cargos: out });
   } catch (err) {
