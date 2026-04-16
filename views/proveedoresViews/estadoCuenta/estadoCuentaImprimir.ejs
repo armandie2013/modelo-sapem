@@ -258,29 +258,27 @@
       }
 
       function truncarConcepto(txt) {
-        const s = String(txt || '').toUpperCase().trim();
+  let s = String(txt || '').trim();
 
-        if (!s) return 'Servicio mensual';
+  if (!s) return 'Servicio mensual';
 
-        const matchVel = s.match(/(\d+)\s*MBPS/);
+  // 1. Eliminar período tipo 2026-04
+  s = s.replace(/\d{4}-\d{2}/g, '').trim();
 
-        if (s.includes('INTERNET') && s.includes('DEDICADO')) {
-          const velocidad = matchVel ? matchVel[1] : '';
-          return velocidad ? `INT. DED. ${velocidad} MBPS` : 'INT. DED.';
-        }
+  // 2. Buscar el primer bloque en MAYÚSCULAS
+  const match = s.match(/[A-ZÁÉÍÓÚÑ0-9][A-ZÁÉÍÓÚÑ0-9\s\.\-]+/);
 
-        if (s.includes('CARGO')) {
-          return 'Cargo mensual';
-        }
+  if (match) {
+    s = match[0];
+  }
 
-        return s
-          .replace(/\d{4}-\d{2}/g, '')
-          .replace(/\bCARGO\b/gi, '')
-          .replace(/\bMENSUAL\b/gi, '')
-          .replace(/\bPLAN\b/gi, '')
-          .replace(/\s{2,}/g, ' ')
-          .trim() || 'Servicio mensual';
-      }
+  // 3. Limpieza básica
+  s = s
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  return s || 'Servicio mensual';
+}
 
       const proveedorDisplay = (proveedor?.nombreFantasia || proveedor?.nombreReal || '—');
       const proveedorLegal   = (proveedor?.nombreReal || '—');

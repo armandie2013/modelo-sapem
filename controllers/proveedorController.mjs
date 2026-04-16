@@ -705,6 +705,170 @@ export async function descargarEstadoCuentaPdfController(req, res) {
   }
 }
 
+export async function descargarEstadoPeriodoCuentaPdfController(req, res) {
+  try {
+    const { proveedorId, periodo } = req.params;
+
+    const proveedor = await Proveedor.findById(proveedorId)
+      .select("numeroProveedor nombreFantasia nombreReal cuit condicionIva telefonoCelular plan")
+      .populate("plan", "nombre")
+      .lean();
+
+    if (!proveedor) {
+      return res.status(404).send("Proveedor no encontrado");
+    }
+
+    const servicioActual = proveedor?.plan?.nombre || "";
+
+    const movs = await MovimientoProveedor.find({
+      proveedor: proveedorId,
+      periodo,
+    })
+      .sort({ createdAt: 1, fecha: 1 })
+      .lean();
+
+    const pagos = await Pago.find({
+      proveedor: proveedorId,
+      periodo,
+      estado: { $ne: "anulado" },
+    })
+      .sort({ createdAt: 1, fecha: 1 })
+      .lean();
+
+    const movimientos = [];
+    const totales = {
+      cargo: 0,
+      notaDebito: 0,
+      notaCredito: 0,
+      pagos: 0,
+      saldo: 0,
+    };
+
+    for (const m of movs) {
+      const importe = Number(m.importe || 0);
+
+      if (m.tipo === "cargo") {
+        totales.cargo += importe;
+        movimientos.push({
+          fecha: m.fecha || m.createdAt,
+          tipo: "Cargo",
+          concepto: m.concepto || "Cargo",
+          comprobante: m.numeroDeComprobante || "—",
+          metodo: "—",
+          importe,
+          signo: "+",
+        });
+      } else if (m.tipo === "debito") {
+        totales.notaDebito += importe;
+        movimientos.push({
+          fecha: m.fecha || m.createdAt,
+          tipo: "Nota de débito",
+          concepto: m.concepto || "Nota de débito",
+          comprobante: m.numeroDeComprobante || "—",
+          metodo: "—",
+          importe,
+          signo: "+",
+        });
+      } else if (m.tipo === "credito") {
+        totales.notaCredito += importe;
+        movimientos.push({
+          fecha: m.fecha || m.createdAt,
+          tipo: "Nota de crédito",
+          concepto: m.concepto || "Nota de crédito",
+          comprobante: m.numeroDeComprobante || "—",
+          metodo: "—",
+          importe,
+          signo: "-",
+        });
+      }
+    }
+
+    for (const p of pagos) {
+      const importe = Number(p.importe || 0);
+      totales.pagos += importe;
+      movimientos.push({
+        fecha: p.fecha || p.createdAt,
+        tipo: "Pago",
+        concepto: p.detalle || "Pago registrado",
+        comprobante: p.comprobante || "—",
+        metodo: p.metodo || p.medioPago || "—",
+        importe,
+        signo: "-",
+      });
+    }
+
+        movimientos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+    totales.saldo =
+      Number(totales.cargo || 0) +
+      Number(totales.notaDebito || 0) -
+      Number(totales.notaCredito || 0) -
+      Number(totales.pagos || 0);
+
+    const logoDataUri = leerLogoDataUriDesdeHtml();
+
+    let usdAyer = res.locals.usdAyer || null;
+    if (!usdAyer) {
+      try {
+        usdAyer = await cambioService.usdDiaAnteriorConFallback(
+          Number(process.env.USD_MAX_FALLBACK_DAYS || 7)
+        );
+      } catch {
+        usdAyer = null;
+      }
+    }
+
+    const html = await new Promise((resolve, reject) => {
+      res.render(
+        "proveedoresViews/estadoCuenta/estadoPeriodoCuentaImprimir",
+        {
+          layout: false,
+          proveedor,
+          servicioActual,
+          periodo,
+          hoy: new Date(),
+          movimientos,
+          totales,
+          logoDataUri,
+          usdAyer,
+        },
+        (err, str) => (err ? reject(err) : resolve(str))
+      );
+    });
+
+    const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: "networkidle0" });
+
+      const pdf = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "18mm",
+          right: "14mm",
+          bottom: "18mm",
+          left: "14mm",
+        },
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="estado-periodo-${proveedor.numeroProveedor || proveedorId}-${periodo}.pdf"`
+      );
+
+      return res.send(pdf);
+    } finally {
+      await browser.close();
+    }
+  } catch (error) {
+    console.error("descargarEstadoPeriodoCuentaPdfController error:", error);
+    return res.status(500).send("Error al generar PDF del período");
+  }
+}
+
 
 // import fs from "fs";
 // import path from "path";
