@@ -76,6 +76,15 @@
           </div>
 
           <div class="shrink-0 flex items-center gap-2">
+            <a href="/proveedores/<%= proveedor._id %>/periodo/<%= periodo %>/estado-cuenta/pdf" target="_blank"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-indigo-700 hover:text-white ring-1 ring-indigo-200 hover:ring-indigo-500 hover:bg-indigo-600 bg-indigo-50">
+              <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M12.5 3H17v4.5a1 1 0 11-2 0V6.41l-7.3 7.29a1 1 0 11-1.4-1.42L13.59 5H12.5a1 1 0 110-2z"></path>
+                <path d="M5 5h4a1 1 0 010 2H6.41l-.7.7V15h7.3l.7-.7V11a1 1 0 112 0v4a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z">
+                </path>
+              </svg>
+              Estado del período
+            </a>
             <a href="/proveedores/<%= proveedor._id %>/ver"
                class="inline-flex items-center gap-1.5 bg-gray-50 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm ring-1 ring-gray-200">
               ← Volver

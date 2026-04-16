@@ -10,6 +10,7 @@ import {
   verProveedorController,
   verPeriodoProveedorController,
   descargarEstadoCuentaPdfController,
+  descargarEstadoPeriodoCuentaPdfController
 } from "../controllers/proveedorController.mjs";
 
 import { verificarSesion } from "../middlewares/authMiddleware.mjs";
@@ -87,6 +88,13 @@ router.get(
   verificarSesion,
   verificarPermiso("proveedores", "ver"),
   descargarEstadoCuentaPdfController
+);
+
+router.get(
+  "/:proveedorId/periodo/:periodo/estado-cuenta/pdf",
+  verificarSesion,
+  verificarPermiso("proveedores", "ver"),
+  descargarEstadoPeriodoCuentaPdfController
 );
 
 export default router;
