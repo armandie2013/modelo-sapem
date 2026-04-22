@@ -11,12 +11,13 @@ const escuelaSchema = new mongoose.Schema({
   direccion: { type: String, required: true, trim: true },
   proveedor: { type: String, required: true, trim: true },
   detalleDelCaso: { type: String, required: true },
+  tareasRealizadas: { type: String, default: "" },
   observacionesTecnica: { type: String, default: "" },
   numeroTicket: { type: Number, required: true, unique: true },
   creadoPor: { type: String, required: true },
   editadoPor: { type: String, default: null },
   imagenes: { type: [String], default: [] },
-  estado: { type: String, enum: ['Abierto', 'Cerrado'], default: 'Abierto' }
+  estado: { type: String, enum: ["Abierto", "Cerrado"], default: "Abierto" }
 });
 
 const Escuela = mongoose.models.Escuela || mongoose.model("Escuela", escuelaSchema);

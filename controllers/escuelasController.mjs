@@ -113,6 +113,7 @@ export async function actualizarEscuelaController(req, res) {
     }
 
     datosActualizados.detalleDelCaso = req.body.detalleDelCaso || "";
+    datosActualizados.tareasRealizadas = req.body.tareasRealizadas || "";
     datosActualizados.observacionesTecnica =
       req.body.observacionesTecnica || "";
     datosActualizados.editadoPor = `${req.session.usuario.nombre} ${req.session.usuario.apellido}`;
@@ -162,8 +163,6 @@ export async function actualizarEscuelaController(req, res) {
     res.status(500).send("Error al actualizar la escuela");
   }
 }
-
-
 
 export async function eliminarEscuelaController(req, res) {
   try {

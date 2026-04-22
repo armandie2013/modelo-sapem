@@ -19,7 +19,6 @@
             </p>
           </div>
 
-          <!-- Botón volver (oculto en mobile) -->
           <div class="hidden sm:block">
             <a
               href="/escuelas/dashboard"
@@ -35,13 +34,19 @@
 
       <div class="px-4 sm:px-6 py-4 space-y-6">
 
-        <% const inputReadonly = "w-full rounded-xl border bg-gray-50 px-3 py-1.5 text-sm text-gray-800 transition " +
-                                 "border-blue-200 hover:border-blue-400 " +
-                                 "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"; %>
+        <% 
+          const inputReadonly = "w-full rounded-xl border bg-gray-50 px-3 py-1.5 text-sm text-gray-800 transition " +
+                                "border-blue-200 hover:border-blue-400 " +
+                                "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500";
 
-        <% const textareaReadonly = "w-full rounded-xl border bg-gray-50 px-3 py-3 text-sm text-gray-800 transition " +
+          const textareaReadonly = "w-full rounded-xl border bg-gray-50 px-3 py-3 text-sm text-gray-800 transition " +
                                    "border-blue-200 hover:border-blue-400 " +
-                                   "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"; %>
+                                   "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none";
+
+          const tieneDetalle = escuela.detalleDelCaso && escuela.detalleDelCaso.trim() !== "";
+          const tieneTareas = escuela.tareasRealizadas && escuela.tareasRealizadas.trim() !== "";
+          const tieneObservaciones = escuela.observacionesTecnica && escuela.observacionesTecnica.trim() !== "";
+        %>
 
         <!-- ===== SECCIÓN 1: Identificación ===== -->
         <section class="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
@@ -159,22 +164,35 @@
         </section>
 
         <!-- ===== SECCIÓN 4: Descripción ===== -->
-        <section class="rounded-2xl border border-gray-200 bg-white p-4">
-          <div class="mb-3">
-            <h2 class="text-sm font-extrabold text-gray-900">Descripción</h2>
-            <p class="text-xs text-gray-600">Detalle del caso y observaciones técnicas.</p>
-          </div>
+        <% if (tieneDetalle || tieneTareas || tieneObservaciones) { %>
+          <section class="rounded-2xl border border-gray-200 bg-white p-4">
+            <div class="mb-3">
+              <h2 class="text-sm font-extrabold text-gray-900">Descripción</h2>
+              <p class="text-xs text-gray-600">Detalle del caso, tareas realizadas y observaciones técnicas.</p>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-xs font-medium text-gray-700 mb-1">Detalle del caso</label>
-            <textarea disabled rows="6" class="<%= textareaReadonly %>"><%= escuela.detalleDelCaso %></textarea>
-          </div>
+            <% if (tieneDetalle) { %>
+              <div class="mb-3">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Detalle del caso</label>
+                <textarea disabled rows="6" class="<%= textareaReadonly %>"><%= escuela.detalleDelCaso %></textarea>
+              </div>
+            <% } %>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Observaciones técnicas</label>
-            <textarea disabled rows="5" class="<%= textareaReadonly %>"><%= escuela.observacionesTecnica || '' %></textarea>
-          </div>
-        </section>
+            <% if (tieneTareas) { %>
+              <div class="mb-3">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Tareas realizadas</label>
+                <textarea disabled rows="5" class="<%= textareaReadonly %>"><%= escuela.tareasRealizadas %></textarea>
+              </div>
+            <% } %>
+
+            <% if (tieneObservaciones) { %>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Observaciones técnicas</label>
+                <textarea disabled rows="5" class="<%= textareaReadonly %>"><%= escuela.observacionesTecnica %></textarea>
+              </div>
+            <% } %>
+          </section>
+        <% } %>
 
         <!-- ===== SECCIÓN 5: Imágenes ===== -->
         <% if (escuela.imagenes && escuela.imagenes.length > 0) { %>

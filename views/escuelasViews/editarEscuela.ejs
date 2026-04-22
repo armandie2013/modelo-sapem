@@ -273,6 +273,16 @@
               ><%= typeof datos !== 'undefined' ? datos.detalleDelCaso : escuela.detalleDelCaso %></textarea>
             </div>
 
+            <div class="mb-3">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Tareas realizadas</label>
+              <textarea
+                name="tareasRealizadas"
+                rows="5"
+                class="<%= textareaMain %>"
+                <%= soloLectura ? "readonly" : "" %>
+              ><%= typeof datos !== 'undefined' ? datos.tareasRealizadas : escuela.tareasRealizadas || '' %></textarea>
+            </div>
+
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">Observaciones técnicas</label>
               <textarea
@@ -474,7 +484,7 @@
     }
   });
 
-  const camposParrafo = ["detalleDelCaso", "observacionesTecnica"];
+  const camposParrafo = ["detalleDelCaso", "tareasRealizadas", "observacionesTecnica"];
   camposParrafo.forEach(name => {
     const textarea = document.querySelector(`textarea[name="${name}"]`);
     if (textarea) {
