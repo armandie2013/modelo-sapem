@@ -1,8 +1,8 @@
-// services/escuelasService.mjs
 import Escuela from "../models/escuela.mjs";
 import puppeteer from "puppeteer";
 import ejs from "ejs";
 import path from "path";
+import fs from "fs/promises";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,13 +36,72 @@ export async function obtenerUltimaEscuelaService() {
   return await Escuela.findOne().sort({ numeroTicket: -1 });
 }
 
+function obtenerMimeType(nombreArchivo = "") {
+  const extension = path.extname(nombreArchivo).toLowerCase();
+
+  switch (extension) {
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".webp":
+      return "image/webp";
+    case ".gif":
+      return "image/gif";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+async function convertirImagenABase64(rutaArchivo, nombreArchivo) {
+  try {
+    const buffer = await fs.readFile(rutaArchivo);
+    const mimeType = obtenerMimeType(nombreArchivo);
+    return `data:${mimeType};base64,${buffer.toString("base64")}`;
+  } catch (error) {
+    console.warn("⚠️ No se pudo convertir imagen a base64:", rutaArchivo);
+    return null;
+  }
+}
+
 export async function generarPDFEscuelaService(escuela) {
   try {
     const filePath = path.join(__dirname, "../views/escuelasViews/verEscuelaPdf.ejs");
 
-    const html = await ejs.renderFile(filePath, { escuela });
+    let imagenesPdf = [];
 
-    const browser = await puppeteer.launch({ headless: "new" });
+    if (Array.isArray(escuela.imagenes) && escuela.imagenes.length > 0) {
+      const carpetaImagenes = path.join(
+        "C:/upload",
+        "escuelas",
+        String(escuela.numeroTicket)
+      );
+
+      const imagenesConvertidas = await Promise.all(
+        escuela.imagenes.map(async (nombreImagen) => {
+          const rutaImagen = path.join(carpetaImagenes, nombreImagen);
+          const dataUrl = await convertirImagenABase64(rutaImagen, nombreImagen);
+
+          if (!dataUrl) return null;
+
+          return {
+            nombre: nombreImagen,
+            dataUrl,
+          };
+        })
+      );
+
+      imagenesPdf = imagenesConvertidas.filter(Boolean);
+    }
+
+    const html = await ejs.renderFile(filePath, { escuela, imagenesPdf });
+
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox"],
+    });
+
     const page = await browser.newPage();
 
     await page.setContent(html, { waitUntil: "networkidle0" });
@@ -50,12 +109,11 @@ export async function generarPDFEscuelaService(escuela) {
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" }
+      margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" },
     });
 
     await browser.close();
     return pdfBuffer;
-
   } catch (error) {
     console.error("Error al generar PDF de escuela:", error);
     throw error;

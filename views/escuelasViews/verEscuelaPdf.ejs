@@ -5,159 +5,213 @@
   <title>Escuela - Ticket <%= escuela.numeroTicket %></title>
 
   <style>
-    @page { margin: 28mm 18mm; }
+    @page { margin: 18mm 14mm; }
     * { box-sizing: border-box; }
 
-    body{
+    body {
       font-family: Arial, sans-serif;
       font-size: 11.5px;
-      color:#111;
-      margin:0;
+      color: #111;
+      margin: 0;
     }
 
-    /* ===== Header ===== */
-    .header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:16px;
-      padding-bottom:12px;
-      border-bottom:2px solid #111;
-      margin-bottom:16px;
-    }
-    .header-left h1{
-      font-size:18px;
-      margin:0 0 4px 0;
-      letter-spacing:.2px;
-    }
-    .muted{ color:#555; }
-    .header-left .sub{
-      margin:0;
-      font-size:11px;
-      color:#444;
-      line-height:1.35;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #111;
+      margin-bottom: 16px;
     }
 
-    .header-right{
-      text-align:right;
-      min-width:200px;
+    .header-left h1 {
+      font-size: 18px;
+      margin: 0 0 4px 0;
+      letter-spacing: .2px;
     }
-    .ticket{
-      font-size:12px;
-      font-weight:700;
-      margin:0 0 6px 0;
-    }
-    .badge{
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:10.5px;
-      font-weight:700;
-      border:1px solid #111;
-    }
-    .badge.abierto{ background:#eaffea; border-color:#1e7a1e; color:#1e7a1e; }
-    .badge.cerrado{ background:#ffecec; border-color:#b91c1c; color:#b91c1c; }
 
-    /* ===== Sections ===== */
-    .grid{
-      display:grid;
+    .muted { color: #555; }
+
+    .header-left .sub {
+      margin: 0;
+      font-size: 11px;
+      color: #444;
+      line-height: 1.35;
+    }
+
+    .header-right {
+      text-align: right;
+      min-width: 200px;
+    }
+
+    .ticket {
+      font-size: 12px;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      border: 1px solid #111;
+    }
+
+    .badge.abierto {
+      background: #eaffea;
+      border-color: #1e7a1e;
+      color: #1e7a1e;
+    }
+
+    .badge.cerrado {
+      background: #ffecec;
+      border-color: #b91c1c;
+      color: #b91c1c;
+    }
+
+    .grid {
+      display: grid;
       grid-template-columns: 1fr 1fr;
-      gap:14px;
-      margin-bottom:14px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
 
-    .card{
-      border:1px solid #cfcfcf;
-      border-radius:10px;
-      padding:10px 12px;
-      background:#fff;
+    .card {
+      border: 1px solid #cfcfcf;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
     }
 
-    .section-title{
-      font-size:12px;
-      margin:0 0 8px 0;
-      padding-bottom:6px;
-      border-bottom:1px solid #cfcfcf;
-      letter-spacing:.2px;
+    .section-title {
+      font-size: 12px;
+      margin: 0 0 8px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #cfcfcf;
+      letter-spacing: .2px;
     }
 
-    /* ===== Key/Value rows ===== */
-    .kv{
-      display:flex;
-      gap:10px;
-      padding:4px 0;
-      border-bottom:1px dashed #e0e0e0;
-    }
-    .kv:last-child{ border-bottom:none; }
-    .k{
-      width:150px;
-      font-weight:700;
-      color:#222;
-      flex:0 0 auto;
-    }
-    .v{ color:#111; flex:1 1 auto; }
-
-    /* ===== Table ===== */
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:11.2px;
-    }
-    th, td{
-      border:1px solid #d6d6d6;
-      padding:7px 8px;
-      vertical-align:top;
-    }
-    th{
-      background:#f4f7ff;
-      text-align:left;
-      font-weight:700;
-      color:#111;
+    .kv {
+      display: flex;
+      gap: 10px;
+      padding: 4px 0;
+      border-bottom: 1px dashed #e0e0e0;
     }
 
-    /* ===== Detail box ===== */
-    .detail{
-      border:1px solid #cfcfcf;
-      border-left:4px solid #2563eb;
-      border-radius:10px;
-      padding:12px;
-      background:#f7fbff;
-      margin-top:6px;
-      white-space:pre-wrap; /* respeta saltos de línea */
-      word-wrap:break-word;
-      line-height:1.45;
+    .kv:last-child { border-bottom: none; }
+
+    .k {
+      width: 150px;
+      font-weight: 700;
+      color: #222;
+      flex: 0 0 auto;
     }
 
-    /* ===== Footer ===== */
-    .footer{
-      margin-top:18px;
-      padding-top:10px;
-      border-top:1px solid #cfcfcf;
-      font-size:10px;
-      color:#555;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
+    .v {
+      color: #111;
+      flex: 1 1 auto;
     }
 
-    /* Si el texto del detalle es MUY largo, evitamos que rompa feo */
-    .avoid-break{
-      break-inside:avoid;
-      page-break-inside:avoid;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.2px;
+    }
+
+    th, td {
+      border: 1px solid #d6d6d6;
+      padding: 7px 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f4f7ff;
+      text-align: left;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .detail {
+      border: 1px solid #cfcfcf;
+      border-left: 4px solid #2563eb;
+      border-radius: 10px;
+      padding: 12px;
+      background: #f7fbff;
+      margin-top: 6px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.45;
+    }
+
+    .footer {
+      margin-top: 18px;
+      padding-top: 10px;
+      border-top: 1px solid #cfcfcf;
+      font-size: 10px;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .avoid-break {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .imagenes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .imagen-card {
+      border: 1px solid #d8d8d8;
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .imagen-card img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      display: block;
+      border-radius: 6px;
+      border: 1px solid #e5e5e5;
+      background: #fafafa;
+    }
+
+    .imagen-nombre {
+      margin-top: 6px;
+      font-size: 10px;
+      color: #555;
+      text-align: center;
+      word-break: break-word;
     }
   </style>
 </head>
 
 <body>
-  <% 
+  <%
     const estado = (escuela.estado || '').toLowerCase();
     const claseEstado = estado === 'cerrado' ? 'cerrado' : 'abierto';
     const fechaCreacion = escuela.fechaDeCreacion ? new Date(escuela.fechaDeCreacion) : null;
     const fechaCreacionTxt = fechaCreacion ? fechaCreacion.toLocaleDateString('es-AR') : '';
     const ahoraTxt = new Date().toLocaleString('es-AR');
+
+    const tieneDetalle = escuela.detalleDelCaso && escuela.detalleDelCaso.trim() !== '';
+    const tieneTareas = escuela.tareasRealizadas && escuela.tareasRealizadas.trim() !== '';
+    const tieneObservaciones = escuela.observacionesTecnica && escuela.observacionesTecnica.trim() !== '';
+    const tieneImagenes = Array.isArray(imagenesPdf) && imagenesPdf.length > 0;
   %>
 
-  <!-- ===== Header ===== -->
   <div class="header">
     <div class="header-left">
       <h1>Detalle del Caso - Escuela</h1>
@@ -175,7 +229,6 @@
     </div>
   </div>
 
-  <!-- ===== Grid: Información general + Datos rápidos ===== -->
   <div class="grid">
     <div class="card">
       <h2 class="section-title">Información general</h2>
@@ -216,7 +269,6 @@
     </div>
   </div>
 
-  <!-- ===== Datos de la escuela (tabla) ===== -->
   <div class="card avoid-break">
     <h2 class="section-title">Datos de la escuela</h2>
 
@@ -246,13 +298,42 @@
     </table>
   </div>
 
-  <!-- ===== Detalle del caso ===== -->
-  <div class="card" style="margin-top:14px;">
-    <h2 class="section-title">Detalle del caso</h2>
-    <div class="detail"><%= escuela.detalleDelCaso %></div>
-  </div>
+  <% if (tieneDetalle) { %>
+    <div class="card" style="margin-top:14px;">
+      <h2 class="section-title">Detalle del caso</h2>
+      <div class="detail"><%= escuela.detalleDelCaso %></div>
+    </div>
+  <% } %>
 
-  <!-- ===== Footer ===== -->
+  <% if (tieneTareas) { %>
+    <div class="card" style="margin-top:14px;">
+      <h2 class="section-title">Tareas realizadas</h2>
+      <div class="detail"><%= escuela.tareasRealizadas %></div>
+    </div>
+  <% } %>
+
+  <% if (tieneObservaciones) { %>
+    <div class="card" style="margin-top:14px;">
+      <h2 class="section-title">Observaciones técnicas</h2>
+      <div class="detail"><%= escuela.observacionesTecnica %></div>
+    </div>
+  <% } %>
+
+  <% if (tieneImagenes) { %>
+    <div class="card" style="margin-top:14px;">
+      <h2 class="section-title">Imágenes del caso</h2>
+
+      <div class="imagenes-grid">
+        <% imagenesPdf.forEach((imagen) => { %>
+          <div class="imagen-card">
+            <img src="<%= imagen.dataUrl %>" alt="<%= imagen.nombre %>">
+            <div class="imagen-nombre"><%= imagen.nombre %></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+
   <div class="footer">
     <div>Impreso: <%= ahoraTxt %></div>
     <div class="muted">Ticket <%= escuela.numeroTicket %> · <%= escuela.estado %></div>
