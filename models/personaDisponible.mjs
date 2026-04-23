@@ -62,6 +62,13 @@ const personaSchema = new mongoose.Schema({
       eliminar: { type: Boolean, default: false },
     },
 
+    prediosEscuelas: {
+      ver: { type: Boolean, default: false },
+      crear: { type: Boolean, default: false },
+      editar: { type: Boolean, default: false },
+      eliminar: { type: Boolean, default: false },
+    },
+
     // 🔹 NUEVO: módulo de tareas programadas
     tareas: {
       ver: { type: Boolean, default: false },       // Ver /tareas/cargos
