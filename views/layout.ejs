@@ -32,9 +32,21 @@
     }
   </script>
 
+  <style>
+    html {
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      width: 100%;
+      overflow-x: hidden;
+    }
+  </style>
+
 </head>
 
-<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col overflow-x-hidden font-sans">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col font-sans">
 
   <%- include('partials/navbar') %>
 

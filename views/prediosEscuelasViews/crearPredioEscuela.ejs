@@ -1,196 +1,272 @@
-<div class="min-h-[calc(100vh-240px)] px-2 sm:px-4 py-2 sm:py-4 safe-bottom">
-  <div class="mx-auto max-w-6xl">
+<%
+  const mensajeSeguro = typeof mensaje !== 'undefined' ? mensaje : '';
+  const erroresSeguro = typeof errores !== 'undefined' ? errores : [];
+  const formData = typeof datos !== 'undefined' ? datos : {};
+%>
 
-    <div class="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
-      <!-- Header -->
-      <div class="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-white to-white">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">
-              Crear Predio Escuela
-            </h1>
-            <p class="mt-0.5 text-xs sm:text-sm text-gray-600">
-              Cargá los datos del predio y conectividad de la escuela.
+<main class="bg-gray-100 pt-0 pb-4 px-2 sm:px-3 lg:px-4">
+  <div class="w-full max-w-[95vw] 2xl:max-w-[1500px] mx-auto bg-white p-3 sm:p-3.5 xl:p-5 rounded-2xl shadow-xl border border-gray-300 overflow-hidden">
+
+    <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+      <div class="min-w-0">
+        <h1 class="text-lg sm:text-xl xl:text-2xl font-extrabold tracking-tight text-gray-900 leading-tight">
+          Nuevo Predio Escuela
+        </h1>
+        <p class="mt-0.5 text-xs xl:text-sm text-gray-600 leading-tight">
+          Cargá los datos del predio y la conectividad asignada.
+        </p>
+      </div>
+
+      <a
+        href="/predios-escuelas/dashboard"
+        class="inline-flex items-center justify-center rounded-xl bg-gray-100 border border-gray-300 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30 self-start"
+      >
+        Volver
+      </a>
+    </div>
+
+    <% if (mensajeSeguro) { %>
+      <div class="mt-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 shadow-sm">
+        <%= mensajeSeguro %>
+      </div>
+    <% } %>
+
+    <% if (erroresSeguro.length > 0) { %>
+      <div class="mt-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl shadow-sm">
+        <h2 class="font-semibold mb-1 text-sm">Por favor corregí los siguientes errores:</h2>
+        <ul class="list-disc pl-5 text-xs sm:text-sm space-y-0.5">
+          <% erroresSeguro.forEach(error => { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form action="/predios-escuelas/crear" method="POST" class="space-y-3 mt-3" id="formCrearPredioEscuela">
+
+      <% const inputMain = "w-full rounded-xl border bg-white px-3 py-1.5 text-sm text-gray-900 transition "
+        + "border-blue-300 hover:border-blue-500 "
+        + "focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600"; %>
+
+      <section class="rounded-2xl border border-gray-200 bg-gray-50/60 p-3 sm:p-4">
+        <div class="mb-2">
+          <h2 class="text-sm font-extrabold text-gray-900 leading-tight">Identificación</h2>
+          <p class="text-xs text-gray-600 leading-tight">Datos base del predio.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-3">
+            <label for="predio" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">Predio</label>
+            <input
+              type="text"
+              id="predio"
+              name="predio"
+              value="<%= formData.predio || '' %>"
+              required
+              inputmode="numeric"
+              autocomplete="off"
+              class="<%= inputMain %>"
+            />
+            <p class="mt-1 text-[11px] text-gray-500 leading-tight">Solo números.</p>
+          </div>
+
+          <div class="md:col-span-3">
+            <label for="cue" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">CUE</label>
+            <input
+              type="text"
+              id="cue"
+              name="cue"
+              value="<%= formData.cue || '' %>"
+              required
+              inputmode="numeric"
+              autocomplete="off"
+              pattern="^\d{9}(-\d{9})*$"
+              title="Ingresá bloques de 9 dígitos separados por guion. Ejemplo: 100002700-100075500"
+              class="<%= inputMain %>"
+            />
+            <p class="mt-1 text-[11px] text-gray-500 leading-tight">
+              Formato: bloques de 9 dígitos separados por guion.
             </p>
           </div>
 
-          <div class="hidden sm:block">
-            <a
-              href="/predios-escuelas/dashboard"
-              class="inline-flex items-center justify-center rounded-xl bg-gray-100 border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            >
-              Volver
-            </a>
+          <div class="md:col-span-6">
+            <label for="nombreEscuela" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">Escuela</label>
+            <input
+              type="text"
+              id="nombreEscuela"
+              name="nombreEscuela"
+              value="<%= formData.nombreEscuela || '' %>"
+              required
+              class="<%= inputMain %>"
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="px-4 sm:px-6 py-4">
-        <% if (typeof errores !== "undefined" && errores.length > 0) { %>
-          <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-4 shadow-sm">
-            <h2 class="font-semibold mb-1 text-sm">Por favor corregí los siguientes errores:</h2>
-            <ul class="list-disc pl-5 text-xs sm:text-sm space-y-0.5">
-              <% errores.forEach(error => { %>
-                <li><%= error.msg %></li>
-              <% }) %>
-            </ul>
+      <section class="rounded-2xl border border-gray-200 bg-white p-3 sm:p-4">
+        <div class="mb-2">
+          <h2 class="text-sm font-extrabold text-gray-900 leading-tight">Ubicación</h2>
+          <p class="text-xs text-gray-600 leading-tight">Dirección, ciudad y departamento.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-5">
+            <label for="direccion" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">Dirección</label>
+            <input
+              type="text"
+              id="direccion"
+              name="direccion"
+              value="<%= formData.direccion || '' %>"
+              required
+              class="<%= inputMain %>"
+            />
           </div>
-        <% } %>
 
-        <form action="/predios-escuelas/crear" method="POST" class="space-y-4">
-          <% const inputMain = "w-full rounded-xl border bg-white px-3 py-1.5 text-sm text-gray-900 transition border-blue-300 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600"; %>
+          <div class="md:col-span-4">
+            <label for="ciudad" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">Ciudad</label>
+            <input
+              type="text"
+              id="ciudad"
+              name="ciudad"
+              value="<%= formData.ciudad || '' %>"
+              required
+              class="<%= inputMain %>"
+            />
+          </div>
 
-          <section class="rounded-2xl border border-gray-200 bg-white p-4">
-            <div class="mb-3">
-              <h2 class="text-sm font-extrabold text-gray-900">Datos principales</h2>
-              <p class="text-xs text-gray-600">Información general del establecimiento.</p>
-            </div>
+          <div class="md:col-span-3">
+            <label for="departamento" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">Departamento</label>
+            <input
+              type="text"
+              id="departamento"
+              name="departamento"
+              value="<%= formData.departamento || '' %>"
+              required
+              class="<%= inputMain %>"
+            />
+          </div>
+        </div>
+      </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div class="md:col-span-2">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Predio</label>
-                <input
-                  type="text"
-                  name="predio"
-                  value="<%= datos?.predio || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
+      <section class="rounded-2xl border border-gray-200 bg-white p-3 sm:p-4">
+        <div class="mb-2">
+          <h2 class="text-sm font-extrabold text-gray-900 leading-tight">Conectividad</h2>
+          <p class="text-xs text-gray-600 leading-tight">Velocidad, ISP y tecnología.</p>
+        </div>
 
-              <div class="md:col-span-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">CUE</label>
-                <input
-                  type="text"
-                  name="cue"
-                  value="<%= datos?.cue || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-3">
+            <label for="megabytesAsignados" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">MB asignados</label>
+            <input
+              type="number"
+              id="megabytesAsignados"
+              name="megabytesAsignados"
+              value="<%= formData.megabytesAsignados || '' %>"
+              required
+              min="0"
+              class="<%= inputMain %>"
+            />
+          </div>
 
-              <div class="md:col-span-7">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre de la escuela</label>
-                <input
-                  type="text"
-                  name="nombreEscuela"
-                  value="<%= datos?.nombreEscuela || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
+          <div class="md:col-span-4">
+            <label for="isp" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">ISP</label>
+            <input
+              type="text"
+              id="isp"
+              name="isp"
+              value="<%= formData.isp || '' %>"
+              required
+              class="<%= inputMain %>"
+            />
+          </div>
 
-              <div class="md:col-span-6">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Dirección</label>
-                <input
-                  type="text"
-                  name="direccion"
-                  value="<%= datos?.direccion || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
-
-              <div class="md:col-span-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Ciudad</label>
-                <input
-                  type="text"
-                  name="ciudad"
-                  value="<%= datos?.ciudad || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
-
-              <div class="md:col-span-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Departamento</label>
-                <input
-                  type="text"
-                  name="departamento"
-                  value="<%= datos?.departamento || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
-            </div>
-          </section>
-
-          <section class="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
-            <div class="mb-3">
-              <h2 class="text-sm font-extrabold text-gray-900">Conectividad</h2>
-              <p class="text-xs text-gray-600">Datos del servicio asignado.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div class="md:col-span-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Megabytes asignados</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  name="megabytesAsignados"
-                  value="<%= datos?.megabytesAsignados || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
-
-              <div class="md:col-span-5">
-                <label class="block text-xs font-medium text-gray-700 mb-1">ISP</label>
-                <input
-                  type="text"
-                  name="isp"
-                  value="<%= datos?.isp || '' %>"
-                  class="<%= inputMain %>"
-                  required
-                >
-              </div>
-
-              <div class="md:col-span-4">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Tecnología</label>
-                <select
-                  name="tecnologia"
-                  class="<%= inputMain %>"
-                  required
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="FTTH" <%= datos?.tecnologia === "FTTH" ? "selected" : "" %>>FTTH</option>
-                  <option value="Radio Enlace" <%= datos?.tecnologia === "Radio Enlace" ? "selected" : "" %>>Radio Enlace</option>
-                  <option value="Cable" <%= datos?.tecnologia === "Cable" ? "selected" : "" %>>Cable</option>
-                  <option value="Fibra Óptica" <%= datos?.tecnologia === "Fibra Óptica" ? "selected" : "" %>>Fibra Óptica</option>
-                  <option value="Wireless" <%= datos?.tecnologia === "Wireless" ? "selected" : "" %>>Wireless</option>
-                  <option value="Otro" <%= datos?.tecnologia === "Otro" ? "selected" : "" %>>Otro</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <div class="flex justify-end pt-3 border-t border-gray-200">
-            <button
-              type="submit"
-              class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          <div class="md:col-span-5">
+            <label for="tecnologia" class="block text-xs font-medium text-gray-700 mb-1 leading-tight">Tecnología</label>
+            <select
+              id="tecnologia"
+              name="tecnologia"
+              required
+              class="<%= inputMain %>"
             >
-              Guardar
-            </button>
+              <option value="">Seleccionar tecnología</option>
+              <option value="FTTH" <%= formData.tecnologia === 'FTTH' ? 'selected' : '' %>>FTTH</option>
+              <option value="Radio Enlace" <%= formData.tecnologia === 'Radio Enlace' ? 'selected' : '' %>>Radio Enlace</option>
+              <option value="Cable" <%= formData.tecnologia === 'Cable' ? 'selected' : '' %>>Cable</option>
+              <option value="Fibra Óptica" <%= formData.tecnologia === 'Fibra Óptica' ? 'selected' : '' %>>Fibra Óptica</option>
+              <option value="Wireless" <%= formData.tecnologia === 'Wireless' ? 'selected' : '' %>>Wireless</option>
+              <option value="Otro" <%= formData.tecnologia === 'Otro' ? 'selected' : '' %>>Otro</option>
+            </select>
           </div>
-        </form>
+        </div>
+      </section>
+
+      <div class="flex justify-end pt-2 border-t border-gray-200">
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+        >
+          Guardar registro
+        </button>
       </div>
-    </div>
+
+    </form>
+
   </div>
-</div>
+</main>
 
 <script>
-  function capitalizarCadaPalabra(texto) {
-    return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+  const inputPredio = document.getElementById("predio");
+  const inputCue = document.getElementById("cue");
+  const formCrear = document.getElementById("formCrearPredioEscuela");
+
+  function soloDigitos(valor) {
+    return String(valor || "").replace(/\D/g, "");
   }
 
-  const campos = ["nombreEscuela", "direccion", "ciudad", "departamento", "isp"];
-  campos.forEach(name => {
-    const input = document.querySelector(`input[name="${name}"]`);
-    if (input) {
-      input.addEventListener("blur", () => {
-        input.value = capitalizarCadaPalabra(input.value);
-      });
+  function formatearCue(valor) {
+    const limpio = soloDigitos(valor);
+    const bloques = [];
+
+    for (let i = 0; i < limpio.length; i += 9) {
+      const bloque = limpio.slice(i, i + 9);
+      if (bloque) bloques.push(bloque);
     }
-  });
+
+    return bloques.join("-");
+  }
+
+  if (inputPredio) {
+    inputPredio.addEventListener("input", () => {
+      inputPredio.value = soloDigitos(inputPredio.value);
+    });
+  }
+
+  if (inputCue) {
+    inputCue.addEventListener("input", () => {
+      inputCue.value = formatearCue(inputCue.value);
+    });
+
+    inputCue.addEventListener("blur", () => {
+      inputCue.value = formatearCue(inputCue.value);
+    });
+  }
+
+  if (formCrear) {
+    formCrear.addEventListener("submit", (e) => {
+      if (inputPredio) {
+        inputPredio.value = soloDigitos(inputPredio.value);
+      }
+
+      if (inputCue) {
+        inputCue.value = formatearCue(inputCue.value);
+
+        const valido = /^\d{9}(-\d{9})*$/.test(inputCue.value);
+        if (!valido) {
+          e.preventDefault();
+          inputCue.focus();
+          alert("El CUE debe tener bloques de 9 dígitos separados por guion.");
+        }
+      }
+    });
+  }
 </script>
