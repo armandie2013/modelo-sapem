@@ -24,6 +24,7 @@ import notasRoutes from "./routes/notasRoutes.mjs";
 import pagosRoutes from "./routes/pagosRoutes.mjs";
 import planPagoRoutes from "./routes/planPagoRoutes.mjs";
 import tareasRoutes from "./routes/tareasRoutes.mjs";
+import prediosEscuelasRoutes from "./routes/prediosEscuelasRoutes.mjs";
 
 import clock from "./utils/clock.mjs";
 
@@ -115,6 +116,7 @@ app.use("/tareas", cargosRoutes);
 app.use("/pagos", pagosRoutes);
 app.use("/notas", notasRoutes);
 app.use("/planes-pago", planPagoRoutes);
+app.use("/predios-escuelas", prediosEscuelasRoutes);
 app.use(tareasRoutes);
 app.use("/api/cambio", cambioRoutes);
 

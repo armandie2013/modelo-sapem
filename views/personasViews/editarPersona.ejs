@@ -238,6 +238,16 @@
                       <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[escuelas][eliminar]" value="true" <%= persona.modulosPermitidos.escuelas?.eliminar ? "checked" : "" %>> Eliminar</label>
                     </div>
                   </div>
+
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p class="font-semibold text-gray-900">Predios Escuelas</p>
+                    <div class="flex flex-wrap gap-2">
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[prediosEscuelas][ver]" value="true" <%= persona.modulosPermitidos.prediosEscuelas?.ver ? "checked" : "" %>> Ver</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[prediosEscuelas][crear]" value="true" <%= persona.modulosPermitidos.prediosEscuelas?.crear ? "checked" : "" %>> Crear</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[prediosEscuelas][editar]" value="true" <%= persona.modulosPermitidos.prediosEscuelas?.editar ? "checked" : "" %>> Editar</label>
+                      <label class="perm-chip"><input type="checkbox" name="modulosPermitidos[prediosEscuelas][eliminar]" value="true" <%= persona.modulosPermitidos.prediosEscuelas?.eliminar ? "checked" : "" %>> Eliminar</label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -287,7 +297,6 @@
         </div>
       </div>
 
-      <!-- ✅ Footer acciones (desktop + mobile) -->
       <div class="pt-1">
         <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
           <button
@@ -296,13 +305,6 @@
           >
             Guardar Cambios
           </button>
-
-          <!-- <a
-            href="/personas/dashboard"
-            class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
-          >
-            Volver
-          </a> -->
         </div>
       </div>
 
