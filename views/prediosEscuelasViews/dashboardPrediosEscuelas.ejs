@@ -13,6 +13,29 @@
 
     return bloques;
   };
+
+  const normalizarTextoVista = (valor) => {
+    return String(valor || '').trim();
+  };
+
+  const obtenerValoresUnicos = (campo) => {
+    return [...new Set(
+      prediosSeguro
+        .map((item) => normalizarTextoVista(item?.[campo]))
+        .filter((valor) => valor !== '')
+    )].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  };
+
+  const departamentosUnicos = obtenerValoresUnicos('departamento');
+  const ciudadesUnicas = obtenerValoresUnicos('ciudad');
+  const ispUnicos = obtenerValoresUnicos('isp');
+  const tecnologiasUnicas = obtenerValoresUnicos('tecnologia');
+
+  const megabytesUnicos = [...new Set(
+    prediosSeguro
+      .map((item) => Number(item?.megabytesAsignados || 0))
+      .filter((valor) => !Number.isNaN(valor))
+  )].sort((a, b) => a - b);
 %>
 
 <main class="bg-gray-100 pt-0 pb-4 px-2 sm:px-3 lg:px-4">
@@ -44,6 +67,125 @@
       </div>
     <% } %>
 
+    <!-- ===== FILTROS ===== -->
+    <section class="mt-3 rounded-2xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
+      <div class="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2 flex-1">
+
+          <div class="sm:col-span-2 lg:col-span-2">
+            <label for="filtroBuscar" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Buscar
+            </label>
+            <input
+              type="text"
+              id="filtroBuscar"
+              placeholder="Predio, CUE, escuela, ciudad, ISP..."
+              class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+          </div>
+
+          <div>
+            <label for="filtroDepartamento" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Departamento
+            </label>
+            <select
+              id="filtroDepartamento"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="">Todos</option>
+              <% departamentosUnicos.forEach((departamento) => { %>
+                <option value="<%= departamento %>"><%= departamento %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label for="filtroCiudad" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Ciudad
+            </label>
+            <select
+              id="filtroCiudad"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="">Todas</option>
+              <% ciudadesUnicas.forEach((ciudad) => { %>
+                <option value="<%= ciudad %>"><%= ciudad %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label for="filtroIsp" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              ISP
+            </label>
+            <select
+              id="filtroIsp"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="">Todos</option>
+              <% ispUnicos.forEach((isp) => { %>
+                <option value="<%= isp %>"><%= isp %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label for="filtroTecnologia" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Tecnología
+            </label>
+            <select
+              id="filtroTecnologia"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="">Todas</option>
+              <% tecnologiasUnicas.forEach((tecnologia) => { %>
+                <option value="<%= tecnologia %>"><%= tecnologia %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label for="filtroMb" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              MB
+            </label>
+            <select
+              id="filtroMb"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="">Todos</option>
+              <% megabytesUnicos.forEach((mb) => { %>
+                <option value="<%= mb %>"><%= mb %> MB</option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 xl:min-w-[180px]">
+          <button
+            type="button"
+            id="btnLimpiarFiltros"
+            class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700
+                   hover:bg-gray-100 transition"
+          >
+            Limpiar filtros
+          </button>
+
+          <div class="inline-flex items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800">
+            <span id="contadorFiltros" data-total="<%= prediosSeguro.length %>">
+              Mostrando <%= prediosSeguro.length %> de <%= prediosSeguro.length %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== DESKTOP / TABLE ===== -->
     <div class="mt-2 hidden sm:block">
       <div class="overflow-x-auto rounded-2xl border border-gray-200">
@@ -72,10 +214,38 @@
                 </td>
               </tr>
             <% } else { %>
+              <tr id="filaSinResultadosTabla" class="border-t hidden">
+                <td colspan="11" class="px-4 py-6 text-center text-sm text-gray-500">
+                  No hay registros que coincidan con los filtros.
+                </td>
+              </tr>
+
               <% prediosSeguro.forEach((predioEscuela, index) => { %>
-                <tr class="border-t hover:bg-blue-50/40 transition align-top">
+                <%
+                  const textoBusqueda = [
+                    predioEscuela.predio,
+                    predioEscuela.cue,
+                    predioEscuela.nombreEscuela,
+                    predioEscuela.direccion,
+                    predioEscuela.ciudad,
+                    predioEscuela.departamento,
+                    predioEscuela.megabytesAsignados,
+                    predioEscuela.isp,
+                    predioEscuela.tecnologia
+                  ].join(' ');
+                %>
+
+                <tr
+                  class="border-t hover:bg-blue-50/40 transition align-top fila-predio"
+                  data-search="<%= textoBusqueda %>"
+                  data-departamento="<%= predioEscuela.departamento || '' %>"
+                  data-ciudad="<%= predioEscuela.ciudad || '' %>"
+                  data-isp="<%= predioEscuela.isp || '' %>"
+                  data-tecnologia="<%= predioEscuela.tecnologia || '' %>"
+                  data-mb="<%= predioEscuela.megabytesAsignados || 0 %>"
+                >
                   <td class="px-2 py-2 whitespace-nowrap font-extrabold text-blue-800 align-top">
-                    <span class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-1.5 py-0.5">
+                    <span class="numero-visible inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-1.5 py-0.5">
                       #<%= index + 1 %>
                     </span>
                   </td>
@@ -171,12 +341,38 @@
           <p class="text-sm text-gray-500 text-center">No hay registros cargados.</p>
         </article>
       <% } else { %>
+        <article id="sinResultadosMobile" class="hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <p class="text-sm text-gray-500 text-center">No hay registros que coincidan con los filtros.</p>
+        </article>
+
         <% prediosSeguro.forEach((predioEscuela, index) => { %>
-          <article class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <%
+            const textoBusquedaMobile = [
+              predioEscuela.predio,
+              predioEscuela.cue,
+              predioEscuela.nombreEscuela,
+              predioEscuela.direccion,
+              predioEscuela.ciudad,
+              predioEscuela.departamento,
+              predioEscuela.megabytesAsignados,
+              predioEscuela.isp,
+              predioEscuela.tecnologia
+            ].join(' ');
+          %>
+
+          <article
+            class="card-predio rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+            data-search="<%= textoBusquedaMobile %>"
+            data-departamento="<%= predioEscuela.departamento || '' %>"
+            data-ciudad="<%= predioEscuela.ciudad || '' %>"
+            data-isp="<%= predioEscuela.isp || '' %>"
+            data-tecnologia="<%= predioEscuela.tecnologia || '' %>"
+            data-mb="<%= predioEscuela.megabytesAsignados || 0 %>"
+          >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <p class="text-xs text-gray-500">Registro</p>
-                <p class="text-lg font-extrabold text-blue-800 leading-tight">#<%= index + 1 %></p>
+                <p class="numero-visible-mobile text-lg font-extrabold text-blue-800 leading-tight">#<%= index + 1 %></p>
                 <p class="mt-1 text-sm font-semibold text-gray-900"><%= predioEscuela.nombreEscuela %></p>
                 <p class="text-xs text-gray-600"><%= predioEscuela.ciudad %> · <%= predioEscuela.departamento %></p>
               </div>
@@ -274,3 +470,164 @@
 
   </div>
 </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const contador = document.getElementById('contadorFiltros');
+    const totalRegistros = Number(contador?.dataset.total || 0);
+
+    const inputBuscar = document.getElementById('filtroBuscar');
+    const selectDepartamento = document.getElementById('filtroDepartamento');
+    const selectCiudad = document.getElementById('filtroCiudad');
+    const selectIsp = document.getElementById('filtroIsp');
+    const selectTecnologia = document.getElementById('filtroTecnologia');
+    const selectMb = document.getElementById('filtroMb');
+    const btnLimpiar = document.getElementById('btnLimpiarFiltros');
+
+    const filas = Array.from(document.querySelectorAll('.fila-predio'));
+    const cards = Array.from(document.querySelectorAll('.card-predio'));
+
+    const filaSinResultadosTabla = document.getElementById('filaSinResultadosTabla');
+    const sinResultadosMobile = document.getElementById('sinResultadosMobile');
+
+    const normalizar = (valor) => {
+      return String(valor || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    };
+
+    const coincideRegistro = (elemento) => {
+      const buscar = normalizar(inputBuscar?.value);
+      const departamento = normalizar(selectDepartamento?.value);
+      const ciudad = normalizar(selectCiudad?.value);
+      const isp = normalizar(selectIsp?.value);
+      const tecnologia = normalizar(selectTecnologia?.value);
+      const mb = String(selectMb?.value || '').trim();
+
+      const dataSearch = normalizar(elemento.dataset.search);
+      const dataDepartamento = normalizar(elemento.dataset.departamento);
+      const dataCiudad = normalizar(elemento.dataset.ciudad);
+      const dataIsp = normalizar(elemento.dataset.isp);
+      const dataTecnologia = normalizar(elemento.dataset.tecnologia);
+      const dataMb = String(elemento.dataset.mb || '').trim();
+
+      const coincideBuscar = !buscar || dataSearch.includes(buscar);
+      const coincideDepartamento = !departamento || dataDepartamento === departamento;
+      const coincideCiudad = !ciudad || dataCiudad === ciudad;
+      const coincideIsp = !isp || dataIsp === isp;
+      const coincideTecnologia = !tecnologia || dataTecnologia === tecnologia;
+      const coincideMb = !mb || dataMb === mb;
+
+      return (
+        coincideBuscar &&
+        coincideDepartamento &&
+        coincideCiudad &&
+        coincideIsp &&
+        coincideTecnologia &&
+        coincideMb
+      );
+    };
+
+    const actualizarNumeracion = () => {
+      let contadorTabla = 0;
+
+      filas.forEach((fila) => {
+        if (!fila.classList.contains('hidden')) {
+          contadorTabla++;
+          const numero = fila.querySelector('.numero-visible');
+          if (numero) numero.textContent = `#${contadorTabla}`;
+        }
+      });
+
+      let contadorMobile = 0;
+
+      cards.forEach((card) => {
+        if (!card.classList.contains('hidden')) {
+          contadorMobile++;
+          const numero = card.querySelector('.numero-visible-mobile');
+          if (numero) numero.textContent = `#${contadorMobile}`;
+        }
+      });
+    };
+
+    const aplicarFiltros = () => {
+      let visiblesTabla = 0;
+      let visiblesMobile = 0;
+
+      filas.forEach((fila) => {
+        const visible = coincideRegistro(fila);
+
+        if (visible) {
+          fila.classList.remove('hidden');
+          visiblesTabla++;
+        } else {
+          fila.classList.add('hidden');
+        }
+      });
+
+      cards.forEach((card) => {
+        const visible = coincideRegistro(card);
+
+        if (visible) {
+          card.classList.remove('hidden');
+          visiblesMobile++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      if (filaSinResultadosTabla) {
+        filaSinResultadosTabla.classList.toggle('hidden', visiblesTabla !== 0);
+      }
+
+      if (sinResultadosMobile) {
+        sinResultadosMobile.classList.toggle('hidden', visiblesMobile !== 0);
+      }
+
+      const visibles = window.innerWidth < 640 ? visiblesMobile : visiblesTabla;
+
+      if (contador) {
+        contador.textContent = `Mostrando ${visibles} de ${totalRegistros}`;
+      }
+
+      actualizarNumeracion();
+    };
+
+    const limpiarFiltros = () => {
+      if (inputBuscar) inputBuscar.value = '';
+      if (selectDepartamento) selectDepartamento.value = '';
+      if (selectCiudad) selectCiudad.value = '';
+      if (selectIsp) selectIsp.value = '';
+      if (selectTecnologia) selectTecnologia.value = '';
+      if (selectMb) selectMb.value = '';
+
+      aplicarFiltros();
+
+      if (inputBuscar) inputBuscar.focus();
+    };
+
+    [
+      inputBuscar,
+      selectDepartamento,
+      selectCiudad,
+      selectIsp,
+      selectTecnologia,
+      selectMb,
+    ].forEach((elemento) => {
+      if (!elemento) return;
+
+      elemento.addEventListener('input', aplicarFiltros);
+      elemento.addEventListener('change', aplicarFiltros);
+    });
+
+    if (btnLimpiar) {
+      btnLimpiar.addEventListener('click', limpiarFiltros);
+    }
+
+    window.addEventListener('resize', aplicarFiltros);
+
+    aplicarFiltros();
+  });
+</script>
