@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const tecnologiasPermitidas = [
+  "FTTH",
+  "Radio Enlace",
+  "RADIOENLACE",
+  "Satelital",
+  "Cable",
+  "Fibra Óptica",
+  "Wireless",
+  "Otro",
+];
+
 const predioEscuelaSchema = new mongoose.Schema(
   {
     predio: { type: String, required: true, trim: true, index: true },
@@ -13,7 +24,7 @@ const predioEscuelaSchema = new mongoose.Schema(
     tecnologia: {
       type: String,
       required: true,
-      enum: ["FTTH", "Radio Enlace", "Cable", "Fibra Óptica", "Wireless", "Otro"],
+      enum: tecnologiasPermitidas,
       trim: true,
     },
   },
