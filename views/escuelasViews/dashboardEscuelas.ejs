@@ -1,3 +1,50 @@
+<%
+  const escuelasSeguro = typeof escuelas !== 'undefined' && Array.isArray(escuelas) ? escuelas : [];
+  const usuarioSeguro = typeof usuario !== 'undefined' ? usuario : null;
+
+  const tienePermiso = (accion) => {
+    return !!(
+      usuarioSeguro &&
+      usuarioSeguro.modulosPermitidos &&
+      usuarioSeguro.modulosPermitidos.escuelas &&
+      usuarioSeguro.modulosPermitidos.escuelas[accion]
+    );
+  };
+
+  const total = escuelasSeguro.length;
+  const abiertos = escuelasSeguro.filter((e) => e.estado === 'Abierto').length;
+  const cerrados = total - abiertos;
+
+  const badge = (estado) => {
+    if (estado === 'Abierto') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    return 'bg-red-50 text-red-700 border-red-200';
+  };
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) return '-';
+
+    const fechaObj = new Date(fecha);
+
+    if (Number.isNaN(fechaObj.getTime())) return '-';
+
+    return fechaObj.toLocaleDateString('es-AR');
+  };
+
+  const obtenerFechaTime = (fecha) => {
+    if (!fecha) return 0;
+
+    const fechaObj = new Date(fecha);
+
+    if (Number.isNaN(fechaObj.getTime())) return 0;
+
+    return fechaObj.getTime();
+  };
+
+  const valorSeguro = (valor) => {
+    return String(valor || '').trim();
+  };
+%>
+
 <main class="bg-gray-100 pt-0 pb-4 px-2 sm:px-3 lg:px-4">
   <div class="w-full max-w-[95vw] 2xl:max-w-[1500px] mx-auto bg-white p-3 sm:p-3.5 xl:p-5 rounded-2xl shadow-xl border border-gray-300">
 
@@ -7,12 +54,13 @@
         <h1 class="text-lg sm:text-xl xl:text-2xl font-extrabold tracking-tight text-gray-900 leading-tight">
           Listado de Casos · Escuelas
         </h1>
+
         <p class="mt-0.5 text-xs xl:text-sm text-gray-600 leading-tight">
           Buscá, filtrá y gestioná los reclamos técnicos.
         </p>
       </div>
 
-      <% if (usuario?.modulosPermitidos?.escuelas?.crear) { %>
+      <% if (tienePermiso('crear')) { %>
         <a
           href="/escuelas/crear"
           class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white
@@ -23,269 +71,251 @@
       <% } %>
     </div>
 
-    <%
-      const total = (escuelas || []).length;
-      const abiertos = (escuelas || []).filter(e => e.estado === 'Abierto').length;
-      const cerrados = total - abiertos;
+    <!-- ===== Métricas ===== -->
+    <section class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div class="rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 shadow-sm">
+        <p class="text-[11px] text-gray-600 leading-tight">Total de casos</p>
+        <p class="text-lg xl:text-xl font-extrabold text-gray-900 leading-tight">
+          <%= total %>
+        </p>
+      </div>
 
-      const badge = (estado) => {
-        if (estado === 'Abierto') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-        return 'bg-red-50 text-red-700 border-red-200';
-      };
-    %>
+      <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 shadow-sm">
+        <p class="text-[11px] text-emerald-700 leading-tight">Abiertos</p>
+        <p class="text-lg xl:text-xl font-extrabold text-emerald-800 leading-tight">
+          <%= abiertos %>
+        </p>
+      </div>
 
-    <!-- ===== Barra única: métricas + búsqueda/filtros ===== -->
-    <div class="mt-2 rounded-2xl border border-gray-200 bg-white p-2.5 sm:p-3">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-2">
+      <div class="rounded-2xl border border-red-200 bg-red-50/70 px-3 py-2 shadow-sm">
+        <p class="text-[11px] text-red-700 leading-tight">Cerrados</p>
+        <p class="text-lg xl:text-xl font-extrabold text-red-800 leading-tight">
+          <%= cerrados %>
+        </p>
+      </div>
+    </section>
 
-        <!-- Métricas -->
-        <div class="lg:col-span-4">
-          <div class="grid grid-cols-3 gap-2">
-            <div class="rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-1.5 sm:py-2">
-              <p class="text-[10px] text-gray-600 leading-tight">Total</p>
-              <p class="text-base xl:text-lg font-extrabold text-gray-900 leading-tight"><%= total %></p>
-            </div>
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50/60 px-2.5 py-1.5 sm:py-2">
-              <p class="text-[10px] text-emerald-700 leading-tight">Abiertos</p>
-              <p class="text-base xl:text-lg font-extrabold text-emerald-800 leading-tight"><%= abiertos %></p>
-            </div>
-            <div class="rounded-xl border border-red-200 bg-red-50/60 px-2.5 py-1.5 sm:py-2">
-              <p class="text-[10px] text-red-700 leading-tight">Cerrados</p>
-              <p class="text-base xl:text-lg font-extrabold text-red-800 leading-tight"><%= cerrados %></p>
+    <!-- ===== FILTROS ===== -->
+    <section class="mt-3 rounded-2xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
+      <div class="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 flex-1">
+
+          <div class="sm:col-span-2 lg:col-span-2">
+            <label for="filtroTexto" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Buscar
+            </label>
+
+            <input
+              id="filtroTexto"
+              type="text"
+              placeholder="Ticket, predio, CUE, escuela, ciudad, provincia..."
+              class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+          </div>
+
+          <div>
+            <label for="filtroEstado" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Estado
+            </label>
+
+            <select
+              id="filtroEstado"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="Todos">Todos</option>
+              <option value="Abierto">Abierto</option>
+              <option value="Cerrado">Cerrado</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="orden" class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Orden
+            </label>
+
+            <select
+              id="orden"
+              class="w-full rounded-xl border border-gray-300 bg-white px-2 py-2 text-xs text-gray-800 outline-none
+                     focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="fecha_desc">Nuevos</option>
+              <option value="fecha_asc">Viejos</option>
+              <option value="ticket_asc">Ticket ↑</option>
+              <option value="ticket_desc">Ticket ↓</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+              Resultado
+            </label>
+
+            <div class="inline-flex w-full items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800">
+              Mostrando <span id="contadorResultados" class="mx-1"><%= total %></span> de <%= total %>
             </div>
           </div>
         </div>
 
-        <!-- Buscar -->
-        <div class="lg:col-span-5">
-          <label class="block text-[11px] font-medium text-gray-700 mb-1 leading-tight">Buscar</label>
-          <input
-            id="filtroTexto"
-            type="text"
-            placeholder="Ticket, fecha, predio, CUE, escuela, ciudad, provincia, creado por..."
-            class="w-full rounded-xl border bg-white px-3 py-1.5 sm:py-2 text-sm text-gray-900 transition
-                   border-blue-300 hover:border-blue-500
-                   focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600"
-          />
-          <p class="mt-1 text-[10px] text-gray-500 hidden xl:block leading-tight">Tip: escribí “cerrado”, “abierto”, “catamarca”, etc.</p>
-        </div>
-
-        <!-- Estado -->
-        <div class="lg:col-span-2">
-          <label class="block text-[11px] font-medium text-gray-700 mb-1 leading-tight">Estado</label>
-          <select
-            id="filtroEstado"
-            class="w-full rounded-xl border bg-white px-3 py-1.5 sm:py-2 text-sm text-gray-900 transition
-                   border-blue-300 hover:border-blue-500
-                   focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600"
+        <div class="grid grid-cols-1 gap-2 xl:min-w-[180px]">
+          <button
+            type="button"
+            id="btnLimpiar"
+            class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700
+                   hover:bg-gray-100 transition"
           >
-            <option value="Todos">Todos</option>
-            <option value="Abierto">Abierto</option>
-            <option value="Cerrado">Cerrado</option>
-          </select>
-        </div>
-
-        <!-- Orden -->
-        <div class="lg:col-span-1">
-          <label class="block text-[11px] font-medium text-gray-700 mb-1 leading-tight">Orden</label>
-          <select
-            id="orden"
-            class="w-full rounded-xl border bg-white px-3 py-1.5 sm:py-2 text-sm text-gray-900 transition
-                   border-blue-300 hover:border-blue-500
-                   focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-600"
-          >
-            <option value="fecha_desc">Nuevos</option>
-            <option value="fecha_asc">Viejos</option>
-            <option value="ticket_asc">Ticket ↑</option>
-            <option value="ticket_desc">Ticket ↓</option>
-          </select>
+            Limpiar filtros
+          </button>
         </div>
       </div>
+    </section>
 
-      <div class="mt-2 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-        <p class="text-[11px] text-gray-600 leading-tight">
-          Mostrando: <span id="contadorResultados" class="font-semibold text-gray-900"><%= total %></span> casos
+    <% if (!escuelasSeguro || escuelasSeguro.length === 0) { %>
+      <div class="mt-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <p class="text-sm text-gray-500 text-center">
+          No hay escuelas registradas.
         </p>
-
-        <button
-          type="button"
-          id="btnLimpiar"
-          class="inline-flex items-center justify-center rounded-xl bg-gray-100 border border-gray-300 px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700
-                 hover:bg-gray-200 transition focus:outline-none focus:ring-2 focus:ring-blue-500/30 self-start sm:self-auto"
-        >
-          Limpiar filtros
-        </button>
       </div>
-    </div>
-
-    <% if (!escuelas || escuelas.length === 0) { %>
-      <p class="text-gray-600 text-center mt-3 text-sm">No hay escuelas registradas.</p>
     <% } else { %>
 
-      <!-- ===== MOBILE: Cards ===== -->
-      <div class="mt-3 grid grid-cols-1 gap-3 sm:hidden" id="cardsMobile">
-        <% escuelas.forEach(escuela => { %>
-          <article
-            class="caso-card rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
-            data-ticket="<%= escuela.numeroTicket %>"
-            data-predio="<%= escuela.predio %>"
-            data-cue="<%= escuela.cue %>"
-            data-nombre="<%= escuela.nombre %>"
-            data-provincia="<%= escuela.provincia %>"
-            data-ciudad="<%= escuela.ciudad %>"
-            data-creadopor="<%= escuela.creadoPor %>"
-            data-estado="<%= escuela.estado %>"
-            data-fecha="<%= new Date(escuela.fechaDeCreacion).getTime() %>"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="text-xs text-gray-500">Ticket</p>
-                <p class="text-lg font-extrabold text-blue-800 leading-tight"><%= escuela.numeroTicket %></p>
-                <p class="mt-1 text-sm font-semibold text-gray-900 truncate"><%= escuela.nombre %></p>
-                <p class="text-xs text-gray-600 truncate"><%= escuela.ciudad %> · <%= escuela.provincia %></p>
-              </div>
-
-              <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold <%= badge(escuela.estado) %>">
-                <%= escuela.estado %>
-              </span>
-            </div>
-
-            <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-700">
-              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2 col-span-2">
-                <p class="text-[11px] text-gray-500">Creación</p>
-                <p class="font-semibold"><%= new Date(escuela.fechaDeCreacion).toLocaleDateString('es-AR') %></p>
-              </div>
-
-              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2">
-                <p class="text-[11px] text-gray-500">Predio</p>
-                <p class="font-semibold"><%= escuela.predio %></p>
-              </div>
-
-              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2">
-                <p class="text-[11px] text-gray-500">CUE</p>
-                <p class="font-semibold"><%= escuela.cue %></p>
-              </div>
-
-              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2 col-span-2">
-                <p class="text-[11px] text-gray-500">Creado por</p>
-                <p class="font-semibold"><%= escuela.creadoPor %></p>
-              </div>
-            </div>
-
-            <div class="mt-3 flex flex-wrap gap-2">
-              <% if (usuario?.modulosPermitidos?.escuelas?.ver) { %>
-                <a href="/escuelas/<%= escuela._id %>" class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition">
-                  Ver
-                </a>
-                <a href="/escuelas/<%= escuela._id %>/pdf" target="_blank" class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition">
-                  PDF
-                </a>
-              <% } %>
-
-              <% if (usuario?.modulosPermitidos?.escuelas?.editar) { %>
-                <a href="/escuelas/<%= escuela._id %>/editar" class="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition">
-                  Editar
-                </a>
-              <% } %>
-
-              <% if (usuario?.modulosPermitidos?.escuelas?.eliminar) { %>
-                <form
-                  action="/escuelas/<%= escuela._id %>?_method=DELETE"
-                  method="POST"
-                  class="inline"
-                  onsubmit="return confirm('¿Estás seguro que deseas eliminar esta escuela?');"
-                >
-                  <button type="submit" class="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition">
-                    Eliminar
-                  </button>
-                </form>
-              <% } %>
-            </div>
-          </article>
-        <% }) %>
-      </div>
-
-      <!-- ===== DESKTOP: Tabla compacta vertical ===== -->
+      <!-- ===== DESKTOP / TABLE ===== -->
       <div class="mt-2 hidden sm:block">
         <div class="overflow-x-auto rounded-2xl border border-gray-200">
-          <table class="w-full table-auto border-collapse min-w-[980px] xl:min-w-[1120px] text-[11px] lg:text-xs xl:text-sm" id="tablaCasos">
+          <table class="w-full table-fixed border-collapse min-w-[1180px] xl:min-w-[1260px] text-[10px] lg:text-[11px] xl:text-xs" id="tablaCasos">
             <thead class="bg-gray-50 text-gray-700 font-semibold">
               <tr>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Ticket</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Creación</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Predio</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">CUE</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Escuela</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Provincia</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Ciudad</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Creado por</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-center">Estado</th>
-                <th class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-left">Acciones</th>
+                <th class="w-[72px] px-2 py-1.5 text-left">Ticket</th>
+                <th class="w-[82px] px-2 py-1.5 text-left">Creación</th>
+                <th class="w-[72px] px-2 py-1.5 text-left">Predio</th>
+                <th class="w-[88px] px-2 py-1.5 text-left">CUE</th>
+                <th class="w-[300px] px-2 py-1.5 text-left">Escuela</th>
+                <th class="w-[110px] px-2 py-1.5 text-left">Provincia</th>
+                <th class="w-[120px] px-2 py-1.5 text-left">Ciudad</th>
+                <th class="w-[130px] px-2 py-1.5 text-left">Creado por</th>
+                <th class="w-[82px] px-2 py-1.5 text-center">Estado</th>
+                <th class="w-[170px] px-2 py-1.5 text-center">Acciones</th>
               </tr>
             </thead>
 
-            <tbody id="tablaBody">
-              <% escuelas.forEach(escuela => { %>
+            <tbody id="tablaBody" class="bg-white">
+              <tr id="filaSinResultadosTabla" class="border-t hidden">
+                <td colspan="10" class="px-4 py-6 text-center text-sm text-gray-500">
+                  No hay casos que coincidan con los filtros.
+                </td>
+              </tr>
+
+              <% escuelasSeguro.forEach((escuela) => { %>
+                <%
+                  const fechaCreacion = formatearFecha(escuela.fechaDeCreacion);
+                  const fechaTime = obtenerFechaTime(escuela.fechaDeCreacion);
+
+                  const textoBusqueda = [
+                    escuela.numeroTicket,
+                    fechaCreacion,
+                    escuela.predio,
+                    escuela.cue,
+                    escuela.nombre,
+                    escuela.provincia,
+                    escuela.ciudad,
+                    escuela.creadoPor,
+                    escuela.estado
+                  ].join(' ');
+                %>
+
                 <tr
-                  class="caso-row border-t hover:bg-blue-50/40 transition"
-                  data-ticket="<%= escuela.numeroTicket %>"
-                  data-predio="<%= escuela.predio %>"
-                  data-cue="<%= escuela.cue %>"
-                  data-nombre="<%= escuela.nombre %>"
-                  data-provincia="<%= escuela.provincia %>"
-                  data-ciudad="<%= escuela.ciudad %>"
-                  data-creadopor="<%= escuela.creadoPor %>"
-                  data-estado="<%= escuela.estado %>"
-                  data-fecha="<%= new Date(escuela.fechaDeCreacion).getTime() %>"
+                  class="caso-row border-t hover:bg-blue-50/40 transition align-top"
+                  data-search="<%= valorSeguro(textoBusqueda) %>"
+                  data-ticket="<%= valorSeguro(escuela.numeroTicket) %>"
+                  data-predio="<%= valorSeguro(escuela.predio) %>"
+                  data-cue="<%= valorSeguro(escuela.cue) %>"
+                  data-nombre="<%= valorSeguro(escuela.nombre) %>"
+                  data-provincia="<%= valorSeguro(escuela.provincia) %>"
+                  data-ciudad="<%= valorSeguro(escuela.ciudad) %>"
+                  data-creadopor="<%= valorSeguro(escuela.creadoPor) %>"
+                  data-estado="<%= valorSeguro(escuela.estado) %>"
+                  data-fecha="<%= fechaTime %>"
                 >
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 font-extrabold text-blue-800 whitespace-nowrap">
-                    <span class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-2 py-0.5">
+                  <td class="px-2 py-2 whitespace-nowrap font-extrabold text-blue-800 align-top">
+                    <span class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-1.5 py-0.5">
                       #<%= escuela.numeroTicket %>
                     </span>
                   </td>
 
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 whitespace-nowrap">
-                    <%= new Date(escuela.fechaDeCreacion).toLocaleDateString('es-AR') %>
+                  <td class="px-2 py-2 whitespace-nowrap align-top">
+                    <%= fechaCreacion %>
                   </td>
 
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 whitespace-nowrap"><%= escuela.predio %></td>
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 whitespace-nowrap"><%= escuela.cue %></td>
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 font-semibold text-gray-900"><%= escuela.nombre %></td>
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2"><%= escuela.provincia %></td>
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2"><%= escuela.ciudad %></td>
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 whitespace-nowrap"><%= escuela.creadoPor %></td>
+                  <td class="px-2 py-2 whitespace-nowrap overflow-hidden text-ellipsis align-top">
+                    <%= escuela.predio %>
+                  </td>
 
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 text-center whitespace-nowrap">
+                  <td class="px-2 py-2 whitespace-nowrap overflow-hidden text-ellipsis align-top">
+                    <%= escuela.cue %>
+                  </td>
+
+                  <td class="px-2 py-2 font-semibold text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap align-top">
+                    <%= escuela.nombre %>
+                  </td>
+
+                  <td class="px-2 py-2 overflow-hidden text-ellipsis whitespace-nowrap align-top">
+                    <%= escuela.provincia %>
+                  </td>
+
+                  <td class="px-2 py-2 overflow-hidden text-ellipsis whitespace-nowrap align-top">
+                    <%= escuela.ciudad %>
+                  </td>
+
+                  <td class="px-2 py-2 overflow-hidden text-ellipsis whitespace-nowrap align-top">
+                    <%= escuela.creadoPor %>
+                  </td>
+
+                  <td class="px-2 py-2 text-center whitespace-nowrap align-top">
                     <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] xl:text-xs font-semibold <%= badge(escuela.estado) %>">
                       <%= escuela.estado %>
                     </span>
                   </td>
 
-                  <td class="px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 whitespace-nowrap">
-                    <div class="flex flex-wrap gap-1.5 xl:gap-2">
-                      <% if (usuario?.modulosPermitidos?.escuelas?.ver) { %>
-                        <a href="/escuelas/<%= escuela._id %>"
-                          class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-semibold text-blue-700 hover:bg-blue-100 transition">
+                  <td class="px-2 py-2 whitespace-nowrap align-top">
+                    <div class="flex flex-wrap items-center justify-center gap-1">
+                      <% if (tienePermiso('ver')) { %>
+                        <a
+                          href="/escuelas/<%= escuela._id %>"
+                          class="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-2 py-0.5 text-[9px] lg:text-[10px] font-semibold text-blue-700 hover:bg-blue-100 transition"
+                        >
                           Ver
                         </a>
-                        <a href="/escuelas/<%= escuela._id %>/pdf" target="_blank"
-                          class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition">
+
+                        <a
+                          href="/escuelas/<%= escuela._id %>/pdf"
+                          target="_blank"
+                          class="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] lg:text-[10px] font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                        >
                           PDF
                         </a>
                       <% } %>
 
-                      <% if (usuario?.modulosPermitidos?.escuelas?.editar) { %>
-                        <a href="/escuelas/<%= escuela._id %>/editar"
-                          class="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-semibold text-amber-700 hover:bg-amber-100 transition">
+                      <% if (tienePermiso('editar')) { %>
+                        <a
+                          href="/escuelas/<%= escuela._id %>/editar"
+                          class="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] lg:text-[10px] font-semibold text-amber-700 hover:bg-amber-100 transition"
+                        >
                           Editar
                         </a>
                       <% } %>
 
-                      <% if (usuario?.modulosPermitidos?.escuelas?.eliminar) { %>
-                        <form action="/escuelas/<%= escuela._id %>?_method=DELETE" method="POST" class="inline"
-                          onsubmit="return confirm('¿Estás seguro que deseas eliminar esta escuela?');">
-                          <button type="submit"
-                            class="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-semibold text-red-700 hover:bg-red-100 transition">
+                      <% if (tienePermiso('eliminar')) { %>
+                        <form
+                          action="/escuelas/<%= escuela._id %>?_method=DELETE"
+                          method="POST"
+                          class="inline"
+                          onsubmit="return confirm('¿Estás seguro que deseas eliminar esta escuela?');"
+                        >
+                          <button
+                            type="submit"
+                            class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] lg:text-[10px] font-semibold text-red-700 hover:bg-red-100 transition"
+                          >
                             Eliminar
                           </button>
                         </form>
@@ -299,108 +329,298 @@
         </div>
       </div>
 
+      <!-- ===== MOBILE / CARDS ===== -->
+      <div class="mt-3 grid grid-cols-1 gap-3 sm:hidden" id="cardsMobile">
+        <article id="sinResultadosMobile" class="hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <p class="text-sm text-gray-500 text-center">
+            No hay casos que coincidan con los filtros.
+          </p>
+        </article>
+
+        <% escuelasSeguro.forEach((escuela) => { %>
+          <%
+            const fechaCreacionMobile = formatearFecha(escuela.fechaDeCreacion);
+            const fechaTimeMobile = obtenerFechaTime(escuela.fechaDeCreacion);
+
+            const textoBusquedaMobile = [
+              escuela.numeroTicket,
+              fechaCreacionMobile,
+              escuela.predio,
+              escuela.cue,
+              escuela.nombre,
+              escuela.provincia,
+              escuela.ciudad,
+              escuela.creadoPor,
+              escuela.estado
+            ].join(' ');
+          %>
+
+          <article
+            class="caso-card rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+            data-search="<%= valorSeguro(textoBusquedaMobile) %>"
+            data-ticket="<%= valorSeguro(escuela.numeroTicket) %>"
+            data-predio="<%= valorSeguro(escuela.predio) %>"
+            data-cue="<%= valorSeguro(escuela.cue) %>"
+            data-nombre="<%= valorSeguro(escuela.nombre) %>"
+            data-provincia="<%= valorSeguro(escuela.provincia) %>"
+            data-ciudad="<%= valorSeguro(escuela.ciudad) %>"
+            data-creadopor="<%= valorSeguro(escuela.creadoPor) %>"
+            data-estado="<%= valorSeguro(escuela.estado) %>"
+            data-fecha="<%= fechaTimeMobile %>"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-xs text-gray-500">Ticket</p>
+
+                <p class="text-lg font-extrabold text-blue-800 leading-tight">
+                  #<%= escuela.numeroTicket %>
+                </p>
+
+                <p class="mt-1 text-sm font-semibold text-gray-900 truncate">
+                  <%= escuela.nombre %>
+                </p>
+
+                <p class="text-xs text-gray-600 truncate">
+                  <%= escuela.ciudad %> · <%= escuela.provincia %>
+                </p>
+              </div>
+
+              <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold <%= badge(escuela.estado) %>">
+                <%= escuela.estado %>
+              </span>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-700">
+              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2 col-span-2">
+                <p class="text-[11px] text-gray-500">Creación</p>
+                <p class="font-semibold"><%= fechaCreacionMobile %></p>
+              </div>
+
+              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2">
+                <p class="text-[11px] text-gray-500">Predio</p>
+                <p class="font-semibold"><%= escuela.predio %></p>
+              </div>
+
+              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2">
+                <p class="text-[11px] text-gray-500">CUE</p>
+                <p class="font-semibold"><%= escuela.cue %></p>
+              </div>
+
+              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2">
+                <p class="text-[11px] text-gray-500">Provincia</p>
+                <p class="font-semibold"><%= escuela.provincia %></p>
+              </div>
+
+              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2">
+                <p class="text-[11px] text-gray-500">Ciudad</p>
+                <p class="font-semibold"><%= escuela.ciudad %></p>
+              </div>
+
+              <div class="rounded-xl bg-gray-50 border border-gray-200 p-2 col-span-2">
+                <p class="text-[11px] text-gray-500">Creado por</p>
+                <p class="font-semibold"><%= escuela.creadoPor %></p>
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+              <% if (tienePermiso('ver')) { %>
+                <a
+                  href="/escuelas/<%= escuela._id %>"
+                  class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition"
+                >
+                  Ver
+                </a>
+
+                <a
+                  href="/escuelas/<%= escuela._id %>/pdf"
+                  target="_blank"
+                  class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                >
+                  PDF
+                </a>
+              <% } %>
+
+              <% if (tienePermiso('editar')) { %>
+                <a
+                  href="/escuelas/<%= escuela._id %>/editar"
+                  class="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition"
+                >
+                  Editar
+                </a>
+              <% } %>
+
+              <% if (tienePermiso('eliminar')) { %>
+                <form
+                  action="/escuelas/<%= escuela._id %>?_method=DELETE"
+                  method="POST"
+                  class="inline"
+                  onsubmit="return confirm('¿Estás seguro que deseas eliminar esta escuela?');"
+                >
+                  <button
+                    type="submit"
+                    class="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+              <% } %>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
     <% } %>
 
   </div>
 </main>
 
 <script>
-  const filtroTexto = document.getElementById("filtroTexto");
-  const filtroEstado = document.getElementById("filtroEstado");
-  const orden = document.getElementById("orden");
-  const contadorResultados = document.getElementById("contadorResultados");
-  const btnLimpiar = document.getElementById("btnLimpiar");
+  document.addEventListener("DOMContentLoaded", function () {
+    const filtroTexto = document.getElementById("filtroTexto");
+    const filtroEstado = document.getElementById("filtroEstado");
+    const orden = document.getElementById("orden");
+    const contadorResultados = document.getElementById("contadorResultados");
+    const btnLimpiar = document.getElementById("btnLimpiar");
 
-  const rows = Array.from(document.querySelectorAll(".caso-row"));
-  const cards = Array.from(document.querySelectorAll(".caso-card"));
+    const rows = Array.from(document.querySelectorAll(".caso-row"));
+    const cards = Array.from(document.querySelectorAll(".caso-card"));
 
-  function normalizar(s) {
-    return (s || "").toString().toLowerCase().trim();
-  }
+    const filaSinResultadosTabla = document.getElementById("filaSinResultadosTabla");
+    const sinResultadosMobile = document.getElementById("sinResultadosMobile");
 
-  function cumpleFiltro(el) {
-    const q = normalizar(filtroTexto?.value);
-    const est = filtroEstado?.value || "Todos";
-
-    const texto = [
-      el.dataset.ticket,
-      new Date(Number(el.dataset.fecha || 0)).toLocaleDateString('es-AR'),
-      el.dataset.predio,
-      el.dataset.cue,
-      el.dataset.nombre,
-      el.dataset.provincia,
-      el.dataset.ciudad,
-      el.dataset.creadopor,
-      el.dataset.estado
-    ].map(normalizar).join(" ");
-
-    const okTexto = !q || texto.includes(q);
-    const okEstado = est === "Todos" || normalizar(el.dataset.estado) === normalizar(est);
-
-    return okTexto && okEstado;
-  }
-
-  function aplicarFiltros() {
-    let count = 0;
-
-    rows.forEach(r => {
-      const ok = cumpleFiltro(r);
-      r.style.display = ok ? "" : "none";
-      if (ok) count++;
-    });
-
-    cards.forEach(c => {
-      const ok = cumpleFiltro(c);
-      c.style.display = ok ? "" : "none";
-    });
-
-    if (contadorResultados) contadorResultados.textContent = String(count);
-  }
-
-  function aplicarOrden() {
-    const value = orden?.value || "fecha_desc";
-
-    const ordenarPor = (a, b) => {
-      const fa = Number(a.dataset.fecha || 0);
-      const fb = Number(b.dataset.fecha || 0);
-      const ta = String(a.dataset.ticket || "");
-      const tb = String(b.dataset.ticket || "");
-
-      if (value === "fecha_desc") return fb - fa;
-      if (value === "fecha_asc") return fa - fb;
-      if (value === "ticket_asc") return ta.localeCompare(tb, "es-AR", { numeric: true });
-      if (value === "ticket_desc") return tb.localeCompare(ta, "es-AR", { numeric: true });
-      return 0;
-    };
-
-    const tbody = document.getElementById("tablaBody");
-    if (tbody) {
-      const visibles = rows.filter(r => r.style.display !== "none");
-      visibles.sort(ordenarPor).forEach(r => tbody.appendChild(r));
+    function normalizar(valor) {
+      return String(valor || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
     }
 
-    const cardsWrap = document.getElementById("cardsMobile");
-    if (cardsWrap) {
-      const visiblesCards = cards.filter(c => c.style.display !== "none");
-      visiblesCards.sort(ordenarPor).forEach(c => cardsWrap.appendChild(c));
+    function cumpleFiltro(elemento) {
+      const buscar = normalizar(filtroTexto ? filtroTexto.value : "");
+      const estado = filtroEstado ? filtroEstado.value : "Todos";
+
+      const dataSearch = normalizar(elemento.dataset.search);
+      const dataEstado = normalizar(elemento.dataset.estado);
+
+      const okTexto = !buscar || dataSearch.includes(buscar);
+      const okEstado = estado === "Todos" || dataEstado === normalizar(estado);
+
+      return okTexto && okEstado;
     }
-  }
 
-  function refrescar() {
-    aplicarFiltros();
-    aplicarOrden();
-  }
+    function ordenarElementos(lista) {
+      const value = orden ? orden.value : "fecha_desc";
 
-  filtroTexto?.addEventListener("input", refrescar);
-  filtroEstado?.addEventListener("change", refrescar);
-  orden?.addEventListener("change", refrescar);
+      return lista.slice().sort(function (a, b) {
+        const fechaA = Number(a.dataset.fecha || 0);
+        const fechaB = Number(b.dataset.fecha || 0);
 
-  btnLimpiar?.addEventListener("click", () => {
-    if (filtroTexto) filtroTexto.value = "";
-    if (filtroEstado) filtroEstado.value = "Todos";
-    if (orden) orden.value = "fecha_desc";
-    refrescar();
+        const ticketA = String(a.dataset.ticket || "");
+        const ticketB = String(b.dataset.ticket || "");
+
+        if (value === "fecha_desc") return fechaB - fechaA;
+        if (value === "fecha_asc") return fechaA - fechaB;
+        if (value === "ticket_asc") return ticketA.localeCompare(ticketB, "es-AR", { numeric: true });
+        if (value === "ticket_desc") return ticketB.localeCompare(ticketA, "es-AR", { numeric: true });
+
+        return 0;
+      });
+    }
+
+    function aplicarFiltrosYOrden() {
+      let visiblesTabla = 0;
+      let visiblesMobile = 0;
+
+      rows.forEach(function (row) {
+        const visible = cumpleFiltro(row);
+
+        if (visible) {
+          row.classList.remove("hidden");
+          visiblesTabla++;
+        } else {
+          row.classList.add("hidden");
+        }
+      });
+
+      cards.forEach(function (card) {
+        const visible = cumpleFiltro(card);
+
+        if (visible) {
+          card.classList.remove("hidden");
+          visiblesMobile++;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+
+      const tbody = document.getElementById("tablaBody");
+
+      if (tbody) {
+        ordenarElementos(rows).forEach(function (row) {
+          tbody.appendChild(row);
+        });
+
+        if (filaSinResultadosTabla) {
+          tbody.prepend(filaSinResultadosTabla);
+        }
+      }
+
+      const cardsWrap = document.getElementById("cardsMobile");
+
+      if (cardsWrap) {
+        ordenarElementos(cards).forEach(function (card) {
+          cardsWrap.appendChild(card);
+        });
+
+        if (sinResultadosMobile) {
+          cardsWrap.prepend(sinResultadosMobile);
+        }
+      }
+
+      if (filaSinResultadosTabla) {
+        filaSinResultadosTabla.classList.toggle("hidden", visiblesTabla !== 0);
+      }
+
+      if (sinResultadosMobile) {
+        sinResultadosMobile.classList.toggle("hidden", visiblesMobile !== 0);
+      }
+
+      const visibles = window.innerWidth < 640 ? visiblesMobile : visiblesTabla;
+
+      if (contadorResultados) {
+        contadorResultados.textContent = String(visibles);
+      }
+    }
+
+    function limpiarFiltros() {
+      if (filtroTexto) filtroTexto.value = "";
+      if (filtroEstado) filtroEstado.value = "Todos";
+      if (orden) orden.value = "fecha_desc";
+
+      aplicarFiltrosYOrden();
+
+      if (filtroTexto) filtroTexto.focus();
+    }
+
+    if (filtroTexto) {
+      filtroTexto.addEventListener("input", aplicarFiltrosYOrden);
+    }
+
+    if (filtroEstado) {
+      filtroEstado.addEventListener("change", aplicarFiltrosYOrden);
+    }
+
+    if (orden) {
+      orden.addEventListener("change", aplicarFiltrosYOrden);
+    }
+
+    if (btnLimpiar) {
+      btnLimpiar.addEventListener("click", limpiarFiltros);
+    }
+
+    window.addEventListener("resize", aplicarFiltrosYOrden);
+
+    aplicarFiltrosYOrden();
   });
-
-  refrescar();
 </script>
