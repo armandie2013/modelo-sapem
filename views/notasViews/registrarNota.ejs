@@ -57,7 +57,7 @@
           <% if (!modoProveedor) { %>
             <!-- Proveedor -->
             <div class="sm:col-span-2">
-              <label class="block font-medium text-gray-700">Proveedor</label>
+              <label class="block font-medium text-gray-700">Cliente</label>
               <select id="proveedorSelect" name="proveedor" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm">
                 <option value="">Seleccione…</option>
                 <% (proveedores || []).forEach(pr => { %>
@@ -91,9 +91,9 @@
               <% } %>
             <% } else { %>
               <select id="cargoSelect" name="cargoId" required class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm" disabled>
-                <option value="">Seleccione un proveedor…</option>
+                <option value="">Seleccione un cliente…</option>
               </select>
-              <p class="text-xs text-gray-500 mt-1">Elegí el proveedor para ver sus cargos de los últimos <%= LIM %> meses.</p>
+              <p class="text-xs text-gray-500 mt-1">Elegí el cliente para ver sus cargos de los últimos <%= LIM %> meses.</p>
             <% } %>
           </div>
 
