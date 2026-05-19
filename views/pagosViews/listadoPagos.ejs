@@ -61,7 +61,7 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Pagos</h1>
-        <p class="text-sm text-gray-500">Gestión y seguimiento de pagos a proveedores</p>
+        <p class="text-sm text-gray-500">Gestión y seguimiento de pagos de clientes</p>
       </div>
       <a href="/pagos/registrar"
          class="inline-flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition text-sm shadow-sm">
@@ -88,9 +88,9 @@
     <!-- Filtros -->
     <form class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-4" method="GET" action="/pagos">
       <div class="sm:col-span-2">
-        <label class="block text-xs text-gray-600 mb-1">Proveedor</label>
+        <label class="block text-xs text-gray-600 mb-1">Cliente</label>
         <select name="proveedor" class="w-full border px-3 py-2 rounded-lg text-sm">
-          <option value="">Todos los proveedores</option>
+          <option value="">Todos los clientes</option>
           <% (proveedores||[]).forEach(pr => { %>
             <option value="<%= pr._id %>" <%= (String(filtros?.proveedor||'')===String(pr._id))?'selected':'' %>>
               #<%= pr.numeroProveedor %> — <%= pr.nombreFantasia || pr.nombreReal %>
@@ -117,7 +117,7 @@
       <div class="sm:col-span-3">
         <label class="block text-xs text-gray-600 mb-1">Buscar</label>
         <div class="relative">
-          <input id="buscar" type="text" placeholder="Por proveedor, medio, comprobante u observación…"
+          <input id="buscar" type="text" placeholder="Por cliente, medio, comprobante u observación…"
                  class="w-full border px-3 py-2 pl-9 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
           <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.5 3.5a5 5 0 013.995 8.037l3.734 3.734a1 1 0 11-1.414 1.414l-3.734-3.734A5 5 0 118.5 3.5zm0 2a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd"/></svg>
         </div>
@@ -128,8 +128,8 @@
         <select id="orden" class="w-full border px-3 py-2 rounded-lg text-sm">
           <option value="fecha-desc">Fecha (recientes)</option>
           <option value="fecha-asc">Fecha (antiguos)</option>
-          <option value="proveedor-asc">Proveedor (A-Z)</option>
-          <option value="proveedor-desc">Proveedor (Z-A)</option>
+          <option value="proveedor-asc">Cliente (A-Z)</option>
+          <option value="proveedor-desc">Cliente (Z-A)</option>
           <option value="importe-desc">Importe (↓)</option>
           <option value="importe-asc">Importe (↑)</option>
         </select>
@@ -155,7 +155,7 @@
         <thead class="bg-gray-50 text-gray-700">
           <tr>
             <th class="px-4 py-3 text-left">Fecha</th>
-            <th class="px-4 py-3 text-left">Proveedor</th>
+            <th class="px-4 py-3 text-left">Cliente</th>
             <th class="px-4 py-3 text-left">Medio</th>
             <th class="px-4 py-3 text-right">Importe</th>
             <th class="px-4 py-3 text-left">Comprobante</th>
