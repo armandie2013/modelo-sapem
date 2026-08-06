@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Reporte de pagos
+  </title>
+
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+      color: #111827;
+      font-size: 10px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #111827;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: #6b7280;
+    }
+
+    .emision {
+      text-align: right;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns:
+        1.5fr
+        1fr
+        .8fr
+        1fr;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .summary-item {
+      min-width: 0;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      padding: 8px 9px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 3px;
+      color: #6b7280;
+      font-size: 8px;
+      text-transform: uppercase;
+    }
+
+    .value {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
+      break-inside: avoid;
+    }
+
+    th,
+    td {
+      border: 1px solid #d1d5db;
+      padding: 6px 7px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f3f4f6;
+      font-size: 9px;
+      text-align: left;
+    }
+
+    td {
+      font-size: 9px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    .right {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .fecha {
+      width: 9%;
+    }
+
+    .cliente {
+      width: 26%;
+    }
+
+    .medio {
+      width: 12%;
+    }
+
+    .importe {
+      width: 13%;
+    }
+
+    .comprobante {
+      width: 16%;
+    }
+
+    .detalle {
+      width: 24%;
+    }
+
+    .empty {
+      padding: 22px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .footer {
+      margin-top: 8px;
+      text-align: right;
+      color: #6b7280;
+      font-size: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div>
+      <h1>
+        Reporte de pagos
+      </h1>
+
+      <div class="subtitle">
+        Listado de pagos registrados según los filtros aplicados.
+      </div>
+    </div>
+
+    <div class="emision">
+      <strong>
+        Sistema de Gestión
+      </strong>
+
+      <br>
+
+      Emitido:
+      <%= fechaEmision %>
+    </div>
+  </header>
+
+  <section class="summary">
+    <div class="summary-item">
+      <span class="label">
+        Cliente
+      </span>
+
+      <span class="value">
+        <%= clienteTexto %>
+      </span>
+    </div>
+
+    <div class="summary-item">
+      <span class="label">
+        Rango
+      </span>
+
+      <span class="value">
+        <%= rangoTexto %>
+      </span>
+    </div>
+
+    <div class="summary-item">
+      <span class="label">
+        Pagos incluidos
+      </span>
+
+      <span class="value">
+        <%= pagos.length %>
+      </span>
+    </div>
+
+    <div class="summary-item">
+      <span class="label">
+        Importe total
+      </span>
+
+      <span class="value">
+        <%= fmtUSD(totalImporte) %>
+      </span>
+    </div>
+  </section>
+
+  <table>
+    <colgroup>
+      <col class="fecha">
+      <col class="cliente">
+      <col class="medio">
+      <col class="importe">
+      <col class="comprobante">
+      <col class="detalle">
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th>
+          Fecha
+        </th>
+
+        <th>
+          Cliente
+        </th>
+
+        <th>
+          Medio
+        </th>
+
+        <th class="right">
+          Importe
+        </th>
+
+        <th>
+          Comprobante
+        </th>
+
+        <th>
+          Detalle
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% if (!pagos.length) { %>
+        <tr>
+          <td
+            colspan="6"
+            class="empty"
+          >
+            No hay pagos para los filtros seleccionados.
+          </td>
+        </tr>
+      <% } else { %>
+        <% pagos.forEach((pago) => { %>
+          <tr>
+            <td class="center">
+              <%= fmtFecha(pago.fecha) %>
+            </td>
+
+            <td>
+              <%= (
+                pago.proveedor?.nombreFantasia ||
+                pago.proveedor?.nombreReal ||
+                "—"
+              ) %>
+            </td>
+
+            <td>
+              <%= (
+                pago.metodo ||
+                pago.medio ||
+                "—"
+              ) %>
+            </td>
+
+            <td class="right">
+              <%= fmtUSD(pago.importe) %>
+            </td>
+
+            <td>
+              <%= pago.comprobante || "—" %>
+            </td>
+
+            <td>
+              <%= pago.observacion || "—" %>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    Total general:
+
+    <strong>
+      <%= fmtUSD(totalImporte) %>
+    </strong>
+  </div>
+</body>
+</html>

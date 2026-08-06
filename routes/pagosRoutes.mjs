@@ -1,7 +1,83 @@
 // routes/pagosRoutes.mjs
-import { Router } from "express";
-import { verificarSesion } from "../middlewares/authMiddleware.mjs";
-import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
+// import { Router } from "express";
+// import { verificarSesion } from "../middlewares/authMiddleware.mjs";
+// import { verificarPermiso } from "../middlewares/permisosPorAccion.mjs";
+// import {
+//   mostrarFormularioPago,
+//   crearPagoController,
+//   listarPagosController,
+//   eliminarPagoController,
+//   mostrarFormularioPagoProveedor,
+//   crearPagoProveedorController,
+//   apiCargosPendientes,
+// } from "../controllers/pagosController.mjs";
+
+// const router = Router();
+
+// router.get(
+//   "/",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "ver"),
+//   listarPagosController
+// );
+
+// router.get(
+//   "/registrar",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "editar"),
+//   mostrarFormularioPago
+// );
+
+// router.post(
+//   "/registrar",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "editar"),
+//   crearPagoController
+// );
+
+// // flujo anidado por proveedor
+// router.get(
+//   "/proveedores/:proveedorId/registrar",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "editar"),
+//   mostrarFormularioPagoProveedor
+// );
+// router.post(
+//   "/proveedores/:proveedorId/registrar",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "editar"),
+//   crearPagoProveedorController
+// );
+
+// // API para poblar períodos en el form genérico
+// router.get(
+//   "/api/cargos-pendientes",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "ver"),
+//   apiCargosPendientes
+// );
+
+// router.post(
+//   "/:id/eliminar",
+//   verificarSesion,
+//   verificarPermiso("proveedores", "eliminar"),
+//   eliminarPagoController
+// );
+
+// export default router;
+
+import {
+  Router,
+} from "express";
+
+import {
+  verificarSesion,
+} from "../middlewares/authMiddleware.mjs";
+
+import {
+  verificarPermiso,
+} from "../middlewares/permisosPorAccion.mjs";
+
 import {
   mostrarFormularioPago,
   crearPagoController,
@@ -10,58 +86,90 @@ import {
   mostrarFormularioPagoProveedor,
   crearPagoProveedorController,
   apiCargosPendientes,
+  descargarReportePagosPdfController,
 } from "../controllers/pagosController.mjs";
 
-const router = Router();
+const router =
+  Router();
 
 router.get(
   "/",
   verificarSesion,
-  verificarPermiso("proveedores", "ver"),
-  listarPagosController
+  verificarPermiso(
+    "proveedores",
+    "ver",
+  ),
+  listarPagosController,
+);
+
+router.get(
+  "/reporte/pdf",
+  verificarSesion,
+  verificarPermiso(
+    "proveedores",
+    "ver",
+  ),
+  descargarReportePagosPdfController,
 );
 
 router.get(
   "/registrar",
   verificarSesion,
-  verificarPermiso("proveedores", "editar"),
-  mostrarFormularioPago
+  verificarPermiso(
+    "proveedores",
+    "editar",
+  ),
+  mostrarFormularioPago,
 );
 
 router.post(
   "/registrar",
   verificarSesion,
-  verificarPermiso("proveedores", "editar"),
-  crearPagoController
+  verificarPermiso(
+    "proveedores",
+    "editar",
+  ),
+  crearPagoController,
 );
 
-// flujo anidado por proveedor
 router.get(
   "/proveedores/:proveedorId/registrar",
   verificarSesion,
-  verificarPermiso("proveedores", "editar"),
-  mostrarFormularioPagoProveedor
+  verificarPermiso(
+    "proveedores",
+    "editar",
+  ),
+  mostrarFormularioPagoProveedor,
 );
+
 router.post(
   "/proveedores/:proveedorId/registrar",
   verificarSesion,
-  verificarPermiso("proveedores", "editar"),
-  crearPagoProveedorController
+  verificarPermiso(
+    "proveedores",
+    "editar",
+  ),
+  crearPagoProveedorController,
 );
 
-// API para poblar períodos en el form genérico
 router.get(
   "/api/cargos-pendientes",
   verificarSesion,
-  verificarPermiso("proveedores", "ver"),
-  apiCargosPendientes
+  verificarPermiso(
+    "proveedores",
+    "ver",
+  ),
+  apiCargosPendientes,
 );
 
 router.post(
   "/:id/eliminar",
   verificarSesion,
-  verificarPermiso("proveedores", "eliminar"),
-  eliminarPagoController
+  verificarPermiso(
+    "proveedores",
+    "eliminar",
+  ),
+  eliminarPagoController,
 );
 
 export default router;
