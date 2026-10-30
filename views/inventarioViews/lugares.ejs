@@ -1,0 +1,17 @@
+<% const ruta = tipoLugar === 'deposito' ? 'depositos' : 'destinatarios'; %>
+<section>
+  <div class="list-heading">
+    <p class="muted"><%= tipoLugar === 'deposito' ? 'Depósitos físicos donde se recibe y conserva material.' : 'Personas, ministerios, organismos, escuelas y otros destinatarios.' %></p>
+    <% if (permisos.administrar) { %><div class="actions"><a class="button" href="/inventario/<%= ruta %>/nuevo"><%= tipoLugar === 'deposito' ? 'Nuevo depósito' : 'Nuevo destinatario' %></a></div><% } %>
+  </div>
+  <div class="scroll"><table class="list-table"><thead><tr><th>Nombre</th><th>Dirección</th><th>Responsable</th><th class="number">Productos distintos</th><th>Estado</th><th class="col-actions">Acciones</th></tr></thead><tbody>
+  <% lugares.forEach(lugar => { %>
+    <tr><td><span class="cell-title"><%= lugar.nombre %></span><% if (lugar.principal) { %><span class="cell-sub">Depósito principal</span><% } %></td>
+    <td><%= lugar.direccion || '—' %></td><td><%= lugar.responsable || '—' %></td><td class="number"><%= lugar.productos %></td>
+    <td><span class="state"><%= lugar.activo === false ? 'Inactivo' : 'Activo' %></span></td>
+    <td class="col-actions"><%- include('accionesListado', { tipoRegistro: tipoLugar, registro: lugar, enlaceConsulta: '/inventario/ubicaciones/' + lugar._id, puedeMarcarPrincipal: tipoLugar === 'deposito' && !lugar.principal && lugar.activo !== false && permisos.administrar }) %></td></tr>
+  <% }) %>
+  <% if (!lugares.length) { %><tr><td colspan="6" class="empty">No hay <%= tipoLugar === 'deposito' ? 'depósitos' : 'destinatarios' %> registrados.</td></tr><% } %>
+  </tbody></table></div>
+  <div class="list-footer"><span><%= lugares.length %> registros</span></div>
+</section>

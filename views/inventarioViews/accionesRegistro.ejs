@@ -1,0 +1,13 @@
+<div class="actions" style="margin:0;gap:6px">
+<% if(permisos.editar) { %>
+<a class="button secondary" href="/inventario/registros/<%= tipoRegistro %>/<%= registro._id %>/editar">Editar</a>
+<% if(tipoRegistro !== 'equipo') { %>
+<form method="post" action="/inventario/registros/<%= tipoRegistro %>/<%= registro._id %>/activo" onsubmit="return confirm('¿Confirmás cambiar el estado de este registro?')">
+<input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="activo" value="<%= registro.activo === false ? 'si' : 'no' %>">
+<button type="submit" class="secondary"><%= registro.activo === false ? 'Reactivar' : 'Desactivar' %></button></form>
+<% } } %>
+<% if(permisos.eliminar && tipoRegistro !== 'equipo') { %>
+<form method="post" action="/inventario/registros/<%= tipoRegistro %>/<%= registro._id %>/eliminar" onsubmit="return confirm('¿Eliminar definitivamente? Solo se permite si no tiene material, historial ni borradores asociados.')">
+<input type="hidden" name="_csrf" value="<%= csrf %>"><button type="submit" style="background:#b91c1c">Eliminar</button></form>
+<% } %>
+</div>

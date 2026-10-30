@@ -1,0 +1,14 @@
+<section>
+<h2>1. Registrar el documento que respalda el ingreso</h2>
+<p class="muted">Primero cargá el remito, factura, nota, acta u otro documento. Después se habilita la carga de artículos. Este paso todavía no incorpora existencias.</p>
+<form method="post" action="/inventario/ingresos/documento" enctype="multipart/form-data">
+<input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="fecha" value="<%= hoy %>">
+<div class="grid">
+<label>Tipo de documento<select name="documentoTipo"><% ['remito','factura','nota','acta','otro'].forEach(t => { %><option value="<%= t %>" <%= datos.documentoTipo === t ? 'selected' : '' %>><%= t %></option><% }) %></select></label>
+<label>Número (S/N si no tiene)<input name="documentoNumero" value="<%= datos.documentoNumero || '' %>" required maxlength="100"></label>
+<label>Fecha del documento<input type="date" name="documentoFecha" value="<%= datos.documentoFecha || hoy %>" required></label>
+<label>Emisor / proveedor<input name="emisor" value="<%= datos.emisor || '' %>" required maxlength="180"></label>
+</div>
+<label>Escaneo o foto (opcional; hasta tres archivos PDF, PNG o JPG de 10 MB)<input name="archivos" type="file" multiple accept="application/pdf,image/png,image/jpeg"></label>
+<div class="actions"><button type="submit">Registrar documento y cargar material</button><a class="button secondary" href="/inventario/ingresos">Cancelar</a></div>
+</form></section>

@@ -4,13 +4,23 @@ import methodOverride from "method-override";
 import expressEjsLayouts from "express-ejs-layouts";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-import { fmtHora, fmtHoraCorta, fmtFecha, fmtFechaHora } from "./utils/formatFechas.mjs";
+
+import {
+  fmtHora,
+  fmtHoraCorta,
+  fmtFecha,
+  fmtFechaHora,
+} from "./utils/formatFechas.mjs";
+
 import { connectDB } from "./config/dbConfig.mjs";
 import { startCargosCron } from "./jobs/cargosCron.mjs";
 import { catchUpCargos } from "./services/cargosService.mjs";
-import cambioRoutes from "./routes/cambioRoutes.mjs";
 import { usdNavbarMiddleware } from "./middlewares/usdNavbar.mjs";
+import {
+  cargarPermisosInventario,
+} from "./middlewares/inventarioAccessMiddleware.mjs";
 
+import cambioRoutes from "./routes/cambioRoutes.mjs";
 import viaticosRoutes from "./routes/viaticosRoutes.mjs";
 import personasRoutes from "./routes/personasRoutes.mjs";
 import authRoutes from "./routes/authRoutes.mjs";
@@ -25,6 +35,10 @@ import pagosRoutes from "./routes/pagosRoutes.mjs";
 import planPagoRoutes from "./routes/planPagoRoutes.mjs";
 import tareasRoutes from "./routes/tareasRoutes.mjs";
 import prediosEscuelasRoutes from "./routes/prediosEscuelasRoutes.mjs";
+
+// Inventario
+import inventarioRoutes from "./routes/inventarioRoutes.mjs";
+import { prepararInventario } from "./models/inventario.mjs";
 
 import clock from "./utils/clock.mjs";
 
@@ -54,7 +68,7 @@ app.use(
   })
 );
 
-// 👇 hidratar req.usuario desde la sesión (¡clave!)
+// Hidratar req.usuario desde la sesión.
 app.use((req, res, next) => {
   req.usuario = req.session?.usuario || null;
   next();
@@ -62,7 +76,13 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   console.log("🔑 Sesión ID:", req.sessionID);
-  console.log(req.session.usuario ? `👤 ${req.session.usuario.email}` : "⚠️ No hay usuario en sesión");
+
+  console.log(
+    req.session.usuario
+      ? `👤 ${req.session.usuario.email}`
+      : "⚠️ No hay usuario en sesión"
+  );
+
   next();
 });
 
@@ -90,20 +110,26 @@ app.use((req, res, next) => {
 });
 
 app.get("/debug/time", (req, res) => {
-  const s = clock.getStatus();
+  const estado = clock.getStatus();
+
   res.json({
     systemNow: new Date().toISOString(),
     clockNow: clock.date().toISOString(),
-    offsetMs: s.offsetMs,
-    lastSyncOk: s.lastSyncOk,
+    offsetMs: estado.offsetMs,
+    lastSyncOk: estado.lastSyncOk,
   });
 });
 
 app.use((req, res, next) => {
-  if (req.path.startsWith("/api/")) return next();
+  if (req.path.startsWith("/api/")) {
+    return next();
+  }
+
   return usdNavbarMiddleware(req, res, next);
 });
 
+// Rutas de los módulos.
+app.use(cargarPermisosInventario);
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);
 app.use("/personas", personasRoutes);
@@ -117,49 +143,84 @@ app.use("/pagos", pagosRoutes);
 app.use("/notas", notasRoutes);
 app.use("/planes-pago", planPagoRoutes);
 app.use("/predios-escuelas", prediosEscuelasRoutes);
+
+// Nuevo módulo de inventario.
+app.use("/inventario", inventarioRoutes);
+
 app.use(tareasRoutes);
 app.use("/api/cambio", cambioRoutes);
 
 app.get("/", (req, res) => {
-  res.render("landing", { title: "Inicio" });
+  res.render("landing", {
+    title: "Inicio",
+  });
 });
 
+// Mantener después de todas las rutas.
 app.use((req, res) => {
-  res.status(404).send({ mensaje: "Ruta no encontrada" });
+  res.status(404).send({
+    mensaje: "Ruta no encontrada",
+  });
 });
 
 const listarRutas = (app) => {
   console.log("📋 Rutas registradas:");
-  if (!app._router || !app._router.stack) return;
-  app._router.stack.forEach((mw) => {
-    if (mw.route) {
-      console.log(`${Object.keys(mw.route.methods).join(", ").toUpperCase()} ${mw.route.path}`);
-    } else if (mw.name === "router") {
-      mw.handle.stack.forEach((nested) => {
+
+  if (!app._router || !app._router.stack) {
+    return;
+  }
+
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      console.log(
+        `${Object.keys(middleware.route.methods)
+          .join(", ")
+          .toUpperCase()} ${middleware.route.path}`
+      );
+    } else if (middleware.name === "router") {
+      middleware.handle.stack.forEach((nested) => {
         if (nested.route) {
-          console.log(`${Object.keys(nested.route.methods).join(", ").toUpperCase()} ${nested.route.path}`);
+          console.log(
+            `${Object.keys(nested.route.methods)
+              .join(", ")
+              .toUpperCase()} ${nested.route.path}`
+          );
         }
       });
     }
   });
 };
+
 listarRutas(app);
 
 (async () => {
   try {
-    await clock.init({ waitForFirstSync: false, intervalMs: 15 * 60 * 1000 });
+    await clock.init({
+      waitForFirstSync: false,
+      intervalMs: 15 * 60 * 1000,
+    });
+
     await connectDB();
 
-    // Evitamos backfill automático
+    // Inicializar los modelos, índices y contador de inventario.
+    await prepararInventario();
+
+    // Evitamos backfill automático.
     // await catchUpCargos(1);
 
     startCargosCron();
 
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Servidor escuchando en el puerto ${PORT}`);
+      console.log(
+        `Servidor escuchando en el puerto ${PORT}`
+      );
     });
-  } catch (err) {
-    console.error("❌ Error al iniciar la app:", err);
+  } catch (error) {
+    console.error(
+      "❌ Error al iniciar la app:",
+      error
+    );
+
     process.exit(1);
   }
 })();

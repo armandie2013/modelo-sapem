@@ -1,0 +1,102 @@
+<section>
+  <div class="list-heading">
+    <p class="muted">
+      Catálogo de productos.
+      Crear o editar una ficha no modifica las existencias.
+      El material ingresa únicamente con un documento de respaldo.
+    </p>
+
+    <% if (permisos.administrar) { %>
+      <div class="actions">
+        <a
+          class="button"
+          href="/inventario/productos/nuevo"
+        >
+          Nuevo producto
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="scroll">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Marca / modelo</th>
+          <th>Descripción</th>
+          <th>Control</th>
+          <th>Estado</th>
+          <th class="col-actions">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% productos.forEach(producto => { %>
+          <tr>
+            <td>
+              <%= producto.codigo %>
+            </td>
+
+            <td class="product-name">
+              <span class="cell-title">
+                <%= producto.nombre %>
+              </span>
+            </td>
+
+            <td>
+              <%=
+                [producto.marca, producto.modelo]
+                  .filter(Boolean)
+                  .join(' · ') || '—'
+              %>
+            </td>
+
+            <td class="description">
+              <%= producto.descripcion || '—' %>
+            </td>
+
+            <td>
+              <%= producto.serializado
+                ? 'Por número de serie'
+                : 'Por cantidad'
+              %>
+            </td>
+
+            <td>
+              <span class="state">
+                <%= producto.activo === false
+                  ? 'Inactivo'
+                  : 'Activo'
+                %>
+              </span>
+            </td>
+
+            <td class="col-actions">
+              <%- include('accionesListado', {
+                tipoRegistro: 'producto',
+                registro: producto
+              }) %>
+            </td>
+          </tr>
+        <% }) %>
+
+        <% if (!productos.length) { %>
+          <tr>
+            <td colspan="7" class="empty">
+              Todavía no hay productos.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="list-footer">
+    <span>
+      <%= productos.length %>
+      <%= productos.length === 1 ? 'producto' : 'productos' %>
+    </span>
+  </div>
+</section>

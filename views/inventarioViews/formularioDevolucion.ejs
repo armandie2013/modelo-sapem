@@ -1,0 +1,332 @@
+<%
+let anteriores = [];
+
+try {
+  anteriores = JSON.parse(datos.items || '[]');
+} catch {}
+
+if (!Array.isArray(anteriores)) {
+  anteriores = [];
+}
+
+const anterior = productoId =>
+  anteriores.find(
+    fila =>
+      String(fila.producto) ===
+      String(productoId)
+  );
+%>
+
+<section>
+  <p>
+    <b>Destinatario:</b>
+    <%= mov.destinoNombre %>
+  </p>
+
+  <p>
+    <b>Asignación original:</b>
+    N.º <%= mov.numero %>
+    · <%= fecha(mov.fecha) %>
+  </p>
+
+  <div class="actions">
+    <a
+      class="button secondary"
+      href="/inventario/movimientos/<%= mov._id %>"
+    >
+      Consultar entrega original
+    </a>
+  </div>
+
+  <% if (!pendientes.length) { %>
+    <p>
+      Esta asignación ya fue devuelta totalmente.
+    </p>
+  <% } else if (!depositos.length) { %>
+    <p>
+      Primero necesitás crear un depósito receptor.
+    </p>
+  <% } else { %>
+    <form
+      id="devolucion"
+      method="post"
+      action="/inventario/movimientos"
+      enctype="multipart/form-data"
+    >
+      <input type="hidden" name="accion" id="accionOperacion" value="confirmar">
+      <input type="hidden" name="borradorId" value="<%= borradorId %>">
+      <input type="hidden" name="borradorVersion" value="<%= borradorVersion %>">
+      <input
+        type="hidden"
+        name="_csrf"
+        value="<%= csrf %>"
+      >
+
+      <input
+        type="hidden"
+        name="clave"
+        value="<%= clave %>"
+      >
+
+      <input
+        type="hidden"
+        name="tipo"
+        value="devolucion"
+      >
+
+      <input
+        type="hidden"
+        name="original"
+        value="<%= mov._id %>"
+      >
+
+      <input
+        type="hidden"
+        name="items"
+        id="itemsDevolucion"
+      >
+
+      <h2>1. Material que regresa</h2>
+
+      <% pendientes.forEach(item => {
+        const previo = anterior(item.producto);
+
+        const seleccionadas = new Set(
+          String(previo?.series || '')
+            .split(/\r?\n/)
+            .map(serie => serie.trim().toUpperCase())
+        );
+      %>
+        <fieldset
+          class="retorno"
+          data-producto="<%= item.producto %>"
+          data-serializado="<%= item.serializado ? 'si' : 'no' %>"
+        >
+          <legend>
+            <%= item.nombre %>
+            · pendientes:
+            <%= n(item.cantidad - item.devuelto) %>
+            <%= item.unidad %>
+          </legend>
+
+          <% if (item.serializado) {
+            equiposPendientes
+              .filter(equipo =>
+                String(equipo.producto) ===
+                String(item.producto)
+              )
+              .forEach(equipo => {
+          %>
+            <label>
+              <input
+                type="checkbox"
+                class="serieRetorno"
+                value="<%= equipo.serie %>"
+                <%= seleccionadas.has(equipo.serie)
+                  ? 'checked'
+                  : ''
+                %>
+              >
+
+              <%= equipo.serie %>
+            </label>
+          <% })
+          } else { %>
+            <label>
+              Cantidad a devolver
+
+              <input
+                class="cantidadRetorno"
+                type="number"
+                value="<%= previo?.cantidad || 0 %>"
+                min="0"
+                max="<%= (item.cantidad - item.devuelto) / 1000 %>"
+                step="1"
+              >
+            </label>
+          <% } %>
+        </fieldset>
+      <% }) %>
+
+      <h2>2. Recepción de la devolución</h2>
+
+      <div class="grid">
+        <label>
+          Fecha
+
+          <input
+            name="fecha"
+            type="date"
+            value="<%= datos.fecha || hoy %>"
+            required
+          >
+        </label>
+
+        <label>
+          Depósito receptor
+
+          <select name="destino" required>
+            <% depositos.forEach(deposito => { %>
+              <option
+                value="<%= deposito._id %>"
+                <%= String(deposito._id) === (
+                  datos.destino || principal
+                ) ? 'selected' : '' %>
+              >
+                <%= deposito.nombre %>
+              </option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>
+          Estado del material
+
+          <select name="estadoRecepcion">
+            <option value="disponible">
+              Disponible
+            </option>
+
+            <option
+              value="revision"
+              <%= datos.estadoRecepcion === 'revision'
+                ? 'selected'
+                : ''
+              %>
+            >
+              A revisar
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Persona que devuelve
+
+          <input
+            name="entrega"
+            value="<%= datos.entrega || '' %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          Persona que recibe
+
+          <input
+            name="recibe"
+            value="<%= datos.recibe || '' %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          DNI de quien recibe
+
+          <input
+            name="dniRecibe"
+            value="<%= datos.dniRecibe || '' %>"
+            maxlength="30"
+          >
+        </label>
+      </div>
+
+      <label>
+        Observaciones
+
+        <textarea
+          name="observaciones"
+          maxlength="4000"
+        ><%= datos.observaciones || '' %></textarea>
+      </label>
+
+      <label>
+        Adjuntos: hasta 3 PDF, PNG o JPG
+        de 10 MB cada uno
+
+        <input
+          name="archivos"
+          type="file"
+          multiple
+          accept="application/pdf,image/png,image/jpeg"
+        >
+      </label>
+
+      <div class="actions">
+        <button type="submit" formnovalidate data-accion="borrador" class="secondary">Guardar borrador</button>
+        <button type="submit" data-accion="confirmar">
+          Confirmar devolución y generar acta
+        </button>
+
+        <a
+          class="button secondary"
+          href="/inventario/devoluciones"
+        >
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+    <script>
+    document.querySelector(
+      "#devolucion"
+    ).addEventListener("submit", function(evento) {
+      const guardar = evento.submitter?.dataset.accion === 'borrador';
+      document.querySelector('#accionOperacion').value = guardar ? 'borrador' : 'confirmar';
+      const filas = [
+        ...this.querySelectorAll(".retorno")
+      ].map(fila => {
+        const series = [
+          ...fila.querySelectorAll(
+            ".serieRetorno:checked"
+          )
+        ].map(checkbox => checkbox.value);
+
+        return {
+          producto: fila.dataset.producto,
+
+          cantidad:
+            fila.dataset.serializado === "si"
+              ? String(series.length)
+              : fila.querySelector(
+                  ".cantidadRetorno"
+                ).value,
+
+          series: series.join("\n")
+        };
+      }).filter(
+        fila => Number(fila.cantidad) > 0
+      );
+
+      if (!guardar && !filas.length) {
+        evento.preventDefault();
+
+        alert(
+          "Seleccioná equipos o cantidades para devolver."
+        );
+
+        return;
+      }
+
+      if (
+        !guardar && !confirm(
+          "¿Confirmás que recibiste este material?"
+        )
+      ) {
+        evento.preventDefault();
+        return;
+      }
+
+      document.querySelector(
+        "#itemsDevolucion"
+      ).value = JSON.stringify(filas);
+
+      this.querySelector(
+        'button[type="submit"]'
+      ).disabled = true;
+    });
+    </script>
+  <% } %>
+</section>
+<%- include('adjuntosBorrador') %>

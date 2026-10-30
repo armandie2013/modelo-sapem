@@ -1,0 +1,64 @@
+<section>
+  <p>
+    <b>Dirección:</b>
+    <%= lugar.direccion || '—' %>
+  </p>
+
+  <p>
+    <b>Responsable:</b>
+    <%= lugar.responsable || '—' %>
+  </p>
+
+  <div class="actions">
+    <a
+      class="button secondary"
+      href="/inventario/equipos?ubicacion=<%= lugar._id %>"
+    >
+      Ver equipos individuales de esta ubicación
+    </a>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Unidad</th>
+          <th>Estado</th>
+          <th>Cantidad</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% saldos.forEach(saldo => { %>
+          <tr>
+            <td>
+              <%= saldo.producto.codigo %> ·
+              <%= saldo.producto.nombre %>
+            </td>
+
+            <td><%= saldo.producto.unidad %></td>
+
+            <td>
+              <%=
+                saldo.estado === 'revision'
+                  ? 'A revisar'
+                  : saldo.estado
+              %>
+            </td>
+
+            <td><%= n(saldo.cantidad) %></td>
+          </tr>
+        <% }) %>
+
+        <% if (!saldos.length) { %>
+          <tr>
+            <td colspan="4">
+              Esta ubicación no tiene existencias.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>

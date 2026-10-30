@@ -1,0 +1,106 @@
+<%
+const permisosInv =
+  typeof persona !== 'undefined'
+    ? persona?.modulosPermitidos?.inventario || {}
+    : {};
+
+const accionesInv = {
+  ver: 'Ver',
+  administrar: 'Administrar catálogos',
+  editar: 'Editar',
+  ingresar: 'Ingresar',
+  asignar: 'Asignar',
+  devolver: 'Devolver',
+  traspasar: 'Traspasar',
+  eliminar: 'Eliminar',
+  anular: 'Anular movimientos'
+};
+%>
+
+<style>
+  .personal-inv-permisos {
+    padding-bottom: 14px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .personal-inv-permisos .inv-permisos-titulo {
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+
+  .personal-inv-permisos .inv-permisos-ayuda {
+    margin: 0 0 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #4b5563;
+  }
+
+  .personal-inv-permisos .inv-permisos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .personal-inv-permisos .inv-permisos-grid .perm-chip {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    min-height: 30px;
+    margin: 0;
+    padding: 5px 8px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: normal;
+    box-sizing: border-box;
+  }
+
+  .personal-inv-permisos .perm-chip input {
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    .personal-inv-permisos .inv-permisos-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .personal-inv-permisos .inv-permisos-grid .perm-chip {
+      min-height: 40px;
+    }
+  }
+</style>
+
+<div class="personal-inv-permisos">
+  <p class="inv-permisos-titulo text-gray-900">
+    Inventario
+  </p>
+
+  <p class="inv-permisos-ayuda">
+    Solo consulta: marcá Ver.
+    Para operar, agregá las acciones necesarias.
+  </p>
+
+  <div class="inv-permisos-grid">
+    <% Object.entries(accionesInv).forEach(
+      ([accion, etiqueta]) => {
+    %>
+      <label class="perm-chip">
+        <input
+          type="checkbox"
+          name="modulosPermitidos[inventario][<%= accion %>]"
+          value="true"
+          <%= permisosInv[accion] === true
+            ? 'checked'
+            : ''
+          %>
+        >
+
+        <span><%= etiqueta %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>

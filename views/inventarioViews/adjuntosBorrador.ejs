@@ -1,0 +1,4 @@
+<% if(borradorId && archivosBorrador.length) { %><section><h2>Adjuntos del borrador</h2>
+<% archivosBorrador.forEach(a => { %><div class="actions"><a href="/inventario/archivos/<%= a._id %>"><%= a.nombre %></a>
+<% if(permisos.eliminar) { %><form method="post" action="/inventario/borradores/<%= borradorId %>/archivos/<%= a._id %>/eliminar" onsubmit="return confirm('¿Eliminar este adjunto del borrador?')"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="version" value="<%= borradorVersion %>"><button type="submit" class="secondary">Eliminar adjunto</button></form><% } %>
+</div><% }) %></section><% } %>

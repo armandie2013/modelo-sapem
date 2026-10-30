@@ -1,0 +1,579 @@
+<%
+const ingreso = tipo === 'ingreso';
+
+const origenes = lugares.filter(
+  lugar => lugar.tipo === 'deposito'
+);
+
+const destinosPermitidos = lugares.filter(
+  lugar =>
+    lugar.tipo === (
+      tipo === 'asignacion'
+        ? 'destino'
+        : 'deposito'
+    )
+);
+%>
+
+<style>
+  .inv #movimiento .material-table { table-layout: fixed; min-width: 760px; }
+  .inv #movimiento .material-table th:nth-child(1) { width: 44%; }
+  .inv #movimiento .material-table th:nth-child(2) { width: 105px; }
+  .inv #movimiento .material-table th:nth-child(4) { width: 85px; }
+  .inv #movimiento .material-table td { vertical-align: top; }
+  .inv #movimiento .material-table td input,
+  .inv #movimiento .material-table td select,
+  .inv #movimiento .material-table td textarea { margin-top: 0; }
+  .inv #movimiento .cantidad { width: 85px; min-width: 0; max-width: 100%; text-align: right; }
+  .inv #movimiento .series { min-width: 0; width: 100%; }
+  .inv #movimiento .unidad { display: block; margin-top: 4px; font-size: 12px; }
+  .inv #movimiento .product-search { border: 1px solid #cbd5e1; border-left: 3px solid #1e40af; border-radius: 5px; padding: 12px; margin: 12px 0; background: #eff6ff; }
+  .inv #movimiento .product-search label { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
+  .inv #movimiento .product-search p { margin: 6px 0 0; font-size: 12px; }
+  .inv #movimiento .search-results { display: grid; gap: 5px; max-height: 240px; overflow-y: auto; margin-top: 8px; }
+  .inv #movimiento .search-results:empty { display: none; }
+  .inv #movimiento .search-results button { width: 100%; justify-content: flex-start; text-align: left; white-space: normal; }
+  .inv #movimiento .search-results .no-results { margin: 0; color: #334155; }
+</style>
+<%- include('productoDesdeDocumento', { ingreso }) %>
+<section>
+  <% if (
+    (!ingreso && !productos.length) ||
+    !destinosPermitidos.length ||
+    (!ingreso && !origenes.length)
+  ) { %>
+    <p>
+      Antes de registrar esta operación necesitás
+      productos y las ubicaciones correspondientes.
+    </p>
+
+    <div class="actions">
+      <a
+        class="button secondary"
+        href="/inventario/productos"
+      >
+        Productos
+      </a>
+
+      <a
+        class="button secondary"
+        href="/inventario/depositos"
+      >
+        Depósitos
+      </a>
+
+      <a
+        class="button secondary"
+        href="/inventario/destinatarios"
+      >
+        Destinatarios
+      </a>
+    </div>
+  <% } else { %>
+    <form
+      id="movimiento"
+      method="post"
+      action="/inventario/movimientos"
+      enctype="multipart/form-data"
+    >
+      <input type="hidden" name="accion" id="accionOperacion" value="confirmar">
+      <input type="hidden" name="borradorId" value="<%= borradorId %>">
+      <input type="hidden" name="borradorVersion" value="<%= borradorVersion %>">
+      <input
+        type="hidden"
+        name="_csrf"
+        value="<%= csrf %>"
+      >
+
+      <input
+        type="hidden"
+        name="clave"
+        value="<%= clave %>"
+      >
+
+      <input
+        type="hidden"
+        name="tipo"
+        value="<%= tipo %>"
+      >
+
+      <input
+        type="hidden"
+        name="items"
+        id="items"
+      >
+
+      <% if (ingreso) { %>
+        <h2>1. Documento de ingreso</h2>
+
+        <div class="grid">
+          <label>
+            Tipo de documento
+
+            <select name="documentoTipo">
+              <% [
+                'remito',
+                'factura',
+                'nota',
+                'acta',
+                'otro'
+              ].forEach(tipoDocumento => { %>
+                <option
+                  value="<%= tipoDocumento %>"
+                  <%= datos.documentoTipo === tipoDocumento
+                    ? 'selected'
+                    : ''
+                  %>
+                >
+                  <%= tipoDocumento %>
+                </option>
+              <% }) %>
+            </select>
+          </label>
+
+          <label>
+            Número (S/N si no tiene)
+
+            <input
+              name="documentoNumero"
+              value="<%= datos.documentoNumero || '' %>"
+              required
+              maxlength="100"
+            >
+          </label>
+
+          <label>
+            Fecha del documento
+
+            <input
+              name="documentoFecha"
+              type="date"
+              value="<%= datos.documentoFecha || hoy %>"
+              required
+            >
+          </label>
+
+          <label>
+            Emisor / proveedor
+
+            <input
+              name="emisor"
+              value="<%= datos.emisor || '' %>"
+              required
+              maxlength="180"
+            >
+          </label>
+        </div>
+
+        <label>
+          <input
+            type="checkbox"
+            name="documentoRepetido"
+            value="si"
+            <%= datos.documentoRepetido === 'si'
+              ? 'checked'
+              : ''
+            %>
+          >
+
+          Este documento ya respalda otra recepción
+          parcial; permitir reutilizarlo.
+        </label>
+      <% } %>
+
+      <h2>
+        <%=
+          ingreso
+            ? '2. Material efectivamente recibido'
+            : '1. Artículos a entregar'
+        %>
+      </h2>
+
+      <p class="muted">
+        Para equipos con serie, ingresá una por línea.
+        En un ingreso podés completar
+        SERIE | MAC | PATRIMONIO.
+        Las cantidades deben ser enteras y coincidir con las series cuando corresponda.
+      </p>
+
+      <div class="product-search">
+        <label for="buscarProductoCatalogo">Buscar y agregar un producto del catálogo</label>
+        <input id="buscarProductoCatalogo" type="search" placeholder="Escribí código, nombre, marca o modelo…" autocomplete="off" aria-controls="resultadosProductoCatalogo">
+        <p class="muted">Seleccioná un resultado para agregarlo a la tabla de material.</p>
+        <div id="resultadosProductoCatalogo" class="search-results" aria-live="polite"></div>
+      </div>
+      <div class="scroll">
+        <table class="material-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Series / identificación</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          id="agregar"
+          class="secondary"
+        >
+          Agregar artículo
+        </button>
+      </div>
+
+      <h2>
+        <%=
+          ingreso
+            ? '3. Recepción en depósito'
+            : '2. Origen, destino y recepción'
+        %>
+      </h2>
+
+      <div class="grid">
+        <label>
+          Fecha de recepción
+
+          <input
+            name="fecha"
+            type="date"
+            value="<%= datos.fecha || hoy %>"
+            required
+          >
+        </label>
+
+        <% if (!ingreso) { %>
+          <label>
+            Depósito de origen
+
+            <select name="origen" required>
+              <% origenes.forEach(lugar => { %>
+                <option
+                  value="<%= lugar._id %>"
+                  <%= String(lugar._id) === (
+                    datos.origen || principal
+                  ) ? 'selected' : '' %>
+                >
+                  <%= lugar.nombre %>
+                </option>
+              <% }) %>
+            </select>
+          </label>
+        <% } %>
+
+        <label>
+          <%= ingreso ? 'Depósito receptor' : 'Destino' %>
+
+          <select name="destino" required>
+            <% destinosPermitidos.forEach(lugar => { %>
+              <option
+                value="<%= lugar._id %>"
+                <%= String(lugar._id) === (
+                  datos.destino ||
+                  (ingreso ? principal : '')
+                ) ? 'selected' : '' %>
+              >
+                <%= lugar.nombre %>
+                <%= String(lugar._id) === principal
+                  ? ' (principal)'
+                  : ''
+                %>
+              </option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>
+          Entrega
+
+          <input
+            name="entrega"
+            value="<%= datos.entrega || '' %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          Recibe
+
+          <input
+            name="recibe"
+            value="<%= datos.recibe || '' %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          DNI de quien recibe
+
+          <input
+            name="dniRecibe"
+            value="<%= datos.dniRecibe || '' %>"
+            maxlength="30"
+          >
+        </label>
+      </div>
+
+      <% if (ingreso && !principal) { %>
+        <p class="muted">
+          Todavía no hay un depósito principal definido.
+          Seleccioná el receptor; un administrador puede
+          marcar el principal desde Depósitos.
+        </p>
+      <% } %>
+
+      <label>
+        Observaciones / diferencias con el documento
+
+        <textarea
+          name="observaciones"
+          maxlength="4000"
+        ><%= datos.observaciones || '' %></textarea>
+      </label>
+
+      <label>
+        Adjuntos opcionales: hasta 3 archivos
+        PDF, PNG o JPG de 10 MB cada uno
+
+        <input
+          type="file"
+          name="archivos"
+          multiple
+          accept="application/pdf,image/png,image/jpeg"
+        >
+      </label>
+
+      <p class="muted">
+        Confirmá cuando el material haya sido recibido.
+        Se actualizarán las existencias y se generará
+        el comprobante.
+      </p>
+
+      <div class="actions">
+        <button type="submit" formnovalidate data-accion="borrador" class="secondary">Guardar borrador</button>
+        <button type="submit" data-accion="confirmar">
+          Confirmar y generar comprobante
+        </button>
+
+        <a
+          class="button secondary"
+          href="/inventario/<%= config.ruta %>"
+        >
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+    <script
+      type="application/json"
+      id="datosMovimiento"
+    ><%- JSON.stringify({
+      productos,
+      datos
+    }).replace(/</g, '\\u003c') %></script>
+
+    <script>
+    (() => {
+      const { productos, datos } = JSON.parse(
+        document.querySelector(
+          "#datosMovimiento"
+        ).textContent
+      );
+
+      const form =
+        document.querySelector("#movimiento");
+
+      const filas =
+        document.querySelector("#filas");
+
+      const buscarProducto = document.querySelector('#buscarProductoCatalogo');
+      const resultados = document.querySelector('#resultadosProductoCatalogo');
+      buscarProducto.addEventListener('input', () => {
+        resultados.replaceChildren();
+        const q = buscarProducto.value.trim().toLocaleLowerCase('es');
+        if (!q) return;
+        const coincidencias = productos.filter(p => [p.codigo,p.nombre,p.marca,p.modelo].join(' ').toLocaleLowerCase('es').includes(q)).slice(0,20);
+        if (!coincidencias.length) {
+          const mensaje = document.createElement('p'); mensaje.className = 'no-results';
+          mensaje.textContent = 'No se encontraron productos con esos datos.'; resultados.append(mensaje);
+        }
+        coincidencias.forEach(p => {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'secondary';
+          b.textContent = `${p.codigo} · ${p.nombre} ${p.marca || ''} ${p.modelo || ''}`;
+          b.onclick = () => { agregar({producto:String(p._id), cantidad:1}); buscarProducto.value=''; resultados.replaceChildren(); };
+          resultados.append(b);
+        });
+      });
+      function agregar(fila = {}) {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>
+            <select
+              class="producto"
+              aria-label="Producto"
+              required
+            ></select>
+            <span class="muted unidad"></span>
+          </td>
+
+          <td>
+            <input
+              class="cantidad"
+              aria-label="Cantidad"
+              type="number"
+              min="1"
+              step="1"
+              required
+
+            >
+          </td>
+
+          <td>
+            <textarea
+              class="series"
+              aria-label="Números de serie"
+              rows="3"
+
+            ></textarea>
+          </td>
+
+          <td>
+            <button
+              type="button"
+              class="secondary quitar"
+            >
+              Quitar
+            </button>
+          </td>
+        `;
+
+        const select = tr.querySelector("select");
+
+        productos.forEach(producto => {
+          select.add(
+            new Option(
+              `${producto.codigo} · ${producto.nombre} ${producto.marca || ''} ${producto.modelo || ''}`,
+              producto._id
+            )
+          );
+        });
+
+        if (fila.producto) {
+          select.value = fila.producto;
+        }
+
+        tr.querySelector(".cantidad").value =
+          fila.cantidad ?? 1;
+
+        tr.querySelector(".series").value =
+          fila.series || "";
+
+        function ajustar() {
+          const producto = productos.find(
+            producto =>
+              producto._id === select.value
+          );
+
+          const series =
+            tr.querySelector(".series");
+
+          series.disabled =
+            !producto?.serializado;
+
+          series.required =
+            !!producto?.serializado;
+
+          const cantidad = tr.querySelector(".cantidad");
+
+          cantidad.min = "1";
+          cantidad.step = "1";
+
+          tr.querySelector(".unidad").textContent =
+            producto ? `Unidad: ${producto.unidad || 'No informada'} · ${producto.serializado ? 'Por número de serie' : 'Por cantidad'}` : '';
+
+          series.placeholder =
+            producto?.serializado
+              ? "Una serie por línea"
+              : "Control por cantidad";
+        }
+
+        select.onchange = ajustar;
+        ajustar();
+
+        tr.querySelector(".quitar").onclick =
+          () => tr.remove();
+
+        filas.append(tr);
+      }
+
+      let anteriores = [];
+
+      try {
+        anteriores = JSON.parse(
+          datos.items || "[]"
+        );
+      } catch {}
+
+      (
+        Array.isArray(anteriores) &&
+        anteriores.length
+          ? anteriores
+          : [{}]
+      ).forEach(agregar);
+
+      document.querySelector("#agregar").onclick =
+        () => agregar();
+
+      form.addEventListener("submit", evento => {
+        const guardar = evento.submitter?.dataset.accion === 'borrador';
+        document.querySelector('#accionOperacion').value = guardar ? 'borrador' : 'confirmar';
+        const items = [
+          ...filas.querySelectorAll("tr")
+        ].map(tr => ({
+          producto:
+            tr.querySelector(".producto").value,
+
+          cantidad:
+            tr.querySelector(".cantidad").value,
+
+          series:
+            tr.querySelector(".series").disabled
+              ? ""
+              : tr.querySelector(".series").value
+        }));
+
+        if (!guardar && !items.length) {
+          evento.preventDefault();
+          alert("Agregá al menos un artículo.");
+          return;
+        }
+
+        if (
+          !guardar && !confirm(
+            "¿Confirmás la recepción y el movimiento de existencias?"
+          )
+        ) {
+          evento.preventDefault();
+          return;
+        }
+
+        document.querySelector("#items").value =
+          JSON.stringify(items);
+
+        form.querySelector(
+          'button[type="submit"]'
+        ).disabled = true;
+      });
+    })();
+    </script>
+  <% } %>
+</section>
+<%- include('adjuntosBorrador') %>
