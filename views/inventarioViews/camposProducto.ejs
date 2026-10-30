@@ -1,0 +1,189 @@
+<%
+  const productoBase = productoEditar || {};
+  const controlProducto =
+    datos.serializado ??
+    (productoEditar
+      ? (productoBase.serializado ? 'si' : 'no')
+      : 'si');
+%>
+
+<style>
+  .inv .producto-fields {
+    display: grid;
+    grid-template-columns:
+      120px
+      minmax(200px, 2fr)
+      minmax(160px, 1fr)
+      minmax(160px, 1fr);
+    align-items: start;
+    gap: 14px 12px;
+    margin-bottom: 14px;
+  }
+
+  .inv .producto-fields > .producto-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .inv .producto-fields > .producto-field > span {
+    display: block;
+    line-height: 18px;
+  }
+
+  .inv .producto-fields > .producto-field > input,
+  .inv .producto-fields > .producto-field > select,
+  .inv .producto-fields > .producto-field > textarea {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .inv .producto-fields > .producto-field > input,
+  .inv .producto-fields > .producto-field > select {
+    height: 34px;
+    padding: 6px 9px;
+  }
+
+  .inv .producto-fields > .producto-field--codigo > input {
+    width: 110px;
+    max-width: 100%;
+  }
+
+  .inv .producto-fields > .producto-field--codigo > input:disabled {
+    color: #64748b;
+    background: #f1f5f9;
+    opacity: 1;
+    cursor: default;
+    -webkit-text-fill-color: #64748b;
+  }
+
+  .inv .producto-fields > .producto-field--control > select {
+    max-width: 260px;
+  }
+
+  .inv .producto-fields > .producto-field--descripcion {
+    grid-column: span 2;
+  }
+
+  .inv .producto-fields > .producto-field--descripcion > textarea {
+    min-height: 68px;
+    padding: 6px 9px;
+    resize: vertical;
+  }
+
+  @media (max-width: 1000px) {
+    .inv .producto-fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .inv .producto-fields {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .inv .producto-fields > .producto-field--descripcion {
+      grid-column: auto;
+    }
+
+    .inv .producto-fields > .producto-field--control > select {
+      max-width: none;
+    }
+  }
+</style>
+
+<div class="producto-fields">
+  <label class="producto-field producto-field--codigo">
+    <span>Código</span>
+
+    <% if (productoEditar) { %>
+      <input
+        type="text"
+        value="<%= productoBase.codigo %>"
+        readonly
+        aria-readonly="true"
+      >
+    <% } else { %>
+      <input
+        type="text"
+        value="Automático"
+        disabled
+      >
+    <% } %>
+  </label>
+
+  <label class="producto-field">
+    <span>Nombre</span>
+    <input
+      type="text"
+      name="nombre"
+      value="<%= datos.nombre ?? productoBase.nombre ?? '' %>"
+      required
+      maxlength="180"
+    >
+  </label>
+
+  <label class="producto-field">
+    <span>Marca</span>
+    <input
+      type="text"
+      name="marca"
+      value="<%= datos.marca ?? productoBase.marca ?? '' %>"
+      maxlength="100"
+    >
+  </label>
+
+  <label class="producto-field">
+    <span>Modelo</span>
+    <input
+      type="text"
+      name="modelo"
+      value="<%= datos.modelo ?? productoBase.modelo ?? '' %>"
+      maxlength="100"
+    >
+  </label>
+
+  <label class="producto-field">
+    <span>Unidad</span>
+    <input
+      type="text"
+      name="unidad"
+      value="<%= datos.unidad ?? productoBase.unidad ?? 'unidad' %>"
+      required
+      maxlength="30"
+    >
+  </label>
+
+  <label class="producto-field producto-field--control">
+    <span>Control</span>
+    <select name="serializado">
+      <option
+        value="si"
+        <%= controlProducto === 'si' ? 'selected' : '' %>
+      >
+        Por número de serie
+      </option>
+      <option
+        value="no"
+        <%= controlProducto === 'no' ? 'selected' : '' %>
+      >
+        Por cantidad
+      </option>
+    </select>
+  </label>
+
+  <label class="producto-field producto-field--descripcion">
+    <span>Descripción</span>
+    <textarea
+      name="descripcion"
+      rows="2"
+      maxlength="2000"
+    ><%= datos.descripcion ?? productoBase.descripcion ?? '' %></textarea>
+  </label>
+</div>
