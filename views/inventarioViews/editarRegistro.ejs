@@ -1,27 +1,106 @@
 <section>
-<p class="muted">Se conservan las descripciones originales de los comprobantes ya emitidos.</p>
-<form data-producto-id="<%= registro._id %>" method="post" action="/inventario/registros/<%= tipoRegistro %>/<%= registro._id %>/editar">
-<input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="version" value="<%= registro.__v || 0 %>">
-<div class="grid">
-<% if(tipoRegistro === 'producto') { %>
-<label>Código<input name="codigo" value="<%= datos.codigo ?? registro.codigo %>" required maxlength="60"></label>
-<label>Nombre<input name="nombre" value="<%= datos.nombre ?? registro.nombre %>" required maxlength="180"></label>
-<label>Marca<input name="marca" value="<%= datos.marca ?? registro.marca ?? '' %>" maxlength="100"></label>
-<label>Modelo<input name="modelo" value="<%= datos.modelo ?? registro.modelo ?? '' %>" maxlength="100"></label>
-<label>Descripción<textarea name="descripcion" maxlength="2000"><%= datos.descripcion ?? registro.descripcion ?? '' %></textarea></label>
-<label>Unidad<input name="unidad" value="<%= datos.unidad ?? registro.unidad %>" required maxlength="30"></label>
-<label>Control<select name="serializado"><% const control = datos.serializado || (registro.serializado ? 'si' : 'no'); %><option value="si" <%= control === 'si' ? 'selected' : '' %>>Por número de serie</option><option value="no" <%= control === 'no' ? 'selected' : '' %>>Por cantidad</option></select></label>
-<% } else if(tipoRegistro === 'equipo') { %>
-<p><b>Serie:</b> <%= registro.serie %>. Su ubicación y estado se modifican con movimientos de inventario.</p>
-<label>MAC<input name="mac" value="<%= datos.mac ?? registro.mac ?? '' %>" maxlength="100"></label>
-<label>Código patrimonial<input name="patrimonio" value="<%= datos.patrimonio ?? registro.patrimonio ?? '' %>" maxlength="100"></label>
-<% } else { %>
-<label>Nombre<input name="nombre" value="<%= datos.nombre ?? registro.nombre %>" required maxlength="180"></label>
-<label>Dirección<input name="direccion" value="<%= datos.direccion ?? registro.direccion ?? '' %>" maxlength="250"></label>
-<label>Responsable<input name="responsable" value="<%= datos.responsable ?? registro.responsable ?? '' %>" maxlength="180"></label>
-<label>DNI<input name="dni" value="<%= datos.dni ?? registro.dni ?? '' %>" maxlength="30"></label>
-<% } %>
-</div>
-<% if(tipoRegistro === 'producto') { %><%- include('similitudProducto') %><% } %>
-<div class="actions"><button>Guardar cambios</button><a class="button secondary" href="/inventario/<%= seccion %>">Cancelar</a></div>
-</form></section>
+  <p class="muted">
+    Se conservan las descripciones originales de los comprobantes ya emitidos.
+  </p>
+
+  <form
+    data-producto-id="<%= registro._id %>"
+    method="post"
+    action="/inventario/registros/<%= tipoRegistro %>/<%= registro._id %>/editar"
+  >
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input
+      type="hidden"
+      name="version"
+      value="<%= registro.__v || 0 %>"
+    >
+
+    <% if (tipoRegistro === 'producto') { %>
+
+      <%- include('camposProducto', {
+        productoEditar: registro
+      }) %>
+
+      <%- include('similitudProducto') %>
+
+    <% } else if (tipoRegistro === 'equipo') { %>
+
+      <p>
+        <b>Serie:</b> <%= registro.serie %>.
+        Su ubicación y estado se modifican con movimientos de inventario.
+      </p>
+
+      <div class="grid">
+        <label>
+          MAC
+          <input
+            name="mac"
+            value="<%= datos.mac ?? registro.mac ?? '' %>"
+            maxlength="100"
+          >
+        </label>
+
+        <label>
+          Código patrimonial
+          <input
+            name="patrimonio"
+            value="<%= datos.patrimonio ?? registro.patrimonio ?? '' %>"
+            maxlength="100"
+          >
+        </label>
+      </div>
+
+    <% } else { %>
+
+      <div class="grid">
+        <label>
+          Nombre
+          <input
+            name="nombre"
+            value="<%= datos.nombre ?? registro.nombre %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          Dirección
+          <input
+            name="direccion"
+            value="<%= datos.direccion ?? registro.direccion ?? '' %>"
+            maxlength="250"
+          >
+        </label>
+
+        <label>
+          Responsable
+          <input
+            name="responsable"
+            value="<%= datos.responsable ?? registro.responsable ?? '' %>"
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          DNI
+          <input
+            name="dni"
+            value="<%= datos.dni ?? registro.dni ?? '' %>"
+            maxlength="30"
+          >
+        </label>
+      </div>
+
+    <% } %>
+
+    <div class="actions">
+      <button type="submit">Guardar cambios</button>
+      <a
+        class="button secondary"
+        href="/inventario/<%= seccion %>"
+      >
+        Cancelar
+      </a>
+    </div>
+  </form>
+</section>

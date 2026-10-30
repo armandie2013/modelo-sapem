@@ -1,13 +1,6 @@
 <section>
-  <form
-    method="post"
-    action="/inventario/catalogos"
-  >
-    <input
-      type="hidden"
-      name="_csrf"
-      value="<%= csrf %>"
-    >
+  <form method="post" action="/inventario/catalogos">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
 
     <input
       type="hidden"
@@ -15,79 +8,25 @@
       value="<%= tipoCatalogo === 'producto' ? 'producto' : 'lugar' %>"
     >
 
-    <div class="grid">
-      <% if (tipoCatalogo === 'producto') { %>
-        <label>
-          Código
+    <% if (tipoCatalogo === 'producto') { %>
 
-          <input
-            name="codigo"
-            value="<%= datos.codigo || '' %>"
-            required
-            maxlength="60"
-          >
-        </label>
+      <%- include('camposProducto', {
+        productoEditar: null
+      }) %>
 
-        <label>
-          Nombre
+      <%- include('similitudProducto') %>
 
-          <input
-            name="nombre"
-            value="<%= datos.nombre || '' %>"
-            required
-            maxlength="180"
-          >
-        </label>
+    <% } else { %>
 
-<label>Marca<input name="marca" value="<%= datos.marca || '' %>" maxlength="100"></label>
-<label>Modelo<input name="modelo" value="<%= datos.modelo || '' %>" maxlength="100"></label>
-<label>Descripción<textarea name="descripcion" maxlength="2000"><%= datos.descripcion || '' %></textarea></label>
-        <label>
-          Unidad
+      <input
+        type="hidden"
+        name="tipoLugar"
+        value="<%= tipoCatalogo %>"
+      >
 
-          <input
-            name="unidad"
-            value="<%= datos.unidad || 'unidad' %>"
-            required
-            maxlength="30"
-          >
-        </label>
-
-        <label>
-          Control
-
-          <select name="serializado">
-            <option
-              value="si"
-              <%= datos.serializado !== 'no'
-                ? 'selected'
-                : ''
-              %>
-            >
-              Por número de serie
-            </option>
-
-            <option
-              value="no"
-              <%= datos.serializado === 'no'
-                ? 'selected'
-                : ''
-              %>
-            >
-              Por cantidad
-            </option>
-          </select>
-        </label>
-      <% } else { %>
-        <input
-          type="hidden"
-          name="tipoLugar"
-          value="<%= tipoCatalogo %>"
-        >
-
+      <div class="grid">
         <label>
           Nombre
-
           <input
             name="nombre"
             value="<%= datos.nombre || '' %>"
@@ -98,7 +37,6 @@
 
         <label>
           Dirección
-
           <input
             name="direccion"
             value="<%= datos.direccion || '' %>"
@@ -108,7 +46,6 @@
 
         <label>
           Responsable
-
           <input
             name="responsable"
             value="<%= datos.responsable || '' %>"
@@ -118,37 +55,30 @@
 
         <label>
           DNI del responsable
-
           <input
             name="dni"
             value="<%= datos.dni || '' %>"
             maxlength="30"
           >
         </label>
+      </div>
+
+      <% if (tipoCatalogo === 'deposito') { %>
+        <label>
+          <input
+            type="checkbox"
+            name="principal"
+            value="si"
+            <%= datos.principal === 'si' ? 'checked' : '' %>
+          >
+          Usar como depósito principal para los nuevos ingresos
+        </label>
       <% } %>
-    </div>
 
-    <% if (tipoCatalogo === 'deposito') { %>
-      <label>
-        <input
-          type="checkbox"
-          name="principal"
-          value="si"
-          <%= datos.principal === 'si'
-            ? 'checked'
-            : ''
-          %>
-        >
-
-        Usar como depósito principal
-        para los nuevos ingresos
-      </label>
     <% } %>
 
-    <% if (tipoCatalogo === 'producto') { %><%- include('similitudProducto') %><% } %>
     <div class="actions">
-      <button>Guardar</button>
-
+      <button type="submit">Guardar</button>
       <a
         class="button secondary"
         href="/inventario/<%= seccion %>"

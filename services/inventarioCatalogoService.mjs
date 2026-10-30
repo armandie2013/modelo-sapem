@@ -1,4 +1,4 @@
-import { Producto } from '../models/inventario.mjs';
+import { Producto, Contador } from '../models/inventario.mjs';
 import { ejecutarOperacion } from './inventarioPersistencia.mjs';
 const texto = v => String(v ?? '').trim();
 function exigir(ok, mensaje) { if (!ok) { const e = new Error(mensaje); e.status = 400; throw e; } }
@@ -22,6 +22,9 @@ export async function similaresProducto(body, excluir = '') {
   return productos.filter(p => String(p._id) !== String(excluir) && sonSimilares(body, p)).slice(0, 12);
 }
 export async function datosProducto(body, excluir = '') {
+  const ficha = excluir ? await Producto.findById(excluir) : null;
+  exigir(!excluir || ficha, 'Producto inexistente.');
+  if (ficha) body = { ...body, codigo: ficha.codigo };
   const datos = { codigo: texto(body.codigo).toUpperCase(), nombre: texto(body.nombre),
     marca: texto(body.marca), modelo: texto(body.modelo), descripcion: texto(body.descripcion),
     unidad: texto(body.unidad) || 'unidad', serializado: body.serializado === 'si' };
@@ -37,5 +40,28 @@ export async function datosProducto(body, excluir = '') {
   return datos;
 }
 export async function crearProductoCatalogo(body) {
-  return ejecutarOperacion(async () => Producto.create(await datosProducto(body)));
+  return ejecutarOperacion(async () => {
+    const codigos = await Producto.find().select('codigo').lean();
+    const maximo = codigos.reduce((max, producto) => {
+      const match = /^PR(\d{4})$/.exec(producto.codigo || '');
+      return match ? Math.max(max, Number(match[1])) : max;
+    }, 0);
+    await Contador.updateOne(
+      { _id: 'productos' },
+      { $setOnInsert: { valor: maximo } },
+      { upsert: true }
+    );
+    const actual = await Contador.findById('productos');
+    if (actual.valor < maximo) {
+      await Contador.updateOne({ _id: 'productos' }, { $set: { valor: maximo } });
+    }
+    const contador = await Contador.findByIdAndUpdate(
+      'productos',
+      { $inc: { valor: 1 } },
+      { new: true }
+    );
+    exigir(contador.valor <= 9999, 'Se agotaron los códigos PR0001 a PR9999. Debe ampliarse el formato.');
+    const codigo = `PR${String(contador.valor).padStart(4, '0')}`;
+    return Producto.create(await datosProducto({ ...body, codigo }));
+  });
 }
