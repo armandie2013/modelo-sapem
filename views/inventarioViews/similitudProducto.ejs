@@ -1,52 +1,137 @@
 <div class="aviso-similitud" aria-live="polite"></div>
-<label
-  ><input type="checkbox" name="confirmarSimilar" value="si" /> Revisé las
-  coincidencias y confirmo que es un producto distinto.</label
->
+
+<label>
+  <input
+    type="checkbox"
+    name="confirmarSimilar"
+    value="si"
+  >
+  Revisé las coincidencias y confirmo que es un producto distinto.
+</label>
+
 <script>
-  (() => {
-    const script = document.currentScript;
-    const form = script.closest("form");
-    if (!form) return;
-    const aviso = form.querySelector(".aviso-similitud");
-    let timer,
-      consulta = 0;
-    const buscar = () => {
-      clearTimeout(timer);
-      const turno = ++consulta;
-      form.querySelector('[name="confirmarSimilar"]').checked = false;
-      timer = setTimeout(async () => {
-        const q = new URLSearchParams({
-          nombre: form.elements.nombre.value,
-          modelo: form.elements.modelo.value,
-          excluir: form.dataset.productoId || "",
-        });
-        try {
-          const respuesta = await fetch("/inventario/productos/similares?" + q);
-          if (!respuesta.ok) throw new Error();
-          const datos = await respuesta.json();
-          if (turno !== consulta) return;
-          aviso.replaceChildren();
-          if (!datos.length) return;
-          const p = document.createElement("p");
-          p.textContent =
-            "Hay productos similares. Revisalos antes de crear otra ficha:";
-          aviso.append(p);
-          datos.forEach((d) => {
-            const a = document.createElement("a");
-            a.href = "/inventario/productos";
-            a.textContent = `${d.codigo} · ${d.nombre} ${d.marca || ""} ${d.modelo || ""}${d.activo === false ? " (inactivo)" : ""}`;
-            aviso.append(a, document.createElement("br"));
-          });
-        } catch {
-          if (turno === consulta)
-            aviso.textContent =
-              "La comprobación de coincidencias se realizará al guardar.";
+(() => {
+  const script = document.currentScript;
+  const form = script.closest('form');
+
+  if (!form) return;
+
+  function formatear(campo, convertir) {
+    const anterior = campo.value;
+    const nuevo = convertir(anterior);
+
+    if (anterior === nuevo) return;
+
+    const inicio = campo.selectionStart;
+    const fin = campo.selectionEnd;
+    const direccion = campo.selectionDirection;
+
+    campo.value = nuevo;
+
+    if (inicio !== null && fin !== null) {
+      campo.setSelectionRange(
+        convertir(anterior.slice(0, inicio)).length,
+        convertir(anterior.slice(0, fin)).length,
+        direccion
+      );
+    }
+  }
+
+  ['nombre', 'marca', 'modelo', 'descripcion'].forEach(nombre => {
+    const campo = form.elements.namedItem(nombre);
+
+    if (!campo) return;
+
+    const convertir = nombre === 'descripcion'
+      ? valor => valor.replace(
+          /\p{L}/u,
+          letra => letra.toLocaleUpperCase('es-AR')
+        )
+      : valor => valor.toLocaleUpperCase('es-AR');
+
+    const aplicar = () => formatear(campo, convertir);
+
+    campo.addEventListener('input', evento => {
+      if (!evento.isComposing) {
+        aplicar();
+      }
+    });
+
+    campo.addEventListener('compositionend', aplicar);
+    form.addEventListener('submit', aplicar);
+
+    aplicar();
+  });
+
+  const aviso = form.querySelector('.aviso-similitud');
+
+  let timer;
+  let consulta = 0;
+
+  const buscar = () => {
+    clearTimeout(timer);
+
+    const turno = ++consulta;
+
+    form.elements.namedItem('confirmarSimilar').checked = false;
+
+    timer = setTimeout(async () => {
+      const parametros = new URLSearchParams({
+        nombre: form.elements.namedItem('nombre').value,
+        modelo: form.elements.namedItem('modelo').value,
+        excluir: form.dataset.productoId || ''
+      });
+
+      try {
+        const respuesta = await fetch(
+          '/inventario/productos/similares?' + parametros
+        );
+
+        if (!respuesta.ok) {
+          throw new Error('No se pudieron consultar las coincidencias.');
         }
-      }, 300);
-    };
-    ["nombre", "marca", "modelo"].forEach((n) =>
-      form.elements[n].addEventListener("input", buscar),
-    );
-  })();
+
+        const coincidencias = await respuesta.json();
+
+        if (turno !== consulta) return;
+
+        aviso.replaceChildren();
+
+        if (!coincidencias.length) return;
+
+        const mensaje = document.createElement('p');
+
+        mensaje.textContent =
+          'Hay productos similares. Revisalos antes de crear otra ficha:';
+
+        aviso.append(mensaje);
+
+        coincidencias.forEach(producto => {
+          const enlace = document.createElement('a');
+
+          enlace.href = '/inventario/productos';
+
+          enlace.textContent =
+            `${producto.codigo} · ${producto.nombre} ` +
+            `${producto.marca || ''} ${producto.modelo || ''}` +
+            (producto.activo === false ? ' (inactivo)' : '');
+
+          aviso.append(
+            enlace,
+            document.createElement('br')
+          );
+        });
+      } catch {
+        if (turno === consulta) {
+          aviso.textContent =
+            'La comprobación de coincidencias se realizará al guardar.';
+        }
+      }
+    }, 300);
+  };
+
+  ['nombre', 'marca', 'modelo'].forEach(nombre => {
+    form.elements.namedItem(nombre).addEventListener('input', buscar);
+  });
+})();
 </script>
