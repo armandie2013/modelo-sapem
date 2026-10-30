@@ -1,0 +1,116 @@
+<section>
+  <p class="muted">
+    Consultá la ubicación y el historial de cada
+    equipo identificado por serie.
+  </p>
+
+  <form class="list-toolbar" method="get" action="/inventario/equipos">
+    <div class="grid">
+      <label>
+        Serie exacta
+        <input name="serie" value="<%= serie %>">
+      </label>
+
+      <label>
+        Ubicación
+
+        <select name="ubicacion">
+          <option value="">Todas</option>
+
+          <% lugares.forEach(lugar => { %>
+            <option
+              value="<%= lugar._id %>"
+              <%= String(lugar._id) === ubicacion
+                ? 'selected'
+                : ''
+              %>
+            >
+              <%= lugar.nombre %>
+            </option>
+          <% }) %>
+        </select>
+      </label>
+
+      <label>
+        Estado
+
+        <select name="estado">
+          <option value="">Todos</option>
+
+          <% Object.entries({
+            disponible: 'Disponible',
+            revision: 'A revisar',
+            asignado: 'Asignado'
+          }).forEach(([valor, texto]) => { %>
+            <option
+              value="<%= valor %>"
+              <%= estado === valor ? 'selected' : '' %>
+            >
+              <%= texto %>
+            </option>
+          <% }) %>
+        </select>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button>Buscar</button>
+
+      <a
+        class="button secondary"
+        href="/inventario/equipos"
+      >
+        Limpiar
+      </a>
+    </div>
+  </form>
+
+  <div class="scroll">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Marca / modelo</th>
+          <th>Serie</th>
+          <th>MAC</th>
+          <th>Patrimonio</th>
+          <th>Ubicación</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% equipos.forEach(equipo => { %>
+          <tr>
+            <td><span class="cell-title"><%= equipo.producto.nombre %></span><span class="cell-sub">Código: <%= equipo.producto.codigo %></span></td>
+            <td><span class="cell-title"><%= equipo.producto.marca || 'No informada' %></span><span class="cell-sub"><%= equipo.producto.modelo || 'Modelo no informado' %></span></td>
+
+            <td>
+              <a href="/inventario/equipos/<%= equipo._id %>">
+                <%= equipo.serie %>
+              </a>
+            </td>
+
+            <td><%= equipo.mac || '—' %></td>
+            <td><%= equipo.patrimonio || '—' %></td>
+            <td><%= equipo.lugar.nombre %></td>
+            <td><span class="state"><%= ({disponible:'Disponible', revision:'A revisar', asignado:'Asignado'})[equipo.estado] || equipo.estado %></span></td>
+          </tr>
+        <% }) %>
+
+        <% if (!equipos.length) { %>
+          <tr>
+            <td colspan="7" class="empty">
+              No se encontraron equipos.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <%- include('paginacion', {
+    base: '/inventario/equipos',
+    filtros: { serie, ubicacion, estado }
+  }) %>
+</section>

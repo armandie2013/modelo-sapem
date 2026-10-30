@@ -1,0 +1,160 @@
+<section>
+  <form
+    method="post"
+    action="/inventario/catalogos"
+  >
+    <input
+      type="hidden"
+      name="_csrf"
+      value="<%= csrf %>"
+    >
+
+    <input
+      type="hidden"
+      name="catalogo"
+      value="<%= tipoCatalogo === 'producto' ? 'producto' : 'lugar' %>"
+    >
+
+    <div class="grid">
+      <% if (tipoCatalogo === 'producto') { %>
+        <label>
+          Código
+
+          <input
+            name="codigo"
+            value="<%= datos.codigo || '' %>"
+            required
+            maxlength="60"
+          >
+        </label>
+
+        <label>
+          Nombre
+
+          <input
+            name="nombre"
+            value="<%= datos.nombre || '' %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+<label>Marca<input name="marca" value="<%= datos.marca || '' %>" maxlength="100"></label>
+<label>Modelo<input name="modelo" value="<%= datos.modelo || '' %>" maxlength="100"></label>
+<label>Descripción<textarea name="descripcion" maxlength="2000"><%= datos.descripcion || '' %></textarea></label>
+        <label>
+          Unidad
+
+          <input
+            name="unidad"
+            value="<%= datos.unidad || 'unidad' %>"
+            required
+            maxlength="30"
+          >
+        </label>
+
+        <label>
+          Control
+
+          <select name="serializado">
+            <option
+              value="si"
+              <%= datos.serializado !== 'no'
+                ? 'selected'
+                : ''
+              %>
+            >
+              Por número de serie
+            </option>
+
+            <option
+              value="no"
+              <%= datos.serializado === 'no'
+                ? 'selected'
+                : ''
+              %>
+            >
+              Por cantidad
+            </option>
+          </select>
+        </label>
+      <% } else { %>
+        <input
+          type="hidden"
+          name="tipoLugar"
+          value="<%= tipoCatalogo %>"
+        >
+
+        <label>
+          Nombre
+
+          <input
+            name="nombre"
+            value="<%= datos.nombre || '' %>"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          Dirección
+
+          <input
+            name="direccion"
+            value="<%= datos.direccion || '' %>"
+            maxlength="250"
+          >
+        </label>
+
+        <label>
+          Responsable
+
+          <input
+            name="responsable"
+            value="<%= datos.responsable || '' %>"
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          DNI del responsable
+
+          <input
+            name="dni"
+            value="<%= datos.dni || '' %>"
+            maxlength="30"
+          >
+        </label>
+      <% } %>
+    </div>
+
+    <% if (tipoCatalogo === 'deposito') { %>
+      <label>
+        <input
+          type="checkbox"
+          name="principal"
+          value="si"
+          <%= datos.principal === 'si'
+            ? 'checked'
+            : ''
+          %>
+        >
+
+        Usar como depósito principal
+        para los nuevos ingresos
+      </label>
+    <% } %>
+
+    <% if (tipoCatalogo === 'producto') { %><%- include('similitudProducto') %><% } %>
+    <div class="actions">
+      <button>Guardar</button>
+
+      <a
+        class="button secondary"
+        href="/inventario/<%= seccion %>"
+      >
+        Cancelar
+      </a>
+    </div>
+  </form>
+</section>

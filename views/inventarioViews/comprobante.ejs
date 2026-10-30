@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>
+    Comprobante de inventario <%= mov.numero %>
+  </title>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { font: 12px/1.45 Arial, sans-serif; color: #172033; margin: 20px auto; max-width: 1000px; padding: 0 16px; }
+    header { border-bottom: 2px solid #1e40af; padding-bottom: 12px; margin-bottom: 16px; }
+    header img { max-width: 230px; max-height: 60px; object-fit: contain; }
+    h1 { font-size: 21px; line-height: 1.2; margin: 0 0 5px; }
+    h2 { font-size: 14px; margin: 20px 0 8px; }
+    p { margin: 0 0 8px; overflow-wrap: anywhere; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0 14px; table-layout: auto; }
+    th, td { border: 1px solid #cbd5e1; padding: 7px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    th { background: #eff6ff; font-weight: 700; }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    .doc-header { margin: 0; }
+    .doc-header td { border: 0; padding: 0; vertical-align: middle; }
+    .doc-header .doc-title { text-align: right; }
+    .doc-number { font-size: 14px; font-weight: 700; }
+    .doc-date { margin-top: 4px; color: #64748b; }
+    .partes { table-layout: fixed; }
+    .partes th { width: 50%; }
+    .dato { margin-bottom: 8px; }
+    .dato:last-child { margin-bottom: 0; }
+    .etiqueta { display: block; font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 2px; }
+    .valor { display: block; font-size: 12px; }
+    .numeric { width: 1%; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+    .codigo { width: 1%; white-space: nowrap; }
+    .meta { font-size: 11px; color: #64748b; }
+    .observaciones { white-space: pre-wrap; }
+    .firmas { width: 100%; table-layout: fixed; margin-top: 30mm; break-inside: avoid; page-break-inside: avoid; }
+    .firmas td { width: 50%; border: 0; padding: 0 14px 0 0; }
+    .firmas td + td { padding: 0 0 0 14px; }
+    .firma-linea { border-top: 1px solid #172033; padding-top: 8px; }
+    .web { background: #f1f5f9; border-radius: 7px; padding: 14px; margin: 16px 0; }
+    .web h2 { margin-top: 0; }
+    .web-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    label { display: block; margin: 10px 0; }
+    input, select, textarea { padding: 7px; max-width: 100%; font: inherit; }
+    button, .boton { display: inline-block; padding: 7px 11px; background: #1e40af; color: white; border: 0; border-radius: 5px; text-decoration: none; font: inherit; cursor: pointer; }
+    .boton.secondary { background: #e2e8f0; color: #334155; }
+    .aviso-historico { color: #64748b; font-size: 11px; }
+    @media print { .web { display: none; } body { margin: 0; padding: 0; max-width: none; } h2 { break-after: avoid; page-break-after: avoid; } }
+    @media screen and (max-width: 640px) { body { padding: 0 10px; } .doc-header td { display: block; width: 100%; } .doc-header .doc-title { text-align: left; padding-top: 12px; } }
+  </style>
+</head>
+
+<body>
+<%
+const n = valor =>
+  ((valor || 0) / 1000).toLocaleString(
+    'es-AR',
+    { maximumFractionDigits: 3 }
+  );
+
+const f = valor =>
+  new Date(valor).toLocaleDateString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires'
+  });
+
+const titulos = {
+  ingreso: 'Ingreso de mercadería',
+  asignacion: 'Acta de asignación',
+  devolucion: 'Acta de devolución',
+  traspaso: 'Traspaso entre depósitos'
+};
+
+const rutas = {
+  ingreso: 'ingresos',
+  asignacion: 'asignaciones',
+  devolucion: 'devoluciones',
+  traspaso: 'traspasos'
+};
+
+const accion = {
+  ingreso: 'ingresar',
+  asignacion: 'asignar',
+  devolucion: 'devolver',
+  traspaso: 'traspasar'
+}[mov.tipo];
+%>
+
+<% if (web) { %>
+  <div class="web">
+    <% if (aviso) { %>
+      <p role="alert"><%= aviso.texto %></p>
+    <% } %>
+
+    <div class="web-toolbar">
+      <a class="boton secondary" href="/inventario/<%= rutas[mov.tipo] %>">Volver al listado</a>
+      <a class="boton secondary" href="/inventario">Inventario general</a>
+      <a class="boton" href="/inventario/movimientos/<%= mov._id %>/pdf" target="_blank" rel="noopener">Descargar / imprimir PDF</a>
+    </div>
+    <% if (nuevo) { %><p style="margin-top:10px;margin-bottom:0">Movimiento confirmado. El acta está lista para descargar e imprimir.</p><% } %>
+  </div>
+<% } %>
+
+<% if(mov.estado === 'anulado') { %>
+<div style="border:2px solid #b91c1c;color:#991b1b;padding:16px;margin:20px 0;break-inside:avoid">
+<h2>COMPROBANTE ANULADO</h2><p><%= mov.anulacion?.motivo || '' %></p>
+<p><%= mov.anulacion?.usuario || '' %> · <%= mov.anulacion?.fecha ? f(mov.anulacion.fecha) : '' %></p></div>
+<% } %>
+<header>
+  <table class="doc-header"><tr>
+    <td><img src="<%= logo %>" alt="Catamarca Telecomunicaciones SAPEM"></td>
+    <td class="doc-title">
+      <h1><%= titulos[mov.tipo] %></h1>
+      <div class="doc-number">N.º <%= String(mov.numero).padStart(8, '0') %></div>
+      <div class="doc-date">Fecha: <%= f(mov.fecha) %></div>
+    </td>
+  </tr></table>
+</header>
+
+<table class="partes">
+  <thead><tr><th>Origen</th><th>Destino / destinatario</th></tr></thead>
+  <tbody><tr>
+    <td>
+      <div class="dato"><span class="etiqueta">NOMBRE / DEPÓSITO / EMISOR</span><span class="valor"><%= mov.origenNombre || '—' %></span></div>
+      <div class="dato"><span class="etiqueta">DIRECCIÓN DE ORIGEN</span><span class="valor"><%= mov.origenDireccion || 'No registrada' %></span></div>
+    </td>
+    <td>
+      <div class="dato"><span class="etiqueta">NOMBRE / DEPÓSITO / ORGANISMO</span><span class="valor"><%= mov.destinoNombre %></span></div>
+      <div class="dato"><span class="etiqueta">DIRECCIÓN DE DESTINO</span><span class="valor"><%= mov.destinoDireccion || 'No registrada' %></span></div>
+    </td>
+  </tr><tr>
+    <td><span class="etiqueta">ENTREGA</span><span class="valor"><%= mov.entrega %></span></td>
+    <td><div class="dato"><span class="etiqueta">RECIBE</span><span class="valor"><%= mov.recibe %></span></div><span class="etiqueta">DNI DE QUIEN RECIBE</span><span class="valor"><%= mov.dniRecibe || 'No registrado' %></span></td>
+  </tr></tbody>
+</table>
+
+<% if (mov.originalNumero) { %><p><b>Asignación de referencia:</b> N.º <%= mov.originalNumero %></p><% } %>
+<% if (mov.tipo === 'devolucion') { %><p><b>Estado del material recibido:</b> <%= mov.estadoRecepcion === 'revision' ? 'A revisar; no disponible para entregar' : 'Disponible' %></p><% } %>
+<h2>Material <%= mov.tipo === 'devolucion' || mov.tipo === 'ingreso' ? 'recibido' : 'entregado' %></h2>
+<table>
+  <thead>
+    <tr>
+      <th class="codigo">Código</th>
+      <th>Producto</th>
+      <th>Marca</th>
+      <th>Modelo</th>
+      <th class="numeric">Cantidad</th>
+      <th>Unidad</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% mov.items.forEach(item => { %>
+      <tr>
+        <td><%= item.codigo %></td>
+        <td><%= item.nombre %></td>
+        <td><%= item.marca || 'No registrada' %></td>
+        <td><%= item.modelo || 'No registrado' %></td>
+        <td class="numeric"><%= n(item.cantidad) %></td>
+        <td><%= item.unidad %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<% mov.items
+  .filter(item => item.series.length)
+  .forEach(item => {
+%>
+  <h2>
+    Identificación individual: <%= item.nombre %>
+    <span class="meta"> · <%= item.marca || 'Marca no registrada' %> · <%= item.modelo || 'Modelo no registrado' %></span>
+  </h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Serie</th>
+        <th>MAC</th>
+        <th>Código patrimonial</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% item.series.forEach(equipo => { %>
+        <tr>
+          <td><%= equipo.serie %></td>
+          <td><%= equipo.mac || '—' %></td>
+          <td><%= equipo.patrimonio || '—' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% }) %>
+
+<% if (mov.documentos.length) { %>
+  <h2>Documentación de respaldo</h2>
+
+  <ul>
+    <% mov.documentos.forEach(documento => { %>
+      <li>
+        <%= documento.tipo %>
+        · <%= documento.numero %>
+        · <%= f(documento.fecha) %>
+        · <%= documento.emisor %>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<% if (mov.items.some(item => !item.marca || !item.modelo)) { %><p class="aviso-historico">Los datos de marca o modelo no registrados en este movimiento no se completan con información posterior del catálogo.</p><% } %>
+<p class="observaciones"><b>Observaciones:</b> <%= mov.observaciones || 'Sin observaciones.' %></p>
+
+<p>
+  <b>Registrado por:</b>
+  <%= mov.creadoPor.nombre %>
+  · <%= f(mov.createdAt) %>
+</p>
+
+<table class="firmas"><tr>
+  <td><div class="firma-linea"><b>Firma de quien entrega</b><br>Aclaración: <%= mov.entrega %><br>DNI: __________________</div></td>
+  <td><div class="firma-linea"><b>Firma de quien recibe</b><br>Aclaración: <%= mov.recibe %><br>DNI: <%= mov.dniRecibe || '__________________' %></div></td>
+</tr></table>
+
+<% if (web) { %>
+  <% if (mov.tipo === 'asignacion') { %>
+    <section class="web">
+      <h2>Seguimiento de la asignación</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Entregado</th>
+            <th>Devuelto</th>
+            <th>Pendiente</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% mov.items.forEach(item => { %>
+            <tr>
+              <td><%= item.nombre %></td>
+              <td><%= n(item.cantidad) %></td>
+              <td><%= n(item.devuelto) %></td>
+              <td>
+                <%= n(
+                  item.cantidad - item.devuelto
+                ) %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <% devoluciones.forEach(devolucion => { %>
+        <p>
+          <a href="/inventario/movimientos/<%= devolucion._id %>">
+            Devolución N.º
+            <%= devolucion.numero %>
+            · <%= f(devolucion.fecha) %>
+          </a>
+        </p>
+      <% }) %>
+
+      <% if (
+        !mov.items.some(
+          item => item.cantidad > item.devuelto
+        )
+      ) { %>
+        <p>
+          Asignación cerrada: devolución total.
+        </p>
+      <% } %>
+    </section>
+  <% } %>
+
+  <% if (original) { %>
+    <p class="web">
+      <a href="/inventario/movimientos/<%= original._id %>">
+        Ver asignación original
+        N.º <%= original.numero %>
+      </a>
+    </p>
+  <% } %>
+
+  <section class="web">
+    <h2>Archivos adjuntos</h2>
+
+    <% archivos.forEach(adjunto => { %>
+      <p>
+        <a href="/inventario/archivos/<%= adjunto._id %>">
+          <%= adjunto.nombre %>
+        </a>
+      </p>
+    <% }) %>
+
+    <% if (permisos[accion]) { %>
+      <form
+        method="post"
+        action="/inventario/movimientos/<%= mov._id %>/adjuntos"
+        enctype="multipart/form-data"
+      >
+        <input
+          type="hidden"
+          name="_csrf"
+          value="<%= csrf %>"
+        >
+
+        <label>
+          Agregar copia firmada u otros adjuntos
+
+          <input
+            name="archivos"
+            type="file"
+            multiple
+            required
+            accept="application/pdf,image/png,image/jpeg"
+          >
+        </label>
+
+        <p>
+          Hasta tres archivos por envío,
+          de 10 MB cada uno.
+        </p>
+
+        <button>Guardar adjuntos</button>
+      </form>
+    <% } %>
+  </section>
+
+  <% if (
+    mov.estado !== 'anulado' && mov.tipo === 'ingreso' &&
+    permisos.ingresar
+  ) { %>
+    <section class="web">
+      <h2>Agregar otro documento al mismo ingreso</h2>
+
+      <p>Esta operación no modifica el stock.</p>
+
+      <form
+        method="post"
+        action="/inventario/movimientos/<%= mov._id %>/documentos"
+        enctype="multipart/form-data"
+      >
+        <input
+          type="hidden"
+          name="_csrf"
+          value="<%= csrf %>"
+        >
+
+        <label>
+          Tipo
+
+          <select name="documentoTipo">
+            <% [
+              'remito',
+              'factura',
+              'nota',
+              'acta',
+              'otro'
+            ].forEach(tipo => { %>
+              <option><%= tipo %></option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>
+          Número
+          <input
+            name="documentoNumero"
+            required
+            maxlength="100"
+          >
+        </label>
+
+        <label>
+          Fecha
+          <input
+            name="documentoFecha"
+            type="date"
+            value="<%= hoy %>"
+            required
+          >
+        </label>
+
+        <label>
+          Emisor
+          <input
+            name="emisor"
+            required
+            maxlength="180"
+          >
+        </label>
+
+        <label>
+          Adjuntos
+
+          <input
+            name="archivos"
+            type="file"
+            multiple
+            accept="application/pdf,image/png,image/jpeg"
+          >
+        </label>
+
+        <button>Agregar documento</button>
+      </form>
+    </section>
+  <% } %>
+
+  <% if (
+    mov.estado !== 'anulado' && mov.tipo === 'asignacion' &&
+    mov.items.some(
+      item => item.cantidad > item.devuelto
+    ) &&
+    permisos.devolver
+  ) { %>
+    <section class="web">
+      <a
+        class="boton"
+        href="/inventario/asignaciones/<%= mov._id %>/devolucion"
+      >
+        Registrar devolución
+      </a>
+    </section>
+  <% } %>
+<% } %>
+<% if(web && permisos.anular && mov.estado !== 'anulado') { %>
+<section class="web"><h2>Anular movimiento</h2><p>Se revierten sus existencias y se conserva el comprobante. Si tiene operaciones posteriores relacionadas, primero deben anularse esas operaciones.</p>
+<form method="post" action="/inventario/movimientos/<%= mov._id %>/anular" onsubmit="return confirm('¿Confirmás la anulación y la reversión del stock?')">
+<input type="hidden" name="_csrf" value="<%= csrf %>"><label>Motivo<textarea name="motivo" required minlength="5" maxlength="2000" style="width:100%"></textarea></label>
+<button type="submit" style="background:#b91c1c">Anular movimiento</button></form></section>
+<% } %>
+</body>
+</html>

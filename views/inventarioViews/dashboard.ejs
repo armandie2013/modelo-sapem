@@ -1,0 +1,116 @@
+<section>
+  <div class="panel-heading">
+  <div>
+  <h2>Existencias de SAPEM</h2>
+
+  <p class="muted">
+    En depósito incluye disponibles y equipos a revisar.
+    El total SAPEM también incluye el material asignado.
+  </p>
+
+  </div>
+  <div class="actions">
+    <% if (permisos.ingresar) { %>
+      <a
+        class="button"
+        href="/inventario/ingresos/nuevo"
+      >
+        Nuevo ingreso
+      </a>
+    <% } %>
+
+    <% if (permisos.asignar) { %>
+      <a
+        class="button secondary"
+        href="/inventario/asignaciones/nuevo"
+      >
+        Nueva asignación
+      </a>
+    <% } %>
+  </div>
+
+  </div>
+  <div class="scroll">
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Unidad</th>
+          <th>En depósito</th>
+          <th>Disponible</th>
+          <th>A revisar</th>
+          <th>Asignado</th>
+          <th>Total SAPEM</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% resumen.forEach(producto => { %>
+          <tr>
+            <td>
+              <%= producto.codigo %> ·
+              <%= producto.nombre %>
+            </td>
+            <td><%= producto.unidad %></td>
+            <td><b><%= n(producto.fisico) %></b></td>
+            <td><%= n(producto.disponible) %></td>
+            <td><%= n(producto.revision) %></td>
+            <td><%= n(producto.asignado) %></td>
+            <td><%= n(producto.total) %></td>
+          </tr>
+        <% }) %>
+
+        <% if (!resumen.length) { %>
+          <tr>
+            <td colspan="7">
+              Todavía no hay productos.
+              Crealos desde la pestaña Productos.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Destinatarios con material asignado</h2>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Destinatario</th>
+          <th>Responsable</th>
+          <th>Productos distintos</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% destinos.forEach(destino => { %>
+          <tr>
+            <td><%= destino.lugar.nombre %></td>
+            <td>
+              <%= destino.lugar.responsable || '—' %>
+            </td>
+            <td><%= destino.productos %></td>
+            <td>
+              <a href="/inventario/ubicaciones/<%= destino.lugar._id %>">
+                Ver material asignado
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+
+        <% if (!destinos.length) { %>
+          <tr>
+            <td colspan="4">
+              No hay material asignado actualmente.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>

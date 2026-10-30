@@ -1,0 +1,189 @@
+<section>
+  <div class="list-heading">
+    <p class="muted"><%= ({ingreso:'Recepciones de material respaldadas por documentos.', asignacion:'Material entregado a personas, organismos y otros destinatarios.', devolucion:'Material devuelto de asignaciones anteriores.', traspaso:'Movimientos de material entre depósitos.'})[tipo] || '' %></p>
+  <div class="actions">
+    <% if (!seleccion && permisos[config.accion]) { %>
+      <a
+        class="button"
+        href="/inventario/<%= config.ruta %>/<%= tipo === 'devolucion' ? 'nueva' : 'nuevo' %>"
+      >
+        <%= config.singular %>
+      </a>
+    <% } %>
+
+    <% if (tipo === 'asignacion' && !seleccion) { %>
+      <a
+        class="button secondary"
+        href="/inventario/destinatarios"
+      >
+        Ver destinatarios
+      </a>
+    <% } %>
+  </div>
+
+  </div>
+  <% if (seleccion) { %>
+    <p>
+      Elegí la asignación original.
+      Solo se muestran las que tienen material
+      pendiente de devolución.
+    </p>
+  <% } %>
+
+  <% if (tipo === 'asignacion' && !seleccion) { %>
+    <form class="list-toolbar"
+      method="get"
+      action="/inventario/asignaciones"
+    >
+      <label>
+        Estado
+
+        <select name="estado">
+          <option value="">Todas</option>
+
+          <% Object.entries({
+            activa: 'Activas',
+            parcial: 'Devueltas parcialmente',
+            cerrada: 'Devueltas totalmente', anulado: 'Anuladas'
+          }).forEach(([valor, texto]) => { %>
+            <option
+              value="<%= valor %>"
+              <%= estado === valor ? 'selected' : '' %>
+            >
+              <%= texto %>
+            </option>
+          <% }) %>
+        </select>
+      </label>
+
+      <div class="actions"><button>Filtrar</button><a class="button secondary" href="/inventario/asignaciones">Limpiar</a></div>
+    </form>
+  <% } %>
+
+  <div class="scroll">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th style="width:1%;white-space:nowrap">N.º</th>
+          <th style="width:1%;white-space:nowrap">Fecha</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Material</th>
+          <th>Estado / referencia</th>
+          <th class="col-actions">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% movimientos.forEach(movimiento => {
+          const devuelto = movimiento.items.reduce(
+            (acumulado, item) =>
+              acumulado + item.devuelto,
+            0
+          );
+
+          const total = movimiento.items.reduce(
+            (acumulado, item) =>
+              acumulado + item.cantidad,
+            0
+          );
+        %>
+          <tr>
+            <td style="width:1%;white-space:nowrap;overflow-wrap:normal">
+              <b><%= movimiento.numero %></b>
+            </td>
+            <td style="width:1%;white-space:nowrap;overflow-wrap:normal">
+              <%= fecha(movimiento.fecha) %>
+            </td>
+
+            <td><%= movimiento.origenNombre %></td>
+            <td><%= movimiento.destinoNombre %></td>
+
+            <td class="material">
+              <% movimiento.items.forEach(item => { %>
+                <div>
+                  <%= n(item.cantidad) %>
+                  <%= item.unidad %> ·
+                  <%= item.nombre %>
+                </div>
+              <% }) %>
+            </td>
+
+            <td>
+              <% if (movimiento.estado === 'anulado') { %><b style="color:#b91c1c">ANULADO</b><% } else if (movimiento.tipo === 'asignacion') { %>
+                <%=
+                  devuelto === 0
+                    ? 'Activa'
+                    : devuelto === total
+                      ? 'Devuelta totalmente'
+                      : 'Devuelta parcialmente'
+                %>
+              <% } else if (movimiento.original) { %>
+                <a href="/inventario/movimientos/<%= movimiento.original %>">
+                  Asignación N.º
+                  <%= movimiento.originalNumero %>
+                </a>
+              <% } else { %>
+                <% movimiento.documentos.forEach(documento => { %>
+                  <div>
+                    <%= documento.tipo %>
+                    <%= documento.numero %>
+                  </div>
+                <% }) %>
+              <% } %>
+            </td>
+
+            <td class="col-actions"><div class="row-actions">
+              <% if (seleccion) { %>
+                <a class="button secondary" href="/inventario/asignaciones/<%= movimiento._id %>/devolucion">
+                  Registrar devolución
+                </a>
+              <% } else { %>
+                <a class="button secondary" href="/inventario/movimientos/<%= movimiento._id %>">
+                  Ver comprobante
+                </a>
+
+                <a class="button secondary"
+                  href="/inventario/movimientos/<%= movimiento._id %>/pdf"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  PDF
+                </a>
+
+                <% if (
+                  movimiento.estado !== 'anulado' && movimiento.tipo === 'asignacion' &&
+                  devuelto < total &&
+                  permisos.devolver
+                ) { %>
+                  <a class="button secondary" href="/inventario/asignaciones/<%= movimiento._id %>/devolucion">
+                    Devolver material
+                  </a>
+                <% } %>
+              <% } %>
+            </div></td>
+          </tr>
+        <% }) %>
+
+        <% if (!movimientos.length) { %>
+          <tr>
+            <td colspan="7" class="empty">
+              <%=
+                seleccion
+                  ? 'No hay asignaciones pendientes de devolución.'
+                  : 'Todavía no hay movimientos en esta sección.'
+              %>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <%- include('paginacion', {
+    base: seleccion
+      ? '/inventario/devoluciones/nueva'
+      : '/inventario/' + config.ruta,
+    filtros: { estado }
+  }) %>
+</section>

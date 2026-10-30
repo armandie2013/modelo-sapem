@@ -1,0 +1,10 @@
+<section><p class="muted">Los borradores no suman ni descuentan existencias. Podés completarlos y confirmar la recepción después.</p>
+<div class="scroll"><table class="list-table"><thead><tr><th>Tipo</th><th>Documento / referencia</th><th>Actualizado</th><th>Creado por</th><th class="col-actions">Acciones</th></tr></thead><tbody>
+<% registros.forEach(b => { %><tr><td><%= b.tipo %></td><td><%= b.datos.documentoTipo || '' %> <%= b.datos.documentoNumero || 'Sin número' %><br><%= b.datos.emisor || '' %></td><td><%= fecha(b.updatedAt) %></td><td><%= b.creadoPor.nombre %></td><td class="col-actions"><div class="row-actions">
+<% if(permisos[accionesTipo[b.tipo]] && (permisos.editar || (b.tipo === 'ingreso' && String(b.creadoPor.id) === String(usuarioActual?._id)))) { %><a class="button secondary" href="/inventario/borradores/<%= b._id %>/editar">Continuar</a><% } %>
+<% if(permisos.eliminar && permisos[accionesTipo[b.tipo]]) { %><form method="post" action="/inventario/borradores/<%= b._id %>/eliminar" onsubmit="return confirm('¿Eliminar este borrador y sus adjuntos? No afecta stock.')"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="version" value="<%= b.version %>"><button type="submit" class="danger">Eliminar</button></form><% } %>
+</div></td></tr><% }) %>
+<% if(!registros.length) { %><tr><td colspan="5" class="empty">No hay borradores.</div></td></tr><% } %>
+</tbody></table></div>
+<%- include('paginacion', { base: '/inventario/borradores', filtros: {} }) %>
+</section>

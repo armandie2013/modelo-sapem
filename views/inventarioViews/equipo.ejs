@@ -1,0 +1,67 @@
+<section>
+  <%- include('accionesRegistro', { tipoRegistro: 'equipo', registro: equipo }) %>
+  <h2><%= equipo.producto.nombre %></h2>
+
+  <p><b>Código de producto:</b> <%= equipo.producto.codigo %></p>
+  <p><b>Marca:</b> <%= equipo.producto.marca || 'No informada' %></p>
+  <p><b>Modelo:</b> <%= equipo.producto.modelo || 'No informado' %></p>
+  <p><b>Serie:</b> <%= equipo.serie %></p>
+  <p><b>MAC:</b> <%= equipo.mac || '—' %></p>
+
+  <p>
+    <b>Patrimonio:</b>
+    <%= equipo.patrimonio || '—' %>
+  </p>
+
+  <p>
+    <b>Ubicación actual:</b>
+
+    <a href="/inventario/ubicaciones/<%= equipo.lugar._id %>">
+      <%= equipo.lugar.nombre %>
+    </a>
+  </p>
+
+  <p><b>Estado:</b> <%= equipo.estado %></p>
+</section>
+
+<section>
+  <h2>Historial del equipo</h2>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>N.º</th>
+          <th>Fecha</th>
+          <th>Operación</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Comprobante</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% movimientos.forEach(movimiento => { %>
+          <tr>
+            <td><%= movimiento.numero %></td>
+            <td><%= fecha(movimiento.fecha) %></td>
+            <td><%= movimiento.tipo %></td>
+            <td><%= movimiento.origenNombre %></td>
+            <td><%= movimiento.destinoNombre %></td>
+
+            <td>
+              <a href="/inventario/movimientos/<%= movimiento._id %>">
+                Ver
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <%- include('paginacion', {
+    base: '/inventario/equipos/' + equipo._id,
+    filtros: {}
+  }) %>
+</section>

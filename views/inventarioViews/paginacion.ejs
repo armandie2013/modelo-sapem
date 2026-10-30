@@ -1,0 +1,27 @@
+<%
+const enlace = paginaDestino =>
+  base + '?' + new URLSearchParams({
+    ...filtros,
+    pagina: String(paginaDestino)
+  }).toString();
+%>
+
+<div class="list-footer"><div class="pagination">
+  <% if (pagina > 1) { %>
+    <a class="button secondary" href="<%= enlace(pagina - 1) %>">
+      Anterior
+    </a>
+  <% } %>
+
+  <span>
+    Página <%= pagina %>
+    · <%= cantidadRegistros %> registros
+  </span>
+
+  <% if (pagina * 25 < cantidadRegistros) { %>
+    <a class="button secondary" href="<%= enlace(pagina + 1) %>">
+      Siguiente
+    </a>
+  <% } %>
+</div>
+</div>

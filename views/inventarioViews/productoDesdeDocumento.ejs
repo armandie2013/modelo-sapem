@@ -1,0 +1,16 @@
+<% if(ingreso && borradorId && permisos.administrar) { %>
+<section><details><summary style="cursor:pointer;font-weight:700">Crear una ficha que falta en el catálogo</summary>
+<p class="muted">Usá esta opción antes de completar la tabla. Se crea la ficha del catálogo y se agrega un renglón al ingreso pendiente; el stock se incorpora solamente al confirmar la recepción. Si ya modificaste renglones, guardá primero el borrador.</p>
+<form method="post" action="/inventario/ingresos/<%= borradorId %>/productos">
+<input type="hidden" name="_csrf" value="<%= csrf %>">
+<div class="grid">
+<label>Código interno<input name="codigo" required maxlength="60"></label>
+<label>Nombre<input name="nombre" required maxlength="180"></label>
+<label>Marca<input name="marca" value="<%= datos.marca || '' %>" maxlength="100"></label>
+<label>Modelo<input name="modelo" value="<%= datos.modelo || '' %>" maxlength="100"></label>
+<label>Descripción<textarea name="descripcion" maxlength="2000"><%= datos.descripcion || '' %></textarea></label>
+<label>Unidad<input name="unidad" value="unidad" required maxlength="30"></label>
+<label>Control<select name="serializado"><option value="si">Por número de serie</option><option value="no">Por cantidad</option></select></label>
+</div><%- include('similitudProducto') %><button>Crear ficha y agregarla al ingreso</button>
+</form></details></section>
+<% } %>
