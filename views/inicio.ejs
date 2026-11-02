@@ -1,0 +1,221 @@
+<%
+  const iconosInicio = {
+    proveedores: 'briefcase-business',
+    planes: 'file-text',
+    pagos: 'credit-card',
+    tareas: 'calendar-days',
+    escuelas: 'school',
+    prediosEscuelas: 'building-2',
+    inventario: 'package',
+    viaticos: 'route',
+    materiales: 'clipboard-list'
+  };
+
+  const iconoInicio = modulo => {
+    if (iconosInicio[modulo.permiso]) {
+      return iconosInicio[modulo.permiso];
+    }
+
+    if (modulo.href === '/personas/dashboard') {
+      return 'users';
+    }
+
+    if (modulo.href === '/usuarios/dashboard') {
+      return 'user-round';
+    }
+
+    return 'layout-grid';
+  };
+%>
+
+<style>
+  .inicio-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    color: #0f172a;
+  }
+
+  .inicio-page .inicio-breadcrumb {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 5px;
+  }
+
+  .inicio-page h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 6px;
+  }
+
+  .inicio-page .inicio-saludo {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0 0 18px;
+  }
+
+  .inicio-page .inicio-area {
+    background: #fff;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 14px;
+  }
+
+  .inicio-page h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 3px;
+  }
+
+  .inicio-page .inicio-descripcion {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 11px;
+  }
+
+  .inicio-page .inicio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .inicio-page .inicio-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 7px;
+    text-decoration: none;
+    color: inherit;
+    transition:
+      border-color .15s,
+      background-color .15s;
+  }
+
+  .inicio-page .inicio-card:hover {
+    border-color: #1e40af;
+    background: #f8fafc;
+  }
+
+  .inicio-page .inicio-card:focus-visible {
+    outline: 2px solid #1e40af;
+    outline-offset: 3px;
+  }
+
+  .inicio-page .inicio-card-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .inicio-page .inicio-icono {
+    display: inline-block;
+    width: 23px;
+    height: 23px;
+    color: #1e40af;
+    flex-shrink: 0;
+  }
+
+  .inicio-page .inicio-card p {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #64748b;
+    margin: 7px 0 10px;
+  }
+
+  .inicio-page .inicio-entrar {
+    margin-top: auto;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1e40af;
+  }
+
+  .inicio-page .inicio-nota {
+    text-align: center;
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .inicio-page .inicio-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .inicio-page h1 {
+      font-size: 24px;
+    }
+
+    .inicio-page .inicio-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
+
+<div class="inicio-page">
+  <div class="inicio-breadcrumb">
+    Sistema / Inicio
+  </div>
+
+  <h1>Inicio</h1>
+
+  <p class="inicio-saludo">
+    Hola, <%= usuario.nombre || 'bienvenido' %>.
+    Estos son tus módulos habilitados.
+  </p>
+
+  <% if (!areasInicio.length) { %>
+    <section class="inicio-area">
+      <h2>No tenés módulos habilitados</h2>
+
+      <p class="inicio-descripcion">
+        Solicitá al administrador que te asigne los permisos correspondientes.
+      </p>
+    </section>
+  <% } %>
+
+  <% areasInicio.forEach(area => { %>
+    <section class="inicio-area">
+      <h2><%= area.nombre %></h2>
+
+      <p class="inicio-descripcion">
+        <%= area.descripcion %>
+      </p>
+
+      <div class="inicio-grid">
+        <% area.modulos.forEach(modulo => { %>
+          <a class="inicio-card" href="<%= modulo.href %>">
+            <div class="inicio-card-titulo">
+              <i
+                data-lucide="<%= iconoInicio(modulo) %>"
+                class="inicio-icono"
+                aria-hidden="true"
+              ></i>
+
+              <span><%= modulo.nombre %></span>
+            </div>
+
+            <p><%= modulo.descripcion %></p>
+
+            <span class="inicio-entrar">
+              Ingresar
+              <span aria-hidden="true">→</span>
+            </span>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+  <% }); %>
+
+  <% if (areasInicio.length) { %>
+    <p class="inicio-nota">
+      Los accesos disponibles dependen de tus permisos.
+    </p>
+  <% } %>
+</div>

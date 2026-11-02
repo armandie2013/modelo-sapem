@@ -13,13 +13,16 @@
     <%= typeof title !== 'undefined' ? title : 'Sistema de Gestión' %>
   </title>
 
-  <!-- 🚀 Tailwind SIEMPRE debe ir primero -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- 🎨 Google Font elegida -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Fuente Roboto -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  >
 
-  <!-- ⚙️ Tailwind config usando esa fuente -->
+  <!-- Configuración de Tailwind -->
   <script>
     tailwind.config = {
       theme: {
@@ -29,7 +32,7 @@
           }
         }
       }
-    }
+    };
   </script>
 
   <style>
@@ -43,7 +46,6 @@
       overflow-x: hidden;
     }
   </style>
-
 </head>
 
 <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col font-sans">
@@ -55,6 +57,10 @@
   </main>
 
   <%- include('partials/footer') %>
+
+  <!-- Lucide: cargar primero la biblioteca y después inicializar -->
+  <script src="/vendor/lucide.js" defer></script>
+  <script src="/scripts/iconos.js" defer></script>
 
 </body>
 

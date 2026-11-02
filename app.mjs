@@ -4,6 +4,7 @@ import methodOverride from "method-override";
 import expressEjsLayouts from "express-ejs-layouts";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import iconosRoutes from "./routes/iconosRoutes.mjs";
 
 import {
   fmtHora,
@@ -128,8 +129,11 @@ app.use((req, res, next) => {
   return usdNavbarMiddleware(req, res, next);
 });
 
+
+
 // Rutas de los módulos.
 app.use(cargarPermisosInventario);
+app.use("/vendor", iconosRoutes);
 app.use(authRoutes);
 app.use("/viaticos", viaticosRoutes);
 app.use("/personas", personasRoutes);
