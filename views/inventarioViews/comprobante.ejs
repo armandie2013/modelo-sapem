@@ -2,94 +2,493 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
-
-  <title>
-    Comprobante de inventario <%= mov.numero %>
-  </title>
+  <title>Comprobante de inventario <%= mov.numero %></title>
 
   <style>
-    * { box-sizing: border-box; }
-    body { font: 12px/1.45 Arial, sans-serif; color: #172033; margin: 20px auto; max-width: 1000px; padding: 0 16px; }
-    header { border-bottom: 2px solid #1e40af; padding-bottom: 12px; margin-bottom: 16px; }
-    header img { max-width: 230px; max-height: 60px; object-fit: contain; }
-    h1 { font-size: 21px; line-height: 1.2; margin: 0 0 5px; }
-    h2 { font-size: 14px; margin: 20px 0 8px; }
-    p { margin: 0 0 8px; overflow-wrap: anywhere; }
-    table { border-collapse: collapse; width: 100%; margin: 10px 0 14px; table-layout: auto; }
-    th, td { border: 1px solid #cbd5e1; padding: 7px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
-    th { background: #eff6ff; font-weight: 700; }
-    thead { display: table-header-group; }
-    tr { break-inside: avoid; page-break-inside: avoid; }
-    .doc-header { margin: 0; }
-    .doc-header td { border: 0; padding: 0; vertical-align: middle; }
-    .doc-header .doc-title { text-align: right; }
-    .doc-number { font-size: 14px; font-weight: 700; }
-    .doc-date { margin-top: 4px; color: #64748b; }
-    .partes { table-layout: fixed; }
-    .partes th { width: 50%; }
-    .dato { margin-bottom: 8px; }
-    .dato:last-child { margin-bottom: 0; }
-    .etiqueta { display: block; font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 2px; }
-    .valor { display: block; font-size: 12px; }
-    .numeric { width: 1%; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
-    .codigo { width: 1%; white-space: nowrap; }
-    .meta { font-size: 11px; color: #64748b; }
-    .observaciones { white-space: pre-wrap; }
-    .firmas { width: 100%; table-layout: fixed; margin-top: 30mm; break-inside: avoid; page-break-inside: avoid; }
-    .firmas td { width: 50%; border: 0; padding: 0 14px 0 0; }
-    .firmas td + td { padding: 0 0 0 14px; }
-    .firma-linea { border-top: 1px solid #172033; padding-top: 8px; }
-    .web { background: #f1f5f9; border-radius: 7px; padding: 14px; margin: 16px 0; }
-    .web h2 { margin-top: 0; }
-    .web-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    label { display: block; margin: 10px 0; }
-    input, select, textarea { padding: 7px; max-width: 100%; font: inherit; }
-    button, .boton { display: inline-block; padding: 7px 11px; background: #1e40af; color: white; border: 0; border-radius: 5px; text-decoration: none; font: inherit; cursor: pointer; }
-    .boton.secondary { background: #e2e8f0; color: #334155; }
-    .aviso-historico { color: #64748b; font-size: 11px; }
-    @media print { .web { display: none; } body { margin: 0; padding: 0; max-width: none; } h2 { break-after: avoid; page-break-after: avoid; } }
-    @media screen and (max-width: 640px) { body { padding: 0 10px; } .doc-header td { display: block; width: 100%; } .doc-header .doc-title { text-align: left; padding-top: 12px; } }
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 11px/1.3 Arial, sans-serif;
+      color: #172033;
+      margin: 20px auto;
+      max-width: 1000px;
+      padding: 0 16px;
+    }
+
+    header {
+      border-bottom: 1.5px solid #1e40af;
+      padding-bottom: 9px;
+      margin-bottom: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    header img {
+      display: block;
+      width: 195px;
+      max-width: 100%;
+      height: auto;
+      max-height: 54px;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.2;
+      margin: 0 0 5px;
+    }
+
+    h2 {
+      font-size: 12px;
+      margin: 10px 0 5px;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 5px;
+      overflow-wrap: anywhere;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0 0 7px;
+    }
+
+    th,
+    td {
+      border: .5px solid #cbd5e1;
+      padding: 4px 5px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eff6ff;
+      font-weight: 700;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .doc-header {
+      margin: 0;
+      table-layout: fixed;
+    }
+
+    .doc-header td {
+      border: 0;
+      padding: 0;
+      vertical-align: middle;
+    }
+
+    .doc-header td:first-child {
+      width: 40%;
+    }
+
+    .doc-header .doc-title {
+      text-align: right;
+    }
+
+    .doc-number {
+      font-size: 11px;
+    }
+
+    .doc-date {
+      color: #64748b;
+    }
+
+    .partes {
+      table-layout: fixed;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .partes td {
+      width: 50%;
+      padding: 7px 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .etiqueta {
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .partes p {
+      margin: 0 0 2px;
+    }
+
+    /* Tabla de materiales con distribución automática. */
+    .materiales {
+      width: 100%;
+      table-layout: auto;
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .materiales th,
+    .materiales td {
+      padding: 4px 6px;
+      vertical-align: top;
+    }
+
+    .materiales th {
+      white-space: nowrap;
+    }
+
+    /* Código: conserva el contenido completo en una línea. */
+    .materiales th:nth-child(1),
+    .materiales td:nth-child(1) {
+      width: 1%;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    /* Producto: comparte el espacio disponible con Modelo. */
+    .materiales th:nth-child(2),
+    .materiales td:nth-child(2) {
+      min-width: 110px;
+      max-width: 270px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    /* Marca: no corta nombres como MIKROTIK. */
+    .materiales th:nth-child(3),
+    .materiales td:nth-child(3) {
+      width: 1%;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    /* Modelo: admite varias líneas cuando es necesario. */
+    .materiales th:nth-child(4),
+    .materiales td:nth-child(4) {
+      min-width: 85px;
+      max-width: 180px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    .materiales th:nth-child(5),
+    .materiales td:nth-child(5) {
+      width: 1%;
+      text-align: right;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      word-break: normal;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .materiales th:nth-child(6),
+    .materiales td:nth-child(6) {
+      width: 1%;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .numeric {
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nota-series,
+    .aviso-historico {
+      font-size: 9px;
+      color: #64748b;
+    }
+
+    .series-table {
+      table-layout: fixed;
+      margin: 0 0 5px;
+      font-size: 10px;
+    }
+
+    .series-table th {
+      padding: 3px 5px;
+      font-weight: 400;
+    }
+
+    .series-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .series-heading span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .series-count {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .series-table td {
+      padding: 2px 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .serie-valor {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+    }
+
+    .equipo-meta {
+      display: block;
+      font-size: 8px;
+      line-height: 1.3;
+      margin-top: 2px;
+      color: #475569;
+    }
+
+    .series-table .vacia {
+      background: #fafbfc;
+    }
+
+    .cierre {
+      margin-top: 7px;
+    }
+
+    .cierre p {
+      margin-bottom: 4px;
+    }
+
+    .observaciones {
+      white-space: pre-wrap;
+    }
+
+    .firmas {
+      table-layout: fixed;
+      margin-top: 14mm;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .firmas td {
+      width: 50%;
+      border: 0;
+      padding: 0 12px 0 0;
+    }
+
+    .firmas td + td {
+      padding: 0 0 0 12px;
+    }
+
+    .firma-linea {
+      border-top: .6px solid #172033;
+      padding-top: 5px;
+    }
+
+    .web {
+      background: #f1f5f9;
+      border-radius: 7px;
+      padding: 14px;
+      margin: 16px 0;
+    }
+
+    .web h2 {
+      margin-top: 0;
+    }
+
+    .web-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 7px;
+      max-width: 100%;
+      font: inherit;
+    }
+
+    button,
+    .boton {
+      display: inline-block;
+      padding: 7px 11px;
+      background: #1e40af;
+      color: white;
+      border: 0;
+      border-radius: 5px;
+      text-decoration: none;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .boton.secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .anulado {
+      border: 1.5px solid #b91c1c;
+      color: #991b1b;
+      padding: 10px;
+      margin: 10px 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    @media print {
+      .web {
+        display: none !important;
+      }
+
+      body {
+        font-size: 8pt;
+        margin: 0;
+        padding: 0;
+        max-width: none;
+      }
+
+      h1 {
+        font-size: 16pt;
+      }
+
+      h2 {
+        font-size: 9pt;
+        margin-top: 8px;
+      }
+
+      .materiales {
+        font-size: 7.5pt;
+      }
+
+      .materiales th,
+      .materiales td {
+        padding: 3pt 4pt;
+      }
+
+      .series-table,
+      .serie-valor {
+        font-size: 8pt;
+        line-height: 1.15;
+      }
+
+      .series-table td {
+        padding: 1.5pt 4pt;
+      }
+
+      .equipo-meta {
+        font-size: 6.5pt;
+      }
+
+      .nota-series,
+      .aviso-historico {
+        font-size: 7pt;
+      }
+
+      .etiqueta {
+        font-size: 7pt;
+      }
+
+      .firmas {
+        margin-top: 10mm;
+      }
+    }
+
+    @media screen and (max-width: 640px) {
+      body {
+        padding: 0 10px;
+      }
+
+      .doc-header td {
+        display: block;
+        width: 100% !important;
+      }
+
+      .doc-header .doc-title {
+        text-align: left;
+        padding-top: 10px;
+      }
+
+      .material-scroll {
+        overflow-x: auto;
+      }
+
+      .materiales {
+        min-width: 660px;
+      }
+    }
   </style>
 </head>
 
 <body>
 <%
-const n = valor =>
-  ((valor || 0) / 1000).toLocaleString(
-    'es-AR',
-    { maximumFractionDigits: 3 }
+  const n = valor =>
+    ((valor || 0) / 1000).toLocaleString(
+      'es-AR',
+      { maximumFractionDigits: 3 }
+    );
+
+  const f = valor =>
+    new Date(valor).toLocaleDateString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires'
+    });
+
+  const titulos = {
+    ingreso: 'Ingreso de mercadería',
+    asignacion: 'Acta de asignación',
+    devolucion: 'Acta de devolución',
+    traspaso: 'Traspaso entre depósitos'
+  };
+
+  const rutas = {
+    ingreso: 'ingresos',
+    asignacion: 'asignaciones',
+    devolucion: 'devoluciones',
+    traspaso: 'traspasos'
+  };
+
+  const accion = {
+    ingreso: 'ingresar',
+    asignacion: 'asignar',
+    devolucion: 'devolver',
+    traspaso: 'traspasar'
+  }[mov.tipo];
+
+  const itemsSeries = mov.items.filter(
+    item => (item.series || []).length
   );
 
-const f = valor =>
-  new Date(valor).toLocaleDateString('es-AR', {
-    timeZone: 'America/Argentina/Buenos_Aires'
-  });
+  const tieneMac = itemsSeries.some(
+    item => item.series.some(equipo => equipo.mac)
+  );
 
-const titulos = {
-  ingreso: 'Ingreso de mercadería',
-  asignacion: 'Acta de asignación',
-  devolucion: 'Acta de devolución',
-  traspaso: 'Traspaso entre depósitos'
-};
-
-const rutas = {
-  ingreso: 'ingresos',
-  asignacion: 'asignaciones',
-  devolucion: 'devoluciones',
-  traspaso: 'traspasos'
-};
-
-const accion = {
-  ingreso: 'ingresar',
-  asignacion: 'asignar',
-  devolucion: 'devolver',
-  traspaso: 'traspasar'
-}[mov.tipo];
+  const tienePatrimonio = itemsSeries.some(
+    item => item.series.some(equipo => equipo.patrimonio)
+  );
 %>
 
 <% if (web) { %>
@@ -99,134 +498,308 @@ const accion = {
     <% } %>
 
     <div class="web-toolbar">
-      <a class="boton secondary" href="/inventario/<%= rutas[mov.tipo] %>">Volver al listado</a>
-      <a class="boton secondary" href="/inventario">Inventario general</a>
-      <a class="boton" href="/inventario/movimientos/<%= mov._id %>/pdf" target="_blank" rel="noopener">Descargar / imprimir PDF</a>
+      <a
+        class="boton secondary"
+        href="/inventario/<%= rutas[mov.tipo] %>"
+      >
+        Volver al listado
+      </a>
+
+      <a class="boton secondary" href="/inventario">
+        Inventario general
+      </a>
+
+      <a
+        class="boton"
+        href="/inventario/movimientos/<%= mov._id %>/pdf"
+        target="_blank"
+        rel="noopener"
+      >
+        Descargar / imprimir PDF
+      </a>
     </div>
-    <% if (nuevo) { %><p style="margin-top:10px;margin-bottom:0">Movimiento confirmado. El acta está lista para descargar e imprimir.</p><% } %>
+
+    <% if (nuevo) { %>
+      <p style="margin-top:10px;margin-bottom:0">
+        Movimiento confirmado.
+        El acta está lista para descargar e imprimir.
+      </p>
+    <% } %>
   </div>
 <% } %>
 
-<% if(mov.estado === 'anulado') { %>
-<div style="border:2px solid #b91c1c;color:#991b1b;padding:16px;margin:20px 0;break-inside:avoid">
-<h2>COMPROBANTE ANULADO</h2><p><%= mov.anulacion?.motivo || '' %></p>
-<p><%= mov.anulacion?.usuario || '' %> · <%= mov.anulacion?.fecha ? f(mov.anulacion.fecha) : '' %></p></div>
+<% if (mov.estado === 'anulado') { %>
+  <div class="anulado">
+    <h2>COMPROBANTE ANULADO</h2>
+
+    <p><%= mov.anulacion?.motivo || '' %></p>
+
+    <p>
+      <%= mov.anulacion?.usuario || '' %>
+      ·
+      <%= mov.anulacion?.fecha
+        ? f(mov.anulacion.fecha)
+        : ''
+      %>
+    </p>
+  </div>
 <% } %>
+
 <header>
-  <table class="doc-header"><tr>
-    <td><img src="<%= logo %>" alt="Catamarca Telecomunicaciones SAPEM"></td>
-    <td class="doc-title">
-      <h1><%= titulos[mov.tipo] %></h1>
-      <div class="doc-number">N.º <%= String(mov.numero).padStart(8, '0') %></div>
-      <div class="doc-date">Fecha: <%= f(mov.fecha) %></div>
-    </td>
-  </tr></table>
+  <table class="doc-header">
+    <tbody>
+      <tr>
+        <td>
+          <img
+            src="<%= logo %>"
+            alt="Catamarca Telecomunicaciones SAPEM"
+          >
+        </td>
+
+        <td class="doc-title">
+          <h1>
+            <%= titulos[mov.tipo] || 'Comprobante de inventario' %>
+          </h1>
+
+          <div class="doc-number">
+            <b>
+              N.º <%= String(mov.numero).padStart(8, '0') %>
+            </b>
+
+            ·
+
+            <span class="doc-date">
+              Fecha: <%= f(mov.fecha) %>
+            </span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </header>
 
 <table class="partes">
-  <thead><tr><th>Origen</th><th>Destino / destinatario</th></tr></thead>
-  <tbody><tr>
-    <td>
-      <div class="dato"><span class="etiqueta">NOMBRE / DEPÓSITO / EMISOR</span><span class="valor"><%= mov.origenNombre || '—' %></span></div>
-      <div class="dato"><span class="etiqueta">DIRECCIÓN DE ORIGEN</span><span class="valor"><%= mov.origenDireccion || 'No registrada' %></span></div>
-    </td>
-    <td>
-      <div class="dato"><span class="etiqueta">NOMBRE / DEPÓSITO / ORGANISMO</span><span class="valor"><%= mov.destinoNombre %></span></div>
-      <div class="dato"><span class="etiqueta">DIRECCIÓN DE DESTINO</span><span class="valor"><%= mov.destinoDireccion || 'No registrada' %></span></div>
-    </td>
-  </tr><tr>
-    <td><span class="etiqueta">ENTREGA</span><span class="valor"><%= mov.entrega %></span></td>
-    <td><div class="dato"><span class="etiqueta">RECIBE</span><span class="valor"><%= mov.recibe %></span></div><span class="etiqueta">DNI DE QUIEN RECIBE</span><span class="valor"><%= mov.dniRecibe || 'No registrado' %></span></td>
-  </tr></tbody>
-</table>
-
-<% if (mov.originalNumero) { %><p><b>Asignación de referencia:</b> N.º <%= mov.originalNumero %></p><% } %>
-<% if (mov.tipo === 'devolucion') { %><p><b>Estado del material recibido:</b> <%= mov.estadoRecepcion === 'revision' ? 'A revisar; no disponible para entregar' : 'Disponible' %></p><% } %>
-<h2>Material <%= mov.tipo === 'devolucion' || mov.tipo === 'ingreso' ? 'recibido' : 'entregado' %></h2>
-<table>
-  <thead>
-    <tr>
-      <th class="codigo">Código</th>
-      <th>Producto</th>
-      <th>Marca</th>
-      <th>Modelo</th>
-      <th class="numeric">Cantidad</th>
-      <th>Unidad</th>
-    </tr>
-  </thead>
-
   <tbody>
-    <% mov.items.forEach(item => { %>
-      <tr>
-        <td><%= item.codigo %></td>
-        <td><%= item.nombre %></td>
-        <td><%= item.marca || 'No registrada' %></td>
-        <td><%= item.modelo || 'No registrado' %></td>
-        <td class="numeric"><%= n(item.cantidad) %></td>
-        <td><%= item.unidad %></td>
-      </tr>
-    <% }) %>
+    <tr>
+      <td>
+        <span class="etiqueta">ORIGEN / EMISOR</span>
+
+        <p>
+          <b><%= mov.origenNombre || '—' %></b>
+        </p>
+
+        <p>
+          Dirección:
+          <%= mov.origenDireccion || 'No registrada' %>
+        </p>
+
+        <p>
+          Entrega:
+          <%= mov.entrega || 'No registrado' %>
+        </p>
+      </td>
+
+      <td>
+        <span class="etiqueta">DESTINO / DESTINATARIO</span>
+
+        <p>
+          <b><%= mov.destinoNombre || '—' %></b>
+        </p>
+
+        <p>
+          Dirección:
+          <%= mov.destinoDireccion || 'No registrada' %>
+        </p>
+
+        <p>
+          Recibe:
+          <%= mov.recibe || 'No registrado' %>
+          · DNI:
+          <%= mov.dniRecibe || 'No registrado' %>
+        </p>
+      </td>
+    </tr>
   </tbody>
 </table>
 
-<% mov.items
-  .filter(item => item.series.length)
-  .forEach(item => {
-%>
-  <h2>
-    Identificación individual: <%= item.nombre %>
-    <span class="meta"> · <%= item.marca || 'Marca no registrada' %> · <%= item.modelo || 'Modelo no registrado' %></span>
-  </h2>
+<% if (mov.originalNumero) { %>
+  <p>
+    <b>Asignación de referencia:</b>
+    N.º <%= mov.originalNumero %>
+  </p>
+<% } %>
 
-  <table>
+<% if (mov.tipo === 'devolucion') { %>
+  <p>
+    <b>Estado del material recibido:</b>
+
+    <%= mov.estadoRecepcion === 'revision'
+      ? 'A revisar; no disponible para entregar'
+      : 'Disponible'
+    %>
+  </p>
+<% } %>
+
+<h2>
+  Material
+  <%= mov.tipo === 'devolucion' || mov.tipo === 'ingreso'
+    ? 'recibido'
+    : 'entregado'
+  %>
+</h2>
+
+<div class="material-scroll">
+  <table class="materiales">
     <thead>
       <tr>
-        <th>Serie</th>
-        <th>MAC</th>
-        <th>Código patrimonial</th>
+        <th>Código</th>
+        <th>Producto</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th class="numeric">Cant.</th>
+        <th>Unidad</th>
       </tr>
     </thead>
 
     <tbody>
-      <% item.series.forEach(equipo => { %>
+      <% mov.items.forEach(item => { %>
         <tr>
-          <td><%= equipo.serie %></td>
-          <td><%= equipo.mac || '—' %></td>
-          <td><%= equipo.patrimonio || '—' %></td>
+          <td class="codigo"><%= item.codigo %></td>
+          <td><%= item.nombre %></td>
+          <td><%= item.marca || 'No registrada' %></td>
+          <td><%= item.modelo || 'No registrado' %></td>
+          <td class="numeric"><%= n(item.cantidad) %></td>
+          <td><%= item.unidad || 'unidad' %></td>
         </tr>
-      <% }) %>
+      <% }); %>
     </tbody>
   </table>
-<% }) %>
+</div>
 
-<% if (mov.documentos.length) { %>
-  <h2>Documentación de respaldo</h2>
+<% if (itemsSeries.length) { %>
+  <h2>Identificación individual por producto</h2>
 
-  <ul>
-    <% mov.documentos.forEach(documento => { %>
-      <li>
-        <%= documento.tipo %>
-        · <%= documento.numero %>
-        · <%= f(documento.fecha) %>
-        · <%= documento.emisor %>
-      </li>
-    <% }) %>
-  </ul>
+  <p class="nota-series">
+    Cada serie corresponde a una unidad.
+
+    <% if (!tieneMac && !tienePatrimonio) { %>
+      MAC y código patrimonial:
+      no registrados en este movimiento.
+    <% } else { %>
+      MAC y patrimonio se muestran debajo de la serie
+      cuando están registrados.
+    <% } %>
+  </p>
+
+  <% itemsSeries.forEach(item => { %>
+    <table class="series-table">
+      <colgroup>
+        <col style="width:33.333%">
+        <col style="width:33.333%">
+        <col style="width:33.334%">
+      </colgroup>
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            <div class="series-heading">
+              <span>
+                <b><%= item.codigo %></b>
+                · <%= item.modelo || item.nombre %>
+              </span>
+
+              <span class="series-count">
+                <%= item.series.length %>
+                <%= item.series.length === 1 ? 'serie' : 'series' %>
+              </span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% for (let i = 0; i < item.series.length; i += 3) { %>
+          <tr>
+            <% for (let j = 0; j < 3; j++) {
+              const equipo = item.series[i + j];
+            %>
+              <td class="<%= equipo ? '' : 'vacia' %>">
+                <% if (equipo) { %>
+                  <span class="serie-valor">
+                    <%= equipo.serie %>
+                  </span>
+
+                  <% if (equipo.mac) { %>
+                    <span class="equipo-meta">
+                      MAC: <%= equipo.mac %>
+                    </span>
+                  <% } %>
+
+                  <% if (equipo.patrimonio) { %>
+                    <span class="equipo-meta">
+                      Patrimonio: <%= equipo.patrimonio %>
+                    </span>
+                  <% } %>
+                <% } %>
+              </td>
+            <% } %>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  <% }); %>
 <% } %>
 
-<% if (mov.items.some(item => !item.marca || !item.modelo)) { %><p class="aviso-historico">Los datos de marca o modelo no registrados en este movimiento no se completan con información posterior del catálogo.</p><% } %>
-<p class="observaciones"><b>Observaciones:</b> <%= mov.observaciones || 'Sin observaciones.' %></p>
+<div class="cierre">
+  <% if ((mov.documentos || []).length) { %>
+    <% mov.documentos.forEach(documento => { %>
+      <p>
+        <b>Documento de respaldo:</b>
+        <%= documento.tipo %>
+        <%= documento.numero %>
+        · Fecha: <%= f(documento.fecha) %>
+        · <%= documento.emisor %>
+      </p>
+    <% }); %>
+  <% } %>
 
-<p>
-  <b>Registrado por:</b>
-  <%= mov.creadoPor.nombre %>
-  · <%= f(mov.createdAt) %>
-</p>
+  <% if (mov.items.some(item => !item.marca || !item.modelo)) { %>
+    <p class="aviso-historico">
+      Los datos de marca o modelo no registrados en este movimiento
+      no se completan con información posterior del catálogo.
+    </p>
+  <% } %>
 
-<table class="firmas"><tr>
-  <td><div class="firma-linea"><b>Firma de quien entrega</b><br>Aclaración: <%= mov.entrega %><br>DNI: __________________</div></td>
-  <td><div class="firma-linea"><b>Firma de quien recibe</b><br>Aclaración: <%= mov.recibe %><br>DNI: <%= mov.dniRecibe || '__________________' %></div></td>
-</tr></table>
+  <p class="observaciones"><b>Observaciones:</b> <%= mov.observaciones || 'Sin observaciones.' %></p>
+
+  <p>
+    <b>Registrado por:</b>
+    <%= mov.creadoPor.nombre %>
+    · <%= f(mov.createdAt) %>
+  </p>
+</div>
+
+<table class="firmas">
+  <tbody>
+    <tr>
+      <td>
+        <div class="firma-linea">
+          Firma de quien entrega<br>
+          Aclaración: <%= mov.entrega %><br>
+          DNI: __________________
+        </div>
+      </td>
+
+      <td>
+        <div class="firma-linea">
+          Firma de quien recibe<br>
+          Aclaración: <%= mov.recibe %><br>
+          DNI: <%= mov.dniRecibe || '__________________' %>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <% if (web) { %>
   <% if (mov.tipo === 'asignacion') { %>
@@ -250,33 +823,24 @@ const accion = {
               <td><%= n(item.cantidad) %></td>
               <td><%= n(item.devuelto) %></td>
               <td>
-                <%= n(
-                  item.cantidad - item.devuelto
-                ) %>
+                <%= n(item.cantidad - item.devuelto) %>
               </td>
             </tr>
-          <% }) %>
+          <% }); %>
         </tbody>
       </table>
 
       <% devoluciones.forEach(devolucion => { %>
         <p>
           <a href="/inventario/movimientos/<%= devolucion._id %>">
-            Devolución N.º
-            <%= devolucion.numero %>
+            Devolución N.º <%= devolucion.numero %>
             · <%= f(devolucion.fecha) %>
           </a>
         </p>
-      <% }) %>
+      <% }); %>
 
-      <% if (
-        !mov.items.some(
-          item => item.cantidad > item.devuelto
-        )
-      ) { %>
-        <p>
-          Asignación cerrada: devolución total.
-        </p>
+      <% if (!mov.items.some(item => item.cantidad > item.devuelto)) { %>
+        <p>Asignación cerrada: devolución total.</p>
       <% } %>
     </section>
   <% } %>
@@ -284,8 +848,7 @@ const accion = {
   <% if (original) { %>
     <p class="web">
       <a href="/inventario/movimientos/<%= original._id %>">
-        Ver asignación original
-        N.º <%= original.numero %>
+        Ver asignación original N.º <%= original.numero %>
       </a>
     </p>
   <% } %>
@@ -299,7 +862,7 @@ const accion = {
           <%= adjunto.nombre %>
         </a>
       </p>
-    <% }) %>
+    <% }); %>
 
     <% if (permisos[accion]) { %>
       <form
@@ -330,13 +893,14 @@ const accion = {
           de 10 MB cada uno.
         </p>
 
-        <button>Guardar adjuntos</button>
+        <button type="submit">Guardar adjuntos</button>
       </form>
     <% } %>
   </section>
 
   <% if (
-    mov.estado !== 'anulado' && mov.tipo === 'ingreso' &&
+    mov.estado !== 'anulado' &&
+    mov.tipo === 'ingreso' &&
     permisos.ingresar
   ) { %>
     <section class="web">
@@ -367,12 +931,13 @@ const accion = {
               'otro'
             ].forEach(tipo => { %>
               <option><%= tipo %></option>
-            <% }) %>
+            <% }); %>
           </select>
         </label>
 
         <label>
           Número
+
           <input
             name="documentoNumero"
             required
@@ -382,6 +947,7 @@ const accion = {
 
         <label>
           Fecha
+
           <input
             name="documentoFecha"
             type="date"
@@ -392,6 +958,7 @@ const accion = {
 
         <label>
           Emisor
+
           <input
             name="emisor"
             required
@@ -410,16 +977,15 @@ const accion = {
           >
         </label>
 
-        <button>Agregar documento</button>
+        <button type="submit">Agregar documento</button>
       </form>
     </section>
   <% } %>
 
   <% if (
-    mov.estado !== 'anulado' && mov.tipo === 'asignacion' &&
-    mov.items.some(
-      item => item.cantidad > item.devuelto
-    ) &&
+    mov.estado !== 'anulado' &&
+    mov.tipo === 'asignacion' &&
+    mov.items.some(item => item.cantidad > item.devuelto) &&
     permisos.devolver
   ) { %>
     <section class="web">
@@ -432,11 +998,46 @@ const accion = {
     </section>
   <% } %>
 <% } %>
-<% if(web && permisos.anular && mov.estado !== 'anulado') { %>
-<section class="web"><h2>Anular movimiento</h2><p>Se revierten sus existencias y se conserva el comprobante. Si tiene operaciones posteriores relacionadas, primero deben anularse esas operaciones.</p>
-<form method="post" action="/inventario/movimientos/<%= mov._id %>/anular" onsubmit="return confirm('¿Confirmás la anulación y la reversión del stock?')">
-<input type="hidden" name="_csrf" value="<%= csrf %>"><label>Motivo<textarea name="motivo" required minlength="5" maxlength="2000" style="width:100%"></textarea></label>
-<button type="submit" style="background:#b91c1c">Anular movimiento</button></form></section>
+
+<% if (web && permisos.anular && mov.estado !== 'anulado') { %>
+  <section class="web">
+    <h2>Anular movimiento</h2>
+
+    <p>
+      Se revierten sus existencias y se conserva el comprobante.
+      Si tiene operaciones posteriores relacionadas,
+      primero deben anularse esas operaciones.
+    </p>
+
+    <form
+      method="post"
+      action="/inventario/movimientos/<%= mov._id %>/anular"
+      onsubmit="return confirm('¿Confirmás la anulación y la reversión del stock?')"
+    >
+      <input
+        type="hidden"
+        name="_csrf"
+        value="<%= csrf %>"
+      >
+
+      <label>
+        Motivo
+
+        <textarea
+          name="motivo"
+          required
+          minlength="5"
+          maxlength="2000"
+          style="width:100%"
+        ></textarea>
+      </label>
+
+      <button type="submit" style="background:#b91c1c">
+        Anular movimiento
+      </button>
+    </form>
+  </section>
 <% } %>
+
 </body>
 </html>
