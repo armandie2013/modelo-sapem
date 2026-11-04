@@ -26,6 +26,7 @@ export const tiposMovimiento = {
     ruta: "asignaciones",
     accion: "asignar",
   },
+  produccion: { titulo: "Equipos en producción", singular: "Nueva puesta en producción", ruta: "produccion", accion: "producir" },
   devolucion: {
     titulo: "Devoluciones",
     singular: "Registrar devolución",
@@ -82,18 +83,20 @@ export async function consultarGeneral() {
         disponible: 0,
         revision: 0,
         asignado: 0,
+        produccion: 0,
       });
     }
 
     porProducto.get(productoId)[saldo.estado] +=
       saldo.cantidad;
 
-    if (saldo.estado === "asignado") {
-      const lugarId = String(saldo.lugar._id);
+    if (["asignado", "produccion"].includes(saldo.estado)) {
+      const lugarId = String(saldo.lugar._id) + ":" + saldo.estado;
 
       if (!porDestino.has(lugarId)) {
         porDestino.set(lugarId, {
           lugar: saldo.lugar,
+          estado: saldo.estado,
           productos: new Set(),
         });
       }
@@ -112,6 +115,7 @@ export async function consultarGeneral() {
         disponible: 0,
         revision: 0,
         asignado: 0,
+        produccion: 0,
       };
 
       return {
@@ -125,13 +129,15 @@ export async function consultarGeneral() {
         total:
           cantidades.disponible +
           cantidades.revision +
-          cantidades.asignado,
+          cantidades.asignado +
+          cantidades.produccion,
       };
     }),
 
     destinos: [...porDestino.values()].map(
       (destino) => ({
         lugar: destino.lugar,
+        estado: destino.estado,
         productos: destino.productos.size,
       })
     ),
@@ -198,7 +204,7 @@ export async function consultarMovimientos(
   const pagina = paginaDe(req);
 
   const filtro = {
-    tipo: seleccion ? "asignacion" : tipo,
+    tipo: seleccion ? { $in: ["asignacion", "produccion"] } : tipo,
   };
 
   const estado = String(req.query.estado || "");
@@ -216,7 +222,7 @@ export async function consultarMovimientos(
     filtro.$expr = {
       $lt: [devuelto, total],
     };
-  } else if (tipo === "asignacion") {
+  } else if (["asignacion", "produccion"].includes(tipo)) {
     if (estado) filtro.estado = estado === "anulado" ? "anulado" : { $ne: "anulado" };
     if (estado === "activa") {
       filtro.$expr = {
@@ -284,7 +290,7 @@ export async function consultarEquipos(req) {
   }
 
   if (
-    ["disponible", "revision", "asignado"].includes(
+    ["disponible", "revision", "asignado", "produccion"].includes(
       estado
     )
   ) {

@@ -1,6 +1,6 @@
 <section>
   <div class="list-heading">
-    <p class="muted"><%= ({ingreso:'Recepciones de material respaldadas por documentos.', asignacion:'Material entregado a personas, organismos y otros destinatarios.', devolucion:'Material devuelto de asignaciones anteriores.', traspaso:'Movimientos de material entre depósitos.'})[tipo] || '' %></p>
+    <p class="muted"><%= ({ingreso:'Recepciones de material respaldadas por documentos.', produccion:'Equipos instalados y funcionando en una ubicación.', asignacion:'Material entregado a personas, organismos y otros destinatarios.', devolucion:'Material devuelto de asignaciones anteriores.', traspaso:'Movimientos de material entre depósitos.'})[tipo] || '' %></p>
   <div class="actions">
     <% if (!seleccion && permisos[config.accion]) { %>
       <a
@@ -11,12 +11,12 @@
       </a>
     <% } %>
 
-    <% if (tipo === 'asignacion' && !seleccion) { %>
+    <% if (['asignacion', 'produccion'].includes(tipo) && !seleccion) { %>
       <a
         class="button secondary"
         href="/inventario/destinatarios"
       >
-        Ver destinatarios
+        <%= tipo === 'produccion' ? 'Ver ubicaciones / destinatarios' : 'Ver destinatarios' %>
       </a>
     <% } %>
   </div>
@@ -24,16 +24,16 @@
   </div>
   <% if (seleccion) { %>
     <p>
-      Elegí la asignación original.
+      Elegí la asignación o puesta en producción original.
       Solo se muestran las que tienen material
       pendiente de devolución.
     </p>
   <% } %>
 
-  <% if (tipo === 'asignacion' && !seleccion) { %>
+  <% if (['asignacion', 'produccion'].includes(tipo) && !seleccion) { %>
     <form class="list-toolbar"
       method="get"
-      action="/inventario/asignaciones"
+      action="/inventario/<%= config.ruta %>"
     >
       <label>
         Estado
@@ -56,7 +56,7 @@
         </select>
       </label>
 
-      <div class="actions"><button>Filtrar</button><a class="button secondary" href="/inventario/asignaciones">Limpiar</a></div>
+      <div class="actions"><button>Filtrar</button><a class="button secondary" href="/inventario/<%= config.ruta %>">Limpiar</a></div>
     </form>
   <% } %>
 
@@ -90,7 +90,7 @@
         %>
           <tr>
             <td style="width:1%;white-space:nowrap;overflow-wrap:normal">
-              <b><%= movimiento.numero %></b>
+              <b><%= movimiento.numero %></b><br><small><%= movimiento.tipo === 'produccion' ? 'Producción' : movimiento.tipo === 'asignacion' ? 'Asignación' : '' %></small>
             </td>
             <td style="width:1%;white-space:nowrap;overflow-wrap:normal">
               <%= fecha(movimiento.fecha) %>
@@ -110,7 +110,7 @@
             </td>
 
             <td>
-              <% if (movimiento.estado === 'anulado') { %><b style="color:#b91c1c">ANULADO</b><% } else if (movimiento.tipo === 'asignacion') { %>
+              <% if (movimiento.estado === 'anulado') { %><b style="color:#b91c1c">ANULADO</b><% } else if (['asignacion', 'produccion'].includes(movimiento.tipo)) { %>
                 <%=
                   devuelto === 0
                     ? 'Activa'
@@ -120,7 +120,7 @@
                 %>
               <% } else if (movimiento.original) { %>
                 <a href="/inventario/movimientos/<%= movimiento.original %>">
-                  Asignación N.º
+                  <%= movimiento.originalTipo === 'produccion' ? 'Producción' : 'Asignación' %> N.º
                   <%= movimiento.originalNumero %>
                 </a>
               <% } else { %>
@@ -135,7 +135,7 @@
 
             <td class="col-actions"><div class="row-actions">
               <% if (seleccion) { %>
-                <a class="button secondary" href="/inventario/asignaciones/<%= movimiento._id %>/devolucion">
+                <a class="button secondary" href="/inventario/<%= movimiento.tipo === 'produccion' ? 'produccion' : 'asignaciones' %>/<%= movimiento._id %>/devolucion">
                   Registrar devolución
                 </a>
               <% } else { %>
@@ -152,11 +152,11 @@
                 </a>
 
                 <% if (
-                  movimiento.estado !== 'anulado' && movimiento.tipo === 'asignacion' &&
+                  movimiento.estado !== 'anulado' && ['asignacion', 'produccion'].includes(movimiento.tipo) &&
                   devuelto < total &&
                   permisos.devolver
                 ) { %>
-                  <a class="button secondary" href="/inventario/asignaciones/<%= movimiento._id %>/devolucion">
+                  <a class="button secondary" href="/inventario/<%= movimiento.tipo === 'produccion' ? 'produccion' : 'asignaciones' %>/<%= movimiento._id %>/devolucion">
                     Devolver material
                   </a>
                 <% } %>
@@ -170,7 +170,7 @@
             <td colspan="7" class="empty">
               <%=
                 seleccion
-                  ? 'No hay asignaciones pendientes de devolución.'
+                  ? 'No hay asignaciones ni puestas en producción pendientes de devolución.'
                   : 'Todavía no hay movimientos en esta sección.'
               %>
             </td>

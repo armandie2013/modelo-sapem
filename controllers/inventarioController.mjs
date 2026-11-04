@@ -214,6 +214,7 @@ export const nuevoMovimiento =
       productos,
       lugares,
       configuracion,
+      equiposDisponibles,
     ] = await Promise.all([
       Producto.find({ activo: { $ne: false } })
         .sort({ nombre: 1 })
@@ -224,6 +225,8 @@ export const nuevoMovimiento =
         .lean(),
 
       Configuracion.findById("general").lean(),
+      tipo === "ingreso" ? [] : Equipo.find({ estado: "disponible" })
+        .select("producto lugar serie mac patrimonio").sort({ serie: 1 }).lean(),
     ]);
 
     const archivosBorrador = borrador ? await Archivo.find({ movimiento: borrador._id }).select('-datos').lean() : [];
@@ -237,6 +240,7 @@ export const nuevoMovimiento =
         tipo,
         config,
         productos,
+        equiposDisponibles,
         lugares,
         datosBorrador: borrador?.datos, borradorId: borrador?._id || '', borradorVersion: borrador?.version ?? '', archivosBorrador,
         principal: String(
@@ -255,11 +259,11 @@ export async function formularioDevolucion(
   ).lean();
 
   exigir(
-    mov?.tipo === "asignacion",
-    "Asignación inexistente."
+    ["asignacion", "produccion"].includes(mov?.tipo),
+    "Asignación o puesta en producción inexistente."
   );
 
-  exigir(mov.estado !== 'anulado', 'La asignación está anulada.');
+  exigir(mov.estado !== 'anulado', 'El movimiento original está anulado.');
   const borrador = req.query.borrador ? await obtenerBorrador(req.query.borrador) : null;
   exigir(!borrador || (borrador.tipo === 'devolucion' && String(borrador.datos.original) === String(mov._id) && req.invPermisos.editar), 'Borrador inválido o sin permiso.');
   const archivosBorrador = borrador ? await Archivo.find({ movimiento: borrador._id }).select('-datos').lean() : [];
@@ -277,7 +281,7 @@ export async function formularioDevolucion(
       .lean(),
 
     Equipo.find({ asignacion: mov._id })
-      .select("producto serie")
+      .select("producto serie mac patrimonio")
       .lean(),
 
     Configuracion.findById("general").lean(),
@@ -443,6 +447,7 @@ export async function adjuntar(req, res) {
   const accion = {
     ingreso: "ingresar",
     asignacion: "asignar",
+    produccion: "producir",
     devolucion: "devolver",
     traspaso: "traspasar",
   }[mov.tipo];
@@ -478,7 +483,7 @@ export async function detalle(req, res) {
     .lean();
 
   const devoluciones =
-    mov.tipo === "asignacion"
+    ["asignacion", "produccion"].includes(mov.tipo)
       ? await Movimiento.find({
           original: mov._id,
         })
@@ -489,7 +494,7 @@ export async function detalle(req, res) {
 
   const original = mov.original
     ? await Movimiento.findById(mov.original)
-        .select("numero")
+        .select("numero tipo")
         .lean()
     : null;
 

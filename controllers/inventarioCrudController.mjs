@@ -40,7 +40,7 @@ export async function abrirBorrador(req, res) {
   const b = await obtenerBorrador(req.params.id);
   exigir(req.invPermisos[accionesTipo[b.tipo]] && (req.invPermisos.editar || puedeCompletarIngreso(b, req.session.usuario, req.invPermisos)), 'No tenés permiso para esta operación.');
   const ruta = b.tipo === 'devolucion' ? `/asignaciones/${b.datos.original}/devolucion`
-    : '/' + ({ ingreso: 'ingresos', asignacion: 'asignaciones', traspaso: 'traspasos' }[b.tipo]) + '/nuevo';
+    : '/' + ({ ingreso: 'ingresos', asignacion: 'asignaciones', produccion: 'produccion', traspaso: 'traspasos' }[b.tipo]) + '/nuevo';
   res.redirect(303, `/inventario${ruta}?borrador=${b._id}`);
 }
 export async function borrarBorrador(req, res) {

@@ -96,13 +96,17 @@ function model(nombre,schema){
 }
 class Consulta{
  constructor(m,op,f,u,o={}){Object.assign(this,{model:m,op,f,u,o});this.limite=Infinity;}
+ populate(campo){this.campo=campo;return this;}sort(){return this;}
  session(){return this;}select(){return this;}lean(){this.plano=true;return this;}limit(n){this.limite=n;return this;}
  getFilter(){return this.f;}getOptions(){return this.o;}getUpdate(){return this.u;}setUpdate(u){this.u=u;}
  then(ok,err){return this.ejecutar().then(ok,err);}
  async ejecutar(){
   for(const fn of this.model.schema.hooks[this.op]||[])await fn.call(this);
   const c=this.model.collection, todos=await c.find(this.f).toArray();
-  if(this.op==='find')return todos.slice(0,this.limite).map(d=>this.plano?d:new this.model(d));
+  if(this.op==='find'){
+   if(this.campo==='lugar')for(const d of todos)d.lugar=await modelos.InvLugar.collection.findOne({_id:d.lugar});
+   return todos.slice(0,this.limite).map(d=>this.plano?d:new this.model(d));
+  }
   if(this.op==='findOne')return todos[0]?(this.plano?todos[0]:new this.model(todos[0])):null;
   if(this.op==='deleteOne')return c.deleteOne(this.f);if(this.op==='deleteMany')return c.deleteMany(this.f);
   if(this.op==='updateMany'){for(const d of todos)await c.updateOne({_id:d._id},this.u,this.o);return {modifiedCount:todos.length};}
@@ -223,7 +227,9 @@ const catalogo = cache.get(pathToFileURL(root+'/services/inventarioCatalogoServi
 const cantAntes=(await m.Producto.find()).length;
 await controlador.catalogo({body:{catalogo:'producto',codigo:'CAT-5009',nombre:'MikroTik RB5009',marca:'MikroTik',modelo:'RB5009',descripcion:'Router de laboratorio',unidad:'unidad',serializado:'si'},session:{}},{redirect(){}});
 assert.equal((await m.Producto.find()).length,cantAntes+1);
-const ficha = await m.Producto.findOne({codigo:'CAT-5009'});
+const ficha = await m.Producto.findOne({modelo:'RB5009'});
+assert.match(ficha.codigo,/^PR\d{4}$/);
+const codigoFijo=ficha.codigo;
 assert.equal(await m.Saldo.findOne({producto:ficha._id}),null);
 assert.equal(await m.Equipo.findOne({producto:ficha._id}),null);
 assert.equal(ficha.modelo,'RB5009');
@@ -232,14 +238,81 @@ await assert.rejects(crud.namespace.guardarBorrador({...ingreso,documentoNumero:
 assert.ok((await catalogo.similaresProducto({nombre:'MK 5009'})).some(p=>String(p._id)===String(ficha._id)));
 await assert.rejects(catalogo.crearProductoCatalogo({codigo:'CAT-OTRO',nombre:'MK 5009',serializado:'si'}),/similares/);
 await catalogo.crearProductoCatalogo({codigo:'CAT-OTRO',nombre:'MK 5009',serializado:'si',confirmarSimilar:'si'});
-await assert.rejects(catalogo.crearProductoCatalogo({codigo:'cat-5009',nombre:'Otro',serializado:'si',confirmarSimilar:'si'}),/código/);
+const otroCodigo = await catalogo.crearProductoCatalogo({codigo:'cat-5009',nombre:'Otro',serializado:'si',confirmarSimilar:'si'});
+assert.notEqual(otroCodigo.codigo,ficha.codigo);
+assert.notEqual(otroCodigo.codigo,'CAT-5009');
 assert.equal(servicio.cantidad('2'),2000);
 for (const invalido of ['1.5','2,1','0','-1','NaN','1e3']) assert.throws(()=>servicio.cantidad(invalido));
 await crud.namespace.editarRegistro('producto',String(ficha._id),{version:ficha.__v||0,codigo:'CAT-5009',nombre:'Router central',marca:'MikroTik',modelo:'RB5009',descripcion:'Descripción corregida',unidad:'unidad',serializado:'si',confirmarSimilar:'si'});
 assert.equal((await m.Producto.findById(ficha._id)).descripcion,'Descripción corregida');
+assert.equal((await m.Producto.findById(ficha._id)).codigo,codigoFijo);
 await crud.namespace.eliminarRegistro('producto',String(ficha._id));
 assert.equal(await m.Producto.findById(ficha._id),null);
 let pantalla;
 await controlador.nuevoMovimiento('ingreso')({query:{},path:'/ingresos/nuevo',session:{},invPermisos:{ver:true,ingresar:true}}, {render(vista,datos){pantalla=datos.vista;}});
 assert.equal(pantalla,'documentoIngreso');
 console.log('OK: stock 15/10/3, anulaciones en orden, CRUD, permisos referenciales, versiones, borradores, duplicados, concurrencia y recuperación de una interrupción. Documento obligatorio para existencias, catálogo independiente, similitudes, edición, borrado y cantidades enteras. Adaptadores simulados.');
+
+const numeroAnterior = (await m.Contador.findById('productos')).valor;
+const reservado = await m.Producto.create({codigo:'PR0900',nombre:'Importado',unidad:'unidad',serializado:false});
+const generado = await catalogo.crearProductoCatalogo({nombre:'Artículo de prueba consecutivo',serializado:'no',confirmarSimilar:'si'});
+assert.equal(generado.codigo,'PR0901');
+await crud.namespace.eliminarRegistro('producto',String(generado._id));
+const posterior = await catalogo.crearProductoCatalogo({nombre:'Artículo posterior',serializado:'no',confirmarSimilar:'si'});
+assert.equal(posterior.codigo,'PR0902');
+const antesFallo=(await m.Contador.findById('productos')).valor;
+await assert.rejects(catalogo.crearProductoCatalogo({nombre:'',serializado:'no'}));
+assert.equal((await m.Contador.findById('productos')).valor,antesFallo);
+console.log('OK: consecutivos PR, código manual ignorado, código inmutable, importaciones, eliminación sin reutilizar e intento fallido sin consumir número.');
+const simultaneos=await Promise.all([
+ catalogo.crearProductoCatalogo({nombre:'Alta simultánea A',serializado:'no',confirmarSimilar:'si'}),
+ catalogo.crearProductoCatalogo({nombre:'Alta simultánea B',serializado:'no',confirmarSimilar:'si'})
+]);
+assert.notEqual(simultaneos[0].codigo,simultaneos[1].codigo);
+console.log('OK: dos altas simultáneas reciben códigos diferentes.');
+
+// Circuito de producción independiente de las asignaciones comunes.
+const equipoProd = await m.Producto.create({codigo:'PR-PROD',nombre:'Router de producción',marca:'MIKROTIK',modelo:'CCR2004',unidad:'unidad',serializado:true});
+const granelProd = await m.Producto.create({codigo:'CABLE-PROD',nombre:'Cable producción',unidad:'unidad',serializado:false});
+const destinoProd = await servicio.crearLugarInventario({nombre:'Nodo CAPE',tipo:'destino'});
+const filaProd=(n,series=[])=>({producto:String(equipoProd._id),cantidad:String(n),series:series.join('\n')});
+const filaCable=n=>({producto:String(granelProd._id),cantidad:String(n),series:''});
+await crear({...ingreso,documentoNumero:'PROD-INGRESO'},[filaProd(3,['PROD-A','PROD-B','PROD-C']),filaCable(15)]);
+const puesta = await crear({...base,tipo:'produccion',origen:String(central._id),destino:String(destinoProd._id)},[filaProd(2,['PROD-A','PROD-B']),filaCable(10)]);
+assert.equal(puesta.tipo,'produccion');
+assert.equal((await m.Equipo.findOne({serie:'PROD-A'})).estado,'produccion');
+assert.equal(String((await m.Equipo.findOne({serie:'PROD-A'})).asignacion),String(puesta._id));
+assert.equal((await m.Saldo.findOne({producto:equipoProd._id,lugar:central._id,estado:'disponible'})).cantidad,1000);
+assert.equal((await m.Saldo.findOne({producto:equipoProd._id,lugar:destinoProd._id,estado:'produccion'})).cantidad,2000);
+await assert.rejects(crear({...base,tipo:'asignacion',origen:String(central._id),destino:String(destino._id)},[filaProd(1,['PROD-A'])]));
+const retiro = await crear({...base,tipo:'devolucion',original:String(puesta._id),destino:String(central._id),estadoRecepcion:'revision'},[filaProd(1,['PROD-A']),filaCable(3)]);
+assert.equal(retiro.originalTipo,'produccion');
+assert.equal((await m.Equipo.findOne({serie:'PROD-A'})).estado,'revision');
+assert.equal((await m.Movimiento.findById(puesta._id)).items[0].devuelto,1000);
+assert.equal((await m.Saldo.findOne({producto:granelProd._id,lugar:destinoProd._id,estado:'produccion'})).cantidad,7000);
+await assert.rejects(crud.namespace.anularMovimiento(String(puesta._id),'No debe permitir anular con retiros',usuario));
+await crud.namespace.anularMovimiento(String(retiro._id),'Revertir retiro de prueba',usuario);
+assert.equal((await m.Equipo.findOne({serie:'PROD-A'})).estado,'produccion');
+assert.equal((await m.Movimiento.findById(puesta._id)).items[0].devuelto,0);
+const totalProd = await crear({...base,tipo:'devolucion',original:String(puesta._id),destino:String(central._id),estadoRecepcion:'disponible'},[filaProd(2,['PROD-A','PROD-B']),filaCable(10)]);
+assert.equal((await m.Movimiento.findById(puesta._id)).items[0].devuelto,2000);
+await assert.rejects(crear({...base,tipo:'devolucion',original:String(puesta._id),destino:String(central._id),estadoRecepcion:'disponible'},[filaProd(1,['PROD-A'])]));
+await crud.namespace.anularMovimiento(String(totalProd._id),'Revertir devolución total',usuario);
+await crud.namespace.anularMovimiento(String(puesta._id),'Revertir puesta en producción',usuario);
+assert.equal((await m.Equipo.findOne({serie:'PROD-A'})).estado,'disponible');
+assert.equal((await m.Saldo.findOne({producto:granelProd._id,lugar:central._id,estado:'disponible'})).cantidad,15000);
+const bProd=await crud.namespace.guardarBorrador({...base,tipo:'produccion',origen:String(central._id),destino:String(destinoProd._id),items:JSON.stringify([filaProd(1,['PROD-C'])])},usuario,[]);
+const confirmadaProd=await crud.namespace.confirmarBorrador({...bProd.datos,borradorId:String(bProd._id),borradorVersion:bProd.version},usuario,[]);
+assert.equal(confirmadaProd.tipo,'produccion');
+assert.equal((await m.Equipo.findOne({serie:'PROD-C'})).estado,'produccion');
+console.log('OK: producción por serie y cantidad, retiro parcial/a revisar/total, sobredevolución rechazada, reversión y borrador.');
+
+const consulta=cache.get(pathToFileURL(root+'/services/inventarioConsultasService.mjs').href).namespace;
+const generalProd=await consulta.consultarGeneral();
+const resumenProd=generalProd.resumen.find(p=>String(p._id)===String(equipoProd._id));
+assert.equal(resumenProd.fisico,2000);
+assert.equal(resumenProd.produccion,1000);
+assert.equal(resumenProd.asignado,0);
+assert.equal(resumenProd.total,3000);
+assert(generalProd.destinos.some(d=>d.estado==='produccion' && String(d.lugar._id)===String(destinoProd._id)));
+console.log('OK: General separa físico/asignado/producción y conserva total SAPEM.');

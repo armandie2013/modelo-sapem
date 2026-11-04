@@ -5,7 +5,7 @@ import { Producto, Lugar, Saldo, Equipo, Movimiento, Archivo, Borrador, Anulacio
 import Configuracion from '../models/inventarioConfiguracion.mjs';
 import { ejecutarOperacion } from './inventarioPersistencia.mjs';
 import { exigir, crearMovimiento, respaldo } from './inventarioService.mjs';
-export const accionesTipo = { ingreso: 'ingresar', asignacion: 'asignar', devolucion: 'devolver', traspaso: 'traspasar' };
+export const accionesTipo = { ingreso: 'ingresar', asignacion: 'asignar', produccion: 'producir', devolucion: 'devolver', traspaso: 'traspasar' };
 export function validarId(id) { exigir(mongoose.isValidObjectId(id), 'Identificador inválido.'); return id; }
 const texto = v => String(v ?? '').trim();
 const usuarioNombre = u => `${u.nombre} ${u.apellido}`;
@@ -149,7 +149,7 @@ export async function anularMovimiento(id, motivo, usuario) {
     exigir(texto(motivo).length >= 5 && texto(motivo).length <= 2000, 'Indicá el motivo de anulación (entre 5 y 2000 caracteres).');
     const mov = await Movimiento.findById(validarId(id));
     exigir(mov && mov.estado !== 'anulado', 'Movimiento inexistente o ya anulado.');
-    if (mov.tipo === 'asignacion') exigir(mov.items.every(i => i.devuelto === 0), 'Primero anulá las devoluciones vinculadas.');
+    if (['asignacion', 'produccion'].includes(mov.tipo)) exigir(mov.items.every(i => i.devuelto === 0), 'Primero anulá las devoluciones vinculadas.');
     for (const item of mov.items) {
       const filtro = { _id: { $ne: mov._id }, numero: { $gt: mov.numero }, estado: { $ne: 'anulado' } };
       if (item.serializado) filtro['items.series.serie'] = { $in: item.series.map(s => s.serie) };
@@ -163,15 +163,15 @@ export async function anularMovimiento(id, motivo, usuario) {
     const original = mov.tipo === 'devolucion' ? await Movimiento.findById(mov.original) : null;
     if (mov.tipo === 'devolucion') exigir(original && original.estado !== 'anulado', 'La asignación original no está vigente.');
     for (const item of mov.items) {
-      const salidaEstado = mov.tipo === 'asignacion' ? 'asignado' : mov.tipo === 'devolucion' ? mov.estadoRecepcion : 'disponible';
+      const salidaEstado = mov.tipo === 'produccion' ? 'produccion' : mov.tipo === 'asignacion' ? 'asignado' : mov.tipo === 'devolucion' ? mov.estadoRecepcion : 'disponible';
       await modificarSaldo(item.producto, mov.destino, salidaEstado, -item.cantidad);
-      if (mov.origen) await modificarSaldo(item.producto, mov.origen, mov.tipo === 'devolucion' ? 'asignado' : 'disponible', item.cantidad);
+      if (mov.origen) await modificarSaldo(item.producto, mov.origen, mov.tipo === 'devolucion' ? (original.tipo === 'produccion' ? 'produccion' : 'asignado') : 'disponible', item.cantidad);
       for (const serie of item.series) {
         const equipo = await Equipo.findOne({ producto: item.producto, serie: serie.serie, lugar: mov.destino, estado: salidaEstado });
         exigir(equipo, `La serie ${serie.serie} ya no está en la ubicación o estado esperados.`);
         if (mov.tipo === 'ingreso') await Equipo.deleteOne({ _id: equipo._id });
         else {
-          equipo.lugar = mov.origen; equipo.estado = mov.tipo === 'devolucion' ? 'asignado' : 'disponible';
+          equipo.lugar = mov.origen; equipo.estado = mov.tipo === 'devolucion' ? (original.tipo === 'produccion' ? 'produccion' : 'asignado') : 'disponible';
           equipo.asignacion = mov.tipo === 'devolucion' ? original._id : undefined;
           await equipo.save();
         }

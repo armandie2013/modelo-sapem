@@ -1,6 +1,7 @@
 import { similaresProducto } from '../services/inventarioCatalogoService.mjs';
 import { Router } from "express";
 import multer from "multer";
+import { AsyncResource } from "node:async_hooks";
 import * as documento from '../controllers/inventarioDocumentoController.mjs';
 import rutasCrud from './inventarioCrudRoutes.mjs';
 import { accesoInventario } from '../services/inventarioPersistencia.mjs';
@@ -17,7 +18,7 @@ import * as controlador from "../controllers/inventarioController.mjs";
 
 const router = Router();
 
-const upload = multer({
+const procesarAdjuntos = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 10 * 1024 * 1024,
@@ -26,6 +27,14 @@ const upload = multer({
     fieldSize: 1024 * 1024,
   },
 }).array("archivos", 3);
+
+// IncomingMessage/Busboy puede ejecutar el callback fuera del AsyncLocalStorage
+// que mantiene el bloqueo. Vincular next antes de procesar el multipart evita
+// que el servicio intente adquirir de nuevo el bloqueo de esta misma petición.
+function upload(req, res, next) {
+  procesarAdjuntos(req, res, AsyncResource.bind(next));
+}
+
 
 router.use(
   verificarSesion,
@@ -169,6 +178,10 @@ router.get(
   controlador.formularioDevolucion
 );
 
+router.get('/produccion', permiso('ver'), controlador.listado('produccion'));
+router.get('/produccion/nuevo', permiso('producir'), controlador.nuevoMovimiento('produccion'));
+router.get('/produccion/:id/devolucion', permiso('devolver'), controlador.formularioDevolucion);
+
 router.get(
   "/devoluciones",
   permiso("ver"),
@@ -209,6 +222,7 @@ router.post(
     const accion = {
       ingreso: "ingresar",
       asignacion: "asignar",
+      produccion: "producir",
       devolucion: "devolver",
       traspaso: "traspasar",
     }[req.body.tipo];

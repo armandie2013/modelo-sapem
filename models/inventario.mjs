@@ -73,7 +73,7 @@ const saldo = new Schema(
     lugar: ref("InvLugar"),
     estado: {
       type: String,
-      enum: ["disponible", "revision", "asignado"],
+      enum: ["disponible", "revision", "asignado", "produccion"],
       required: true,
     },
     cantidad: {
@@ -103,7 +103,7 @@ const equipo = new Schema(
     lugar: ref("InvLugar"),
     estado: {
       type: String,
-      enum: ["disponible", "revision", "asignado"],
+      enum: ["disponible", "revision", "asignado", "produccion"],
       required: true,
     },
     asignacion: ref("InvMovimiento", false),
@@ -172,7 +172,7 @@ const movimiento = new Schema(
     },
     tipo: {
       type: String,
-      enum: ["ingreso", "asignacion", "devolucion", "traspaso"],
+      enum: ["ingreso", "asignacion", "produccion", "devolucion", "traspaso"],
       required: true,
     },
     fecha: {
@@ -189,6 +189,7 @@ const movimiento = new Schema(
     destinoDireccion: text(),
 
     original: ref("InvMovimiento", false),
+    originalTipo: { type: String, enum: ["asignacion", "produccion"] },
     originalNumero: Number,
 
     estadoRecepcion: {
@@ -240,7 +241,7 @@ const contador = new Schema({
 });
 
 const borrador = new Schema({
-  tipo: { type: String, enum: ['ingreso', 'asignacion', 'devolucion', 'traspaso'], required: true },
+  tipo: { type: String, enum: ['ingreso', 'asignacion', 'produccion', 'devolucion', 'traspaso'], required: true },
   datos: { type: Schema.Types.Mixed, required: true },
   productos: [Schema.Types.ObjectId], lugares: [Schema.Types.ObjectId],
   version: { type: Number, default: 0 },

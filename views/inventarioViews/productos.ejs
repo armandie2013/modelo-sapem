@@ -21,13 +21,11 @@
     white-space: nowrap;
     overflow-wrap: normal;
     word-break: normal;
-    font-variant-numeric: tabular-nums;
   }
 
   .inv .productos-table .product-name {
     min-width: 220px;
     max-width: 400px;
-    white-space: normal;
     overflow-wrap: anywhere;
   }
 
@@ -38,6 +36,23 @@
 
   .inv .productos-table .col-control {
     min-width: 110px;
+  }
+
+  .inv .catalogo-busqueda {
+    display: flex;
+    align-items: end;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .inv .catalogo-busqueda label {
+    flex: 1;
+    max-width: 550px;
+    margin: 0;
+  }
+
+  .inv .catalogo-busqueda button {
+    margin-bottom: 0;
   }
 </style>
 
@@ -51,14 +66,27 @@
 
     <% if (permisos.administrar) { %>
       <div class="actions">
-        <a
-          class="button"
-          href="/inventario/productos/nuevo"
-        >
+        <a class="button" href="/inventario/productos/nuevo">
           Nuevo producto
         </a>
       </div>
     <% } %>
+  </div>
+
+  <div class="catalogo-busqueda">
+    <label>
+      Buscar producto
+      <input
+        id="buscarCatalogo"
+        type="search"
+        placeholder="Código, nombre, marca, modelo o descripción"
+        autocomplete="off"
+      >
+    </label>
+
+    <button type="button" id="limpiarCatalogo" class="secondary">
+      Limpiar
+    </button>
   </div>
 
   <div class="scroll">
@@ -77,23 +105,16 @@
 
       <tbody>
         <% productos.forEach(producto => { %>
-          <tr>
-            <td class="col-codigo">
-              <%= producto.codigo %>
-            </td>
+          <tr data-fila-producto>
+            <td class="col-codigo"><%= producto.codigo %></td>
 
             <td class="product-name">
-              <span class="cell-title">
-                <%= producto.nombre %>
-              </span>
+              <span class="cell-title"><%= producto.nombre %></span>
             </td>
 
             <td>
-              <%=
-                [producto.marca, producto.modelo]
-                  .filter(Boolean)
-                  .join(' · ') || '—'
-              %>
+              <%= [producto.marca, producto.modelo]
+                .filter(Boolean).join(' · ') || '—' %>
             </td>
 
             <td class="description">
@@ -103,16 +124,12 @@
             <td class="col-control">
               <%= producto.serializado
                 ? 'Por número de serie'
-                : 'Por cantidad'
-              %>
+                : 'Por cantidad' %>
             </td>
 
             <td>
               <span class="state">
-                <%= producto.activo === false
-                  ? 'Inactivo'
-                  : 'Activo'
-                %>
+                <%= producto.activo === false ? 'Inactivo' : 'Activo' %>
               </span>
             </td>
 
@@ -125,21 +142,74 @@
           </tr>
         <% }); %>
 
-        <% if (!productos.length) { %>
-          <tr>
-            <td colspan="7" class="empty">
-              Todavía no hay productos.
-            </td>
-          </tr>
-        <% } %>
+        <tr id="catalogoVacio" <%= productos.length ? 'hidden' : '' %>>
+          <td colspan="7" class="empty">
+            No hay productos para mostrar.
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
   <div class="list-footer">
-    <span>
-      <%= productos.length %>
-      <%= productos.length === 1 ? 'producto' : 'productos' %>
+    <span id="catalogoContador" role="status">
+      <%= productos.length %> productos
     </span>
   </div>
 </section>
+
+<script>
+(() => {
+  const input = document.querySelector('#buscarCatalogo');
+
+  const filas = [
+    ...document.querySelectorAll('[data-fila-producto]')
+  ];
+
+  const normalizar = valor =>
+    String(valor || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
+
+  const textos = filas.map(fila =>
+    normalizar(
+      [...fila.cells]
+        .slice(0, 4)
+        .map(celda => celda.textContent)
+        .join(' ')
+    )
+  );
+
+  function filtrar() {
+    const terminos = normalizar(input.value)
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    let visibles = 0;
+
+    filas.forEach((fila, indice) => {
+      fila.hidden = !terminos.every(
+        termino => textos[indice].includes(termino)
+      );
+
+      if (!fila.hidden) visibles++;
+    });
+
+    document.querySelector('#catalogoVacio').hidden =
+      visibles > 0;
+
+    document.querySelector('#catalogoContador').textContent =
+      `${visibles} de ${filas.length} productos`;
+  }
+
+  input.addEventListener('input', filtrar);
+
+  document.querySelector('#limpiarCatalogo').onclick = () => {
+    input.value = '';
+    filtrar();
+    input.focus();
+  };
+})();
+</script>

@@ -21,7 +21,7 @@
     </a>
   </p>
 
-  <p><b>Estado:</b> <%= equipo.estado %></p>
+  <p><b>Estado:</b> <%= equipo.estado === 'produccion' ? 'En producción' : equipo.estado %></p>
 </section>
 
 <section>
@@ -45,7 +45,7 @@
           <tr>
             <td><%= movimiento.numero %></td>
             <td><%= fecha(movimiento.fecha) %></td>
-            <td><%= movimiento.tipo %></td>
+            <td><%= movimiento.tipo === 'produccion' ? 'Puesta en producción' : movimiento.tipo %></td>
             <td><%= movimiento.origenNombre %></td>
             <td><%= movimiento.destinoNombre %></td>
 

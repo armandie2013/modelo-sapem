@@ -139,6 +139,7 @@ const personaSchema = new mongoose.Schema({
       "administrar",
       "ingresar",
       "asignar",
+      "producir",
       "devolver",
       "traspasar"
     ),

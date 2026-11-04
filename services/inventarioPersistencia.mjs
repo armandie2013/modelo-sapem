@@ -47,11 +47,13 @@ async function recuperar() {
     await restaurar(operacion._id);
   }
 }
-async function tomarBloqueo() {
+async function tomarBloqueo(cancelado = () => false) {
   await inicializarPersistencia();
   const { bloqueo } = colecciones();
   const token = randomUUID(), limite = Date.now() + 30000;
   while (true) {
+    // Una petición que ya se cerró no debe quedar esperando y adquirir después.
+    if (cancelado()) return null;
     try {
       await bloqueo.insertOne({ _id: 'inventario', token, host, pid: process.pid, fecha: new Date() }, opciones);
       break;
@@ -81,18 +83,47 @@ async function liberar(ctx) {
 }
 export async function accesoInventario(req, res, next) {
   let ctx;
-  try {
-    ctx = await tomarBloqueo();
-    const fin = () => {
+  let terminado = !!(req.aborted || res.destroyed || res.writableEnded);
+  const fin = () => {
+    terminado = true;
+    if (ctx) {
       ctx.terminado = true;
       liberar(ctx).catch(e => console.error('Bloqueo inventario:', e.message));
-    };
-    res.once('finish', fin);
-    res.once('close', fin);
+    }
+  };
+  // Registrar antes de esperar MongoDB: el navegador puede cerrar la petición
+  // mientras se adquiere el bloqueo, incluso durante insertOne o recuperación.
+  res.once('finish', fin);
+  res.once('close', fin);
+  req.once('aborted', fin);
+  const quitarListeners = () => {
+    res.removeListener('finish', fin);
+    res.removeListener('close', fin);
+    req.removeListener('aborted', fin);
+  };
+  try {
+    ctx = await tomarBloqueo(() => terminado);
+    if (!ctx) { quitarListeners(); return; }
+    if (terminado || req.aborted || res.destroyed || res.writableEnded) {
+      ctx.terminado = true;
+      quitarListeners();
+      await liberar(ctx);
+      return;
+    }
     ctx.usuario = req.session?.usuario ? { id: String(req.session.usuario._id), nombre: `${req.session.usuario.nombre} ${req.session.usuario.apellido}` } : null;
     ctx.ruta = req.originalUrl.split('?')[0];
     contexto.run(ctx, () => next());
-  } catch (e) { next(e); }
+  } catch (e) {
+    quitarListeners();
+    if (ctx) {
+      ctx.terminado = true;
+      try { await liberar(ctx); }
+      catch (liberacion) { console.error('Bloqueo inventario:', liberacion.message); }
+    }
+    // Si el cliente se fue, ya no hay una respuesta donde mostrar el error.
+    if (!terminado && !res.destroyed && !res.writableEnded) next(e);
+    else console.error('Petición de inventario cerrada:', e.message);
+  }
 }
 export async function ejecutarOperacion(fn) {
   const existente = contexto.getStore();

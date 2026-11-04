@@ -1,0 +1,94 @@
+<style>
+  .inv .selector-series { border: 1px solid #cbd5e1; padding: 8px; border-radius: 5px; margin-bottom: 8px; background: #f8fafc; }
+  .inv .selector-series summary { cursor: pointer; color: #1e40af; font-weight: 500; }
+  .inv .selector-series .series-herramientas { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+  .inv .selector-series .series-herramientas input { flex: 1 1 150px; min-width: 0; }
+  .inv .selector-series .series-lista { max-height: 230px; overflow: auto; display: grid; gap: 4px; }
+  .inv .selector-series .series-opcion { display: flex; align-items: flex-start; gap: 7px; padding: 5px; margin: 0; background: white; border: 1px solid #e2e8f0; overflow-wrap: anywhere; }
+  .inv .selector-series input[type=checkbox] { width: auto; flex-shrink: 0; margin-top: 3px; }
+  .inv .selector-series small { display: block; color: #64748b; }
+  .inv .series-resumen { font-size: 12px; margin: 6px 0; color: #64748b; }
+  .inv .series-error { color: #b91c1c; }
+</style>
+<script>
+// El textarea es la fuente única: selección visual y carga manual se sincronizan.
+window.crearSelectorSeries = function ({ textarea, cantidad, obtenerEquipos, claseCheckbox = '' }) {
+  const panel = document.createElement('details');
+  panel.className = 'selector-series';
+  panel.open = true;
+  panel.innerHTML = `<summary>Series disponibles</summary>
+    <div class="series-herramientas">
+      <input type="search" aria-label="Buscar serie, MAC o patrimonio" placeholder="Buscar serie, MAC o patrimonio">
+      <button type="button" class="secondary series-todas">Seleccionar todas</button>
+      <button type="button" class="secondary series-ninguna">Limpiar selección</button>
+    </div>
+    <p class="series-resumen" role="status"></p><div class="series-lista"></div>`;
+  textarea.before(panel);
+  const filtro = panel.querySelector('input[type=search]');
+  const lista = panel.querySelector('.series-lista');
+  const resumen = panel.querySelector('.series-resumen');
+  const normalizar = s => String(s || '').trim().toUpperCase();
+  const leer = () => textarea.value.split(/\r?\n/).map(normalizar).filter(Boolean);
+  let equipos = [];
+  let controles = [];
+  function sincronizar() {
+    const entradas = leer();
+    const seleccion = new Set(entradas);
+    const permitidas = new Set(equipos.map(e => normalizar(e.serie)));
+    const invalidas = [...seleccion].filter(s => !permitidas.has(s));
+    const repetidas = entradas.length !== seleccion.size;
+    controles.forEach(({checkbox}) => checkbox.checked = seleccion.has(normalizar(checkbox.value)));
+    cantidad.value = String(seleccion.size);
+    const mensaje = repetidas ? 'Hay series repetidas. Revisá la carga manual.'
+      : invalidas.length ? `Series no disponibles en este origen: ${invalidas.join(', ')}.` : '';
+    textarea.setCustomValidity(mensaje);
+    resumen.textContent = `${equipos.length} disponibles · ${seleccion.size} seleccionadas. ${mensaje}`;
+    resumen.classList.toggle('series-error', !!mensaje);
+  }
+  function escribir(series) {
+    textarea.value = [...new Set(series)].join('\n');
+    sincronizar();
+  }
+  function filtrar() {
+    const terminos = normalizar(filtro.value).split(/\s+/).filter(Boolean);
+    controles.forEach(({label, equipo}) => {
+      const texto = normalizar([equipo.serie, equipo.mac, equipo.patrimonio].join(' '));
+      label.hidden = !terminos.every(t => texto.includes(t));
+    });
+  }
+  function refrescar() {
+    equipos = obtenerEquipos();
+    controles = [];
+    lista.replaceChildren();
+    equipos.forEach(equipo => {
+      const label = document.createElement('label'); label.className = 'series-opcion';
+      const checkbox = document.createElement('input'); checkbox.type = 'checkbox';
+      checkbox.className = claseCheckbox; checkbox.value = equipo.serie;
+      const texto = document.createElement('span'); texto.textContent = equipo.serie;
+      const detalle = document.createElement('small');
+      detalle.textContent = [equipo.mac && `MAC: ${equipo.mac}`, equipo.patrimonio && `Patrimonio: ${equipo.patrimonio}`].filter(Boolean).join(' · ');
+      texto.append(detalle); label.append(checkbox, texto); lista.append(label);
+      controles.push({label, checkbox, equipo});
+      checkbox.addEventListener('change', () => {
+        const seleccion = new Set(leer()); const serie = normalizar(checkbox.value);
+        if (checkbox.checked) seleccion.add(serie); else seleccion.delete(serie);
+        escribir([...seleccion]);
+      });
+    });
+    if (!equipos.length) {
+      const vacio = document.createElement('p');
+      vacio.textContent = 'No hay series disponibles para este producto en el origen seleccionado.';
+      lista.append(vacio);
+    }
+    filtrar(); sincronizar();
+  }
+  panel.querySelector('.series-todas').onclick = () => escribir([...leer(), ...equipos.map(e => normalizar(e.serie))]);
+  panel.querySelector('.series-ninguna').onclick = () => escribir([]);
+  filtro.addEventListener('input', filtrar);
+  textarea.addEventListener('input', sincronizar);
+  cantidad.readOnly = true;
+  cantidad.title = 'Se calcula a partir de las series seleccionadas o ingresadas.';
+  refrescar();
+  return { refrescar, limpiar: () => escribir([]) };
+};
+</script>

@@ -83,8 +83,21 @@ assert(!interno.includes('class="inv inv-list"'));
 console.log('OK: listados vacíos y completos, tipos de movimientos, estados y alcance fuera de formularios.');
 
 const acta=render('comprobante',{...base,mov:{...mov,destinoDireccion:'San Antonio',origenDireccion:'CAPE',items:[{...item,marca:'MikroTik',modelo:'CCR2116'}]},web:true,archivos:[],devoluciones:[],original:null,nuevo:true,logo:''});
-assert(acta.includes('DIRECCIÓN DE DESTINO'));
+assert(acta.includes('DESTINO / DESTINATARIO'));
+assert((acta.match(/Dirección:/g) || []).length === 2);
 assert(acta.includes('San Antonio'));
 assert(acta.includes('MikroTik') && acta.includes('CCR2116'));
 assert(!acta.includes('<iframe'));
 console.log('OK: direcciones separadas, marca/modelo y acta sin visor duplicado.');
+
+for (const web of [false, true]) {
+ const produccion = {...mov, tipo:'produccion', items:[{...item, marca:'MIKROTIK', modelo:'CCR2116'}]};
+ const html = render('comprobante', {...base, mov:produccion, web, archivos:[], devoluciones:[], original:null, nuevo:true, logo:''});
+ assert(html.includes('Acta de puesta en producción'));
+ assert(html.includes('Firma de quien entrega'));
+ assert(html.includes('Firma de quien recibe'));
+ if(web) assert(html.includes('/inventario/produccion/' + id + '/devolucion'));
+}
+render('panel', {...base, ...casos.movimientos, tipo:'produccion', config:{ruta:'produccion',accion:'producir',singular:'Nueva puesta en producción'},vista:'movimientos'});
+render('panel', {...base, ...casos.formularioMovimiento, tipo:'produccion',config:{ruta:'produccion'},vista:'formularioMovimiento'});
+console.log('OK: pantallas y comprobantes de puesta en producción.');
