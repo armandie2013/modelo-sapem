@@ -60,8 +60,8 @@ const areas = [
       { permiso: 'inventario', nombre: 'Equipos en producción', descripcion: 'Instalaciones, responsables y retiros de equipos.', href: '/inventario/produccion' },
       {
         permiso: 'viaticos',
-        nombre: 'Viáticos',
-        descripcion: 'Solicitudes y rendiciones de viáticos.',
+        nombre: 'Órdenes de trabajo',
+        descripcion: 'Solicitudes y rendiciones de órdenes de trabajo.',
         href: '/viaticos/dashboard'
       },
       {

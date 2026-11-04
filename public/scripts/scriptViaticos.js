@@ -496,7 +496,7 @@
 //       });
 
 //       if (duplicado) {
-//         alert("No se puede ingresar viajantes duplicados.");
+//         alert("No se puede ingresar agentes duplicados.");
 //         // Volver al valor anterior
 //         sel.value = prevValor;
 
@@ -1118,7 +1118,7 @@
 //       });
 
 //       if (duplicado) {
-//         alert("No se puede ingresar viajantes duplicados.");
+//         alert("No se puede ingresar agentes duplicados.");
 //         // Volver al valor anterior
 //         sel.value = prevValor;
 
@@ -1752,7 +1752,7 @@
 //       });
 
 //       if (duplicado) {
-//         alert("No se puede ingresar viajantes duplicados.");
+//         alert("No se puede ingresar agentes duplicados.");
 //         // Volver al valor anterior
 //         sel.value = prevValor;
 
@@ -2368,7 +2368,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (duplicado) {
-        alert("No se puede ingresar viajantes duplicados.");
+        alert("No se puede ingresar agentes duplicados.");
         sel.value = prevValor;
 
         var cargoInput2 = document.getElementById("cargo-" + idx);

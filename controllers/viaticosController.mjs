@@ -170,7 +170,7 @@
 
 //     res.set({
 //       "Content-Type": "application/pdf",
-//       "Content-Disposition": `inline; filename=viatico-${id}.pdf`,
+//       "Content-Disposition": `inline; filename=orden-trabajo-${id}.pdf`,
 //     });
 
 //     res.send(pdfBuffer);
@@ -392,7 +392,7 @@
 
 //     res.set({
 //       "Content-Type": "application/pdf",
-//       "Content-Disposition": `inline; filename=viatico-${id}.pdf`,
+//       "Content-Disposition": `inline; filename=orden-trabajo-${id}.pdf`,
 //     });
 
 //     res.send(pdfBuffer);
@@ -739,7 +739,7 @@
 
 //     res.set({
 //       "Content-Type": "application/pdf",
-//       "Content-Disposition": `inline; filename=viatico-${id}.pdf`,
+//       "Content-Disposition": `inline; filename=orden-trabajo-${id}.pdf`,
 //     });
 
 //     res.send(pdfBuffer);
@@ -914,13 +914,13 @@ export const mostrarFormularioViatico = async (req, res) => {
       await obtenerDatosFormularioViatico();
 
     res.render("viaticosViews/crearViatico", {
-      title: "Crear Viático",
+      title: "Crear orden de trabajo",
       numeroDeViaje,
       listaDePersonasDisponibles
     });
   } catch (error) {
     console.error("Error al mostrar formulario de viático:", error);
-    res.status(500).send("Error al mostrar formulario de viático");
+    res.status(500).send("Error al mostrar formulario de orden de trabajo");
   }
 };
 
@@ -945,7 +945,7 @@ export const crearViaticoController = async (req, res) => {
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Generando viático...</title>
+  <title>Generando orden de trabajo...</title>
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -1005,7 +1005,7 @@ export const crearViaticoController = async (req, res) => {
 </head>
 <body>
   <div class="card">
-    <h1>Generando viático…</h1>
+    <h1>Generando orden de trabajo…</h1>
     <p>Intentando abrir el PDF en una pestaña nueva.</p>
     <p id="msgPopup" class="small hidden">
       Parece que el navegador bloqueó la ventana emergente.<br/>
@@ -1017,7 +1017,7 @@ export const crearViaticoController = async (req, res) => {
     </button>
 
     <p class="small">
-      Luego vas a ser redirigido al dashboard de viáticos.
+      Luego vas a ser redirigido al dashboard de órdenes de trabajo.
     </p>
   </div>
 
@@ -1058,7 +1058,7 @@ export const crearViaticoController = async (req, res) => {
 </html>`);
   } catch (error) {
     console.error("❌ Error al crear el viático:", error);
-    res.status(500).send("Error al crear el viático");
+    res.status(500).send("Error al crear la orden de trabajo");
   }
 };
 
@@ -1083,7 +1083,7 @@ export const mostrarDashboardViaticos = async (req, res) => {
     }
 
     res.render("viaticosViews/dashboardViaticos", {
-      title: hayFiltros ? "Viáticos filtrados" : "Últimos Viáticos",
+      title: hayFiltros ? "Órdenes de trabajo filtradas" : "Últimas órdenes de trabajo",
       viaticos,
       mostrarTodos: hayFiltros, // si hay filtros, mostramos como "modo todos"
       query: queryLimpia
@@ -1107,14 +1107,14 @@ export const mostrarTodosLosViaticos = async (req, res) => {
     const viaticos = hayFiltros ? (todos || []).filter(filtroFn) : todos;
 
     res.render("viaticosViews/dashboardViaticos", {
-      title: "Todos los Viáticos",
+      title: "Todas las órdenes de trabajo",
       viaticos,
       mostrarTodos: true,
       query: queryLimpia
     });
   } catch (error) {
     console.error("Error al cargar todos los viáticos:", error);
-    res.status(500).send("Error al cargar todos los viáticos");
+    res.status(500).send("Error al cargar todos las órdenes de trabajo");
   }
 };
 
@@ -1129,7 +1129,7 @@ export const eliminarViaticoController = async (req, res) => {
     res.redirect("/viaticos/dashboard/todos");
   } catch (error) {
     console.error("❌ Error al eliminar viático:", error);
-    res.status(500).send("Error al eliminar viático");
+    res.status(500).send("Error al eliminar orden de trabajo");
   }
 };
 
@@ -1140,17 +1140,17 @@ export const verViaticoController = async (req, res) => {
   try {
     const viatico = await obtenerViaticoPorId(req.params.id);
     const listaDePersonasDisponibles = await obtenerPersonasDisponiblesOrdenadas();
-    if (!viatico) return res.status(404).send("Viático no encontrado");
+    if (!viatico) return res.status(404).send("Orden de trabajo no encontrada");
 
     res.render("viaticosViews/verViatico", {
-      title: "Detalle del Viático",
+      title: "Detalle de la orden de trabajo",
       viatico,
       listaDePersonasDisponibles,
       soloLectura: true
     });
   } catch (error) {
     console.error("Error al mostrar viático:", error);
-    res.status(500).send("Error al mostrar viático");
+    res.status(500).send("Error al mostrar orden de trabajo");
   }
 };
 
@@ -1181,7 +1181,7 @@ export async function actualizarViaticoController(req, res) {
     res.redirect("/viaticos/dashboard");
   } catch (error) {
     console.error("Error al actualizar viático:", error);
-    res.status(500).send("Error al actualizar viático");
+    res.status(500).send("Error al actualizar orden de trabajo");
   }
 }
 
@@ -1193,7 +1193,7 @@ export async function editarViaticoController(req, res) {
     res.redirect("/viaticos/dashboard");
   } catch (error) {
     console.error("Error al editar viático:", error);
-    res.status(500).send("Error al editar viático");
+    res.status(500).send("Error al editar orden de trabajo");
   }
 }
 
@@ -1207,7 +1207,7 @@ export const generarPDFViaticoController = async (req, res) => {
 
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename=viatico-${id}.pdf`
+      "Content-Disposition": `inline; filename=orden-trabajo-${id}.pdf`
     });
 
     res.send(pdfBuffer);
@@ -1224,7 +1224,7 @@ export async function mostrarVistaPDF(req, res) {
   const { id } = req.params;
   try {
     const viatico = await obtenerViaticoPorId(id);
-    if (!viatico) return res.status(404).send("Viático no encontrado");
+    if (!viatico) return res.status(404).send("Orden de trabajo no encontrada");
 
     const logoDataUri = leerLogoDataUriDesdeHtml();
 
