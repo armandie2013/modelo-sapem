@@ -5,7 +5,7 @@
     <!-- Encabezado: título izquierda, botón derecha -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
       <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-left flex-1">
-        Detalle de Viático
+        Detalle de la orden de trabajo
       </h1>
 
       <a
@@ -41,7 +41,7 @@
         >
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Nº de Viaje</label>
+        <label class="block text-sm font-medium text-gray-700">Nº de orden de trabajo</label>
         <input
           type="text"
           value="<%= viatico.numeroDeViaje %>"
@@ -80,7 +80,7 @@
             </tr>
           <% }) %>
           <tr class="bg-gray-50 font-semibold">
-            <td colspan="3" class="border border-gray-200 px-4 py-2 text-right">Total de Viáticos</td>
+            <td colspan="3" class="border border-gray-200 px-4 py-2 text-right">Total de importes</td>
             <td class="border border-gray-200 px-4 py-2 text-right">
               $<%= viatico.montoTotalViatico.toLocaleString('es-AR', {minimumFractionDigits: 2}) %>
             </td>
@@ -130,7 +130,7 @@
     </div>
 
     <div class="mt-4">
-      <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
+      <label class="block text-sm font-medium text-gray-700">Motivo de la orden de trabajo</label>
       <input
         type="text"
         value="<%= viatico.motivoDelViaje %>"

@@ -8,12 +8,12 @@
           href="/viaticos/crear"
           class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition text-[12px]"
         >
-          Crear Viático
+          Crear orden de trabajo
         </a>
       <% } %>
       
       <h1 class="text-lg sm:text-xl font-semibold text-gray-800 text-center flex-1 sm:text-center">
-        Listado de Viáticos
+        Listado de Órdenes de trabajo
       </h1>
 
       <%
@@ -27,14 +27,14 @@
           href="/viaticos/dashboard/todos"
           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-[12px]"
         >
-          Ver todos los viáticos
+          Ver todas las órdenes de trabajo
         </a>
       <% } else { %>
         <a
           href="/viaticos/dashboard"
           class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition text-[12px]"
         >
-          Ver últimos 10
+          Ver últimas 10
         </a>
       <% } %>
     </div>
@@ -151,7 +151,7 @@
           </p>
         <% } else { %>
           <p class="text-gray-600 text-center text-sm">
-            No hay viáticos disponibles.
+            No hay órdenes de trabajo disponibles.
           </p>
         <% } %>
       </div>
@@ -169,7 +169,7 @@
               <th class="px-2 py-2 text-left">Origen</th>
               <th class="px-2 py-2 text-left">Destino</th>
               <th class="px-2 py-2 text-left">Motivo</th>
-              <th class="px-2 py-2 text-right">Total Viático</th>
+              <th class="px-2 py-2 text-right">Importe total</th>
               <th class="px-2 py-2 text-right">Adicional</th>
               <th class="px-2 py-2 text-left">Creado por</th>
               <th class="px-2 py-2 text-center">Acciones</th>
@@ -332,7 +332,7 @@
                         action="/viaticos/<%= v._id %>?_method=DELETE"
                         method="POST"
                         class="inline"
-                        onsubmit="return confirm('¿Eliminar este viático?')"
+                        onsubmit="return confirm('¿Eliminar esta orden de trabajo?')"
                       >
                         <button
                           type="submit"

@@ -16,7 +16,7 @@
     <div class="mb-6">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 text-left flex-1">
-          Editar Viático
+          Editar orden de trabajo
         </h1>
 
         <a
@@ -32,7 +32,7 @@
       </div>
 
       <p class="mt-1 text-sm text-gray-500">
-        Actualizá los datos del viático.
+        Actualizá los datos dla orden de trabajo.
       </p>
     </div>
     <!-- FIN ENCABEZADO -->
@@ -86,7 +86,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">N° de Viaje</label>
+            <label class="block text-sm font-medium text-gray-700">N° de orden de trabajo</label>
             <input
               type="text"
               name="numeroDeViaje"
@@ -203,7 +203,7 @@
               <% } %>
 
               <tr class="bg-indigo-50/90 font-semibold">
-                <td colspan="3" class="px-4 py-2 text-right border border-gray-300">Total de Viáticos</td>
+                <td colspan="3" class="px-4 py-2 text-right border border-gray-300">Total de importes</td>
                 <td class="px-4 py-2 border border-gray-300">
                   <span class="text-gray-700 mr-1">$</span>
                   <span id="totalViatico"><%= fmtARS(viatico.montoTotalViatico) %></span>
@@ -227,7 +227,7 @@
             </svg>
           </span>
           <div>
-            <h2 class="text-base font-semibold text-gray-800">Datos del viaje</h2>
+            <h2 class="text-base font-semibold text-gray-800">Datos de la orden de trabajo</h2>
             <p class="text-xs text-gray-500">Fechas, recorrido y motivo.</p>
           </div>
         </div>
@@ -283,7 +283,7 @@
         </div>
 
         <div class="mt-2">
-          <label class="block text-sm font-medium text-gray-700">Motivo del Viaje</label>
+          <label class="block text-sm font-medium text-gray-700">Motivo de la orden de trabajo</label>
           <input
             type="text"
             name="motivoDelViaje"
