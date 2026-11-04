@@ -40,7 +40,7 @@
           <% Object.entries({
             disponible: 'Disponible',
             revision: 'A revisar',
-            asignado: 'Asignado'
+            asignado: 'Asignado', produccion: 'En producción'
           }).forEach(([valor, texto]) => { %>
             <option
               value="<%= valor %>"
@@ -94,7 +94,7 @@
             <td><%= equipo.mac || '—' %></td>
             <td><%= equipo.patrimonio || '—' %></td>
             <td><%= equipo.lugar.nombre %></td>
-            <td><span class="state"><%= ({disponible:'Disponible', revision:'A revisar', asignado:'Asignado'})[equipo.estado] || equipo.estado %></span></td>
+            <td><span class="state"><%= ({disponible:'Disponible', revision:'A revisar', asignado:'Asignado', produccion:'En producción'})[equipo.estado] || equipo.estado %></span></td>
           </tr>
         <% }) %>
 

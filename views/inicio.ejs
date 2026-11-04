@@ -12,6 +12,7 @@
   };
 
   const iconoInicio = modulo => {
+    if (modulo.href === '/inventario/produccion') return 'factory';
     if (iconosInicio[modulo.permiso]) {
       return iconosInicio[modulo.permiso];
     }

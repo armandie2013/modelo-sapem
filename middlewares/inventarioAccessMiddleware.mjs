@@ -6,6 +6,7 @@ export const accionesInventario = [
   "administrar",
   "ingresar",
   "asignar",
+  "producir",
   "devolver",
   "traspasar",
 ];

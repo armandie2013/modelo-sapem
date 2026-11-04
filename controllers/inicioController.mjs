@@ -54,9 +54,10 @@ const areas = [
       {
         permiso: 'inventario',
         nombre: 'Inventario',
-        descripcion: 'Existencias, ingresos y asignaciones.',
+        descripcion: 'Existencias, ingresos, asignaciones y producción.',
         href: '/inventario'
       },
+      { permiso: 'inventario', nombre: 'Equipos en producción', descripcion: 'Instalaciones, responsables y retiros de equipos.', href: '/inventario/produccion' },
       {
         permiso: 'viaticos',
         nombre: 'Viáticos',

@@ -1,0 +1,354 @@
+<style>
+  .inv .inv-paso {
+    margin: 0 0 18px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    padding: 14px;
+  }
+
+  .inv .inv-paso > legend {
+    padding: 0 8px;
+    color: #1e40af;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .inv .material-buscador {
+    background: #eff6ff;
+    border: 1px solid #cbd5e1;
+    border-left: 3px solid #1e40af;
+    border-radius: 5px;
+    padding: 12px;
+    margin: 10px 0 14px;
+  }
+
+  .inv .material-buscador label {
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+
+  .inv .material-busqueda-fila {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .inv .material-busqueda-fila input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .inv .material-busqueda-fila button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .inv .material-resultados {
+    display: grid;
+    gap: 5px;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+
+  .inv .material-resultados:empty {
+    display: none;
+  }
+
+  .inv .material-resultados button {
+    width: 100%;
+    justify-content: space-between;
+    text-align: left;
+    background: white;
+    color: #172033;
+    border: 1px solid #cbd5e1;
+  }
+
+  .inv .material-resultados button:hover {
+    border-color: #1e40af;
+  }
+
+  .inv .material-resultados .agregar-texto {
+    color: #1e40af;
+    font-weight: 700;
+    margin-left: 10px;
+  }
+
+  .inv .material-resultados small {
+    display: block;
+    color: #64748b;
+  }
+
+  .inv .material-vacio {
+    border: 1px dashed #cbd5e1;
+    border-radius: 5px;
+    padding: 18px;
+    text-align: center;
+    color: #64748b;
+  }
+
+  .inv .material-table {
+    table-layout: fixed;
+    min-width: 680px;
+  }
+
+  .inv .material-table th:nth-child(1) {
+    width: 43%;
+  }
+
+  .inv .material-table th:nth-child(2) {
+    width: 95px;
+  }
+
+  .inv .material-table th:last-child {
+    width: 50px;
+  }
+
+  .inv .material-table td {
+    vertical-align: top;
+  }
+
+  .inv .material-table .cantidad {
+    width: 78px;
+    text-align: right;
+    margin-top: 0;
+  }
+
+  .inv .material-table .series {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .inv .material-identidad {
+    display: block;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  .inv .material-detalle {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .inv button.material-quitar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    min-height: 30px;
+    padding: 5px;
+    color: #b91c1c;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+  }
+
+  .inv button.material-quitar:hover {
+    border-color: #b91c1c;
+  }
+
+  .inv .material-quitar svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .inv .retorno {
+    position: relative;
+    margin-top: 12px;
+    padding: 12px;
+  }
+
+  .inv .retorno .material-quitar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  .inv .retorno .series-retorno {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 5px;
+    margin-right: 35px;
+  }
+
+  .inv .retorno .series-retorno label {
+    margin: 0;
+  }
+
+  .inv .retorno .cantidadRetorno {
+    width: 100px;
+  }
+
+  .inv .material-estado {
+    font-size: 12px;
+    color: #64748b;
+    margin: 6px 0 0;
+  }
+
+  .inv [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 640px) {
+    .inv .material-busqueda-fila {
+      flex-wrap: wrap;
+    }
+
+    .inv .material-busqueda-fila input {
+      flex-basis: 100%;
+    }
+
+    .inv button.material-quitar {
+      width: 40px;
+      min-height: 40px;
+    }
+  }
+</style>
+
+<div class="material-buscador">
+  <label for="<%= buscadorId %>">
+    Buscar producto para agregar
+  </label>
+
+  <div class="material-busqueda-fila">
+    <input
+      id="<%= buscadorId %>"
+      type="search"
+      placeholder="Código, nombre, marca o modelo"
+      autocomplete="off"
+      aria-controls="<%= buscadorId %>-resultados"
+    >
+
+    <button type="button" class="material-buscar">
+      + Agregar artículo
+    </button>
+  </div>
+
+  <p class="material-estado" role="status">
+    Escribí un producto y seleccioná «Agregar» en el resultado.
+  </p>
+
+  <div
+    id="<%= buscadorId %>-resultados"
+    class="material-resultados"
+  ></div>
+
+  <script
+    type="application/json"
+    class="material-catalogo"
+  ><%- JSON.stringify(opcionesMateriales).replace(/</g, '\u003c') %></script>
+</div>
+
+<script>
+(() => {
+  const bloque = document.currentScript.previousElementSibling;
+  const form = bloque.closest('form');
+  const input = bloque.querySelector('input');
+  const resultados = bloque.querySelector('.material-resultados');
+  const estado = bloque.querySelector('.material-estado');
+
+  const productos = JSON.parse(
+    bloque.querySelector('.material-catalogo').textContent
+  );
+
+  const normalizar = valor =>
+    String(valor || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
+
+  const buscar = () => {
+    resultados.replaceChildren();
+
+    const terminos = normalizar(input.value)
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (!terminos.length) {
+      estado.textContent =
+        'Escribí un producto para buscarlo. La lista empieza vacía.';
+      return;
+    }
+
+    const encontrados = productos.filter(producto => {
+      const texto = normalizar([
+        producto.codigo,
+        producto.nombre,
+        producto.marca,
+        producto.modelo
+      ].join(' '));
+
+      return terminos.every(termino => texto.includes(termino));
+    });
+
+    estado.textContent = encontrados.length
+      ? `${encontrados.length} coincidencias${
+          encontrados.length > 15
+            ? '; se muestran las primeras 15. Precisá la búsqueda.'
+            : '.'
+        }`
+      : 'No se encontraron productos con esos datos.';
+
+    encontrados.slice(0, 15).forEach(producto => {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+
+      const texto = document.createElement('span');
+      texto.textContent =
+        `${producto.codigo || ''} · ${producto.nombre || ''}`;
+
+      const detalle = document.createElement('small');
+      detalle.textContent = [
+        producto.marca,
+        producto.modelo
+      ].filter(Boolean).join(' · ');
+
+      texto.append(detalle);
+
+      const agregar = document.createElement('span');
+      agregar.className = 'agregar-texto';
+      agregar.textContent = '+ Agregar';
+
+      boton.append(texto, agregar);
+
+      boton.addEventListener('click', () => {
+        form.dispatchEvent(
+          new CustomEvent('inventario:agregar', {
+            detail: producto
+          })
+        );
+
+        input.value = '';
+        resultados.replaceChildren();
+
+        estado.textContent =
+          'Producto seleccionado. Podés buscar otro artículo.';
+      });
+
+      resultados.append(boton);
+    });
+  };
+
+  input.addEventListener('input', buscar);
+
+  input.addEventListener('keydown', evento => {
+    if (evento.key === 'Enter') {
+      evento.preventDefault();
+      buscar();
+      resultados.querySelector('button')?.focus();
+    }
+
+    if (evento.key === 'Escape') {
+      resultados.replaceChildren();
+    }
+  });
+
+  bloque.querySelector('.material-buscar')
+    .addEventListener('click', () => {
+      buscar();
+      input.focus();
+    });
+})();
+</script>

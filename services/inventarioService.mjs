@@ -231,7 +231,7 @@ export async function crearMovimiento(
   const tipo = limpiar(body.tipo);
 
   exigir(
-    ["ingreso", "asignacion", "devolucion", "traspaso"].includes(
+    ["ingreso", "asignacion", "produccion", "devolucion", "traspaso"].includes(
       tipo
     ),
     "Operación inválida."
@@ -301,13 +301,13 @@ export async function crearMovimiento(
         ).session(session);
 
         exigir(
-          original?.tipo === "asignacion" && original.estado !== "anulado",
-          "Seleccioná una asignación válida."
+          ["asignacion", "produccion"].includes(original?.tipo) && original.estado !== "anulado",
+          "Seleccioná una asignación o puesta en producción válida."
         );
 
         exigir(
           fechaMovimiento >= original.fecha,
-          "La devolución no puede ser anterior a la asignación."
+          "La devolución no puede ser anterior al movimiento original."
         );
 
         origen = await Lugar.findById(
@@ -331,7 +331,7 @@ export async function crearMovimiento(
 
       exigir(
         destino.tipo ===
-          (tipo === "asignacion" ? "destino" : "deposito"),
+          (["asignacion", "produccion"].includes(tipo) ? "destino" : "deposito"),
         "Tipo de destino incorrecto."
       );
 
@@ -343,14 +343,16 @@ export async function crearMovimiento(
       );
 
       const estadoEntrada =
-        tipo === "asignacion"
+        tipo === "produccion"
+          ? "produccion"
+          : tipo === "asignacion"
           ? "asignado"
           : tipo === "devolucion"
             ? limpiar(body.estadoRecepcion)
             : "disponible";
 
       exigir(
-        ["disponible", "revision", "asignado"].includes(
+        ["disponible", "revision", "asignado", "produccion"].includes(
           estadoEntrada
         ),
         "Estado de recepción inválido."
@@ -399,6 +401,7 @@ export async function crearMovimiento(
 
         original: original?._id,
         originalNumero: original?.numero,
+        originalTipo: original?.tipo,
 
         estadoRecepcion:
           estadoEntrada === "revision"
@@ -519,7 +522,7 @@ export async function crearMovimiento(
 
               estado:
                 tipo === "devolucion"
-                  ? "asignado"
+                  ? (original.tipo === "produccion" ? "produccion" : "asignado")
                   : "disponible",
             };
 
@@ -546,7 +549,7 @@ export async function crearMovimiento(
             equipo.estado = estadoEntrada;
 
             equipo.asignacion =
-              tipo === "asignacion"
+              ["asignacion", "produccion"].includes(tipo)
                 ? movimiento._id
                 : undefined;
 
@@ -559,7 +562,7 @@ export async function crearMovimiento(
             producto._id,
             origen._id,
             tipo === "devolucion"
-              ? "asignado"
+              ? (original.tipo === "produccion" ? "produccion" : "asignado")
               : "disponible",
             -unidades,
             session

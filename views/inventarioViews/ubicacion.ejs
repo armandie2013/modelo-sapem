@@ -43,7 +43,7 @@
               <%=
                 saldo.estado === 'revision'
                   ? 'A revisar'
-                  : saldo.estado
+                  : saldo.estado === 'produccion' ? 'En producción' : saldo.estado
               %>
             </td>
 
