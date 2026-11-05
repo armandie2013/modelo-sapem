@@ -1,3 +1,10 @@
+<%
+  const ordenCodigos = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
+  const productosPorCodigo = [...productos].sort((a, b) =>
+    ordenCodigos.compare(String(a.codigo || ''), String(b.codigo || '')) ||
+    ordenCodigos.compare(String(a.nombre || ''), String(b.nombre || ''))
+  );
+%>
 <style>
   .inv .productos-table {
     width: 100%;
@@ -104,7 +111,7 @@
       </thead>
 
       <tbody>
-        <% productos.forEach(producto => { %>
+        <% productosPorCodigo.forEach(producto => { %>
           <tr data-fila-producto>
             <td class="col-codigo"><%= producto.codigo %></td>
 
