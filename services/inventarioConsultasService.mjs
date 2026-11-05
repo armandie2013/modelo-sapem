@@ -347,7 +347,7 @@ export async function consultarEquipo(req) {
     cantidadRegistros,
   ] = await Promise.all([
     Movimiento.find(filtro)
-      .sort({ numero: -1 })
+      .sort({ numero: 1 })
       .skip((pagina - 1) * 25)
       .limit(25)
       .lean(),

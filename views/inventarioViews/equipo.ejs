@@ -1,27 +1,37 @@
+<style>
+  .inv .equipo-cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .inv .equipo-cabecera h2 { margin: 0; font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
+  .inv .equipo-cabecera .actions { margin: 0; flex-shrink: 0; }
+  .inv .equipo-datos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 18px; margin: 0; }
+  .inv .equipo-datos > div { min-width: 0; }
+  .inv .equipo-datos dt { font-size: 12px; color: #64748b; margin-bottom: 2px; }
+  .inv .equipo-datos dd { margin: 0; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+  .inv .equipo-datos .equipo-ubicacion { grid-column: auto; }
+  .inv .equipo-datos .equipo-serie { font-weight: 600; }
+  @media (max-width: 900px) { .inv .equipo-datos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 480px) {
+    .inv .equipo-datos { grid-template-columns: minmax(0, 1fr); }
+    .inv .equipo-datos .equipo-ubicacion { grid-column: auto; }
+    .inv .equipo-cabecera { flex-wrap: wrap; }
+  }
+</style>
 <section>
-  <%- include('accionesRegistro', { tipoRegistro: 'equipo', registro: equipo }) %>
-  <h2><%= equipo.producto.nombre %></h2>
-
-  <p><b>Código de producto:</b> <%= equipo.producto.codigo %></p>
-  <p><b>Marca:</b> <%= equipo.producto.marca || 'No informada' %></p>
-  <p><b>Modelo:</b> <%= equipo.producto.modelo || 'No informado' %></p>
-  <p><b>Serie:</b> <%= equipo.serie %></p>
-  <p><b>MAC:</b> <%= equipo.mac || '—' %></p>
-
-  <p>
-    <b>Patrimonio:</b>
-    <%= equipo.patrimonio || '—' %>
-  </p>
-
-  <p>
-    <b>Ubicación actual:</b>
-
-    <a href="/inventario/ubicaciones/<%= equipo.lugar._id %>">
-      <%= equipo.lugar.nombre %>
-    </a>
-  </p>
-
-  <p><b>Estado:</b> <%= equipo.estado === 'produccion' ? 'En producción' : equipo.estado %></p>
+  <div class="equipo-cabecera">
+    <h2><%= equipo.producto.nombre %></h2>
+    <%- include('accionesRegistro', { tipoRegistro: 'equipo', registro: equipo }) %>
+  </div>
+  <dl class="equipo-datos">
+    <div><dt>Código de producto</dt><dd><%= equipo.producto.codigo %></dd></div>
+    <div><dt>Marca</dt><dd><%= equipo.producto.marca || 'No informada' %></dd></div>
+    <div><dt>Modelo</dt><dd><%= equipo.producto.modelo || 'No informado' %></dd></div>
+    <div><dt>Serie</dt><dd class="equipo-serie"><%= equipo.serie %></dd></div>
+    <div><dt>MAC</dt><dd><%= equipo.mac || '—' %></dd></div>
+    <div><dt>Patrimonio</dt><dd><%= equipo.patrimonio || '—' %></dd></div>
+    <div class="equipo-ubicacion"><dt>Ubicación actual</dt><dd>
+      <a href="/inventario/ubicaciones/<%= equipo.lugar._id %>"><%= equipo.lugar.nombre %></a>
+    </dd></div>
+    <div><dt>Estado</dt><dd><span class="state"><%= ({ disponible: 'Disponible', revision: 'A revisar', asignado: 'Asignado', produccion: 'En producción' })[equipo.estado] || equipo.estado %></span></dd></div>
+  </dl>
 </section>
 
 <section>
@@ -45,7 +55,7 @@
           <tr>
             <td><%= movimiento.numero %></td>
             <td><%= fecha(movimiento.fecha) %></td>
-            <td><%= movimiento.tipo === 'produccion' ? 'Puesta en producción' : movimiento.tipo %></td>
+            <td><%= ({ ingreso: 'Ingreso', asignacion: 'Asignación', produccion: 'Puesta en producción', devolucion: 'Devolución', traspaso: 'Traspaso' })[movimiento.tipo] || movimiento.tipo %></td>
             <td><%= movimiento.origenNombre %></td>
             <td><%= movimiento.destinoNombre %></td>
 
