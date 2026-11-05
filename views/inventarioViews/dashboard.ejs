@@ -1,3 +1,26 @@
+<%
+  const ordenProductos = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
+  const productosOrdenados = [...resumen].sort((a, b) =>
+    ordenProductos.compare(String(a.codigo || ''), String(b.codigo || '')) ||
+    ordenProductos.compare(String(a.nombre || ''), String(b.nombre || ''))
+  );
+  const tieneExistencias = producto =>
+    ['disponible', 'revision', 'asignado', 'produccion'].some(
+      estado => Number(producto[estado] || 0) > 0
+    );
+  const cantidadConStock = productosOrdenados.filter(tieneExistencias).length;
+%>
+<style>
+  .inv .stock-ver-todos { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; margin: 0; white-space: nowrap; }
+  .inv .stock-ver-todos input { width: auto; margin: 0; }
+  .inv .stock-cantidad { display: inline-block; min-width: 28px; padding: 2px 6px; border-radius: 4px; text-align: right; font-variant-numeric: tabular-nums; }
+  .inv .stock-positivo { color: #1e40af; background: #eff6ff; font-weight: 700; }
+  .inv .stock-cero { color: #94a3b8; }
+  .inv .stock-table .stock-total { background: #dbeafe; color: #1e3a8a; }
+  .inv .stock-table td:first-child { overflow-wrap: anywhere; }
+  .inv .stock-codigo { white-space: nowrap; font-weight: 600; }
+  .inv .stock-table [hidden] { display: none !important; }
+</style>
 <section>
   <div class="panel-heading">
   <div>
@@ -9,26 +32,10 @@
   </p>
 
   </div>
-  <div class="actions">
-    <% if (permisos.ingresar) { %>
-      <a
-        class="button"
-        href="/inventario/ingresos/nuevo"
-      >
-        Nuevo ingreso
-      </a>
-    <% } %>
-
-    <% if (permisos.asignar) { %>
-      <a
-        class="button secondary"
-        href="/inventario/asignaciones/nuevo"
-      >
-        Nueva asignación
-      </a>
-    <% } %>
-    <% if (permisos.producir) { %><a class="button secondary" href="/inventario/produccion/nuevo">Poner en producción</a><% } %>
-  </div>
+  <label class="stock-ver-todos">
+    <input type="checkbox" id="stockVerTodos" aria-controls="stockGeneralFilas">
+    Ver todos los productos
+  </label>
 
   </div>
   <div class="scroll">
@@ -46,34 +53,52 @@
         </tr>
       </thead>
 
-      <tbody>
-        <% resumen.forEach(producto => { %>
-          <tr>
-            <td>
-              <%= producto.codigo %> ·
-              <%= producto.nombre %>
-            </td>
+      <tbody id="stockGeneralFilas">
+        <% productosOrdenados.forEach(producto => { const conStock = tieneExistencias(producto); %>
+          <tr data-stock="<%= conStock ? 'si' : 'no' %>" <%= conStock ? '' : 'hidden' %>>
+            <td><span class="stock-codigo"><%= producto.codigo %></span> · <%= producto.nombre %></td>
             <td><%= producto.unidad %></td>
-            <td><b><%= n(producto.fisico) %></b></td>
-            <td><%= n(producto.disponible) %></td>
-            <td><%= n(producto.revision) %></td>
-            <td><%= n(producto.asignado) %></td>
-            <td><%= n(producto.produccion) %></td>
-            <td><%= n(producto.total) %></td>
+            <% ['fisico', 'disponible', 'revision', 'asignado', 'produccion', 'total'].forEach(estado => {
+              const positivo = Number(producto[estado] || 0) > 0;
+            %>
+              <td><span class="stock-cantidad <%= positivo ? 'stock-positivo' : 'stock-cero' %> <%= positivo && estado === 'total' ? 'stock-total' : '' %>"><%= n(producto[estado] || 0) %></span></td>
+            <% }); %>
           </tr>
-        <% }) %>
-
-        <% if (!resumen.length) { %>
-          <tr>
-            <td colspan="8">
-              Todavía no hay productos.
-              Crealos desde la pestaña Productos.
-            </td>
-          </tr>
-        <% } %>
+        <% }); %>
+        <tr id="stockGeneralVacio" <%= cantidadConStock ? 'hidden' : '' %>>
+          <td colspan="8" class="empty">
+            <span id="stockGeneralVacioTexto"><%= resumen.length ? 'No hay productos con existencias. Activá «Ver todos los productos» para consultar el catálogo completo.' : 'Todavía no hay productos. Crealos desde la pestaña Productos.' %></span>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
+  <p class="muted" id="stockGeneralConteo" role="status"><%= cantidadConStock %> de <%= resumen.length %> productos · Solo con existencias</p>
+  <script>
+  (() => {
+    const control = document.getElementById('stockVerTodos');
+    const filas = [...document.querySelectorAll('#stockGeneralFilas tr[data-stock]')];
+    const vacio = document.getElementById('stockGeneralVacio');
+    const textoVacio = document.getElementById('stockGeneralVacioTexto');
+    const conteo = document.getElementById('stockGeneralConteo');
+    function actualizar() {
+      let visibles = 0;
+      filas.forEach(fila => {
+        fila.hidden = !control.checked && fila.dataset.stock !== 'si';
+        if (!fila.hidden) visibles++;
+      });
+      vacio.hidden = visibles > 0;
+      textoVacio.textContent = filas.length
+        ? 'No hay productos con existencias. Activá «Ver todos los productos» para consultar el catálogo completo.'
+        : 'Todavía no hay productos. Crealos desde la pestaña Productos.';
+      conteo.textContent = `${visibles} de ${filas.length} productos · ${control.checked ? 'Todos los productos' : 'Solo con existencias'}`;
+    }
+    control.addEventListener('change', actualizar);
+    // Evitar que el navegador restaure el checkbox al volver y cambie el filtro inicial.
+    control.checked = false;
+    actualizar();
+  })();
+  </script>
 </section>
 
 <section>
