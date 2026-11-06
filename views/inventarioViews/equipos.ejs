@@ -1,14 +1,20 @@
+<style>
+  .inv .equipos-consulta .grid { grid-template-columns: minmax(250px, 2fr) repeat(2, minmax(140px, 1fr)); }
+  .inv .equipo-codigo { white-space: nowrap; font-weight: 600; }
+  @media (max-width: 700px) { .inv .equipos-consulta .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>
 <section>
   <p class="muted">
     Consultá la ubicación y el historial de cada
     equipo identificado por serie.
   </p>
 
-  <form class="list-toolbar" method="get" action="/inventario/equipos">
+  <form class="list-toolbar equipos-consulta" method="get" action="/inventario/equipos">
     <div class="grid">
       <label>
-        Serie exacta
-        <input name="serie" value="<%= serie %>">
+        Buscar equipo
+        <input type="search" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Código, producto, marca, modelo, serie, MAC o patrimonio" maxlength="180">
+        <% if (serie) { %><input type="hidden" name="serie" value="<%= serie %>"><small class="muted">Serie exacta: <%= serie %> · Limpiar para quitar este filtro.</small><% } %>
       </label>
 
       <label>
@@ -69,38 +75,32 @@
     <table class="list-table">
       <thead>
         <tr>
-          <th>Producto</th>
-          <th>Marca / modelo</th>
+          <th>Código</th>
+          <th>Producto / Marca / Modelo</th>
           <th>Serie</th>
-          <th>MAC</th>
-          <th>Patrimonio</th>
           <th>Ubicación</th>
           <th>Estado</th>
+          <th>Detalle</th>
         </tr>
       </thead>
 
       <tbody>
         <% equipos.forEach(equipo => { %>
           <tr>
-            <td><span class="cell-title"><%= equipo.producto.nombre %></span><span class="cell-sub">Código: <%= equipo.producto.codigo %></span></td>
-            <td><span class="cell-title"><%= equipo.producto.marca || 'No informada' %></span><span class="cell-sub"><%= equipo.producto.modelo || 'Modelo no informado' %></span></td>
-
-            <td>
-              <a href="/inventario/equipos/<%= equipo._id %>">
-                <%= equipo.serie %>
-              </a>
+            <td class="equipo-codigo"><%= equipo.producto?.codigo || '—' %></td>
+            <td><span class="cell-title"><%= equipo.producto?.nombre || 'Producto no disponible' %></span>
+              <span class="cell-sub"><%= [equipo.producto?.marca, equipo.producto?.modelo].filter(Boolean).join(' · ') || 'Marca y modelo no informados' %></span>
             </td>
-
-            <td><%= equipo.mac || '—' %></td>
-            <td><%= equipo.patrimonio || '—' %></td>
-            <td><%= equipo.lugar.nombre %></td>
+            <td><a href="/inventario/equipos/<%= equipo._id %>"><%= equipo.serie %></a></td>
+            <td><%= equipo.lugar?.nombre || 'Ubicación no disponible' %></td>
             <td><span class="state"><%= ({disponible:'Disponible', revision:'A revisar', asignado:'Asignado', produccion:'En producción'})[equipo.estado] || equipo.estado %></span></td>
+            <td><a class="button secondary" href="/inventario/equipos/<%= equipo._id %>">Ver ficha</a></td>
           </tr>
         <% }) %>
 
         <% if (!equipos.length) { %>
           <tr>
-            <td colspan="7" class="empty">
+            <td colspan="6" class="empty">
               No se encontraron equipos.
             </td>
           </tr>
@@ -111,6 +111,6 @@
 
   <%- include('paginacion', {
     base: '/inventario/equipos',
-    filtros: { serie, ubicacion, estado }
+    filtros: { q: typeof q !== 'undefined' ? q : '', serie, ubicacion, estado }
   }) %>
 </section>

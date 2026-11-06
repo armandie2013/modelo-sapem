@@ -601,7 +601,7 @@ export async function archivo(req, res) {
     "Content-Type": adjunto.mime,
     "X-Content-Type-Options": "nosniff",
     "Content-Disposition":
-      `attachment; filename*=UTF-8''${
+      `${req.query.ver === '1' && ['application/pdf', 'image/png', 'image/jpeg'].includes(adjunto.mime) ? 'inline' : 'attachment'}; filename*=UTF-8''${
         encodeURIComponent(adjunto.nombre)
       }`,
   });
