@@ -2368,7 +2368,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (duplicado) {
-        alert("No se puede ingresar agentes duplicados.");
+        alert("No se puede ingresar viajantes duplicados.");
         sel.value = prevValor;
 
         var cargoInput2 = document.getElementById("cargo-" + idx);

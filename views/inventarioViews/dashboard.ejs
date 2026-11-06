@@ -11,6 +11,9 @@
   const cantidadConStock = productosOrdenados.filter(tieneExistencias).length;
 %>
 <style>
+  .inv .stock-buscador { display: flex; gap: 8px; align-items: end; margin: 0 0 12px; }
+  .inv .stock-buscador label { flex: 1; max-width: 560px; margin: 0; }
+  .inv .stock-buscador button { margin: 0; }
   .inv .stock-ver-todos { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; margin: 0; white-space: nowrap; }
   .inv .stock-ver-todos input { width: auto; margin: 0; }
   .inv .stock-cantidad { display: inline-block; min-width: 28px; padding: 2px 6px; border-radius: 4px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -38,6 +41,12 @@
   </label>
 
   </div>
+  <div class="stock-buscador">
+    <label>Buscar producto
+      <input type="search" id="stockBuscar" placeholder="Código, nombre, marca o modelo" autocomplete="off">
+    </label>
+    <button type="button" class="secondary" id="stockLimpiar">Limpiar</button>
+  </div>
   <div class="scroll">
     <table class="stock-table">
       <thead>
@@ -55,7 +64,7 @@
 
       <tbody id="stockGeneralFilas">
         <% productosOrdenados.forEach(producto => { const conStock = tieneExistencias(producto); %>
-          <tr data-stock="<%= conStock ? 'si' : 'no' %>" <%= conStock ? '' : 'hidden' %>>
+          <tr data-stock="<%= conStock ? 'si' : 'no' %>" data-busqueda="<%= [producto.codigo, producto.nombre, producto.marca, producto.modelo].filter(Boolean).join(' ') %>" <%= conStock ? '' : 'hidden' %>>
             <td><span class="stock-codigo"><%= producto.codigo %></span> · <%= producto.nombre %></td>
             <td><%= producto.unidad %></td>
             <% ['fisico', 'disponible', 'revision', 'asignado', 'produccion', 'total'].forEach(estado => {
@@ -78,22 +87,28 @@
   (() => {
     const control = document.getElementById('stockVerTodos');
     const filas = [...document.querySelectorAll('#stockGeneralFilas tr[data-stock]')];
+    const buscar = document.getElementById('stockBuscar');
+    const normalizar = texto => String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
     const vacio = document.getElementById('stockGeneralVacio');
     const textoVacio = document.getElementById('stockGeneralVacioTexto');
     const conteo = document.getElementById('stockGeneralConteo');
     function actualizar() {
+      const terminos = normalizar(buscar.value).trim().split(/\s+/).filter(Boolean);
       let visibles = 0;
       filas.forEach(fila => {
-        fila.hidden = !control.checked && fila.dataset.stock !== 'si';
+        const coincide = terminos.every(termino => normalizar(fila.dataset.busqueda).includes(termino));
+        fila.hidden = (!control.checked && fila.dataset.stock !== 'si') || !coincide;
         if (!fila.hidden) visibles++;
       });
       vacio.hidden = visibles > 0;
-      textoVacio.textContent = filas.length
+      textoVacio.textContent = buscar.value.trim() ? 'No hay productos que coincidan con la búsqueda y el filtro de existencias.' : filas.length
         ? 'No hay productos con existencias. Activá «Ver todos los productos» para consultar el catálogo completo.'
         : 'Todavía no hay productos. Crealos desde la pestaña Productos.';
       conteo.textContent = `${visibles} de ${filas.length} productos · ${control.checked ? 'Todos los productos' : 'Solo con existencias'}`;
     }
     control.addEventListener('change', actualizar);
+    buscar.addEventListener('input', actualizar);
+    document.getElementById('stockLimpiar').onclick = () => { buscar.value = ''; actualizar(); buscar.focus(); };
     // Evitar que el navegador restaure el checkbox al volver y cambie el filtro inicial.
     control.checked = false;
     actualizar();

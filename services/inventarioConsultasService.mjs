@@ -269,61 +269,52 @@ export async function consultarMovimientos(
 
 export async function consultarEquipos(req) {
   const pagina = paginaDe(req);
-  const filtro = {};
-
-  const serie = String(req.query.serie || "")
-    .trim()
-    .toUpperCase();
-
-  const ubicacion = String(
-    req.query.ubicacion || ""
-  );
-
+  const serie = String(req.query.serie || "").trim().toUpperCase();
+  const q = String(req.query.q || "").trim().slice(0, 180);
+  const ubicacion = String(req.query.ubicacion || "");
   const estado = String(req.query.estado || "");
+  const filtro = {};
+  if (serie) filtro.serie = serie; // Compatibilidad con enlaces de serie exacta.
+  if (ubicacion) filtro.lugar = new mongoose.Types.ObjectId(idValido(ubicacion));
+  if (["disponible", "revision", "asignado", "produccion"].includes(estado)) filtro.estado = estado;
 
-  if (serie) {
-    filtro.serie = serie;
+  const camposBusqueda = [
+    "producto.codigo", "producto.nombre", "producto.marca", "producto.modelo",
+    "serie", "mac", "patrimonio",
+  ];
+  const terminos = q.split(/\s+/).filter(Boolean);
+  // Escapar metacaracteres: el texto del usuario nunca se ejecuta como regex.
+  const literal = texto => texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pipeline = [
+    { $match: filtro },
+    { $lookup: { from: Producto.collection.name, localField: "producto", foreignField: "_id", as: "producto" } },
+    { $unwind: { path: "$producto", preserveNullAndEmptyArrays: true } },
+  ];
+  if (terminos.length) {
+    pipeline.push({ $match: { $and: terminos.map(termino => ({
+      $or: camposBusqueda.map(campo => ({ [campo]: { $regex: literal(termino), $options: "i" } })),
+    })) } });
   }
-
-  if (ubicacion) {
-    filtro.lugar = idValido(ubicacion);
-  }
-
-  if (
-    ["disponible", "revision", "asignado", "produccion"].includes(
-      estado
-    )
-  ) {
-    filtro.estado = estado;
-  }
-
-  const [
-    equipos,
-    cantidadRegistros,
-    lugares,
-  ] = await Promise.all([
-    Equipo.find(filtro)
-      .populate("producto lugar")
-      .sort({ serie: 1 })
-      .skip((pagina - 1) * 25)
-      .limit(25)
-      .lean(),
-
-    Equipo.countDocuments(filtro),
-
-    Lugar.find()
-      .sort({ nombre: 1 })
-      .lean(),
+  pipeline.push(
+    // El orden se aplica al resultado completo antes de paginar.
+    { $sort: { "producto.codigo": 1, serie: 1, _id: 1 } },
+    { $facet: {
+      equipos: [
+        { $skip: (pagina - 1) * 25 }, { $limit: 25 },
+        { $lookup: { from: Lugar.collection.name, localField: "lugar", foreignField: "_id", as: "lugar" } },
+        { $unwind: { path: "$lugar", preserveNullAndEmptyArrays: true } },
+      ],
+      total: [{ $count: "cantidad" }],
+    } },
+  );
+  const [resultado, lugares] = await Promise.all([
+    Equipo.aggregate(pipeline).collation({ locale: "es", numericOrdering: true, strength: 2 }),
+    Lugar.find().sort({ nombre: 1 }).lean(),
   ]);
-
   return {
-    equipos,
-    cantidadRegistros,
-    lugares,
-    pagina,
-    serie,
-    ubicacion,
-    estado,
+    equipos: resultado[0]?.equipos || [],
+    cantidadRegistros: resultado[0]?.total[0]?.cantidad || 0,
+    lugares, pagina, q, serie, ubicacion, estado,
   };
 }
 
