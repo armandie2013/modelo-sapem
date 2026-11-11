@@ -9,6 +9,9 @@ export const accionesInventario = [
   "producir",
   "devolver",
   "traspasar",
+  "informarBajas",
+  "autorizarBajas",
+  "liberarRevision",
 ];
 
 export function cargarPermisosInventario(

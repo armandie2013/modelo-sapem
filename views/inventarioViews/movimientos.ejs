@@ -43,8 +43,8 @@
 
           <% Object.entries({
             activa: 'Activas',
-            parcial: 'Devueltas parcialmente',
-            cerrada: 'Devueltas totalmente', anulado: 'Anuladas'
+            parcial: 'Parciales',
+            cerrada: 'Cerradas', anulado: 'Anuladas'
           }).forEach(([valor, texto]) => { %>
             <option
               value="<%= valor %>"
@@ -78,7 +78,7 @@
         <% movimientos.forEach(movimiento => {
           const devuelto = movimiento.items.reduce(
             (acumulado, item) =>
-              acumulado + item.devuelto,
+              acumulado + item.devuelto + (item.retirado || 0),
             0
           );
 
@@ -115,8 +115,8 @@
                   devuelto === 0
                     ? 'Activa'
                     : devuelto === total
-                      ? 'Devuelta totalmente'
-                      : 'Devuelta parcialmente'
+                      ? 'Cerrada'
+                      : 'Parcial'
                 %>
               <% } else if (movimiento.original) { %>
                 <a href="/inventario/movimientos/<%= movimiento.original %>">

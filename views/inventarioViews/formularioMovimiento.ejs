@@ -248,7 +248,15 @@
           </p>
         <% } %>
 
-        <label>
+        <% if (tipo === 'traspaso') { %>
+        <label>Estado al recibir
+          <select name="estadoRecepcion">
+            <option value="disponible">Disponible</option>
+            <option value="revision" <%= datos.estadoRecepcion === 'revision' ? 'selected' : '' %>>A revisar</option>
+          </select>
+        </label>
+      <% } %>
+      <label>
           Observaciones / diferencias con el documento
           <textarea
             name="observaciones"

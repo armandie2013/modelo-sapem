@@ -46,7 +46,7 @@
           <% Object.entries({
             disponible: 'Disponible',
             revision: 'A revisar',
-            asignado: 'Asignado', produccion: 'En producción'
+            asignado: 'Asignado', produccion: 'En producción', pendiente_baja: 'Pendiente de baja', baja: 'Dado de baja'
           }).forEach(([valor, texto]) => { %>
             <option
               value="<%= valor %>"
@@ -93,7 +93,7 @@
             </td>
             <td><a href="/inventario/equipos/<%= equipo._id %>"><%= equipo.serie %></a></td>
             <td><%= equipo.lugar?.nombre || 'Ubicación no disponible' %></td>
-            <td><span class="state"><%= ({disponible:'Disponible', revision:'A revisar', asignado:'Asignado', produccion:'En producción'})[equipo.estado] || equipo.estado %></span></td>
+            <td><span class="state"><%= ({disponible:'Disponible', revision:'A revisar', asignado:'Asignado', produccion:'En producción', pendiente_baja: 'Pendiente de baja', baja: 'Dado de baja'})[equipo.estado] || equipo.estado %></span></td>
             <td><a class="button secondary" href="/inventario/equipos/<%= equipo._id %>">Ver ficha</a></td>
           </tr>
         <% }) %>

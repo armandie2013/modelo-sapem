@@ -1,0 +1,28 @@
+<header>
+  <table class="doc-header">
+    <tbody>
+      <tr>
+        <td>
+          <img
+            src="<%= logo %>"
+            alt="Catamarca Telecomunicaciones SAPEM"
+          >
+        </td>
+
+        <td class="doc-title">
+          <h1>
+            <%= tituloDocumento %>
+          </h1>
+
+          <div class="doc-number">
+            <b>N.º <%= String(numeroDocumento).padStart(8, '0') %></b>
+            ·
+            <span class="doc-date">
+              Fecha: <%= fechaDocumento %>
+            </span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</header>

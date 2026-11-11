@@ -31,7 +31,7 @@ const casos={
  dashboard:{resumen:[{...producto,disponible:12000,revision:0,asignado:3000,fisico:12000,total:15000}],destinos:[{lugar:destino,productos:1}]},
  lugares:{lugares:[deposito],tipoLugar:'deposito'},ubicacion:{lugar:deposito,saldos:[{producto,cantidad:12000,estado:'disponible'}]},
  equipos:{equipos:[{_id:id,producto,lugar:deposito,serie:'A',estado:'disponible'}]},
- equipo:{equipo:{_id:id,producto,lugar:deposito,serie:'A',estado:'disponible'},movimientos:[mov]},
+ equipo:{equipo:{_id:id,producto,lugar:deposito,serie:'A',estado:'disponible'},eventos:[mov]},
  movimientos:{movimientos:[mov],tipo:'asignacion',config:{ruta:'asignaciones',accion:'asignar',singular:'Nueva asignación'},seleccion:false},
  productos:{},formularioCatalogo:{tipoCatalogo:'deposito'},formularioMovimiento:{tipo:'ingreso',config:{ruta:'ingresos'}},
  formularioDevolucion:{mov,pendientes:[item],equiposPendientes:[{producto:id,serie:'A'}],depositos:[deposito]},

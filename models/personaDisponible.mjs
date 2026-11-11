@@ -141,7 +141,7 @@ const personaSchema = new mongoose.Schema({
       "asignar",
       "producir",
       "devolver",
-      "traspasar"
+      "traspasar", "informarBajas", "autorizarBajas", "liberarRevision"
     ),
   },
 });

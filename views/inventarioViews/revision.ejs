@@ -1,0 +1,60 @@
+<% const fechaRevision = valor => valor ? new Date(valor).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) : '—'; %>
+<section>
+  <div class="scroll">
+    <table class="list-table">
+      <thead><tr><th>Producto</th><th>Serie / cantidad</th><th>Depósito</th><th>Origen / comprobante</th><th>Fecha</th><th>Acción</th></tr></thead>
+      <tbody>
+        <% for (const fila of filas) { %>
+          <tr>
+            <td><strong><%= fila.producto.codigo %></strong> · <%= fila.producto.nombre %></td>
+            <td><% if (fila.equipo) { %><a href="/inventario/equipos/<%= fila.equipo %>"><%= fila.serie %></a><% } else { %><%= fila.cantidad / 1000 %> <%= fila.producto.unidad %><% } %></td>
+            <td><%= fila.lugar.nombre %></td>
+            <td><% if (fila.origen) { %><a href="<%= fila.origen.url %>"><%= fila.origen.texto %></a><% } else { %><%= fila.equipo ? '—' : 'Saldo agrupado por depósito' %>
+              <% if (fila.referencias?.length) { %><br><small>Comprobantes relacionados:</small>
+                <% for (const referencia of fila.referencias) { %><a href="<%= referencia.url %>">N.º <%= referencia.numero %></a> <% } %>
+              <% } %>
+            <% } %></td>
+            <td><%= fechaRevision(fila.origen?.fecha) %></td>
+            <td>
+              <% if (permisos.liberarRevision) { %>
+                <form action="/inventario/revision/liberar" method="post" class="actions" style="margin:0">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <input type="hidden" name="operacion" value="<%= fila.operacion %>">
+                  <input type="hidden" name="producto" value="<%= fila.producto._id %>">
+                  <input type="hidden" name="lugar" value="<%= fila.lugar._id %>">
+                  <% if (fila.equipo) { %>
+                    <input type="hidden" name="equipo" value="<%= fila.equipo %>">
+                  <% } else { %>
+                    <input type="number" name="cantidad" min="1" max="<%= fila.cantidad / 1000 %>" step="1" value="1" required aria-label="Cantidad revisada" style="width:5rem">
+                  <% } %>
+                  <button type="submit">Marcar disponible</button>
+                </form>
+              <% } else { %>—<% } %>
+            </td>
+          </tr>
+        <% } %>
+        <% if (!filas.length) { %><tr><td colspan="6" class="empty">No hay material pendiente de revisión.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+<% if (revisiones.length) { %>
+  <section>
+    <h2>Últimas liberaciones</h2>
+    <div class="scroll">
+      <table class="list-table">
+        <thead><tr><th>Fecha</th><th>Producto</th><th>Serie / cantidad</th><th>Depósito</th><th>Revisó</th></tr></thead>
+        <tbody>
+          <% for (const fila of revisiones) { %>
+            <tr>
+              <td><%= fechaRevision(fila.createdAt) %></td>
+              <td><%= fila.producto?.nombre || '—' %></td>
+              <td><% if (fila.equipo) { %><a href="/inventario/equipos/<%= fila.equipo %>"><%= fila.serie %></a><% } else { %><%= fila.cantidad / 1000 %><% } %></td>
+              <td><%= fila.lugar?.nombre || '—' %></td><td><%= fila.operador %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% } %>

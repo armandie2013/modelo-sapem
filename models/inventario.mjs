@@ -73,7 +73,7 @@ const saldo = new Schema(
     lugar: ref("InvLugar"),
     estado: {
       type: String,
-      enum: ["disponible", "revision", "asignado", "produccion"],
+      enum: ["disponible", "revision", "asignado", "produccion", "pendiente_baja"],
       required: true,
     },
     cantidad: {
@@ -103,9 +103,10 @@ const equipo = new Schema(
     lugar: ref("InvLugar"),
     estado: {
       type: String,
-      enum: ["disponible", "revision", "asignado", "produccion"],
+      enum: ["disponible", "revision", "asignado", "produccion", "pendiente_baja", "baja"],
       required: true,
     },
+    baja: ref("InvBaja", false),
     asignacion: ref("InvMovimiento", false),
   },
   options
@@ -137,6 +138,7 @@ const item = new Schema({
     type: Number,
     default: 0,
   },
+  retirado: { type: Number, default: 0 },
   series: [identidad],
 });
 
@@ -216,9 +218,34 @@ const movimiento = new Schema(
 
 movimiento.index({ fecha: -1 });
 
+const baja = new Schema({
+  numero: { type: Number, unique: true, required: true },
+  equipo: ref('InvEquipo'),
+  original: ref('InvMovimiento'),
+  comprobanteOriginal: Number,
+  serie: text(true),
+  producto: text(true),
+  codigo: text(),
+  marca: text(),
+  modelo: text(),
+  ubicacion: text(true),
+  responsable: text(),
+  motivo: { type: String, enum: ['perdida', 'sustraccion'], required: true },
+  fecha: { type: Date, required: true },
+  observaciones: text(),
+  estado: { type: String, enum: ['pendiente', 'confirmada', 'recuperada'], default: 'pendiente' },
+  informadoPor: text(true),
+  confirmacion: { fecha: Date, usuario: String },
+  recuperacion: { fecha: Date, usuario: String, deposito: String, observaciones: String },
+}, options);
+baja.index({ equipo: 1, numero: 1 });
+baja.index({ original: 1, numero: 1 });
+baja.index({ estado: 1, numero: -1 });
+
 const archivo = new Schema(
   {
-    movimiento: ref("InvMovimiento"),
+    movimiento: { ...ref("InvMovimiento", false), required() { return !this.baja; } },
+    baja: ref("InvBaja", false),
     nombre: text(true),
     mime: text(true),
     datos: {
@@ -231,6 +258,7 @@ const archivo = new Schema(
 );
 
 archivo.index({ movimiento: 1 });
+archivo.index({ baja: 1 });
 
 const contador = new Schema({
   _id: String,
@@ -251,7 +279,15 @@ const anulacion = new Schema({
   movimiento: { ...ref('InvMovimiento'), unique: true }, fecha: { type: Date, required: true },
   motivo: text(true), usuario: text(true)
 }, options);
-for (const esquema of [producto, lugar, saldo, equipo, movimiento, archivo, contador, borrador, anulacion]) esquema.plugin(proteccionInventario);
+const revision = new Schema({
+  producto: ref('InvProducto'), lugar: ref('InvLugar'), equipo: ref('InvEquipo', false),
+  serie: text(), cantidad: { type: Number, required: true, min: 1000 },
+  usuario: ref('Usuario'), operador: text(true),
+}, options);
+revision.index({ equipo: 1, createdAt: -1 });
+for (const esquema of [producto, lugar, saldo, equipo, movimiento, archivo, contador, borrador, anulacion, baja, revision]) esquema.plugin(proteccionInventario);
+export const Revision = model("InvRevision", revision);
+export const Baja = model("InvBaja", baja);
 export const Borrador = model('InvBorrador', borrador);
 export const Anulacion = model('InvAnulacion', anulacion);
 export const Producto = model("InvProducto", producto);
@@ -273,6 +309,8 @@ export async function prepararInventario() {
     Contador,
     Borrador,
     Anulacion,
+    Baja,
+    Revision,
   ]) {
     await modelo.init();
   }

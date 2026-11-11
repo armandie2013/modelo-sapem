@@ -1,0 +1,59 @@
+<% const fechaLocal = valor => new Date(valor).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }); %>
+<section>
+  <div class="actions">
+    <a class="button secondary" href="/inventario/bajas">Volver a Bajas</a>
+    <a class="button secondary" href="/inventario/equipos/<%= baja.equipo %>">Ver equipo</a>
+    <a class="button secondary" href="/inventario/movimientos/<%= baja.original %>">Comprobante N.º <%= baja.comprobanteOriginal %></a>
+    <% if (baja.confirmacion?.fecha) { %><a class="button" href="/inventario/bajas/<%= baja._id %>/acta" target="_blank" rel="noopener">Ver acta PDF</a><% } %>
+  </div>
+  <div class="grid">
+    <div><strong>Equipo</strong><div><%= [baja.codigo, baja.producto, baja.marca, baja.modelo].filter(Boolean).join(' · ') %></div></div>
+    <div><strong>Serie</strong><div><%= baja.serie %></div></div>
+    <div><strong>Estado</strong><div><span class="state baja-<%= baja.estado %>"><%= estadosBaja[baja.estado] %></span></div></div>
+    <div><strong>Motivo</strong><div><%= motivosBaja[baja.motivo] %> · <%= fechaLocal(baja.fecha) %></div></div>
+    <div><strong>Ubicación informada</strong><div><%= baja.ubicacion %></div></div>
+    <div><strong>Responsable registrado</strong><div><%= baja.responsable || '—' %></div></div>
+    <div><strong>Informó</strong><div><%= baja.informadoPor %> · <%= fechaLocal(baja.createdAt) %></div></div>
+  </div>
+  <% if (baja.observaciones) { %><p><strong>Observaciones</strong> · <%= baja.observaciones %></p><% } %>
+  <% if (baja.confirmacion?.fecha) { %><p><strong>Confirmó</strong> · <%= baja.confirmacion.usuario %> · <%= fechaLocal(baja.confirmacion.fecha) %></p><% } %>
+  <% if (baja.recuperacion?.fecha) { %>
+    <p><strong>Recuperación</strong> · <%= baja.recuperacion.usuario %> · <%= fechaLocal(baja.recuperacion.fecha) %> · <%= baja.recuperacion.deposito %></p>
+    <% if (baja.recuperacion.observaciones) { %><p><%= baja.recuperacion.observaciones %></p><% } %>
+  <% } %>
+</section>
+<%- include('estilosGestionComprobante') %>
+<div class="gestion-comprobante" style="margin-bottom: 12px;">
+  <%- include('adjuntosComprobante', { puedeAdjuntar: permisos.informarBajas || permisos.autorizarBajas, rutaAdjuntos: '/inventario/bajas/' + baja._id + '/adjuntos' }) %>
+</div>
+<% if (baja.estado === 'pendiente' && permisos.autorizarBajas) { %>
+  <section>
+    <h2>Confirmar baja</h2>
+    <p class="muted">El equipo saldrá del total SAPEM. La confirmación requiere una denuncia u otro respaldo.</p>
+    <form action="/inventario/bajas/<%= baja._id %>/confirmar" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label><%= archivos.length ? 'Adjuntar respaldo adicional (opcional)' : 'Adjuntar denuncia o respaldo' %>
+        <input type="file" name="archivos" accept=".pdf,.png,.jpg,.jpeg" multiple <%= archivos.length ? '' : 'required' %>>
+      </label>
+      <div class="actions"><button class="danger">Confirmar baja</button></div>
+    </form>
+  </section>
+<% } %>
+<% if (baja.estado !== 'recuperada' && (permisos.autorizarBajas || (baja.estado === 'pendiente' && permisos.informarBajas))) { %>
+  <section>
+    <h2>Registrar recuperación</h2>
+    <p class="muted">El equipo quedará en el depósito seleccionado con estado A revisar.</p>
+    <form action="/inventario/bajas/<%= baja._id %>/recuperar" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Depósito
+        <select name="deposito" required>
+          <option value="">Seleccioná un depósito</option>
+          <% for (const deposito of depositos) { %><option value="<%= deposito._id %>" <%= String(deposito._id) === datos.deposito ? 'selected' : '' %>><%= deposito.nombre %></option><% } %>
+        </select>
+      </label>
+      <label>Observaciones<textarea name="observaciones" maxlength="2000"><%= datos.observaciones || '' %></textarea></label>
+      <label>Respaldo (opcional)<input type="file" name="archivos" accept=".pdf,.png,.jpg,.jpeg" multiple></label>
+      <div class="actions"><button>Registrar recuperación</button></div>
+    </form>
+  </section>
+<% } %>

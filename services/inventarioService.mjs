@@ -43,7 +43,7 @@ export function cantidad(valor) {
   return numero;
 }
 
-function fecha(valor) {
+export function fecha(valor) {
   exigir(
     /^\d{4}-\d{2}-\d{2}$/.test(limpiar(valor)),
     "Fecha inválida."
@@ -83,7 +83,7 @@ export function respaldo(body) {
   return documento;
 }
 
-function validarArchivos(files) {
+export function validarArchivos(files) {
   for (const archivo of files) {
     const buffer = archivo.buffer;
 
@@ -113,14 +113,16 @@ function validarArchivos(files) {
   }
 }
 
-async function guardarArchivos(
+export async function guardarArchivos(
   movimientoId,
   files,
-  session
+  session,
+  baja
 ) {
   for (const archivo of files) {
     await new Archivo({
       movimiento: movimientoId,
+      baja,
 
       nombre: archivo.originalname
         .replace(/[\\/\r\n]/g, "_")
@@ -136,7 +138,7 @@ async function operacionInventario(fn) {
   return ejecutarOperacion(() => fn(undefined));
 }
 
-async function moverSaldo(
+export async function moverSaldo(
   producto,
   lugar,
   estado,
@@ -347,8 +349,8 @@ export async function crearMovimiento(
           ? "produccion"
           : tipo === "asignacion"
           ? "asignado"
-          : tipo === "devolucion"
-            ? limpiar(body.estadoRecepcion)
+          : tipo === "devolucion" || tipo === "traspaso"
+            ? limpiar(body.estadoRecepcion || (tipo === "traspaso" ? "disponible" : ""))
             : "disponible";
 
       exigir(
@@ -359,7 +361,7 @@ export async function crearMovimiento(
       );
 
       exigir(
-        tipo !== "devolucion" ||
+        !["devolucion", "traspaso"].includes(tipo) ||
           ["disponible", "revision"].includes(
             estadoEntrada
           ),
@@ -480,7 +482,7 @@ export async function crearMovimiento(
           exigir(
             pendiente &&
               unidades <=
-                pendiente.cantidad - pendiente.devuelto,
+                pendiente.cantidad - pendiente.devuelto - (pendiente.retirado || 0),
             `${producto.nombre}: supera lo pendiente de devolver.`
           );
 

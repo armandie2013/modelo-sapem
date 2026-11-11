@@ -1,0 +1,35 @@
+<style>
+  .gestion-comprobante { font-size: 13px; line-height: 1.45; }
+  .gestion-comprobante .adjuntos { background: #f1f5f9; }
+  .gestion-comprobante .web { padding: 14px; border-radius: 7px; margin: 12px 0; }
+  .gestion-comprobante h2 { font-size: 15px; margin: 0; }
+  .gestion-comprobante .cabecera { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .gestion-comprobante .contador { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+  .gestion-comprobante .muted { color: #64748b; font-size: 12px; margin: 5px 0; }
+  .gestion-comprobante .archivo { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; margin: 6px 0; }
+  .gestion-comprobante .archivo-nombre { color: #1e40af; overflow-wrap: anywhere; min-width: 0; }
+  .gestion-comprobante .acciones { display: flex; gap: 6px; flex-shrink: 0; }
+  .gestion-comprobante .boton, .gestion-comprobante button { display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; min-height: 30px; border: 1px solid transparent; border-radius: 5px; background: #1e40af; color: white; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; margin: 0; }
+  .gestion-comprobante .secondary { background: white; color: #172033; border-color: #cbd5e1; }
+  .gestion-comprobante .subir { border-top: 1px solid #cbd5e1; margin-top: 12px; padding-top: 10px; }
+  .gestion-comprobante label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; min-width: 0; }
+  .gestion-comprobante input, .gestion-comprobante select, .gestion-comprobante textarea { width: 100%; min-width: 0; border: 1px solid #cbd5e1; border-radius: 4px; background: white; padding: 7px 8px; font: inherit; color: #172033; }
+  .gestion-comprobante input[type=file] { padding: 5px; font-size: 12px; }
+  .gestion-comprobante input::file-selector-button { border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; background: #fff; color: #172033; margin-right: 8px; cursor: pointer; }
+  .gestion-comprobante .campos { display: grid; grid-template-columns: 120px 1fr 155px 1.4fr; gap: 12px; margin-top: 12px; }
+  .gestion-comprobante .pie-formulario { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+  .gestion-comprobante .pie-formulario > div { flex: 1; min-width: 0; }
+  .gestion-comprobante .peligro { border: 1px solid #efb4b4; background: white; }
+  .gestion-comprobante .peligro h2 { color: #b91c1c; }
+  .gestion-comprobante summary { cursor: pointer; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #f8fafc; font-weight: 600; margin-top: 10px; }
+  .gestion-comprobante details form { margin-top: 12px; }
+  .gestion-comprobante .peligro button { background: #b91c1c; margin-top: 8px; }
+  .gestion-comprobante a:focus-visible, .gestion-comprobante button:focus-visible, .gestion-comprobante summary:focus-visible { outline: 2px solid #1e40af; outline-offset: 2px; }
+  @media (max-width: 700px) {
+    .gestion-comprobante .campos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .gestion-comprobante .pie-formulario { align-items: stretch; flex-direction: column; }
+    .gestion-comprobante .archivo { align-items: flex-start; flex-direction: column; }
+  }
+  @media (max-width: 420px) { .gestion-comprobante .campos { grid-template-columns: minmax(0, 1fr); } }
+  @media print { .gestion-comprobante { display: none !important; } }
+</style>
