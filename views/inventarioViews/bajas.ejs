@@ -1,0 +1,40 @@
+<section>
+  <div class="list-heading"><p class="muted">Pérdidas y sustracciones de equipos identificados por serie.</p></div>
+  <form class="list-toolbar" method="get">
+    <label>Estado
+      <select name="estado">
+        <option value="">Todos</option>
+        <% for (const [valor, etiqueta] of Object.entries(estadosBaja)) { %>
+          <option value="<%= valor %>" <%= estado === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% } %>
+      </select>
+    </label>
+    <div class="actions"><button>Filtrar</button><a class="button secondary" href="/inventario/bajas">Limpiar</a></div>
+  </form>
+  <div class="scroll">
+    <table class="list-table">
+      <thead><tr><th>N.º</th><th>Fecha del incidente</th><th>Equipo / serie</th><th>Ubicación informada</th><th>Motivo</th><th>Estado</th><th>Detalle</th></tr></thead>
+      <tbody>
+        <% for (const baja of bajas) { %>
+          <tr>
+            <td><%= baja.numero %></td>
+            <td class="nowrap"><%= baja.fecha.toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) %></td>
+            <td><span class="cell-title"><%= baja.producto %></span><a class="cell-sub" href="/inventario/equipos/<%= baja.equipo %>"><%= baja.serie %></a></td>
+            <td><%= baja.ubicacion %></td>
+            <td><%= motivosBaja[baja.motivo] %></td>
+            <td><span class="state baja-<%= baja.estado %>"><%= estadosBaja[baja.estado] %></span></td>
+            <td><a class="button secondary" href="/inventario/bajas/<%= baja._id %>">Ver</a></td>
+          </tr>
+        <% } %>
+        <% if (!bajas.length) { %><tr><td colspan="7" class="empty">No hay incidentes para mostrar.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="list-footer">
+    <span>Página <%= pagina %> · <%= total %> registros</span>
+    <div class="actions">
+      <% if (pagina > 1) { %><a href="?estado=<%= estado %>&amp;pagina=<%= pagina - 1 %>">Anterior</a><% } %>
+      <% if (pagina * 25 < total) { %><a href="?estado=<%= estado %>&amp;pagina=<%= pagina + 1 %>">Siguiente</a><% } %>
+    </div>
+  </div>
+</section>

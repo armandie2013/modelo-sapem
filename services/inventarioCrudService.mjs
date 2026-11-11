@@ -1,7 +1,7 @@
 import { datosProducto } from './inventarioCatalogoService.mjs';
 import mongoose from 'mongoose';
 import { randomUUID } from 'node:crypto';
-import { Producto, Lugar, Saldo, Equipo, Movimiento, Archivo, Borrador, Anulacion } from '../models/inventario.mjs';
+import { Producto, Lugar, Saldo, Equipo, Movimiento, Archivo, Borrador, Anulacion, Revision } from '../models/inventario.mjs';
 import Configuracion from '../models/inventarioConfiguracion.mjs';
 import { ejecutarOperacion } from './inventarioPersistencia.mjs';
 import { exigir, crearMovimiento, respaldo } from './inventarioService.mjs';
@@ -149,6 +149,7 @@ export async function anularMovimiento(id, motivo, usuario) {
     exigir(texto(motivo).length >= 5 && texto(motivo).length <= 2000, 'Indicá el motivo de anulación (entre 5 y 2000 caracteres).');
     const mov = await Movimiento.findById(validarId(id));
     exigir(mov && mov.estado !== 'anulado', 'Movimiento inexistente o ya anulado.');
+    exigir(mov.items.every(i => !i.retirado), 'El movimiento tiene incidentes de baja vinculados.');
     if (['asignacion', 'produccion'].includes(mov.tipo)) exigir(mov.items.every(i => i.devuelto === 0), 'Primero anulá las devoluciones vinculadas.');
     for (const item of mov.items) {
       const filtro = { _id: { $ne: mov._id }, numero: { $gt: mov.numero }, estado: { $ne: 'anulado' } };
@@ -158,12 +159,18 @@ export async function anularMovimiento(id, motivo, usuario) {
         filtro.$or = [{ origen: { $in: [mov.origen, mov.destino].filter(Boolean) } },
           { destino: { $in: [mov.origen, mov.destino].filter(Boolean) } }];
       }
+      if (!item.serializado && mov.estadoRecepcion === 'revision') {
+        const liberada = await Revision.exists({
+          producto: item.producto, lugar: mov.destino, createdAt: { $gte: mov.createdAt || mov.fecha },
+        });
+        exigir(!liberada, 'Hay material liberado de revisión en ese depósito.');
+      }
       exigir(!await Movimiento.exists(filtro), `Hay movimientos posteriores relacionados con ${item.nombre}. Revertí primero esas operaciones.`);
     }
     const original = mov.tipo === 'devolucion' ? await Movimiento.findById(mov.original) : null;
     if (mov.tipo === 'devolucion') exigir(original && original.estado !== 'anulado', 'La asignación original no está vigente.');
     for (const item of mov.items) {
-      const salidaEstado = mov.tipo === 'produccion' ? 'produccion' : mov.tipo === 'asignacion' ? 'asignado' : mov.tipo === 'devolucion' ? mov.estadoRecepcion : 'disponible';
+      const salidaEstado = mov.tipo === 'produccion' ? 'produccion' : mov.tipo === 'asignacion' ? 'asignado' : ['devolucion', 'traspaso'].includes(mov.tipo) ? (mov.estadoRecepcion || 'disponible') : 'disponible';
       await modificarSaldo(item.producto, mov.destino, salidaEstado, -item.cantidad);
       if (mov.origen) await modificarSaldo(item.producto, mov.origen, mov.tipo === 'devolucion' ? (original.tipo === 'produccion' ? 'produccion' : 'asignado') : 'disponible', item.cantidad);
       for (const serie of item.series) {

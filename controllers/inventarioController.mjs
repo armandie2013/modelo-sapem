@@ -15,6 +15,7 @@ import {
   Equipo,
   Movimiento,
   Archivo,
+  Baja,
 } from "../models/inventario.mjs";
 
 import {
@@ -268,7 +269,7 @@ export async function formularioDevolucion(
   exigir(!borrador || (borrador.tipo === 'devolucion' && String(borrador.datos.original) === String(mov._id) && req.invPermisos.editar), 'Borrador inválido o sin permiso.');
   const archivosBorrador = borrador ? await Archivo.find({ movimiento: borrador._id }).select('-datos').lean() : [];
   const pendientes = mov.items.filter(
-    (item) => item.cantidad > item.devuelto
+    (item) => item.cantidad > item.devuelto + (item.retirado || 0)
   );
 
   const [
@@ -280,7 +281,7 @@ export async function formularioDevolucion(
       .sort({ nombre: 1 })
       .lean(),
 
-    Equipo.find({ asignacion: mov._id })
+    Equipo.find({ asignacion: mov._id, estado: mov.tipo === "produccion" ? "produccion" : "asignado" })
       .select("producto serie mac patrimonio")
       .lean(),
 
@@ -504,8 +505,11 @@ export async function detalle(req, res) {
   const aviso = req.session.invAviso || null;
   delete req.session.invAviso;
 
+  const bajas = req.params.formato !== "pdf" && ["asignacion", "produccion"].includes(mov.tipo)
+    ? await Baja.find({ original: mov._id }).sort({ numero: 1 }).select("numero serie").lean() : [];
   const datos = {
     aviso,
+    bajas,
     mov,
     archivos,
     devoluciones,
@@ -538,6 +542,10 @@ export async function detalle(req, res) {
     );
   }
 
+  return enviarPdf(res, "comprobante", datos, `inventario-${mov.numero}.pdf`);
+}
+
+export async function enviarPdf(res, vista, datos, nombre) {
   const [
     { default: ejs },
     { default: puppeteer },
@@ -549,7 +557,7 @@ export async function detalle(req, res) {
   const html = await ejs.renderFile(
     fileURLToPath(
       new URL(
-        "../views/inventarioViews/comprobante.ejs",
+        `../views/inventarioViews/${vista}.ejs`,
         import.meta.url
       )
     ),
@@ -581,7 +589,7 @@ export async function detalle(req, res) {
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition":
-        `inline; filename="inventario-${mov.numero}.pdf"`,
+        `inline; filename="${nombre}"`,
     });
 
     res.send(Buffer.from(pdf));

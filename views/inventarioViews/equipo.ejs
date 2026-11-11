@@ -1,4 +1,5 @@
 <style>
+  .inv .equipo-historial .evento-numero { width: 1%; white-space: nowrap; }
   .inv .equipo-cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
   .inv .equipo-cabecera h2 { margin: 0; font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
   .inv .equipo-cabecera .actions { margin: 0; flex-shrink: 0; }
@@ -27,51 +28,38 @@
     <div><dt>Serie</dt><dd class="equipo-serie"><%= equipo.serie %></dd></div>
     <div><dt>MAC</dt><dd><%= equipo.mac || '—' %></dd></div>
     <div><dt>Patrimonio</dt><dd><%= equipo.patrimonio || '—' %></dd></div>
-    <div class="equipo-ubicacion"><dt>Ubicación actual</dt><dd>
+    <div class="equipo-ubicacion"><dt><%= ['pendiente_baja', 'baja'].includes(equipo.estado) ? 'Última ubicación conocida' : 'Ubicación actual' %></dt><dd>
       <a href="/inventario/ubicaciones/<%= equipo.lugar._id %>"><%= equipo.lugar.nombre %></a>
     </dd></div>
-    <div><dt>Estado</dt><dd><span class="state"><%= ({ disponible: 'Disponible', revision: 'A revisar', asignado: 'Asignado', produccion: 'En producción' })[equipo.estado] || equipo.estado %></span></dd></div>
+    <div><dt>Estado</dt><dd><span class="state"><%= ({ disponible: 'Disponible', revision: 'A revisar', asignado: 'Asignado', produccion: 'En producción', pendiente_baja: 'Pendiente de baja', baja: 'Dado de baja' })[equipo.estado] || equipo.estado %></span></dd></div>
   </dl>
+  <% if (permisos.informarBajas && ['asignado', 'produccion'].includes(equipo.estado) && equipo.asignacion) { %>
+    <div class="actions"><a class="button secondary" href="/inventario/bajas/nueva?equipo=<%= equipo._id %>">Registrar pérdida o sustracción</a></div>
+  <% } %>
 </section>
 
 <section>
   <h2>Historial del equipo</h2>
-
   <div class="scroll">
-    <table>
+    <table class="equipo-historial">
       <thead>
-        <tr>
-          <th>N.º</th>
-          <th>Fecha</th>
-          <th>Operación</th>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>Comprobante</th>
-        </tr>
+        <tr><th class="evento-numero" scope="col">N.°</th><th>Fecha</th><th>Evento</th><th>Estado resultante</th><th>Origen</th><th>Destino</th><th>Comprobante / responsable</th></tr>
       </thead>
-
       <tbody>
-        <% movimientos.forEach(movimiento => { %>
+        <% for (const evento of eventos) { %>
           <tr>
-            <td><%= movimiento.numero %></td>
-            <td><%= fecha(movimiento.fecha) %></td>
-            <td><%= ({ ingreso: 'Ingreso', asignacion: 'Asignación', produccion: 'Puesta en producción', devolucion: 'Devolución', traspaso: 'Traspaso' })[movimiento.tipo] || movimiento.tipo %></td>
-            <td><%= movimiento.origenNombre %></td>
-            <td><%= movimiento.destinoNombre %></td>
-
-            <td>
-              <a href="/inventario/movimientos/<%= movimiento._id %>">
-                Ver
-              </a>
-            </td>
+            <td class="evento-numero"><%= evento.numero %></td>
+            <td><%= new Date(evento.fecha).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) %></td>
+            <td><%= evento.operacion %></td>
+            <td><%= evento.estado || '—' %></td>
+            <td><%= evento.origen || '—' %></td>
+            <td><%= evento.destino || '—' %></td>
+            <td><% if (evento.url) { %><a href="<%= evento.url %>"><%= evento.referencia %></a><% } else { %><%= evento.referencia || '—' %><% } %></td>
           </tr>
-        <% }) %>
+        <% } %>
+        <% if (!eventos.length) { %><tr><td colspan="7">Todavía no hay eventos registrados.</td></tr><% } %>
       </tbody>
     </table>
   </div>
-
-  <%- include('paginacion', {
-    base: '/inventario/equipos/' + equipo._id,
-    filtros: {}
-  }) %>
+  <%- include('paginacion', { base: '/inventario/equipos/' + equipo._id, filtros: {} }) %>
 </section>

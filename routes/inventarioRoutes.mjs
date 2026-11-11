@@ -16,6 +16,9 @@ import {
 
 import * as controlador from "../controllers/inventarioController.mjs";
 
+import * as bajas from '../controllers/inventarioBajasController.mjs';
+import * as revision from '../controllers/inventarioRevisionController.mjs';
+
 const router = Router();
 
 const procesarAdjuntos = multer({
@@ -75,6 +78,23 @@ function csrf(req, res, next) {
 
 router.use(permiso('ver'), accesoInventario);
 router.use(rutasCrud(permiso, csrf));
+router.get('/revision', revision.listado);
+router.post('/revision/liberar', permiso('liberarRevision'), csrf, revision.liberar);
+router.get('/bajas', bajas.listado);
+router.get('/bajas/nueva', permiso('informarBajas'), bajas.formulario);
+router.get('/bajas/:id/acta', bajas.acta);
+router.get('/bajas/:id', bajas.detalle);
+const volverBajas = (req, res, next) => {
+  req.invVolver = /^[a-f0-9]{24}$/i.test(req.params.id || '') ? `/inventario/bajas/${req.params.id}` : '/inventario/bajas';
+  next();
+};
+router.post('/bajas', permiso('informarBajas'), volverBajas, upload, csrf, bajas.registrar);
+router.post('/bajas/:id/confirmar', permiso('autorizarBajas'), volverBajas, upload, csrf, bajas.resolver('confirmar'));
+function permisoOperarBajas(req, res, next) {
+  return permiso(req.invPermisos.autorizarBajas ? 'autorizarBajas' : 'informarBajas')(req, res, next);
+}
+router.post('/bajas/:id/adjuntos', permisoOperarBajas, volverBajas, upload, csrf, bajas.adjuntar);
+router.post('/bajas/:id/recuperar', permisoOperarBajas, volverBajas, upload, csrf, bajas.resolver('recuperar'));
 router.get('/productos/similares', permiso('ver'), async (req, res) => {
   res.json(await similaresProducto({ nombre: String(req.query.nombre || '').slice(0,180), modelo: String(req.query.modelo || '').slice(0,100) }, String(req.query.excluir || '')));
 });

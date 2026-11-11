@@ -7,6 +7,8 @@ import {
   Saldo,
   Equipo,
   Movimiento,
+  Baja,
+  Revision,
 } from "../models/inventario.mjs";
 
 import {
@@ -59,18 +61,33 @@ export function idValido(id) {
   return id;
 }
 
-export async function consultarGeneral() {
-  const [productos, saldos] = await Promise.all([
-    Producto.find()
-      .sort({ nombre: 1 })
-      .lean(),
-
-    Saldo.find({
-      cantidad: { $gt: 0 },
-    })
-      .populate("lugar")
-      .lean(),
+async function consultarExistencias(lugares) {
+  const filtro = lugares ? { lugar: { $in: lugares.map(lugar => lugar._id) } } : {};
+  const [productos, saldos, equipos] = await Promise.all([
+    Producto.find().sort({ nombre: 1 }).lean(),
+    Saldo.find({ ...filtro, cantidad: { $gt: 0 } }).lean(),
+    Equipo.find({ ...filtro, estado: { $in: ['disponible', 'revision', 'asignado', 'produccion', 'pendiente_baja', 'baja'] } })
+      .select('producto lugar estado').lean(),
   ]);
+  const serializados = new Set(productos.filter(producto => producto.serializado).map(producto => String(producto._id)));
+  // Los registros de equipos también identifican productos serializados del catálogo anterior.
+  for (const equipo of equipos) serializados.add(String(equipo.producto));
+  const existencias = saldos.filter(saldo => !serializados.has(String(saldo.producto)));
+  const porEstado = new Map();
+  for (const equipo of equipos) {
+    const clave = String(equipo.producto) + ':' + String(equipo.lugar) + ':' + equipo.estado;
+    if (!porEstado.has(clave)) porEstado.set(clave, { ...equipo, cantidad: 0 });
+    porEstado.get(clave).cantidad += 1000;
+  }
+  return { productos, saldos: [...existencias, ...porEstado.values()] };
+}
+
+export async function consultarGeneral() {
+  const [{ productos, saldos }, lugares] = await Promise.all([
+    consultarExistencias(),
+    Lugar.find().lean(),
+  ]);
+  const lugarPorId = new Map(lugares.map(lugar => [String(lugar._id), lugar]));
 
   const porProducto = new Map();
   const porDestino = new Map();
@@ -84,6 +101,8 @@ export async function consultarGeneral() {
         revision: 0,
         asignado: 0,
         produccion: 0,
+        pendiente_baja: 0,
+        baja: 0,
       });
     }
 
@@ -91,11 +110,13 @@ export async function consultarGeneral() {
       saldo.cantidad;
 
     if (["asignado", "produccion"].includes(saldo.estado)) {
-      const lugarId = String(saldo.lugar._id) + ":" + saldo.estado;
+      const lugar = lugarPorId.get(String(saldo.lugar));
+      if (!lugar) continue;
+      const lugarId = String(lugar._id) + ":" + saldo.estado;
 
       if (!porDestino.has(lugarId)) {
         porDestino.set(lugarId, {
-          lugar: saldo.lugar,
+          lugar,
           estado: saldo.estado,
           productos: new Set(),
         });
@@ -116,6 +137,8 @@ export async function consultarGeneral() {
         revision: 0,
         asignado: 0,
         produccion: 0,
+        pendiente_baja: 0,
+        baja: 0,
       };
 
       return {
@@ -130,7 +153,7 @@ export async function consultarGeneral() {
           cantidades.disponible +
           cantidades.revision +
           cantidades.asignado +
-          cantidades.produccion,
+          cantidades.produccion + cantidades.pendiente_baja,
       };
     }),
 
@@ -153,12 +176,7 @@ export async function consultarLugares(tipo) {
     Configuracion.findById("general").lean(),
   ]);
 
-  const saldos = await Saldo.find({
-    lugar: {
-      $in: lugares.map((lugar) => lugar._id),
-    },
-    cantidad: { $gt: 0 },
-  }).lean();
+  const { saldos } = await consultarExistencias(lugares);
 
   return lugares.map((lugar) => ({
     ...lugar,
@@ -171,7 +189,7 @@ export async function consultarLugares(tipo) {
       saldos
         .filter(
           (saldo) =>
-            String(saldo.lugar) ===
+            saldo.estado !== "baja" && String(saldo.lugar) ===
             String(lugar._id)
         )
         .map((saldo) => String(saldo.producto))
@@ -186,14 +204,9 @@ export async function consultarUbicacion(id) {
 
   exigir(lugar, "Ubicación inexistente.");
 
-  const saldos = await Saldo.find({
-    lugar: lugar._id,
-    cantidad: { $gt: 0 },
-  })
-    .populate("producto")
-    .lean();
-
-  return { lugar, saldos };
+  const { productos, saldos } = await consultarExistencias([lugar]);
+  const porId = new Map(productos.map(producto => [String(producto._id), producto]));
+  return { lugar, saldos: saldos.filter(saldo => saldo.estado !== "baja").map(saldo => ({ ...saldo, producto: porId.get(String(saldo.producto)) })).filter(saldo => saldo.producto) };
 }
 
 export async function consultarMovimientos(
@@ -210,7 +223,7 @@ export async function consultarMovimientos(
   const estado = String(req.query.estado || "");
 
   const devuelto = {
-    $sum: "$items.devuelto",
+    $add: [{ $sum: "$items.devuelto" }, { $sum: "$items.retirado" }],
   };
 
   const total = {
@@ -276,7 +289,7 @@ export async function consultarEquipos(req) {
   const filtro = {};
   if (serie) filtro.serie = serie; // Compatibilidad con enlaces de serie exacta.
   if (ubicacion) filtro.lugar = new mongoose.Types.ObjectId(idValido(ubicacion));
-  if (["disponible", "revision", "asignado", "produccion"].includes(estado)) filtro.estado = estado;
+  if (["disponible", "revision", "asignado", "produccion", "pendiente_baja", "baja"].includes(estado)) filtro.estado = estado;
 
   const camposBusqueda = [
     "producto.codigo", "producto.nombre", "producto.marca", "producto.modelo",
@@ -327,29 +340,57 @@ export async function consultarEquipo(req) {
 
   exigir(equipo, "Equipo inexistente.");
 
-  const pagina = paginaDe(req);
-
-  const filtro = {
-    "items.series.serie": equipo.serie,
-  };
-
-  const [
-    movimientos,
-    cantidadRegistros,
-  ] = await Promise.all([
-    Movimiento.find(filtro)
-      .sort({ numero: 1 })
-      .skip((pagina - 1) * 25)
-      .limit(25)
-      .lean(),
-
-    Movimiento.countDocuments(filtro),
+  const [movimientos, bajas, revisiones] = await Promise.all([
+    Movimiento.find({ "items.series.serie": equipo.serie })
+      .select("numero tipo fecha createdAt estado estadoRecepcion origenNombre destinoNombre").lean(),
+    Baja.find({ equipo: equipo._id }).lean(),
+    Revision.find({ equipo: equipo._id }).lean(),
   ]);
-
+  const ubicaciones = await Lugar.find({ _id: { $in: revisiones.map(revision => revision.lugar) } })
+    .select("nombre").lean();
+  const nombreUbicacion = new Map(ubicaciones.map(lugar => [String(lugar._id), lugar.nombre]));
+  const etiquetas = {
+    ingreso: "Ingreso", asignacion: "Asignación", produccion: "Puesta en producción",
+    devolucion: "Devolución", traspaso: "Traspaso",
+  };
+  const eventos = movimientos.map(mov => ({
+    fecha: mov.fecha, registrado: mov.createdAt || mov.fecha,
+    operacion: etiquetas[mov.tipo] || mov.tipo,
+    estado: mov.estado === "anulado" ? "Anulado" : mov.estadoRecepcion === "revision" ? "A revisar" : "",
+    origen: mov.origenNombre, destino: mov.destinoNombre,
+    referencia: "Movimiento N.º " + mov.numero, url: "/inventario/movimientos/" + mov._id,
+  }));
+  for (const baja of bajas) {
+    const referencia = "Incidente N.º " + baja.numero;
+    const url = "/inventario/bajas/" + baja._id;
+    eventos.push({
+      fecha: baja.fecha, registrado: baja.createdAt || baja.fecha,
+      operacion: baja.motivo === "sustraccion" ? "Sustracción informada" : "Pérdida informada",
+      estado: "Pendiente de baja", origen: baja.ubicacion, referencia, url,
+    });
+    if (baja.confirmacion?.fecha) eventos.push({
+      fecha: baja.confirmacion.fecha, registrado: baja.confirmacion.fecha,
+      operacion: "Baja confirmada", estado: "Dado de baja", origen: baja.ubicacion,
+      referencia: "Acta de baja N.º " + baja.numero, url: url + "/acta",
+    });
+    if (baja.recuperacion?.fecha) eventos.push({
+      fecha: baja.recuperacion.fecha, registrado: baja.recuperacion.fecha,
+      operacion: "Recuperación", estado: "A revisar",
+      destino: baja.recuperacion.deposito, referencia, url,
+    });
+  }
+  for (const revision of revisiones) eventos.push({
+    fecha: revision.createdAt, registrado: revision.createdAt,
+    operacion: "Revisión completada", estado: "Disponible",
+    destino: nombreUbicacion.get(String(revision.lugar)), referencia: revision.operador,
+  });
+  const diaLocal = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" });
+  for (const evento of eventos) evento.dia = diaLocal.format(new Date(evento.fecha));
+  eventos.sort((a, b) => a.dia.localeCompare(b.dia) || new Date(a.registrado) - new Date(b.registrado));
+  const pagina = Math.min(paginaDe(req), Math.max(1, Math.ceil(eventos.length / 25)));
+  const inicio = (pagina - 1) * 25;
   return {
-    equipo,
-    movimientos,
-    cantidadRegistros,
-    pagina,
+    equipo, pagina, cantidadRegistros: eventos.length,
+    eventos: eventos.slice(inicio, inicio + 25).map((evento, indice) => ({ ...evento, numero: inicio + indice + 1 })),
   };
 }

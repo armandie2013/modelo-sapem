@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Acta de baja N.º <%= baja.numero %></title>
+  <%- include('estilosComprobante') %>
+</head>
+<body>
+  <% const fechaLocal = valor => new Date(valor).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }); %>
+  <%- include('cabeceraComprobante', {
+    tituloDocumento: 'Acta de baja de equipo',
+    numeroDocumento: baja.numero,
+    fechaDocumento: fechaLocal(baja.confirmacion.fecha),
+  }) %>
+  <table class="partes">
+    <tbody><tr>
+      <td>
+        <span class="etiqueta">UBICACIÓN / RESPONSABLE</span>
+        <p><b><%= baja.ubicacion %></b></p>
+        <p>Responsable: <%= baja.responsable || 'No registrado' %></p>
+        <p>Comprobante de origen: N.º <%= baja.comprobanteOriginal %></p>
+      </td>
+      <td>
+        <span class="etiqueta">MOTIVO / INCIDENTE</span>
+        <p><b><%= motivosBaja[baja.motivo] %></b></p>
+        <p>Fecha del incidente: <%= fechaLocal(baja.fecha) %></p>
+        <p>Informó: <%= baja.informadoPor %></p>
+      </td>
+    </tr></tbody>
+  </table>
+
+  <h2>Material dado de baja</h2>
+  <div class="material-scroll">
+    <table class="materiales">
+      <thead><tr><th>Código</th><th>Producto</th><th>Marca</th><th>Modelo</th><th class="numeric">Cant.</th><th>Unidad</th></tr></thead>
+      <tbody><tr>
+        <td class="codigo"><%= baja.codigo || '—' %></td>
+        <td><%= baja.producto %></td>
+        <td><%= baja.marca || 'No registrada' %></td>
+        <td><%= baja.modelo || 'No registrado' %></td>
+        <td class="numeric">1</td><td>unidad</td>
+      </tr></tbody>
+    </table>
+  </div>
+
+  <h2>Identificación individual por producto</h2>
+  <p class="nota-series">La serie corresponde al equipo dado de baja.</p>
+  <table class="series-table">
+    <colgroup><col style="width:33.333%"><col style="width:33.333%"><col style="width:33.334%"></colgroup>
+    <thead><tr><th colspan="3">
+      <div class="series-heading">
+        <span><b><%= baja.codigo || '—' %></b> · <%= baja.modelo || baja.producto %></span>
+        <span class="series-count">1 serie</span>
+      </div>
+    </th></tr></thead>
+    <tbody><tr>
+      <td><span class="serie-valor"><%= baja.serie %></span></td><td class="vacia"></td><td class="vacia"></td>
+    </tr></tbody>
+  </table>
+
+  <p><b>Observaciones:</b> <%= baja.observaciones || 'Sin observaciones.' %></p>
+  <p><b>Autorizado por:</b> <%= baja.confirmacion.usuario %> · <%= fechaLocal(baja.confirmacion.fecha) %></p>
+
+  <table class="firmas ingreso">
+    <tbody><tr><td><div class="firma-linea">
+      Firma de quien autorizó la baja<br>
+      Aclaración: <%= baja.confirmacion.usuario %>
+    </div></td></tr></tbody>
+  </table>
+</body>
+</html>

@@ -43,7 +43,7 @@
               <%=
                 saldo.estado === 'revision'
                   ? 'A revisar'
-                  : saldo.estado === 'produccion' ? 'En producción' : saldo.estado
+                  : ({ produccion: 'En producción', pendiente_baja: 'Pendiente de baja' })[saldo.estado] || saldo.estado
               %>
             </td>
 

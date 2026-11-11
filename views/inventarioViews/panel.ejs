@@ -15,8 +15,10 @@ const pestanas = [
   ['borradores', '/borradores', 'Borradores'],
   ['depositos', '/depositos', 'Depósitos'],
   ['equipos', '/equipos', 'Equipos'],
+  ['revision', '/revision', 'A revisar'],
   ['ingresos', '/ingresos', 'Ingresos'],
   ['asignaciones', '/asignaciones', 'Asignaciones'],
+  ['bajas', '/bajas', 'Bajas'],
   ['produccion', '/produccion', 'En producción'],
   ['devoluciones', '/devoluciones', 'Devoluciones'],
   ['traspasos', '/traspasos', 'Traspasos'],
@@ -102,6 +104,9 @@ const pestanas = [
   }
 
   /* Reglas exclusivas de los listados; no rediseñan formularios internos. */
+  .inv .baja-pendiente { background: #fef3c7; color: #92400e; }
+  .inv .baja-confirmada { background: #fee2e2; color: #991b1b; }
+  .inv .baja-recuperada { background: #dcfce7; color: #166534; }
   .inv-list .list-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; margin-bottom: 14px; }
   .inv-list .list-heading p { margin: 0; max-width: 85ch; }
   .inv-list .list-heading .actions { margin: 0; }
@@ -138,7 +143,7 @@ const pestanas = [
   }
 </style>
 
-<div class="inv <%= ['dashboard', 'borradores', 'lugares', 'equipos', 'movimientos', 'productos'].includes(vista) ? 'inv-list' : '' %>">
+<div class="inv <%= ['dashboard', 'borradores', 'lugares', 'equipos', 'movimientos', 'productos', 'bajas', 'revision'].includes(vista) ? 'inv-list' : '' %>">
   <header>
     <p class="muted">Técnica / Inventario</p>
     <h1><%= titulo %></h1>

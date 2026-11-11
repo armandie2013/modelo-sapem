@@ -316,3 +316,91 @@ assert.equal(resumenProd.asignado,0);
 assert.equal(resumenProd.total,3000);
 assert(generalProd.destinos.some(d=>d.estado==='produccion' && String(d.lugar._id)===String(destinoProd._id)));
 console.log('OK: General separa físico/asignado/producción y conserva total SAPEM.');
+
+const moduloBajas = cargar(pathToFileURL(root + '/services/inventarioBajasService.mjs').href);
+await moduloBajas.link(resolver);
+await moduloBajas.evaluate();
+const { informarBaja, resolverBaja } = moduloBajas.namespace;
+const asignacionBaja = await crear({
+  ...base, tipo: 'asignacion', origen: String(central._id), destino: String(destino._id),
+}, [filaProd(2, ['PROD-A', 'PROD-B'])]);
+const serieA = await m.Equipo.findOne({ serie: 'PROD-A' });
+const parte = { equipo: String(serieA._id), motivo: 'sustraccion', fecha: '2026-11-10' };
+const respaldoBaja = { originalname: 'denuncia.pdf', buffer: Buffer.from('%PDF-1.4') };
+const permisosBaja = { informarBajas: true, autorizarBajas: true };
+
+const incidente = await informarBaja(parte, [], 'Operador');
+const incidenteId = String(incidente._id);
+assert.equal((await m.Equipo.findById(serieA._id)).estado, 'pendiente_baja');
+assert.equal((await m.Equipo.findOne({ serie: 'PROD-B' })).estado, 'asignado');
+assert.equal((await m.Movimiento.findById(asignacionBaja._id)).items[0].retirado, 1000);
+const saldoGeneral = async () => (await consulta.consultarGeneral()).resumen.find(p => String(p._id) === String(equipoProd._id));
+assert.equal((await saldoGeneral()).pendiente_baja, 1000);
+assert.equal((await saldoGeneral()).total, 3000);
+await assert.rejects(informarBaja(parte, [], 'Operador'));
+await assert.rejects(resolverBaja(incidenteId, 'confirmar', {}, [], 'Operador', permisosBaja), /respaldo/);
+await assert.rejects(resolverBaja(incidenteId, 'confirmar', {}, [respaldoBaja], 'Operador', { informarBajas: true }), /permiso/);
+await assert.rejects(crud.namespace.anularMovimiento(String(asignacionBaja._id), 'Revertir asignación', usuario), /incidentes/);
+
+const devolucionBaja = { ...base, tipo: 'devolucion', estadoRecepcion: 'disponible', original: String(asignacionBaja._id), destino: String(central._id) };
+await assert.rejects(crear(devolucionBaja, [filaProd(1, ['PROD-A'])]));
+await crear(devolucionBaja, [filaProd(1, ['PROD-B'])]);
+await resolverBaja(incidenteId, 'confirmar', {}, [respaldoBaja], 'Responsable', permisosBaja);
+assert.equal((await saldoGeneral()).total, 2000);
+await m.Saldo.updateOne({ producto: equipoProd._id, lugar: destino._id, estado: 'asignado' }, { $inc: { cantidad: 1000 } });
+assert.equal((await saldoGeneral()).total, 2000);
+assert.equal((await consulta.consultarUbicacion(String(destino._id))).saldos.some(saldo => saldo.producto.codigo === equipoProd.codigo), false);
+assert.equal((await m.Equipo.findById(serieA._id)).estado, 'baja');
+assert.equal((await m.Archivo.findOne({ baja: incidente._id })).nombre, 'denuncia.pdf');
+
+const recuperar = { deposito: String(central._id) };
+await assert.rejects(resolverBaja(incidenteId, 'recuperar', recuperar, [], 'Operador', { informarBajas: true }), /permiso/);
+await resolverBaja(incidenteId, 'recuperar', recuperar, [], 'Responsable', permisosBaja);
+assert.equal((await saldoGeneral()).total, 3000);
+assert.equal((await m.Equipo.findById(serieA._id)).estado, 'revision');
+assert.equal((await m.Baja.findById(incidente._id)).confirmacion.usuario, 'Responsable');
+await assert.rejects(resolverBaja(incidenteId, 'recuperar', recuperar, [], 'Responsable', permisosBaja), /resuelto/);
+assert.equal((await saldoGeneral()).total, 3000);
+console.log('OK: baja por serie, respaldo y permisos obligatorios, devolución de otra serie y recuperación sin duplicar existencias.');
+
+const prodC = await m.Equipo.findOne({ serie: 'PROD-C' });
+const bajaProduccion = await informarBaja({ ...parte, equipo: String(prodC._id) }, [], 'Operador');
+await resolverBaja(String(bajaProduccion._id), 'confirmar', {}, [respaldoBaja], 'Responsable', permisosBaja);
+await m.Producto.updateOne({ _id: equipoProd._id }, { $set: { serializado: false } });
+await m.Saldo.updateOne({ producto: equipoProd._id, lugar: destinoProd._id, estado: 'produccion' }, { $inc: { cantidad: 1000 } });
+const generalBajaProduccion = await saldoGeneral();
+assert.equal(generalBajaProduccion.baja, 1000);
+assert.equal(generalBajaProduccion.produccion, 0);
+assert.equal(generalBajaProduccion.total, 2000);
+console.log('OK: producción a baja con saldo anterior y catálogo legado.');
+
+const moduloRevision = cargar(pathToFileURL(root + '/services/inventarioRevisionService.mjs').href);
+await moduloRevision.link(resolver);
+await moduloRevision.evaluate();
+const { listarRevision, liberarRevision } = moduloRevision.namespace;
+const seleccionRevision = { operacion: String(new Id()), equipo: String(serieA._id), producto: String(equipoProd._id), lugar: String(central._id) };
+const pendientesRevision = await listarRevision();
+assert.match(pendientesRevision.filas.find(fila => String(fila.equipo) === String(serieA._id)).origen.texto, /Recuperación de baja/);
+const totalAntesRevision = (await saldoGeneral()).total;
+await liberarRevision(seleccionRevision, usuario);
+assert.equal((await m.Equipo.findById(serieA._id)).estado, 'disponible');
+assert.equal((await saldoGeneral()).total, totalAntesRevision);
+await assert.rejects(liberarRevision({ ...seleccionRevision, operacion: String(new Id()) }, usuario), /ya no está pendiente/);
+const secundario = await servicio.crearLugarInventario({ nombre: 'Depósito revisión', tipo: 'deposito' });
+const transferenciaRevision = await crear({
+  ...base, tipo: 'traspaso', origen: String(central._id), destino: String(secundario._id), estadoRecepcion: 'revision',
+}, [filaCable(3)]);
+const seleccionCantidad = { operacion: String(new Id()), producto: String(granelProd._id), lugar: String(secundario._id), cantidad: '2' };
+await liberarRevision(seleccionCantidad, usuario);
+assert.equal((await m.Saldo.findOne({ producto: granelProd._id, lugar: secundario._id, estado: 'revision' })).cantidad, 1000);
+await liberarRevision(seleccionCantidad, usuario);
+assert.equal((await m.Saldo.findOne({ producto: granelProd._id, lugar: secundario._id, estado: 'revision' })).cantidad, 1000);
+await assert.rejects(liberarRevision({ ...seleccionCantidad, operacion: String(new Id()) }, usuario));
+await assert.rejects(crud.namespace.anularMovimiento(String(transferenciaRevision._id), 'Anulación de traspaso', usuario));
+console.log('OK: recuperación visible, liberación individual, traspaso a revisión y liberación parcial.');
+
+const historial = await consulta.consultarEquipo({ params: { id: String(serieA._id) }, query: {} });
+assert.deepEqual(Array.from(historial.eventos.slice(-4), evento => evento.operacion), [
+  'Sustracción informada', 'Baja confirmada', 'Recuperación', 'Revisión completada',
+]);
+assert.deepEqual(Array.from(historial.eventos, evento => evento.numero), Array.from({ length: historial.eventos.length }, (_, i) => i + 1));

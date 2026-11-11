@@ -5,7 +5,7 @@
     ordenProductos.compare(String(a.nombre || ''), String(b.nombre || ''))
   );
   const tieneExistencias = producto =>
-    ['disponible', 'revision', 'asignado', 'produccion'].some(
+    ['disponible', 'revision', 'asignado', 'produccion', 'pendiente_baja', 'baja'].some(
       estado => Number(producto[estado] || 0) > 0
     );
   const cantidadConStock = productosOrdenados.filter(tieneExistencias).length;
@@ -31,7 +31,7 @@
 
   <p class="muted">
     En depósito incluye disponibles y equipos a revisar.
-    El total SAPEM incluye el material asignado y los equipos en producción.
+    El total SAPEM incluye el material asignado y los equipos en producción. Las bajas confirmadas quedan fuera del total.
   </p>
 
   </div>
@@ -58,6 +58,8 @@
           <th>A revisar</th>
           <th>Asignado</th>
           <th>En producción</th>
+          <th>Pendiente de baja</th>
+          <th>Baja</th>
           <th>Total SAPEM</th>
         </tr>
       </thead>
@@ -67,7 +69,7 @@
           <tr data-stock="<%= conStock ? 'si' : 'no' %>" data-busqueda="<%= [producto.codigo, producto.nombre, producto.marca, producto.modelo].filter(Boolean).join(' ') %>" <%= conStock ? '' : 'hidden' %>>
             <td><span class="stock-codigo"><%= producto.codigo %></span> · <%= producto.nombre %></td>
             <td><%= producto.unidad %></td>
-            <% ['fisico', 'disponible', 'revision', 'asignado', 'produccion', 'total'].forEach(estado => {
+            <% ['fisico', 'disponible', 'revision', 'asignado', 'produccion', 'pendiente_baja', 'baja', 'total'].forEach(estado => {
               const positivo = Number(producto[estado] || 0) > 0;
             %>
               <td><span class="stock-cantidad <%= positivo ? 'stock-positivo' : 'stock-cero' %> <%= positivo && estado === 'total' ? 'stock-total' : '' %>"><%= n(producto[estado] || 0) %></span></td>
@@ -75,7 +77,7 @@
           </tr>
         <% }); %>
         <tr id="stockGeneralVacio" <%= cantidadConStock ? 'hidden' : '' %>>
-          <td colspan="8" class="empty">
+          <td colspan="10" class="empty">
             <span id="stockGeneralVacioTexto"><%= resumen.length ? 'No hay productos con existencias. Activá «Ver todos los productos» para consultar el catálogo completo.' : 'Todavía no hay productos. Crealos desde la pestaña Productos.' %></span>
           </td>
         </tr>

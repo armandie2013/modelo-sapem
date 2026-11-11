@@ -1,0 +1,33 @@
+<section>
+  <% if (equipos.length) { %>
+    <p class="muted">Al registrar el incidente, la serie queda pendiente de baja y se retira de las operaciones de stock.</p>
+    <form method="post" action="/inventario/bajas" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="grid">
+        <label>Equipo / serie
+          <select name="equipo" required>
+            <% if (equipos.length > 1) { %><option value="">Seleccioná una serie</option><% } %>
+            <% for (const equipo of equipos) { %>
+              <option value="<%= equipo._id %>" <%= String(equipo._id) === datos.equipo ? 'selected' : '' %>><%= [equipo.serie, equipo.producto?.codigo, equipo.producto?.nombre, equipo.producto?.marca, equipo.producto?.modelo].filter(Boolean).join(' · ') %></option>
+            <% } %>
+          </select>
+        </label>
+        <label>Motivo
+          <select name="motivo" required>
+            <option value="">Seleccioná el motivo</option>
+            <% for (const [valor, etiqueta] of Object.entries(motivosBaja)) { %>
+              <option value="<%= valor %>" <%= datos.motivo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+            <% } %>
+          </select>
+        </label>
+        <label>Fecha del incidente<input type="date" name="fecha" value="<%= datos.fecha || hoy %>" required></label>
+      </div>
+      <label>Observaciones<textarea name="observaciones" maxlength="2000"><%= datos.observaciones || '' %></textarea></label>
+      <label>Denuncia o respaldo (opcional)<input type="file" name="archivos" accept=".pdf,.png,.jpg,.jpeg" multiple></label>
+      <div class="actions"><button>Registrar incidente</button><a class="button secondary" href="/inventario/bajas">Cancelar</a></div>
+    </form>
+  <% } else { %>
+    <p class="muted">Ya no hay series asignadas o en producción disponibles para informar.</p>
+    <a class="button secondary" href="/inventario/bajas">Volver a Bajas</a>
+  <% } %>
+</section>

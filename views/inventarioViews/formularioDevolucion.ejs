@@ -90,7 +90,7 @@
             <legend>
               <%= item.nombre %>
               · pendientes:
-              <%= n(item.cantidad - item.devuelto) %>
+              <%= n(item.cantidad - item.devuelto - (item.retirado || 0)) %>
               <%= item.unidad %>
             </legend>
 
@@ -130,7 +130,7 @@
                     type="number"
                     value="<%= previo?.cantidad || 0 %>"
                     min="0"
-                    max="<%= (item.cantidad - item.devuelto) / 1000 %>"
+                    max="<%= (item.cantidad - item.devuelto - (item.retirado || 0)) / 1000 %>"
                     step="1"
                   >
                 </label>
