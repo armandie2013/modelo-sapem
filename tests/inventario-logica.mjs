@@ -404,3 +404,10 @@ assert.deepEqual(Array.from(historial.eventos.slice(-4), evento => evento.operac
   'Sustracción informada', 'Baja confirmada', 'Recuperación', 'Revisión completada',
 ]);
 assert.deepEqual(Array.from(historial.eventos, evento => evento.numero), Array.from({ length: historial.eventos.length }, (_, i) => i + 1));
+
+const bajaDeposito = await informarBaja(parte, [], 'Operador');
+assert.equal((await m.Equipo.findById(serieA._id)).estado, 'pendiente_baja');
+assert.equal(bajaDeposito.ubicacion, central.nombre);
+await resolverBaja(String(bajaDeposito._id), 'confirmar', {}, [respaldoBaja], 'Responsable', permisosBaja);
+assert.equal((await m.Equipo.findById(serieA._id)).estado, 'baja');
+assert.equal((await saldoGeneral()).total, totalAntesRevision - 1000);

@@ -221,7 +221,7 @@ movimiento.index({ fecha: -1 });
 const baja = new Schema({
   numero: { type: Number, unique: true, required: true },
   equipo: ref('InvEquipo'),
-  original: ref('InvMovimiento'),
+  original: ref('InvMovimiento', false),
   comprobanteOriginal: Number,
   serie: text(true),
   producto: text(true),

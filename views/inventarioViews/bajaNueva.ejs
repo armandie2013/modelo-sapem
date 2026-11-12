@@ -3,15 +3,27 @@
     <p class="muted">Al registrar el incidente, la serie queda pendiente de baja y se retira de las operaciones de stock.</p>
     <form method="post" action="/inventario/bajas" enctype="multipart/form-data">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <% if (equipos.length === 1) { %>
+        <% const equipo = equipos[0]; %>
+        <input type="hidden" name="equipo" value="<%= equipo._id %>">
+        <div style="margin-bottom: 12px; padding: 10px 12px; border: 1px solid #dbe4f0; border-radius: 6px; background: #f3f7fc; overflow-wrap: anywhere;">
+          <div><span class="muted">Serie</span> · <strong><%= equipo.serie %></strong></div>
+          <% if (equipo.producto) { %>
+            <div><%= [equipo.producto.codigo, equipo.producto.nombre, equipo.producto.marca, equipo.producto.modelo].filter(Boolean).join(' · ') %></div>
+          <% } %>
+        </div>
+      <% } %>
       <div class="grid">
-        <label>Equipo / serie
-          <select name="equipo" required>
-            <% if (equipos.length > 1) { %><option value="">Seleccioná una serie</option><% } %>
-            <% for (const equipo of equipos) { %>
-              <option value="<%= equipo._id %>" <%= String(equipo._id) === datos.equipo ? 'selected' : '' %>><%= [equipo.serie, equipo.producto?.codigo, equipo.producto?.nombre, equipo.producto?.marca, equipo.producto?.modelo].filter(Boolean).join(' · ') %></option>
-            <% } %>
-          </select>
-        </label>
+        <% if (equipos.length > 1) { %>
+          <label>Equipo / serie
+            <select name="equipo" required>
+              <option value="">Seleccioná una serie</option>
+              <% for (const equipo of equipos) { %>
+                <option value="<%= equipo._id %>" <%= String(equipo._id) === datos.equipo ? 'selected' : '' %>><%= [equipo.serie, equipo.producto?.codigo, equipo.producto?.nombre, equipo.producto?.marca, equipo.producto?.modelo].filter(Boolean).join(' · ') %></option>
+              <% } %>
+            </select>
+          </label>
+        <% } %>
         <label>Motivo
           <select name="motivo" required>
             <option value="">Seleccioná el motivo</option>
@@ -27,7 +39,7 @@
       <div class="actions"><button>Registrar incidente</button><a class="button secondary" href="/inventario/bajas">Cancelar</a></div>
     </form>
   <% } else { %>
-    <p class="muted">Ya no hay series asignadas o en producción disponibles para informar.</p>
+    <p class="muted">No hay equipos habilitados para informar una pérdida o sustracción.</p>
     <a class="button secondary" href="/inventario/bajas">Volver a Bajas</a>
   <% } %>
 </section>

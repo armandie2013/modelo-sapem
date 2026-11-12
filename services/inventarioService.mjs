@@ -709,6 +709,16 @@ export async function adjuntarArchivos(
 
 // Crear un depósito o destinatario.
 // Si se marca como principal, guardar también la configuración.
+export function datosLugar(tipo, datos) {
+  const campo = valor => tipo === "destino" ? limpiar(valor).toUpperCase() : limpiar(valor);
+  return {
+    nombre: campo(datos.nombre),
+    direccion: campo(datos.direccion),
+    responsable: campo(datos.responsable),
+    dni: campo(datos.dni),
+  };
+}
+
 export async function crearLugarInventario(datos) {
   const { principal, ...campos } = datos;
 
@@ -723,7 +733,7 @@ export async function crearLugarInventario(datos) {
   );
 
   if (!principal) {
-    return Lugar.create(campos);
+    return Lugar.create({ ...campos, ...datosLugar(campos.tipo, campos) });
   }
 
   await Configuracion.init();

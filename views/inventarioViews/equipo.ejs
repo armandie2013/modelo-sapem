@@ -33,7 +33,7 @@
     </dd></div>
     <div><dt>Estado</dt><dd><span class="state"><%= ({ disponible: 'Disponible', revision: 'A revisar', asignado: 'Asignado', produccion: 'En producción', pendiente_baja: 'Pendiente de baja', baja: 'Dado de baja' })[equipo.estado] || equipo.estado %></span></dd></div>
   </dl>
-  <% if (permisos.informarBajas && ['asignado', 'produccion'].includes(equipo.estado) && equipo.asignacion) { %>
+  <% if (permisos.informarBajas && (['disponible', 'revision'].includes(equipo.estado) ? equipo.lugar?.tipo === 'deposito' : ['asignado', 'produccion'].includes(equipo.estado) && equipo.asignacion)) { %>
     <div class="actions"><a class="button secondary" href="/inventario/bajas/nueva?equipo=<%= equipo._id %>">Registrar pérdida o sustracción</a></div>
   <% } %>
 </section>

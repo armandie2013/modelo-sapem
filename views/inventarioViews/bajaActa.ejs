@@ -18,7 +18,7 @@
         <span class="etiqueta">UBICACIÓN / RESPONSABLE</span>
         <p><b><%= baja.ubicacion %></b></p>
         <p>Responsable: <%= baja.responsable || 'No registrado' %></p>
-        <p>Comprobante de origen: N.º <%= baja.comprobanteOriginal %></p>
+        <% if (baja.comprobanteOriginal) { %><p>Comprobante de origen: N.º <%= baja.comprobanteOriginal %></p><% } %>
       </td>
       <td>
         <span class="etiqueta">MOTIVO / INCIDENTE</span>

@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
-import { Archivo, Baja, Contador, Equipo, Lugar, Movimiento } from '../models/inventario.mjs';
+import { Archivo, Baja, Contador, Equipo, Lugar, Movimiento, Producto } from '../models/inventario.mjs';
 import { ejecutarOperacion } from './inventarioPersistencia.mjs';
 import { exigir, fecha, guardarArchivos, moverSaldo, validarArchivos } from './inventarioService.mjs';
 
 const unidad = 1000;
 export const estadosBaja = { pendiente: 'Pendiente', confirmada: 'Confirmada', recuperada: 'Recuperada' };
 export const motivosBaja = { perdida: 'Pérdida', sustraccion: 'Sustracción' };
-export const estadosInformables = ['asignado', 'produccion'];
+export const estadosInformables = ['asignado', 'produccion', 'disponible', 'revision'];
 
 export function validarId(id) {
   exigir(typeof id === 'string' && mongoose.isValidObjectId(id), 'Registro inválido.');
@@ -21,21 +21,39 @@ export async function informarBaja(body, archivos, usuario) {
 
   return ejecutarOperacion(async () => {
     const equipo = await Equipo.findById(id);
-    exigir(equipo?.asignacion && estadosInformables.includes(equipo.estado), 'El equipo ya no está asignado ni en producción.');
-    const original = await Movimiento.findById(equipo.asignacion);
-    const tipo = equipo.estado === 'produccion' ? 'produccion' : 'asignacion';
-    exigir(original?.tipo === tipo && original.estado !== 'anulado' && original.destino.equals(equipo.lugar), 'El movimiento original no coincide con el equipo.');
-    const item = original.items.find(fila =>
-      fila.producto.equals(equipo.producto) && fila.series.some(identidad => identidad.serie === equipo.serie)
-    );
-    exigir(item && item.cantidad - (item.devuelto || 0) - (item.retirado || 0) >= unidad, 'El equipo no está pendiente en el movimiento original.');
+    exigir(equipo && estadosInformables.includes(equipo.estado), 'El equipo no admite un nuevo informe de pérdida o sustracción.');
+    const enDeposito = ['disponible', 'revision'].includes(equipo.estado);
+    let original;
+    let item;
+    let producto;
+    let lugar;
+    if (enDeposito) {
+      [producto, lugar, original] = await Promise.all([
+        Producto.findById(equipo.producto),
+        Lugar.findOne({ _id: equipo.lugar, tipo: 'deposito' }),
+        Movimiento.findOne({
+          destino: equipo.lugar, estado: { $ne: 'anulado' }, 'items.series.serie': equipo.serie,
+        }).sort({ numero: -1 }),
+      ]);
+      exigir(producto && lugar, 'El producto o depósito del equipo no existe.');
+    } else {
+      exigir(equipo.asignacion, 'Falta el movimiento original del equipo.');
+      original = await Movimiento.findById(equipo.asignacion);
+      const tipo = equipo.estado === 'produccion' ? 'produccion' : 'asignacion';
+      exigir(original?.tipo === tipo && original.estado !== 'anulado' && original.destino.equals(equipo.lugar), 'El movimiento original no coincide con el equipo.');
+      item = original.items.find(fila =>
+        fila.producto.equals(equipo.producto) && fila.series.some(identidad => identidad.serie === equipo.serie)
+      );
+      exigir(item && item.cantidad - (item.devuelto || 0) - (item.retirado || 0) >= unidad, 'El equipo no está pendiente en el movimiento original.');
+      producto = item;
+    }
 
     const contador = await Contador.findByIdAndUpdate('bajas', { $inc: { valor: 1 } }, { upsert: true, new: true });
     const baja = await Baja.create({
-      numero: contador.valor, equipo: equipo._id, original: original._id,
-      comprobanteOriginal: original.numero, serie: equipo.serie, producto: item.nombre,
-      codigo: item.codigo, marca: item.marca, modelo: item.modelo,
-      ubicacion: original.destinoNombre, responsable: original.recibe,
+      numero: contador.valor, equipo: equipo._id, original: original?._id,
+      comprobanteOriginal: original?.numero, serie: equipo.serie, producto: producto.nombre,
+      codigo: producto.codigo, marca: producto.marca, modelo: producto.modelo,
+      ubicacion: lugar?.nombre || original.destinoNombre, responsable: lugar ? lugar.responsable : original.recibe,
       motivo: body.motivo, fecha: fechaIncidente,
       observaciones: String(body.observaciones || '').trim().slice(0, 2000), informadoPor: usuario,
     });
@@ -44,9 +62,11 @@ export async function informarBaja(body, archivos, usuario) {
     await moverSaldo(equipo.producto, equipo.lugar, 'pendiente_baja', unidad);
     equipo.estado = 'pendiente_baja';
     equipo.baja = baja._id;
-    item.retirado = (item.retirado || 0) + unidad;
     await equipo.save();
-    await original.save();
+    if (item) {
+      item.retirado = (item.retirado || 0) + unidad;
+      await original.save();
+    }
     await guardarArchivos(undefined, archivos, undefined, baja._id);
     return baja;
   });

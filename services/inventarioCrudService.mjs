@@ -1,10 +1,10 @@
 import { datosProducto } from './inventarioCatalogoService.mjs';
 import mongoose from 'mongoose';
 import { randomUUID } from 'node:crypto';
-import { Producto, Lugar, Saldo, Equipo, Movimiento, Archivo, Borrador, Anulacion, Revision } from '../models/inventario.mjs';
+import { Producto, Lugar, Saldo, Equipo, Movimiento, Archivo, Borrador, Anulacion, Revision, Baja } from '../models/inventario.mjs';
 import Configuracion from '../models/inventarioConfiguracion.mjs';
 import { ejecutarOperacion } from './inventarioPersistencia.mjs';
-import { exigir, crearMovimiento, respaldo } from './inventarioService.mjs';
+import { exigir, crearMovimiento, respaldo, datosLugar } from './inventarioService.mjs';
 export const accionesTipo = { ingreso: 'ingresar', asignacion: 'asignar', produccion: 'producir', devolucion: 'devolver', traspaso: 'traspasar' };
 export function validarId(id) { exigir(mongoose.isValidObjectId(id), 'Identificador inválido.'); return id; }
 const texto = v => String(v ?? '').trim();
@@ -50,8 +50,7 @@ export async function editarRegistro(tipo, id, body) {
       // Serie, producto, ubicación y estado cambian únicamente mediante operaciones de inventario.
       registro.mac = texto(body.mac); registro.patrimonio = texto(body.patrimonio);
     } else {
-      registro.nombre = texto(body.nombre); registro.direccion = texto(body.direccion);
-      registro.responsable = texto(body.responsable); registro.dni = texto(body.dni);
+      Object.assign(registro, datosLugar(registro.tipo, body));
     }
     registro.increment();
     return registro.save();
@@ -149,6 +148,7 @@ export async function anularMovimiento(id, motivo, usuario) {
     exigir(texto(motivo).length >= 5 && texto(motivo).length <= 2000, 'Indicá el motivo de anulación (entre 5 y 2000 caracteres).');
     const mov = await Movimiento.findById(validarId(id));
     exigir(mov && mov.estado !== 'anulado', 'Movimiento inexistente o ya anulado.');
+    exigir(!await Baja.exists({ original: mov._id }), 'El movimiento tiene incidentes de baja vinculados.');
     exigir(mov.items.every(i => !i.retirado), 'El movimiento tiene incidentes de baja vinculados.');
     if (['asignacion', 'produccion'].includes(mov.tipo)) exigir(mov.items.every(i => i.devuelto === 0), 'Primero anulá las devoluciones vinculadas.');
     for (const item of mov.items) {

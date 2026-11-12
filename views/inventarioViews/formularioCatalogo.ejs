@@ -1,3 +1,10 @@
+<% if (tipoCatalogo === 'destino') { %>
+  <style>
+    .inv input:is([name="nombre"], [name="direccion"], [name="responsable"], [name="dni"]) {
+      text-transform: uppercase;
+    }
+  </style>
+<% } %>
 <section>
   <form method="post" action="/inventario/catalogos">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
