@@ -1,3 +1,10 @@
+<% if (tipoRegistro === 'destino') { %>
+  <style>
+    .inv input:is([name="nombre"], [name="direccion"], [name="responsable"], [name="dni"]) {
+      text-transform: uppercase;
+    }
+  </style>
+<% } %>
 <section>
   <p class="muted">
     Se conservan las descripciones originales de los comprobantes ya emitidos.

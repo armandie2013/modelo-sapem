@@ -3,7 +3,7 @@
   <div class="actions">
     <a class="button secondary" href="/inventario/bajas">Volver a Bajas</a>
     <a class="button secondary" href="/inventario/equipos/<%= baja.equipo %>">Ver equipo</a>
-    <a class="button secondary" href="/inventario/movimientos/<%= baja.original %>">Comprobante N.º <%= baja.comprobanteOriginal %></a>
+    <% if (baja.original) { %><a class="button secondary" href="/inventario/movimientos/<%= baja.original %>">Comprobante N.º <%= baja.comprobanteOriginal %></a><% } %>
     <% if (baja.confirmacion?.fecha) { %><a class="button" href="/inventario/bajas/<%= baja._id %>/acta" target="_blank" rel="noopener">Ver acta PDF</a><% } %>
   </div>
   <div class="grid">

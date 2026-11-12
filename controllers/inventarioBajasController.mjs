@@ -18,9 +18,12 @@ export async function listado(req, res) {
 }
 
 export async function formulario(req, res) {
-  const filtro = { estado: { $in: estadosInformables }, asignacion: { $exists: true, $ne: null } };
+  const filtro = { estado: { $in: estadosInformables } };
   if (req.query.equipo) filtro._id = validarId(req.query.equipo);
-  if (req.query.movimiento) filtro.asignacion = validarId(req.query.movimiento);
+  if (req.query.movimiento) {
+    filtro.asignacion = validarId(req.query.movimiento);
+    filtro.estado = { $in: ['asignado', 'produccion'] };
+  }
   exigir(filtro._id || req.query.movimiento, 'Abrí el formulario desde un equipo o comprobante.');
   const equipos = await Equipo.find(filtro).populate('producto', 'codigo nombre marca modelo').sort({ serie: 1 }).lean();
   mostrar(req, res, 'bajaNueva', 'Registrar pérdida o sustracción', 'bajas', { ...etiquetas, equipos });
