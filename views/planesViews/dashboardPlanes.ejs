@@ -1,78 +1,78 @@
-<main class="bg-gray-100 min-h-screen py-10 px-4">
-  <div class="bg-white max-w-6xl mx-auto p-8 rounded-2xl shadow-xl border border-gray-200 relative overflow-hidden">
-    <!-- Franja superior sutil (match crear/editar) -->
-    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500/70 via-sky-500/70 to-emerald-500/70"></div>
-
-    <% 
-      // Helpers
-      const fmtUSD = (v) => 'US$ ' + Number(v || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const perms = (usuario && usuario.modulosPermitidos) ? usuario.modulosPermitidos : {};
-      const puedeCrear  = !!(perms.planes && perms.planes.crear);
-      const puedeEditar = !!(perms.planes && perms.planes.editar);
-      const _planes = Array.isArray(planes) ? planes : [];
-    %>
-
-    <!-- Header + acción principal -->
-    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Listado de planes</h1>
-        <p class="text-sm text-gray-600">Administrá los planes existentes.</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <% if (puedeCrear) { %>
-          <a href="/planes/crear"
-             class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm shadow-sm ring-1 ring-indigo-500/10">
-            + Crear plan
-          </a>
-        <% } %>
-      </div>
-    </header>
-
-    <!-- Contenido -->
-    <% if (!_planes.length) { %>
-      <div class="bg-white rounded-2xl border border-gray-200 p-10 text-center">
-        <p class="text-gray-600 italic">No hay planes cargados.</p>
-      </div>
-    <% } else { %>
-      <div class="overflow-hidden rounded-2xl border border-gray-200">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-left text-gray-700">
-              <tr class="font-semibold">
-                <th class="px-4 py-3">Nombre</th>
-                <th class="px-4 py-3">Detalle</th>
-                <th class="px-4 py-3">Importe</th>
-                <th class="px-4 py-3">Estado</th>
-                <th class="px-4 py-3 text-center w-28">Acciones</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <% _planes.forEach(function(p, idx) { %>
-                <tr class="<%= (idx % 2 === 0) ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition-colors">
-                  <td class="px-4 py-3 font-medium text-gray-900">
-                    <a href="/planes/<%= p._id %>" class="hover:underline"><%= p.nombre %></a>
-                  </td>
-                  <td class="px-4 py-3 text-gray-700"><%= p.detalle || '-' %></td>
-                  <td class="px-4 py-3 text-gray-900"><%= fmtUSD(p.importe) %></td>
-                  <td class="px-4 py-3">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ring-1
-                                 <%= p.activo ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-gray-100 text-gray-700 ring-gray-300' %>">
-                      <%= p.activo ? 'Activo' : 'Inactivo' %>
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-center">
-                    <% if (puedeEditar) { %>
-                      <a href="/planes/<%= p._id %>/editar" class="text-indigo-700 hover:text-indigo-900 font-medium">Editar</a>
-                    <% } else { %>
-                      <span class="text-gray-400">—</span>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    <% } %>
-  </div>
-</main>
+<%
+  const fmtUSD = valor => 'US$ ' + Number(valor || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const permisosPlanes = usuario?.modulosPermitidos?.planes || {};
+  const filtroBusqueda = typeof busqueda === 'string' ? busqueda : '';
+  const filtroEstado = typeof estado === 'string' ? estado : 'todos';
+  const listaPlanes = Array.isArray(planes) ? planes : [];
+%>
+<style>
+  .planes-page { max-width: 1280px; margin: 0 auto; }
+  .planes-page .planes-card { background: #fff; border: 1px solid #dbe3ef; border-radius: 8px; padding: 18px; }
+  .planes-page .planes-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .planes-page h1 { font-size: 24px; font-weight: 700; margin: 0; }
+  .planes-page .muted { color: #64748b; font-size: 13px; }
+  .planes-page .planes-button { display: inline-flex; align-items: center; padding: 7px 12px; border-radius: 5px; background: #1e40af; color: white; font-size: 13px; text-decoration: none; white-space: nowrap; }
+  .planes-page .planes-filtros { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .planes-page .planes-filtros label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .planes-page .planes-search { flex: 1 1 280px; }
+  .planes-page .planes-filtros input, .planes-page .planes-filtros select { min-height: 34px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; font: inherit; }
+  .planes-page .planes-filtros .planes-button { min-height: 34px; border: 0; cursor: pointer; }
+  .planes-page .planes-filtros .secondary { background: #e2e8f0; color: #172033; }
+  .planes-page .planes-scroll { overflow-x: auto; }
+  .planes-page table { width: 100%; min-width: 680px; border-collapse: collapse; table-layout: auto; font-size: 13px; }
+  .planes-page th, .planes-page td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+  .planes-page th { background: #eff6ff; font-weight: 600; }
+  .planes-page .planes-name { min-width: 190px; max-width: 300px; font-weight: 500; overflow-wrap: anywhere; }
+  .planes-page .planes-detail { min-width: 240px; max-width: 550px; overflow-wrap: anywhere; }
+  .planes-page .planes-amount { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .planes-page .planes-state, .planes-page .planes-actions { width: 1%; white-space: nowrap; }
+  .planes-page tbody tr:nth-child(even) { background: #f8fafc; }
+  .planes-page tbody tr:hover { background: #eff6ff; }
+  .planes-page .planes-state span { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; border-radius: 4px; padding: 3px 7px; font-size: 12px; background: #f1f5f9; color: #475569; }
+  .planes-page .planes-state .activo { background: #dcfce7; color: #166534; }
+  .planes-page .planes-state .inactivo { background: #fee2e2; color: #991b1b; }
+  .planes-page td a { color: #1e40af; }
+  .planes-page td a:hover { text-decoration: underline; }
+  .planes-page .planes-footer { margin-top: 12px; font-size: 12px; color: #64748b; }
+  @media (max-width: 640px) { .planes-page .planes-card { padding: 12px; } }
+</style>
+<div class="planes-page">
+  <section class="planes-card">
+    <div class="planes-heading">
+      <div><h1>Planes</h1><p class="muted">Administrá los planes existentes.</p></div>
+      <% if (permisosPlanes.crear) { %><a href="/planes/crear" class="planes-button">Crear plan</a><% } %>
+    </div>
+    <form class="planes-filtros" method="get" action="/planes">
+      <label class="planes-search" for="planesBuscar">Buscar plan
+        <input id="planesBuscar" type="search" name="q" placeholder="Nombre o detalle" value="<%= filtroBusqueda %>">
+      </label>
+      <label for="planesEstado">Estado
+        <select id="planesEstado" name="estado">
+          <% for (const [valor, etiqueta] of Object.entries({ todos: 'Todos', activos: 'Activos', inactivos: 'Inactivos' })) { %>
+            <option value="<%= valor %>" <%= filtroEstado === valor ? 'selected' : '' %>><%= etiqueta %></option>
+          <% } %>
+        </select>
+      </label>
+      <button class="planes-button" type="submit">Filtrar</button>
+      <a class="planes-button secondary" href="/planes">Limpiar</a>
+    </form>
+    <div class="planes-scroll">
+      <table>
+        <thead><tr><th>Nombre</th><th>Detalle</th><th class="planes-amount">Importe</th><th class="planes-state">Estado</th><th class="planes-actions">Acciones</th></tr></thead>
+        <tbody>
+          <% for (const plan of listaPlanes) { %>
+            <tr>
+              <td class="planes-name"><a href="/planes/<%= plan._id %>"><%= plan.nombre %></a></td>
+              <td class="planes-detail"><%= plan.detalle || '—' %></td>
+              <td class="planes-amount"><%= fmtUSD(plan.importe) %></td>
+              <td class="planes-state"><span class="<%= plan.activo === false ? 'inactivo' : 'activo' %>"><%= plan.activo === false ? 'Inactivo' : 'Activo' %></span></td>
+              <td class="planes-actions"><% if (permisosPlanes.editar) { %><a href="/planes/<%= plan._id %>/editar">Editar</a><% } else { %>—<% } %></td>
+            </tr>
+          <% } %>
+          <% if (!listaPlanes.length) { %><tr><td colspan="5" class="muted">No hay planes que coincidan con la búsqueda.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+    <p class="planes-footer"><%= listaPlanes.length %> <%= listaPlanes.length === 1 ? 'plan' : 'planes' %></p>
+  </section>
+</div>

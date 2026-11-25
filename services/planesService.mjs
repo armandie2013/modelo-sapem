@@ -1,8 +1,10 @@
 // services/planesService.mjs
 import Plan from "../models/plan.mjs";
+import Proveedor from "../models/proveedor.mjs";
+import MovimientoProveedor from "../models/movimientoProveedor.mjs";
 
 const toBool = (v) =>
-  v === true || v === "true" || v === "on" || v === "1" || v === 1;
+  Array.isArray(v) ? v.some(toBool) : v === true || v === "true" || v === "on" || v === "1" || v === 1;
 
 /**
  * Acepta: "12.345,67", "12345,67", "12345.67", "12345"
@@ -67,6 +69,18 @@ export async function obtenerPlanPorIdService(id) {
   return Plan.findById(id).lean();
 }
 
+export async function verificarPlanSinAsignaciones(id) {
+  const vinculados = await Proveedor.find({ plan: id })
+    .select("numeroProveedor nombreFantasia nombreReal").limit(5).lean();
+  if (vinculados.length) {
+    const nombres = vinculados.map(proveedor =>
+      [proveedor.numeroProveedor ? "#" + proveedor.numeroProveedor : "", proveedor.nombreFantasia || proveedor.nombreReal]
+        .filter(Boolean).join(" ")
+    ).join(", ");
+    throw new Error("El plan está asignado a proveedores/clientes (" + nombres + "). Reasigná o quitá el plan antes de desactivarlo o eliminarlo.");
+  }
+}
+
 export async function actualizarPlanService(id, data) {
   const update = {};
   if (data.nombre != null) update.nombre = String(data.nombre).trim();
@@ -77,6 +91,8 @@ export async function actualizarPlanService(id, data) {
     update.importe = n;
   }
   if (data.activo != null) update.activo = toBool(data.activo);
+
+  if (update.activo === false) await verificarPlanSinAsignaciones(id);
 
   try {
     return await Plan.findByIdAndUpdate(
@@ -93,5 +109,9 @@ export async function actualizarPlanService(id, data) {
 }
 
 export async function eliminarPlanService(id) {
+  await verificarPlanSinAsignaciones(id);
+  if (await MovimientoProveedor.exists({ plan: id })) {
+    throw new Error("El plan tiene movimientos registrados. Podés desactivarlo cuando quede sin asignaciones.");
+  }
   return Plan.findByIdAndDelete(id);
 }
